@@ -4,6 +4,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuPortal,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/shared/components/ui/dropdown';
@@ -49,32 +50,46 @@ export function Navbar() {
                   JD
                 </AvatarFallback>
               </Avatar>
+
               <div className="text-left">
-                <p className="text-sm font-black text-gray-900 leading-tight">Jean Dupont</p>
-                <p className="text-xs text-gray-500 font-semibold leading-tight">Dir. Financier</p>
+                <p className="text-sm font-black text-gray-900 leading-tight">
+                  Jean Dupont
+                </p>
+                <p className="text-xs text-gray-500 font-semibold leading-tight">
+                  Dir. Financier
+                </p>
               </div>
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent 
-            align="end" 
-            className="w-56 rounded-[20px] border-gray-100 shadow-xl p-2"
-          >
-            <DropdownMenuLabel className="px-4 py-3">
-              <div className="flex flex-col">
-                <p className="text-sm font-black text-gray-900">Jean Dupont</p>
-                <p className="text-xs text-gray-500 font-semibold mt-0.5">jean.dupont@company.com</p>
-              </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator className="bg-gray-100" />
-            <DropdownMenuItem className="px-4 py-3 rounded-[16px] cursor-pointer focus:bg-gray-50">
-              <User className="mr-3 h-4 w-4 text-gray-500" />
-              <span className="font-bold text-sm text-gray-700">Mon Profil</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem className="px-4 py-3 rounded-[16px] cursor-pointer focus:bg-red-50 text-red-600">
-              <LogOut className="mr-3 h-4 w-4" />
-              <span className="font-bold text-sm">Déconnexion</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
+
+          <DropdownMenuPortal>
+            <DropdownMenuContent
+              align="end"
+              sideOffset={8}
+              className="w-56 rounded-[20px] border-gray-100 shadow-xl p-2 z-[9999] bg-white"
+            >
+              <DropdownMenuLabel className="px-4 py-3">
+                <div className="flex flex-col">
+                  <p className="text-sm font-black text-gray-900">Jean Dupont</p>
+                  <p className="text-xs text-gray-500 font-semibold mt-0.5">
+                    jean.dupont@company.com
+                  </p>
+                </div>
+              </DropdownMenuLabel>
+
+              <DropdownMenuSeparator className="bg-gray-100" />
+
+              <DropdownMenuItem className="px-4 py-3 rounded-[16px] cursor-pointer focus:bg-gray-50">
+                <User className="mr-3 h-4 w-4 text-gray-500" />
+                <span className="font-bold text-sm text-gray-700">Mon Profil</span>
+              </DropdownMenuItem>
+
+              <DropdownMenuItem className="px-4 py-3 rounded-[16px] cursor-pointer focus:bg-red-50 text-red-600">
+                <LogOut className="mr-3 h-4 w-4" />
+                <span className="font-bold text-sm">Déconnexion</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenuPortal>
         </DropdownMenu>
       </div>
     </header>

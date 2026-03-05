@@ -36,13 +36,12 @@ export const NAVIGATION_ITEMS = [
     items: [
       { title: "Facturation", 
         icon: Receipt, 
-        href: "/billing",
         subMenu: [
-          { title: "Tableau de board", href: "/" },
-          { title: "Clients", href: "/clients" },
-          { title: "Fournisseurs", href: "/suppliers" },
-          { title: "Factures Clients", href: "/clients-invoices" },
-          { title: "Factures Fournisseurs", href: "/suppliers-invoices" },
+          { title: "Tableau de board", href: "/billing/dashboard" },
+          { title: "Clients", href: "/billing/clients" },
+          { title: "Fournisseurs", href: "/billing/suppliers" },
+          { title: "Factures Clients", href: "/billing/clients-invoices" },
+          { title: "Factures Fournisseurs", href: "/billing/suppliers-invoices" },
         ],
       },
       {

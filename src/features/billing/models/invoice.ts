@@ -30,7 +30,7 @@ export const invoiceSchema = z.object({
     exchangeRateSource : exchangeRateSourceSchema,
     complianceQRcode : z.string(),
     purchaseOrder: purchaseOrderSchema,
-    partner : partnerSchema,
+    partner : z.lazy(()=>partnerSchema),
     invoiceItems : z.array(invoiceItemSchema),
     invoiceDocument : documentSchema,    
 

@@ -5,16 +5,16 @@ import {  invoiceSchema } from "./invoice";
 
 export const partnerSchema = z.object({
   idPartner: z.uuid(),
-  name: z.string().min(3),
-  email: z.email(),
-  phoneNumber: z.string().min(1),
-  taxRegistrationNumber: z.string().min(1),
-  country: z.string().min(1),
-  adress: z.string().min(1),
-  iban: z.string().min(1),
+  name: z.string().min(1, "Le nom est obligatoire").min(3, "Le nom doit contenir au moins 3 caractères"),
+  email: z.email("Email invalide"),
+  phoneNumber: z.string().min(1, "Le téléphone est obligatoire").min(8, "Le numéro de téléphone est invalide"),
+  taxRegistrationNumber: z.string().min(1, "La matricule fiscale est obligatoire"),
+  country: z.string().min(1, "Le pays est obligatoire"),
+  adress: z.string().min(1, "L'addresse est obligatoire"),
+  iban: z.string().min(1, "IBAN est obligatoire"),
 
   rne: documentSchema,
-  contact: documentSchema,
+  contract: documentSchema,
   patente: documentSchema,
 
   partnerType: partnerTypeSchema,
@@ -27,6 +27,14 @@ export type Partner = z.infer<typeof partnerSchema>;
 export type ClientPartner = Partner & { partnerType: "CLIENT" };
 
 export type SupplierPartner = Partner & { partnerType: "SUPPLIER" };
+
+export const partnerItemSchema = partnerSchema.omit({patente: true, rne: true, contract: true, iban:true, invoices: true})
+
+export type PartnerItem = z.infer<typeof partnerItemSchema>
+
+export type ClientPartnerItem = PartnerItem & { partnerType: "CLIENT" };
+
+export type SupplierPartnerItem = PartnerItem & { partnerType: "SUPPLIER" };
 
 export const createPartnerSchema = partnerSchema.omit({idPartner: true, invoices: true})
 
