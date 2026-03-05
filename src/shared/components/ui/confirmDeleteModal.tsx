@@ -13,7 +13,7 @@ type ConfirmDeleteModalProps = {
   isLoading?: boolean;
 };
 
-export function ConfirmDeleteModal({
+export default function ConfirmDeleteModal({
   open,
   title = "Confirmer la suppression",
   message,

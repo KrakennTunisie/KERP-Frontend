@@ -1,8 +1,7 @@
-// src/app/(app)/billing/clients/page.tsx
 import dynamic from "next/dynamic";
 
 const ClientsListClient = dynamic(
-  () => import("./clientsList"),
+  () => import("./suppliersList"),
   { loading: () => <div className="p-8 font-bold">Loading...</div> }
 );
 

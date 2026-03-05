@@ -1,7 +1,7 @@
 "use client";
 
-import PartnerForm from "./partnerForm";
-import { createClientPartnerSchema } from "../models/partner";
+import PartnerForm from "../partnerForm";
+import { createClientPartnerSchema, createSupplierPartnerSchema } from "../../models/partner";
 import { Modal } from "@/shared/components/ui/modal";
 
 
@@ -11,11 +11,11 @@ type Props = {
   onCreated?: () => void; // refresh list, etc.
 };
 
-export function ClientCreateModal({ open, onClose, onCreated }: Props) {
+export default function SupplierCreateModal({ open, onClose, onCreated }: Props) {
   return (
     <Modal
       open={open}
-      title="Ajouter un client"
+      title="Ajouter un fournisseur"
       onClose={onClose}
       footer={
         <button
@@ -27,10 +27,10 @@ export function ClientCreateModal({ open, onClose, onCreated }: Props) {
       }
     >
       <PartnerForm
-        schema={createClientPartnerSchema}
+        schema={createSupplierPartnerSchema}
         submitLabel="Ajouter"
         defaultValues={{
-          partnerType: "CLIENT",
+          partnerType: "SUPPLIER",
         }}
         onSubmit={async (data) => {
           // await billingPartnersApi.create(values);

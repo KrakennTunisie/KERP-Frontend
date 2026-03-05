@@ -11,16 +11,17 @@ import {
   Trash2,
 } from "lucide-react";
 import { DataTable, type DataTableColumn } from '@/shared/components/datatable';
-import {  ClientPartnerItem } from "../models/partner";
+import {  ClientPartnerItem } from "../../models/partner";
 
+export type ClientsTableProps = {
+  rows: ClientPartnerItem[];
+  onDeleteRequest: (id: string) => void;
+};
 
-export function ClientsTable({
+export default function ClientsTable({
   rows,
   onDeleteRequest,
-}: {
-  rows: ClientPartnerItem[];              // pass already filtered rows
-  onDeleteRequest: (id: string) => void;
-}) {
+}: ClientsTableProps) {
   const router = useRouter();
 
   const columns: DataTableColumn<ClientPartnerItem>[] = [

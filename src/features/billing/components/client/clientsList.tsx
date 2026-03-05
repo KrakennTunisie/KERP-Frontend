@@ -1,5 +1,7 @@
 'use client';
 
+import dynamic from "next/dynamic";
+
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
@@ -7,10 +9,19 @@ import {
   Plus
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { ClientCreateModal } from './createClientModal';
-import { ConfirmDeleteModal } from '@/shared/components/ui/confirmDeleteModal';
-import { ClientsTable } from './clientsTable';
-import { ClientPartnerItem } from '../models/partner';
+
+const ClientsTable = dynamic((): any => import("./clientsTable"), {
+  loading: () => <div className="p-6 font-bold">Loading table...</div>,
+});
+
+const ClientCreateModal = dynamic((): any => import("./createClientModal"), {
+  loading: () => null,
+});
+
+const ConfirmDeleteModal = dynamic((): any => import("@/shared/components/ui/confirmDeleteModal"), {
+  loading: () => null,
+});
+import { ClientPartnerItem } from '../../models/partner';
 
 
 const mockClients: ClientPartnerItem[]=[
@@ -196,8 +207,10 @@ export default function ClientsList() {
           </div>
 
           {/* Table */}
-        <ClientsTable rows={paginatedClients} 
-                onDeleteRequest={setDeleteConfirmId}/>
+        <ClientsTable 
+            rows={paginatedClients} 
+            onDeleteRequest={setDeleteConfirmId}
+        />
 
                 <ClientCreateModal
                     open={showAddModal}
