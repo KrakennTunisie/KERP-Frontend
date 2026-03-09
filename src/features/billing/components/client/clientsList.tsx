@@ -10,17 +10,28 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
-const ClientsTable = dynamic((): any => import("./clientsTable"), {
-  loading: () => <div className="p-6 font-bold">Loading table...</div>,
-});
+import lazyComponent from "@/shared/utils/lazyComponent";
 
-const ClientCreateModal = dynamic((): any => import("./createClientModal"), {
-  loading: () => null,
-});
+
+const ClientsTable = lazyComponent(
+  () => import("./clientsTable"),
+  "Chargement des clients..."
+);
+
+
+
+
+const ClientCreateModal = lazyComponent(
+  () => import("./createClientModal"),
+  "Chargement du formulaire client..."
+);
 
 const ConfirmDeleteModal = dynamic((): any => import("@/shared/components/ui/confirmDeleteModal"), {
   loading: () => null,
 });
+
+
+
 import { ClientPartnerItem } from '../../models/partner';
 
 

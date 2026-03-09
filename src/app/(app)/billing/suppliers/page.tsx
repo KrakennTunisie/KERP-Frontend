@@ -1,10 +1,11 @@
-import dynamic from "next/dynamic";
+import lazyComponent from "@/shared/utils/lazyComponent";
 
-const ClientsListClient = dynamic(
+
+const SuppliersList = lazyComponent(
   () => import("./suppliersList"),
-  { loading: () => <div className="p-8 font-bold">Loading...</div> }
+  "Chargement des fournisseurs..."
 );
 
 export default function Page() {
-  return <ClientsListClient />;
+  return <SuppliersList />;
 }

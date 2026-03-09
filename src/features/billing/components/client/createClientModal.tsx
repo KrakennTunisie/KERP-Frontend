@@ -1,6 +1,6 @@
 "use client";
 
-import PartnerForm from "../partnerForm";
+import PartnerForm from "../partner/partnerForm";
 import { CreateClientPartner, createClientPartnerSchema } from "../../models/partner";
 import { Modal } from "@/shared/components/ui/modal";
 import { SubmitHandler } from "react-hook-form";

@@ -1,11 +1,11 @@
-// src/app/(app)/billing/clients/page.tsx
-import dynamic from "next/dynamic";
+import lazyComponent from "@/shared/utils/lazyComponent";
 
-const ClientsListClient = dynamic(
+
+const ClientsList = lazyComponent(
   () => import("./clientsList"),
-  { loading: () => <div className="p-8 font-bold">Loading...</div> }
+  "Chargement des clients..."
 );
 
 export default function Page() {
-  return <ClientsListClient />;
+  return <ClientsList />;
 }

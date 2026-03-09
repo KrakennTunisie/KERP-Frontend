@@ -12,9 +12,10 @@ import { toast } from 'sonner';
 import { z } from "zod";
 
 
-const SuppliersTable = dynamic((): any => import("./suppliersTable"), {
-  loading: () => <div className="p-6 font-bold">Loading table...</div>,
-});
+const SuppliersTable = lazyComponent(
+  () => import("./suppliersTable"),
+  "Chargement des fournisseurs..."
+);
 
 const SupplierCreateModal = dynamic((): any => import("./createSupplierModal"), {
   loading: () => null,
@@ -24,6 +25,7 @@ const ConfirmDeleteModal = dynamic((): any => import("@/shared/components/ui/con
   loading: () => null,
 });
 import {  createSupplierPartnerSchema, SupplierPartnerItem } from '../../models/partner';
+import lazyComponent from "@/shared/utils/lazyComponent";
 
 
 const mockClients: SupplierPartnerItem[]=[
