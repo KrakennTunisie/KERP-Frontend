@@ -3,6 +3,22 @@ import {  z } from "zod";
 import {  partnerTypeSchema } from "../types/partnerType";
 import {  invoiceSchema } from "./invoice";
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+
+const ACCEPTED_TYPES = [
+  "application/pdf",
+  "image/jpeg",
+  "image/png"
+];
+
+const fileSchema = z
+  .instanceof(File, { message: "Fichier obligatoire" })
+  .refine((file) => file.size <= MAX_FILE_SIZE, "Le fichier doit être inférieur à 5MB")
+  .refine(
+    (file) => ACCEPTED_TYPES.includes(file.type),
+    "Format accepté : PDF, JPG, PNG"
+  );
+
 export const partnerSchema = z.object({
   idPartner: z.uuid(),
   name: z.string().min(1, "Le nom est obligatoire").min(3, "Le nom doit contenir au moins 3 caractères"),
@@ -13,9 +29,9 @@ export const partnerSchema = z.object({
   adress: z.string().min(1, "L'addresse est obligatoire"),
   iban: z.string().min(1, "IBAN est obligatoire"),
 
-  rne: documentSchema,
-  contract: documentSchema,
-  patente: documentSchema,
+  rne: fileSchema,
+  contract: fileSchema,
+  patente: fileSchema,
 
   partnerType: partnerTypeSchema,
 

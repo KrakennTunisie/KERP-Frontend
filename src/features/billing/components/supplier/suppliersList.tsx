@@ -9,6 +9,8 @@ import {
   Plus
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { z } from "zod";
+
 
 const SuppliersTable = dynamic((): any => import("./suppliersTable"), {
   loading: () => <div className="p-6 font-bold">Loading table...</div>,
@@ -21,17 +23,17 @@ const SupplierCreateModal = dynamic((): any => import("./createSupplierModal"), 
 const ConfirmDeleteModal = dynamic((): any => import("@/shared/components/ui/confirmDeleteModal"), {
   loading: () => null,
 });
-import {  SupplierPartnerItem } from '../../models/partner';
+import {  createSupplierPartnerSchema, SupplierPartnerItem } from '../../models/partner';
 
 
 const mockClients: SupplierPartnerItem[]=[
   {
     idPartner: '1',
-    taxRegistrationNumber: '1234567/A/M/000',
-    name: 'TechCorp Solutions SA',
-    adress: 'Zone Industrielle Kheireddine',
-    country: 'Le Kram',
-    email: 'contact@techcorp.tn',
+    taxRegistrationNumber: '7778889/E/N/001',
+    name: 'Office Supply Pro SA',
+    adress: 'Avenue de la République',
+    country: 'Tunis',
+    email: 'ventes@officesupply.tn',
     phoneNumber: '+216 71 000 001',
     partnerType : 'SUPPLIER',
   },
@@ -213,10 +215,7 @@ export default function SuppliersList() {
                 <SupplierCreateModal
                     open={showAddModal}
                     onClose={() => setShowAddModal(false)}
-                    onCreated={() => {
-                    // refresh list (re-fetch)
-                    }}
-                />
+                    />
 
                 <ConfirmDeleteModal
                     open={!!deleteConfirmId}
