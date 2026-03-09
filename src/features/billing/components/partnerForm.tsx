@@ -4,7 +4,7 @@ import { DefaultValues, SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
 import FilePicker from "@/shared/components/ui/filePicker";
-import { CreateSupplierPartner } from "../models/partner";
+import LoadingButton from "@/shared/components/ui/loadingButton";
 
 type PartnerFormProps<TSchema extends z.ZodTypeAny> = {
   schema: TSchema;
@@ -48,7 +48,7 @@ return (
           </p>
         )}
       </div>
-      
+
       <div >
         <input
           {...register("email" as any)}
@@ -178,14 +178,16 @@ return (
       </div>
     </div>
 
-    <button
+    <LoadingButton
       disabled={isSubmitting}
+      loading = {isSubmitting}
       type="submit"
       form="form-partner"
       className="px-5 py-3 rounded-2xl bg-gray-900 text-white font-black hover:bg-black disabled:opacity-60"
-    >
-      {isSubmitting ? "En cours..." : submitLabel}
-    </button>
+      children = {submitLabel}
+      loadingText = "Chargement..."
+
+    />
   </form>
 );
 }

@@ -16,7 +16,6 @@ type SupplierCreateModalProps = {
 export default function SupplierCreateModal({ open, onClose }: SupplierCreateModalProps) {
 
     const onSubmit: SubmitHandler<CreateSupplierPartner> = async (values) => {
-        const loadingId = appToast.loading("Création du fournisseur...", "Upload des documents en cours");
 
         setTimeout(()=>{
             console.log(values.email);
@@ -26,7 +25,6 @@ export default function SupplierCreateModal({ open, onClose }: SupplierCreateMod
         await new Promise((resolve) => setTimeout(resolve, 2000));
         onClose();
         //appToast.success("Fournisseur créé avec succès");
-        appToast.dismiss(loadingId);
         appToast.error("Échec de création", "Veuillez réessayer.");
 
 

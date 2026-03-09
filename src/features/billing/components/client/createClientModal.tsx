@@ -16,7 +16,7 @@ type Props = {
 export default function ClientCreateModal({ open, onClose, onCreated }: Props) {
 
       const onSubmit: SubmitHandler<CreateClientPartner> = async (values) => {
-        const loadingId = appToast.loading("Création du client...", "Upload des documents en cours");
+        //const loadingId = appToast.loading("Création du client...", "Upload des documents en cours");
 
         setTimeout(()=>{
             console.log(values.email);
@@ -25,9 +25,9 @@ export default function ClientCreateModal({ open, onClose, onCreated }: Props) {
         },3000)
         await new Promise((resolve) => setTimeout(resolve, 2000));
         onClose();
-        //appToast.success("client créé avec succès");
-        appToast.dismiss(loadingId);
-        appToast.error("Échec de création", "Veuillez réessayer.");
+        appToast.success("client créé avec succès");
+       // appToast.dismiss(loadingId);
+        //appToast.error("Échec de création", "Veuillez réessayer.");
   
       };
 
