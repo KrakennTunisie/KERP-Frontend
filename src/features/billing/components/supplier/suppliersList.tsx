@@ -8,7 +8,6 @@ import {
   Search,
   Plus
 } from 'lucide-react';
-import { toast } from 'sonner';
 
 
 const SuppliersTable = lazyComponent(
@@ -20,12 +19,10 @@ const SupplierCreateModal = dynamic((): any => import("./createSupplierModal"), 
   loading: () => null,
 });
 
-const ConfirmDeleteModal = dynamic((): any => import("@/shared/components/ui/confirmDeleteModal"), {
-  loading: () => null,
-});
 import {   SupplierPartnerItem } from '../../models/partner';
 import lazyComponent from "@/shared/utils/lazyComponent";
 import SupplierUpdateModal from "./updateSupplierModal";
+import SupplierDeleteModal from "./deleteSupplierModal";
 
 
 const mockClients: SupplierPartnerItem[]=[
@@ -79,7 +76,6 @@ const mockClients: SupplierPartnerItem[]=[
 ];
 
 export default function SuppliersList() {
-  const router = useRouter();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCity, setFilterCity] = useState<string>('all');
@@ -87,7 +83,6 @@ export default function SuppliersList() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
 
   const itemsPerPage = 10;
 
@@ -124,23 +119,7 @@ export default function SuppliersList() {
     return filteredClients.slice(start, start + itemsPerPage);
   }, [filteredClients, currentPage]);
 
-  const handleAdd = () => {
-    toast.success('Client ajouté avec succès !');
-    setShowAddModal(false);
-    setFormData({
-      taxRegistrationNumber: '',
-      name: '',
-      adress: '',
-      country: 'TN',
-      email: '',
-      phoneNumber: '',
-    });
-  };
 
-  const handleDelete = (id: string) => {
-    toast.success('Client supprimé avec succès !');
-    setDeleteConfirmId(null);
-  };
 
   const onUpdateRequest = (row : SupplierPartnerItem)=>{
       console.log("rows: ",row)
@@ -239,13 +218,10 @@ export default function SuppliersList() {
                   data={formData}
                 />
 
-                <ConfirmDeleteModal
+                <SupplierDeleteModal
                     open={!!deleteConfirmId}
-                    message="Voulez-vous vraiment supprimer ce fournisseur ?"
-                    dangerLabel="Cette action est irréversible."
-                    isLoading={isDeleting}
-                    onCancel={() => setDeleteConfirmId(null)}
-                    onConfirm={() => {}}
+                    onClose={() => setDeleteConfirmId(null)} 
+                    confirmDeleteId={deleteConfirmId}                
                 />
         </div>
       </main>

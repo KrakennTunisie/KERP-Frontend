@@ -8,7 +8,6 @@ import {
   Search,
   Plus
 } from 'lucide-react';
-import { toast } from 'sonner';
 
 import lazyComponent from "@/shared/utils/lazyComponent";
 
@@ -26,14 +25,11 @@ const ClientCreateModal = lazyComponent(
   "Chargement du formulaire client..."
 );
 
-const ConfirmDeleteModal = dynamic((): any => import("@/shared/components/ui/confirmDeleteModal"), {
-  loading: () => null,
-});
-
 
 
 import { ClientPartnerItem } from '../../models/partner';
 import ClientUpdateModal from "./updateClientModal";
+import ClientDeleteModal from "./deleteClientModal";
 
 
 const mockClients: ClientPartnerItem[]=[
@@ -87,7 +83,6 @@ const mockClients: ClientPartnerItem[]=[
 ];
 
 export default function ClientsList() {
-  const router = useRouter();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCity, setFilterCity] = useState<string>('all');
@@ -95,7 +90,6 @@ export default function ClientsList() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
 
   const itemsPerPage = 10;
 
@@ -131,16 +125,7 @@ export default function ClientsList() {
     return filteredClients.slice(start, start + itemsPerPage);
   }, [filteredClients, currentPage]);
 
-  const handleAdd = () => {
-    toast.success('Client ajouté avec succès !');
-    setShowAddModal(false);
 
-  };
-
-  const handleDelete = (id: string) => {
-    toast.success('Client supprimé avec succès !');
-    setDeleteConfirmId(null);
-  };
 
   const onUpdateRequest = (row : ClientPartnerItem)=>{
     console.log("rows: ",row)
@@ -244,13 +229,10 @@ export default function ClientsList() {
                   data={formData}
                 />
 
-                <ConfirmDeleteModal
+                <ClientDeleteModal
                     open={!!deleteConfirmId}
-                    message="Voulez-vous vraiment supprimer ce client ?"
-                    dangerLabel="Cette action est irréversible."
-                    isLoading={isDeleting}
-                    onCancel={() => setDeleteConfirmId(null)}
-                    onConfirm={() => {}}
+                    onClose={() => setDeleteConfirmId(null)} 
+                    confirmDeleteId={deleteConfirmId}                
                 />
         </div>
       </main>
