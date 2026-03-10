@@ -18,6 +18,7 @@ export default function ClientDetails(){
     email: "contact@techcorp.tn",
     phone: "+216 71 111 222",
     createdAt: "2024-03-15",
+    iban:"987654321"
   }
 
   const invoices= [

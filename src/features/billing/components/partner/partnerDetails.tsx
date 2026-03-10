@@ -39,6 +39,7 @@ export interface PartnerDetailsData {
   email?: string;
   phone?: string;
   createdAt: string;
+  iban: string,
 }
 
 type PartnerDetailsProps = {

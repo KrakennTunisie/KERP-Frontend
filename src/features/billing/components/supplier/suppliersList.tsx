@@ -9,7 +9,6 @@ import {
   Plus
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { z } from "zod";
 
 
 const SuppliersTable = lazyComponent(
@@ -24,7 +23,7 @@ const SupplierCreateModal = dynamic((): any => import("./createSupplierModal"), 
 const ConfirmDeleteModal = dynamic((): any => import("@/shared/components/ui/confirmDeleteModal"), {
   loading: () => null,
 });
-import {  createSupplierPartnerSchema, SupplierPartnerItem } from '../../models/partner';
+import {   SupplierPartnerItem } from '../../models/partner';
 import lazyComponent from "@/shared/utils/lazyComponent";
 
 

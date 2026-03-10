@@ -12,6 +12,28 @@ export default function SupplierDetails(){
     email: "ventes@officesupply.tn",
     phone: "+216 71 333 444",
     createdAt: "2024-01-10",
+    iban:"123456789",
+    rne: {
+        idDocument : "1",
+        fileName: "RNE_Client.pdf",
+        storageURL: "Tableau.pdf",
+        mimeType: "application/pdf",
+        hash:""
+    },
+    contract: {
+        idDocument : "2",
+        fileName: "Contrat_Client.docx",
+        storageURL: "Elfatoora API.docx",
+        mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        hash:""
+    },
+    patente: {
+        idDocument : "3",
+        fileName: "Patente_Client.jpg",
+        storageURL: "image.jpg",
+        mimeType: "image/jpeg",
+        hash:""
+    },
   }
 
   const invoices= [
