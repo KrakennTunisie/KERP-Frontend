@@ -33,6 +33,7 @@ const ConfirmDeleteModal = dynamic((): any => import("@/shared/components/ui/con
 
 
 import { ClientPartnerItem } from '../../models/partner';
+import ClientUpdateModal from "./updateClientModal";
 
 
 const mockClients: ClientPartnerItem[]=[
@@ -45,6 +46,7 @@ const mockClients: ClientPartnerItem[]=[
     email: 'contact@techcorp.tn',
     phoneNumber: '+216 71 000 001',
     partnerType : 'CLIENT',
+    iban:'123456789'
   },
   {
     idPartner: '2',
@@ -55,6 +57,7 @@ const mockClients: ClientPartnerItem[]=[
     email: 'contact@digitalhr.com',
     phoneNumber: '+216 71 222 333',
     partnerType : 'CLIENT',
+    iban:'123789456'
 
   },
   {
@@ -66,6 +69,7 @@ const mockClients: ClientPartnerItem[]=[
     email: 'billing@tunistelecom.tn',
     phoneNumber: '+216 71 888 999',
     partnerType : 'CLIENT',
+    iban:'135798462'
 
   },
   {
@@ -77,6 +81,7 @@ const mockClients: ClientPartnerItem[]=[
     email: 'info@innovationlabs.tn',
     phoneNumber: '+216 74 111 222',
     partnerType : 'CLIENT',
+    iban:'987654321'
 
   },
 ];
@@ -88,13 +93,14 @@ export default function ClientsList() {
   const [filterCity, setFilterCity] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const itemsPerPage = 10;
 
   const [formData, setFormData] = useState<Partial<ClientPartnerItem>>({
-    taxRegistrationNumber: '',
+    iban: '',
     name: '',
     adress: '',
     country: '',
@@ -128,20 +134,20 @@ export default function ClientsList() {
   const handleAdd = () => {
     toast.success('Client ajouté avec succès !');
     setShowAddModal(false);
-    setFormData({
-      taxRegistrationNumber: '',
-      name: '',
-      adress: '',
-      country: 'TN',
-      email: '',
-      phoneNumber: '',
-    });
+
   };
 
   const handleDelete = (id: string) => {
     toast.success('Client supprimé avec succès !');
     setDeleteConfirmId(null);
   };
+
+  const onUpdateRequest = (row : ClientPartnerItem)=>{
+    console.log("rows: ",row)
+        setFormData(row)
+        setShowUpdateModal(true)
+  }
+
 
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-gray-50/30">
@@ -161,7 +167,7 @@ export default function ClientsList() {
 
           <button
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 px-8 py-4 bg-gray-900 text-white rounded-[20px] hover:bg-black transition-all font-black text-sm shadow-xl shadow-gray-200"
+            className="flex items-center gap-2 px-8 py-4 bg-gray-900 text-white rounded-[20px] hover:bg-black transition-all font-black text-sm shadow-xl shadow-gray-200 cursor-pointer"
           >
             <Plus className="w-5 h-5" />
             Ajouter un client
@@ -221,6 +227,7 @@ export default function ClientsList() {
         <ClientsTable 
             rows={paginatedClients} 
             onDeleteRequest={setDeleteConfirmId}
+            onUpdateRequest = {onUpdateRequest}
         />
 
                 <ClientCreateModal
@@ -229,6 +236,12 @@ export default function ClientsList() {
                     onCreated={() => {
                     // refresh list (re-fetch)
                     }}
+                />
+                <ClientUpdateModal
+                  open ={showUpdateModal}
+                  onClose={()=> setShowUpdateModal(false)}
+                  onCreated={()=>{}}
+                  data={formData}
                 />
 
                 <ConfirmDeleteModal

@@ -25,6 +25,7 @@ const ConfirmDeleteModal = dynamic((): any => import("@/shared/components/ui/con
 });
 import {   SupplierPartnerItem } from '../../models/partner';
 import lazyComponent from "@/shared/utils/lazyComponent";
+import SupplierUpdateModal from "./updateSupplierModal";
 
 
 const mockClients: SupplierPartnerItem[]=[
@@ -37,6 +38,7 @@ const mockClients: SupplierPartnerItem[]=[
     email: 'ventes@officesupply.tn',
     phoneNumber: '+216 71 000 001',
     partnerType : 'SUPPLIER',
+    iban:'123456789'
   },
   {
     idPartner: '2',
@@ -47,6 +49,7 @@ const mockClients: SupplierPartnerItem[]=[
     email: 'contact@digitalhr.com',
     phoneNumber: '+216 71 222 333',
     partnerType : 'SUPPLIER',
+    iban:'123456789'
 
   },
   {
@@ -58,6 +61,7 @@ const mockClients: SupplierPartnerItem[]=[
     email: 'billing@tunistelecom.tn',
     phoneNumber: '+216 71 888 999',
     partnerType : 'SUPPLIER',
+    iban:'123456789'
 
   },
   {
@@ -69,6 +73,7 @@ const mockClients: SupplierPartnerItem[]=[
     email: 'info@innovationlabs.tn',
     phoneNumber: '+216 74 111 222',
     partnerType : 'SUPPLIER',
+    iban:'123456789'
 
   },
 ];
@@ -80,12 +85,14 @@ export default function SuppliersList() {
   const [filterCity, setFilterCity] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const itemsPerPage = 10;
 
   const [formData, setFormData] = useState<Partial<SupplierPartnerItem>>({
+    iban:'',
     taxRegistrationNumber: '',
     name: '',
     adress: '',
@@ -135,6 +142,12 @@ export default function SuppliersList() {
     setDeleteConfirmId(null);
   };
 
+  const onUpdateRequest = (row : SupplierPartnerItem)=>{
+      console.log("rows: ",row)
+          setFormData(row)
+          setShowUpdateModal(true)
+    }
+
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-gray-50/30">
       {/* Header */}
@@ -151,7 +164,7 @@ export default function SuppliersList() {
           
           <button
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 px-8 py-4 bg-gray-900 text-white rounded-[20px] hover:bg-black transition-all font-black text-sm shadow-xl shadow-gray-200"
+            className="flex items-center gap-2 px-8 py-4 bg-gray-900 text-white rounded-[20px] hover:bg-black transition-all font-black text-sm shadow-xl shadow-gray-200 cursor-pointer"
           >
             <Plus className="w-5 h-5" />
             Ajouter un fournisseur
@@ -211,12 +224,20 @@ export default function SuppliersList() {
         <SuppliersTable 
             rows={paginatedClients} 
             onDeleteRequest={setDeleteConfirmId}
+            onUpdateRequest = {onUpdateRequest}
         />
 
                 <SupplierCreateModal
                     open={showAddModal}
                     onClose={() => setShowAddModal(false)}
                     />
+                
+                <SupplierUpdateModal
+                  open ={showUpdateModal}
+                  onClose={()=> setShowUpdateModal(false)}
+                  onCreated={()=>{}}
+                  data={formData}
+                />
 
                 <ConfirmDeleteModal
                     open={!!deleteConfirmId}

@@ -16,11 +16,13 @@ import { SupplierPartnerItem } from "../../models/partner";
 export type SupplierTableProps = {
   rows: SupplierPartnerItem[];
   onDeleteRequest: (id: string) => void;
+  onUpdateRequest: (row: SupplierPartnerItem)=> void;
 };
 
 export default function SuppliersTable({
   rows,
   onDeleteRequest,
+  onUpdateRequest
 }: SupplierTableProps) {
   const router = useRouter();
 
@@ -96,7 +98,7 @@ export default function SuppliersTable({
           </button>
 
           <button
-            onClick={() => router.push(`/billing/suppliers/${supplier.idPartner}/edit`)}
+            onClick={() => onUpdateRequest(supplier)}
             className="p-2.5 bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 rounded-xl shadow-sm transition-all"
             title="Modifier"
           >

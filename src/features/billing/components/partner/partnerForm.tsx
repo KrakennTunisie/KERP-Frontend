@@ -11,6 +11,7 @@ type PartnerFormProps<TSchema extends z.ZodTypeAny> = {
   defaultValues?: DefaultValues<z.infer<TSchema>>;
   onSubmit: SubmitHandler<z.infer<TSchema>>;
   submitLabel?: string;
+  type?: string;
 };
 
 export default function PartnerForm<TSchema extends z.ZodTypeAny>({
@@ -18,6 +19,7 @@ export default function PartnerForm<TSchema extends z.ZodTypeAny>({
   defaultValues,
   onSubmit,
   submitLabel = "Créer",
+  type = "create",
 }: PartnerFormProps<TSchema>) {
   type FormValues = z.infer<TSchema>;
 
@@ -31,6 +33,8 @@ export default function PartnerForm<TSchema extends z.ZodTypeAny>({
     resolver: zodResolver(schema),
     defaultValues,
   });
+
+  console.log("defaultValues: ", defaultValues)
 
 
 return (
@@ -79,7 +83,13 @@ return (
         <input
           {...register("taxRegistrationNumber" as any)}
           placeholder="Matricule fiscal"
-          className="w-full px-4 py-3 rounded-2xl bg-gray-50 font-bold"
+          disabled = {type!=="create"}
+          className={`w-full px-4 py-3 rounded-2xl font-bold
+            ${type!=="create" 
+              ? "bg-gray-100 text-gray-500 cursor-not-allowed"
+              : "bg-gray-50"
+            }`
+          }
         />
         {errors?.["taxRegistrationNumber" as any]?.message && (
           <p className="text-xs text-red-600 mt-1">
@@ -131,6 +141,7 @@ return (
     </div>
 
     {/* Documents */}
+    {type== "create" && 
     <div className="space-y-3">
       <div>
         <p className="text-sm font-black text-gray-900">Documents obligatoires</p>
@@ -177,13 +188,14 @@ return (
         />
       </div>
     </div>
+    }
 
     <LoadingButton
       disabled={isSubmitting}
       loading = {isSubmitting}
       type="submit"
       form="form-partner"
-      className="px-5 py-3 rounded-2xl bg-gray-900 text-white font-black hover:bg-black disabled:opacity-60"
+      className="px-5 py-3 rounded-2xl bg-gray-900 text-white font-black hover:bg-black disabled:opacity-60 cursor-pointer"
       children = {submitLabel}
       loadingText = "Chargement..."
 

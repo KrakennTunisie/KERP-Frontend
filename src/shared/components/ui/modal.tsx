@@ -25,7 +25,7 @@ export function Modal({ open, title, onClose, children, footer }: ModalProps) {
 
           <button
             onClick={onClose}
-            className="w-10 h-10 rounded-xl border border-gray-200 hover:bg-gray-50 font-black"
+            className="w-10 h-10 rounded-xl border border-gray-200 hover:bg-gray-50 font-black cursor-pointer"
             aria-label="Fermer"
           >
             ×

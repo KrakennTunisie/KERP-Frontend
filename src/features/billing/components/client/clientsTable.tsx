@@ -16,11 +16,13 @@ import {  ClientPartnerItem } from "../../models/partner";
 export type ClientsTableProps = {
   rows: ClientPartnerItem[];
   onDeleteRequest: (id: string) => void;
+  onUpdateRequest: (row: ClientPartnerItem)=> void;
 };
 
 export default function ClientsTable({
   rows,
   onDeleteRequest,
+  onUpdateRequest,
 }: ClientsTableProps) {
   const router = useRouter();
 
@@ -96,7 +98,7 @@ export default function ClientsTable({
           </button>
 
           <button
-            onClick={() => router.push(`/billing/clients/${client.idPartner}/edit`)}
+            onClick={() => onUpdateRequest(client)}
             className="p-2.5 bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 rounded-xl shadow-sm transition-all"
             title="Modifier"
           >

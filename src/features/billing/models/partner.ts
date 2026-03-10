@@ -44,7 +44,7 @@ export type ClientPartner = Partner & { partnerType: "CLIENT" };
 
 export type SupplierPartner = Partner & { partnerType: "SUPPLIER" };
 
-export const partnerItemSchema = partnerSchema.omit({patente: true, rne: true, contract: true, iban:true, invoices: true})
+export const partnerItemSchema = partnerSchema.omit({patente: true, rne: true, contract: true,  invoices: true})
 
 export type PartnerItem = z.infer<typeof partnerItemSchema>
 
@@ -63,7 +63,7 @@ export const createSupplierPartnerSchema = createPartnerSchema.extend({
 });
 
 export const updatePartnerSchema = createPartnerSchema
-  .omit({ partnerType: true })
+  .omit({ partnerType: true, taxRegistrationNumber: true, rne: true, contract: true, patente: true })
   .partial();
 
 export type CreateClientPartner = z.infer<typeof createClientPartnerSchema>;
