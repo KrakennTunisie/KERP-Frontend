@@ -25,6 +25,7 @@ import SupplierDeleteModal from "./deleteSupplierModal";
 import { partnersApi } from "../../api/partners-api";
 import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 import { appToast } from "@/shared/lib/toast";
+import { useDebounce } from "@/shared/hooks/useDebounce";
 
 
 export default function SuppliersList() {
@@ -51,21 +52,27 @@ export default function SuppliersList() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalElements, setTotalElements] = useState(0);
   const [loading, setLoading] = useState(false);
+  
+  const debouncedSearchQuery = useDebounce(searchQuery, 2000);
 
 const cities = useMemo(() => Array.from(new Set(suppliers.map((c) => c.country))), []);
 
 useEffect(() => {
   setCurrentPage(1);
-}, [searchQuery, filterCity]);
+}, [debouncedSearchQuery, filterCity]);
 
 useEffect(() => {
   const fetchClients = async () => {
     try {
       setLoading(true);
       setError(null);
+      const keyword =
+        debouncedSearchQuery.trim().length >= 3
+          ? debouncedSearchQuery.trim()
+          : undefined;
 
       const response = await partnersApi.getSuppliers({
-        keyword: searchQuery.trim() || undefined,
+        keyword: keyword,
         country: filterCity !== "all" ? filterCity : undefined,
         page: currentPage - 1,
       });
@@ -82,7 +89,7 @@ useEffect(() => {
   };
 
   fetchClients();
-}, [searchQuery, filterCity, currentPage]);
+}, [debouncedSearchQuery, filterCity, currentPage]);
 
 
 
