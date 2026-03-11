@@ -8,23 +8,16 @@ import {
   AlertCircle,
   FileText,
 } from "lucide-react";
+import { Invoice } from "../../models/invoice";
+import { InvoiceStatus } from "../../types/invoiceStatus";
 
-type InvoiceStatus = "paid" | "pending" | "overdue";
 type PartnerType = "CLIENT" | "SUPPLIER";
 
-export type PartnerInvoiceItem = {
-  id: string;
-  number: string;
-  date: string;
-  dueDate: string;
-  amount: number;
-  status: InvoiceStatus;
-  type?: string;
-};
+export type PartnerInvoiceItem = Partial<Invoice>;
 
 type PartnerInvoicesCardProps = {
   partnerType: PartnerType;
-  invoices: PartnerInvoiceItem[];
+  invoices: PartnerInvoiceItem[] | undefined;
   subtitle: string;
   buttonHref: string;
   buttonLabel: string;
@@ -41,39 +34,45 @@ export default function PartnerInvoicesCard({
 }: PartnerInvoicesCardProps) {
   const isSupplier = partnerType === "SUPPLIER";
 
-  const getStatusColor = (status: InvoiceStatus) => {
+  const getStatusColor = (status: InvoiceStatus | undefined) => {
     switch (status) {
-      case "paid":
+      case "PAID":
         return "bg-emerald-50 text-emerald-600 border-emerald-100";
-      case "pending":
+      case "TO_PAY":
         return "bg-blue-50 text-blue-600 border-blue-100";
-      case "overdue":
+      case "TO_COLLECT":
+        return "bg-blue-50 text-blue-600 border-blue-100";
+      case "CANCELLED":
         return "bg-rose-50 text-rose-600 border-rose-100";
       default:
         return "bg-gray-50 text-gray-500 border-gray-100";
     }
   };
 
-  const getStatusLabel = (status: InvoiceStatus) => {
+  const getStatusLabel = (status: InvoiceStatus | undefined) => {
     switch (status) {
-      case "paid":
+      case "PAID":
         return "Payée";
-      case "pending":
+      case "TO_PAY":
         return "En attente";
-      case "overdue":
+      case "TO_COLLECT":
+        return "En attente";
+      case "CANCELLED":
         return "En retard";
       default:
         return status;
     }
   };
 
-  const getStatusIcon = (status: InvoiceStatus) => {
+  const getStatusIcon = (status: InvoiceStatus | undefined) => {
     switch (status) {
-      case "paid":
+      case "PAID":
         return CheckCircle;
-      case "pending":
+      case "TO_PAY":
         return Clock;
-      case "overdue":
+      case "TO_COLLECT":
+        return Clock;
+      case "CANCELLED":
         return AlertCircle;
       default:
         return FileText;
@@ -101,30 +100,30 @@ export default function PartnerInvoicesCard({
       </div>
 
       <div className="divide-y divide-gray-100">
-        {invoices.slice(0, 3).map((invoice) => {
-          const StatusIcon = getStatusIcon(invoice.status);
+        {invoices?.slice(0, 3).map((invoice) => {
+          const StatusIcon = getStatusIcon(invoice?.invoiceStatus);
 
           return (
             <div
-              key={invoice.id}
+              key={invoice.idInvoice}
               className="px-8 py-8 hover:bg-gray-50/50 transition-colors"
             >
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex items-start gap-4">
                   <div
                     className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
-                      invoice.status === "paid"
+                      invoice?.invoiceStatus === "PAID"
                         ? "bg-emerald-50"
-                        : invoice.status === "pending"
+                        : invoice.invoiceStatus === "TO_COLLECT" || "TO_PAY"
                         ? "bg-blue-50"
                         : "bg-rose-50"
                     }`}
                   >
                     <StatusIcon
                       className={`w-6 h-6 ${
-                        invoice.status === "paid"
+                        invoice.invoiceStatus === "PAID"
                           ? "text-emerald-600"
-                          : invoice.status === "pending"
+                          : invoice.invoiceStatus === "TO_COLLECT" || "TO_PAY"
                           ? "text-blue-600"
                           : "text-rose-600"
                       }`}
@@ -135,23 +134,23 @@ export default function PartnerInvoicesCard({
                     <Link
                       href={
                         isSupplier
-                          ? `/billing/invoices/suppliers/${invoice.id}`
-                          : `/billing/invoices/clients/${invoice.id}`
+                          ? `/billing/invoices/suppliers/${invoice.idInvoice}`
+                          : `/billing/invoices/clients/${invoice.idInvoice}`
                       }
                       className="text-lg font-black text-blue-600 hover:text-blue-800 tracking-tight underline-offset-4 hover:underline"
                     >
-                      {invoice.number}
+                      {invoice.invoiceNumber}
                     </Link>
 
                     <div className="flex items-center gap-4 mt-2">
                       <div className="flex items-center gap-2 text-xs font-bold text-gray-600">
                         <Calendar className="w-3 h-3" />
-                        <span>Émise: {invoice.date}</span>
+                        <span>Émise: {invoice?.issueDate?.toLocaleString()}</span>
                       </div>
 
                       <div className="flex items-center gap-2 text-xs font-bold text-rose-600">
                         <Calendar className="w-3 h-3" />
-                        <span>Échéance: {invoice.dueDate}</span>
+                        <span>Échéance: {invoice.dueDate?.toLocaleString()}</span>
                       </div>
                     </div>
                   </div>
@@ -160,20 +159,20 @@ export default function PartnerInvoicesCard({
                 <div className="flex items-center gap-6">
                   <div className="text-right">
                     <p className="text-2xl font-black text-gray-900 tracking-tighter">
-                      {invoice.amount.toLocaleString()}{" "}
+                      {invoice?.totalInclTaxTND?.toLocaleString()}{" "}
                       <span className="text-sm text-gray-600">TND</span>
                     </p>
                     <p className="text-[10px] font-bold text-gray-500 uppercase tracking-tighter mt-1">
-                      {invoice.type || emptyInvoiceType}
+                      {invoice.invoiceType || emptyInvoiceType}
                     </p>
                   </div>
 
                   <span
                     className={`inline-flex items-center px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest border ${getStatusColor(
-                      invoice.status
+                      invoice.invoiceStatus
                     )}`}
                   >
-                    {getStatusLabel(invoice.status)}
+                    {getStatusLabel(invoice?.invoiceStatus)}
                   </span>
                 </div>
               </div>
@@ -181,7 +180,7 @@ export default function PartnerInvoicesCard({
           );
         })}
 
-        {invoices.length === 0 && (
+        {invoices?.length === 0 && (
           <div className="px-8 py-10 text-sm font-bold text-gray-500">
             Aucune facture trouvée pour ce partenaire.
           </div>

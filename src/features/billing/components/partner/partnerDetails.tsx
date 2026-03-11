@@ -14,6 +14,7 @@ import PartnerStatCard from "../widgets/partnerStatCard";
 import PartnerHeader from "./partnerHeroSection";
 import PartnerInfoCard from "./partnerInfoCard";
 import PartnerInvoicesCard from "./partnerInvoices";
+import { Partner } from "../../models/partner";
 
 type InvoiceStatus = "paid" | "pending" | "overdue";
 type PartnerType = "CLIENT" | "SUPPLIER";
@@ -48,20 +49,16 @@ type PartnerDetailsProps = {
   invoices: PartnerInvoiceItem[];
 };
 
-export default function PartnerDetails({
-  partnerType,
-  partner,
-  invoices,
-}: PartnerDetailsProps) {
-  const isSupplier = partnerType === "SUPPLIER";
+export default function PartnerDetails(partner : Partner) {
+  const isSupplier = partner.partnerType === "SUPPLIER";
 
-  const totalInvoices = invoices.length;
-  const totalAmount = invoices.reduce((sum, inv) => sum + inv.amount, 0);
-  const paidInvoices = invoices.filter((inv) => inv.status === "paid").length;
-  const pendingAmount = invoices
+  const totalInvoices = partner?.invoices?.length;
+  const totalAmount = partner?.invoices?.reduce((sum, inv) => sum + inv.amount, 0);
+  const paidInvoices = partner?.invoices?.filter((inv) => inv.status ===  "paid").length;
+  const pendingAmount = partner?.invoices?
     .filter((inv) => inv.status !== "paid")
     .reduce((sum, inv) => sum + inv.amount, 0);
-  const averageInvoice = totalInvoices > 0 ? totalAmount / totalInvoices : 0;
+  const averageInvoice = totalInvoices? totalInvoices > 0 ? totalAmount / totalInvoices : 0 : undefined;
 
   const pageConfig = {
     title: isSupplier ? "Fournisseur" : "Client",
@@ -83,8 +80,8 @@ export default function PartnerDetails({
       ? "Les 3 dernières factures d'achat"
       : "Les 3 dernières factures de vente",
     invoicesButtonHref: isSupplier
-      ? `/billing/invoices/suppliers?supplier=${partner.id}`
-      : `/billing/invoices/clients?client=${partner.id}`,
+      ? `/billing/invoices/suppliers?supplier=${partner.idPartner}`
+      : `/billing/invoices/clients?client=${partner.idPartner}`,
     invoicesButtonLabel: "Voir toutes les factures",
     detailsTypeLabel: isSupplier ? "Fournisseur" : "Client",
     emptyInvoiceType: isSupplier ? "Achat" : "Vente",
@@ -110,7 +107,7 @@ export default function PartnerDetails({
                 title={pageConfig.totalLabel}
                 value={
                     <p className="text-3xl font-black text-gray-900 tracking-tighter">
-                    {totalAmount.toLocaleString()}{" "}
+                    {totalAmount?.toLocaleString()}{" "}
                     <span className="text-sm text-gray-600">TND</span>
                     </p>
                 }
@@ -150,7 +147,7 @@ export default function PartnerDetails({
                 iconClassName="text-amber-600"
                 footer={
                     <p className="text-[10px] font-bold text-amber-600 uppercase tracking-tighter">
-                        {pendingAmount.toLocaleString()}
+                        {pendingAmount?.toLocaleString()}
                         <span className="text-sm text-gray-600">TND</span>
                     </p>
                     
@@ -161,7 +158,7 @@ export default function PartnerDetails({
                 title="Montant Moyen"
                 value={
                     <p className="text-3xl font-black text-gray-900 tracking-tighter">
-                        {averageInvoice.toLocaleString()}
+                        {averageInvoice?.toLocaleString()}
                     </p>
                 }
                 icon={Euro}
@@ -169,7 +166,7 @@ export default function PartnerDetails({
                 iconClassName="text-purple-600"
                 footer={
                     <p className="text-[10px] font-bold text-purple-600 uppercase tracking-tighter">
-                        {averageInvoice.toLocaleString()}{" "}
+                        {averageInvoice?.toLocaleString()}{" "}
                         <span className="text-sm text-gray-600">TND</span>
 
                     </p>
@@ -180,8 +177,8 @@ export default function PartnerDetails({
           </div>
 
             <PartnerInvoicesCard
-                partnerType={partnerType}
-                invoices={invoices}
+                partnerType={partner.partnerType}
+                invoices={partner.invoices}
                 subtitle={pageConfig.invoicesSubtitle}
                 buttonHref={pageConfig.invoicesButtonHref}
                 buttonLabel={pageConfig.invoicesButtonLabel}

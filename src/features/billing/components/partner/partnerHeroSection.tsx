@@ -2,17 +2,10 @@
 
 import Link from "next/link";
 import { ArrowLeft, MapPin, Mail, Phone, LucideIcon } from "lucide-react";
+import { Partner } from "../../models/partner";
 
 type PartnerHeaderProps = {
-  partner: {
-    name: string;
-    identifier: string;
-    address: string;
-    city: string;
-    postalCode: string;
-    email?: string;
-    phone?: string;
-  };
+  partner: Partial<Partner>
 
   pageConfig: {
     backHref: string;
@@ -77,7 +70,7 @@ export default function PartnerHeader({
                 <div className="flex items-center gap-2 text-gray-600">
                   <MapPin className={`w-4 h-4 ${pageConfig.heroInfoIconClass}`} />
                   <span className="text-sm font-bold">
-                    {partner.address}, {partner.city} {partner.postalCode}
+                    {partner.adress}, {partner.country}
                   </span>
                 </div>
 
@@ -91,7 +84,7 @@ export default function PartnerHeader({
                 <div className="flex items-center gap-2 text-gray-600">
                   <Phone className={`w-4 h-4 ${pageConfig.heroInfoIconClass}`} />
                   <span className="text-sm font-bold">
-                    {partner.phone ?? "-"}
+                    {partner.phoneNumber ?? "-"}
                   </span>
                 </div>
 

@@ -1,4 +1,13 @@
+'use client'
+
 import lazyComponent from "@/shared/utils/lazyComponent";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { ClientPartner } from "../../models/partner";
+import { partnersApi } from "../../api/partners-api";
+import { appToast } from "@/shared/lib/toast";
+import { getApiErrorMessage } from "@/shared/api/handle-api-error";
+import PageLoader from "@/shared/components/ui/pageLoader";
 
 
 const PartnerDetails = lazyComponent(
@@ -7,55 +16,51 @@ const PartnerDetails = lazyComponent(
 );
 
 export default function ClientDetails(){
-    const client = {
-    id: "c1",
-    identifier: "1234567/A/M/000",
-    name: "TechCorp Solutions SA",
-    address: "Zone Industrielle Kheireddine",
-    city: "La Goulette",
-    postalCode: "2015",
-    country: "TN",
-    email: "contact@techcorp.tn",
-    phone: "+216 71 111 222",
-    createdAt: "2024-03-15",
-    iban:"987654321"
-  }
+ const params = useParams();
 
-  const invoices= [
-    {
-      id: "i1",
-      number: "FAC-2025-001",
-      date: "2025-01-10",
-      dueDate: "2025-02-10",
-      amount: 8400,
-      status: "paid",
-      type: "Vente",
-    },
-    {
-      id: "i2",
-      number: "FAC-2025-009",
-      date: "2025-01-25",
-      dueDate: "2025-02-24",
-      amount: 6400,
-      status: "pending",
-      type: "Vente",
-    },
-    {
-      id: "i3",
-      number: "FAC-2025-014",
-      date: "2025-02-03",
-      dueDate: "2025-03-05",
-      amount: 9200,
-      status: "overdue",
-      type: "Vente",
-    },
-  ]
+  const clientId = params?.clientId as string;
 
+  const [client, setClient] = useState<ClientPartner | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+  const fetchSupplier = async () => {
+    try {
+      setLoading(true)
+      const supplier = await partnersApi.getClientById(clientId);
+      setClient(supplier);
+    } catch (error) {
+      appToast.error(getApiErrorMessage(error));
+    }
+    finally{
+      setLoading(false)
+    }
+  };
+
+  fetchSupplier();
+}, [params.id]);
+
+if(loading){
+  return(
+      <PageLoader label="Chargement du client ..."/>            
+
+  )
+}
+
+if(client==null){
+  return(
+      <div className="p-6">
+        <p className="text-sm font-medium text-gray-500">
+          Client introuvable.
+        </p>
+      </div>
+  )
+}
         return(
             <PartnerDetails
                 partner={client}
                 partnerType="CLIENT"
-                invoices={invoices}
+                invoices={client.invoices}
             />
         )
 

@@ -6,18 +6,12 @@ import { BadgeCheck, CalendarDays, CreditCard, ReceiptText } from "lucide-react"
 import InfoItem from "@/shared/components/ui/infoItem";
 import DocumentItem from "@/shared/components/ui/documentItem";
 import { Document } from "../../models/document";
+import { Partner } from "../../models/partner";
 
 
 
 type PartnerInfoCardProps = {
-  partner: {
-    identifier: string;
-    createdAt: string;
-    iban: string;
-    rne?: Document;
-    contract?: Document;
-    patente?: Document;
-  };
+  partner: Partial<Partner>
   typeLabel: string;
 };
 
@@ -77,7 +71,7 @@ export default function PartnerInfoCard({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <InfoItem
               label="Matricule fiscal"
-              value={partner.identifier}
+              value={partner.idPartner}
               icon={<ReceiptText className="w-5 h-5 text-gray-700" />}
             />
 
