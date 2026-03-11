@@ -2,8 +2,7 @@
 
 import dynamic from "next/dynamic";
 
-import { useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Search,
   Plus
@@ -23,57 +22,10 @@ import {   SupplierPartnerItem } from '../../models/partner';
 import lazyComponent from "@/shared/utils/lazyComponent";
 import SupplierUpdateModal from "./updateSupplierModal";
 import SupplierDeleteModal from "./deleteSupplierModal";
+import { partnersApi } from "../../api/partners-api";
+import { getApiErrorMessage } from "@/shared/api/handle-api-error";
+import { appToast } from "@/shared/lib/toast";
 
-
-const mockClients: SupplierPartnerItem[]=[
-  {
-    idPartner: '1',
-    taxRegistrationNumber: '7778889/E/N/001',
-    name: 'Office Supply Pro SA',
-    adress: 'Avenue de la République',
-    country: 'Tunis',
-    email: 'ventes@officesupply.tn',
-    phoneNumber: '+216 71 000 001',
-    partnerType : 'SUPPLIER',
-    iban:'123456789'
-  },
-  {
-    idPartner: '2',
-    taxRegistrationNumber: '9876543/B/N/001',
-    name: 'Digital HR Services Ltd',
-    adress: 'Avenue Habib Bourguiba',
-    country: 'Tunis',
-    email: 'contact@digitalhr.com',
-    phoneNumber: '+216 71 222 333',
-    partnerType : 'SUPPLIER',
-    iban:'123456789'
-
-  },
-  {
-    idPartner: '3',
-    taxRegistrationNumber: '0001112/C/P/000',
-    name: 'Tunis Telecom',
-    adress: "Place de l'Indépendance",
-    country: 'Tunis',
-    email: 'billing@tunistelecom.tn',
-    phoneNumber: '+216 71 888 999',
-    partnerType : 'SUPPLIER',
-    iban:'123456789'
-
-  },
-  {
-    idPartner: '4',
-    taxRegistrationNumber: '5554443/D/M/002',
-    name: 'Innovation Labs SA',
-    adress: 'Rue de la Liberté',
-    country: 'Sfax',
-    email: 'info@innovationlabs.tn',
-    phoneNumber: '+216 74 111 222',
-    partnerType : 'SUPPLIER',
-    iban:'123456789'
-
-  },
-];
 
 export default function SuppliersList() {
 
@@ -83,8 +35,6 @@ export default function SuppliersList() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
-
-  const itemsPerPage = 10;
 
   const [formData, setFormData] = useState<Partial<SupplierPartnerItem>>({
     iban:'',
@@ -96,28 +46,44 @@ export default function SuppliersList() {
     phoneNumber: '',
   });
 
-  const cities = useMemo(() => Array.from(new Set(mockClients.map((c) => c.country))), []);
+  const [error, setError] = useState<string | null>(null);
+  const [suppliers, setSuppliers] = useState<SupplierPartnerItem[]>([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalElements, setTotalElements] = useState(0);
+  const [loading, setLoading] = useState(false);
 
-  const filteredClients = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
-    return mockClients.filter((client) => {
-      const matchesSearch =
-        client.name.toLowerCase().includes(q) ||
-        client.taxRegistrationNumber.toLowerCase().includes(q) ||
-        (client.email?.toLowerCase().includes(q) ?? false);
+const cities = useMemo(() => Array.from(new Set(suppliers.map((c) => c.country))), []);
 
-      const matchesCity = filterCity === 'all' || client.country === filterCity;
+useEffect(() => {
+  setCurrentPage(1);
+}, [searchQuery, filterCity]);
 
-      return matchesSearch && matchesCity;
-    });
-  }, [searchQuery, filterCity]);
+useEffect(() => {
+  const fetchClients = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-  const totalPages = Math.max(1, Math.ceil(filteredClients.length / itemsPerPage));
+      const response = await partnersApi.getSuppliers({
+        keyword: searchQuery.trim() || undefined,
+        country: filterCity !== "all" ? filterCity : undefined,
+        page: currentPage - 1,
+      });
 
-  const paginatedClients = useMemo(() => {
-    const start = (currentPage - 1) * itemsPerPage;
-    return filteredClients.slice(start, start + itemsPerPage);
-  }, [filteredClients, currentPage]);
+      setSuppliers(response.content);
+      setTotalPages(response.totalPages);
+      setTotalElements(response.totalElements);
+    } catch (error) {
+      setError(getApiErrorMessage(error));
+      appToast.error("Erreur de fetch clients: ",getApiErrorMessage(error))
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchClients();
+}, [searchQuery, filterCity, currentPage]);
+
 
 
 
@@ -200,7 +166,12 @@ export default function SuppliersList() {
 
           {/* Table */}
         <SuppliersTable 
-            rows={paginatedClients} 
+            rows={suppliers}
+            setCurrentPage= {setCurrentPage}
+            currentPage= {currentPage}
+            totalPages= {totalPages}
+            loading= {loading}
+            totalElements= {totalElements} 
             onDeleteRequest={setDeleteConfirmId}
             onUpdateRequest = {onUpdateRequest}
         />

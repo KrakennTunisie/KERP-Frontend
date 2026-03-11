@@ -67,7 +67,7 @@ useEffect(() => {
       const response = await partnersApi.getClients({
         keyword: searchQuery.trim() || undefined,
         country: filterCity !== "all" ? filterCity : undefined,
-        page: currentPage,
+        page: currentPage - 1,
       });
 
       setClients(response.content);

@@ -15,12 +15,22 @@ import { SupplierPartnerItem } from "../../models/partner";
 
 export type SupplierTableProps = {
   rows: SupplierPartnerItem[];
+  setCurrentPage: ()=> void,
+  currentPage: number,
+  totalPages : number,
+  loading: boolean,
+  totalElements: number
   onDeleteRequest: (id: string) => void;
   onUpdateRequest: (row: SupplierPartnerItem)=> void;
 };
 
 export default function SuppliersTable({
   rows,
+  setCurrentPage,
+  currentPage,
+  totalPages,
+  loading,
+  totalElements,
   onDeleteRequest,
   onUpdateRequest
 }: SupplierTableProps) {
@@ -121,9 +131,13 @@ export default function SuppliersTable({
     <DataTable
       rows={rows}
       columns={columns}
-      getRowKey={(c) => c.idPartner}
-      pageSize={3}
-      emptyMessage="Aucun fournisseur ne correspond à vos filtres."
+      getRowKey={(row) => row.idPartner}
+      currentPage={currentPage}
+      totalPages={totalPages}
+      onPageChange={setCurrentPage}
+      isLoading={loading}
+      emptyMessage="Aucun fournisseur trouvé."
+      totalCount={totalElements}
       countLabel={(count) =>
         `${count} fournisseur${count > 1 ? "s" : ""} trouvé${count > 1 ? "s" : ""}`
       }
