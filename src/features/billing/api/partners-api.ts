@@ -2,11 +2,14 @@
 import { apiClient } from "@/shared/api/api-client";
 import { BILLING_ENDPOINTS } from "@/shared/api/endpoints";
 import { ClientPartner, ClientPartnerItem, CreateClientPartner, CreateSupplierPartner, SupplierPartner, SupplierPartnerItem, UpdatePartner } from "../models/partner";
+import { GetPartnersParams, PageResponse } from "@/shared/api/types";
 
 export const partnersApi = {
-  getClients: () => apiClient.get<ClientPartnerItem[]>(BILLING_ENDPOINTS.clients),
+  getClients: (query? : GetPartnersParams) => 
+    apiClient.get<PageResponse<ClientPartnerItem>>(BILLING_ENDPOINTS.getClients(query)),
 
-  getSuppliers: () => apiClient.get<SupplierPartnerItem[]>(BILLING_ENDPOINTS.suppliers),
+  getSuppliers: (query? : GetPartnersParams) => 
+    apiClient.get<PageResponse<SupplierPartnerItem>>(BILLING_ENDPOINTS.getSuppliers(query)),
 
   getClientById: (id: string) =>
     apiClient.get<ClientPartner>(BILLING_ENDPOINTS.clientById(id)),

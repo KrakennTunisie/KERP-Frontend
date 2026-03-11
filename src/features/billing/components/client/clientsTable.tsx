@@ -15,12 +15,22 @@ import {  ClientPartnerItem } from "../../models/partner";
 
 export type ClientsTableProps = {
   rows: ClientPartnerItem[];
+  setCurrentPage: ()=> void,
+  currentPage: number,
+  totalPages : number,
+  loading: boolean,
+  totalElements: number,
   onDeleteRequest: (id: string) => void;
   onUpdateRequest: (row: ClientPartnerItem)=> void;
 };
 
 export default function ClientsTable({
   rows,
+  setCurrentPage,
+  currentPage,
+  totalPages,
+  loading,
+  totalElements,
   onDeleteRequest,
   onUpdateRequest,
 }: ClientsTableProps) {
@@ -121,9 +131,13 @@ export default function ClientsTable({
     <DataTable
       rows={rows}
       columns={columns}
-      getRowKey={(c) => c.idPartner}
-      pageSize={3}
-      emptyMessage="Aucun client ne correspond à vos filtres."
+      getRowKey={(row) => row.idPartner}
+      currentPage={currentPage}
+      totalPages={totalPages}
+      onPageChange={setCurrentPage}
+      isLoading={loading}
+      emptyMessage="Aucun client trouvé."
+      totalCount={totalElements}
       countLabel={(count) =>
         `${count} client${count > 1 ? "s" : ""} trouvé${count > 1 ? "s" : ""}`
       }

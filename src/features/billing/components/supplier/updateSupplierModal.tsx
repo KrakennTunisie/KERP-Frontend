@@ -19,9 +19,9 @@ type Props = {
 export default function SupplierUpdateModal({ open, onClose, onCreated, data }: Props) {
       const onSubmit: SubmitHandler<UpdatePartner> = async (values) => {
         try {
-          const updatedClient = await partnersApi.updateSupplier(data.idPartner, values);
+          const updatedSupplier = await partnersApi.updateSupplier(data.idPartner, values);
 
-          if (updatedClient) {
+          if (updatedSupplier) {
             appToast.success("Fournisseur modifié avec succès");
             onClose();
           }

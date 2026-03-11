@@ -1,9 +1,6 @@
 'use client';
 
-import dynamic from "next/dynamic";
-
-import { useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Search,
   Plus
@@ -17,70 +14,18 @@ const ClientsTable = lazyComponent(
   "Chargement des clients..."
 );
 
-
-
-
 const ClientCreateModal = lazyComponent(
   () => import("./createClientModal"),
   "Chargement du formulaire client..."
 );
 
-
-
 import { ClientPartnerItem } from '../../models/partner';
 import ClientUpdateModal from "./updateClientModal";
 import ClientDeleteModal from "./deleteClientModal";
+import { partnersApi } from "../../api/partners-api";
+import { getApiErrorMessage } from "@/shared/api/handle-api-error";
+import { appToast } from "@/shared/lib/toast";
 
-
-const mockClients: ClientPartnerItem[]=[
-  {
-    idPartner: '1',
-    taxRegistrationNumber: '1234567/A/M/000',
-    name: 'TechCorp Solutions SA',
-    adress: 'Zone Industrielle Kheireddine',
-    country: 'Le Kram',
-    email: 'contact@techcorp.tn',
-    phoneNumber: '+216 71 000 001',
-    partnerType : 'CLIENT',
-    iban:'123456789'
-  },
-  {
-    idPartner: '2',
-    taxRegistrationNumber: '9876543/B/N/001',
-    name: 'Digital HR Services Ltd',
-    adress: 'Avenue Habib Bourguiba',
-    country: 'Tunis',
-    email: 'contact@digitalhr.com',
-    phoneNumber: '+216 71 222 333',
-    partnerType : 'CLIENT',
-    iban:'123789456'
-
-  },
-  {
-    idPartner: '3',
-    taxRegistrationNumber: '0001112/C/P/000',
-    name: 'Tunis Telecom',
-    adress: "Place de l'Indépendance",
-    country: 'Tunis',
-    email: 'billing@tunistelecom.tn',
-    phoneNumber: '+216 71 888 999',
-    partnerType : 'CLIENT',
-    iban:'135798462'
-
-  },
-  {
-    idPartner: '4',
-    taxRegistrationNumber: '5554443/D/M/002',
-    name: 'Innovation Labs SA',
-    adress: 'Rue de la Liberté',
-    country: 'Sfax',
-    email: 'info@innovationlabs.tn',
-    phoneNumber: '+216 74 111 222',
-    partnerType : 'CLIENT',
-    iban:'987654321'
-
-  },
-];
 
 export default function ClientsList() {
 
@@ -91,7 +36,6 @@ export default function ClientsList() {
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
-  const itemsPerPage = 10;
 
   const [formData, setFormData] = useState<Partial<ClientPartnerItem>>({
     iban: '',
@@ -102,28 +46,43 @@ export default function ClientsList() {
     phoneNumber: '',
   });
 
-  const cities = useMemo(() => Array.from(new Set(mockClients.map((c) => c.country))), []);
+const [error, setError] = useState<string | null>(null);
+const [clients, setClients] = useState<ClientPartnerItem[]>([]);
+const [totalPages, setTotalPages] = useState(1);
+const [totalElements, setTotalElements] = useState(0);
+const [loading, setLoading] = useState(false);
 
-  const filteredClients = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
-    return mockClients.filter((client) => {
-      const matchesSearch =
-        client.name.toLowerCase().includes(q) ||
-        client.taxRegistrationNumber.toLowerCase().includes(q) ||
-        (client.email?.toLowerCase().includes(q) ?? false);
+const cities = useMemo(() => Array.from(new Set(clients.map((c) => c.country))), []);
 
-      const matchesCity = filterCity === 'all' || client.country === filterCity;
+useEffect(() => {
+  setCurrentPage(1);
+}, [searchQuery, filterCity]);
 
-      return matchesSearch && matchesCity;
-    });
-  }, [searchQuery, filterCity]);
+useEffect(() => {
+  const fetchClients = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-  const totalPages = Math.max(1, Math.ceil(filteredClients.length / itemsPerPage));
+      const response = await partnersApi.getClients({
+        keyword: searchQuery.trim() || undefined,
+        country: filterCity !== "all" ? filterCity : undefined,
+        page: currentPage,
+      });
 
-  const paginatedClients = useMemo(() => {
-    const start = (currentPage - 1) * itemsPerPage;
-    return filteredClients.slice(start, start + itemsPerPage);
-  }, [filteredClients, currentPage]);
+      setClients(response.content);
+      setTotalPages(response.totalPages);
+      setTotalElements(response.totalElements);
+    } catch (error) {
+      setError(getApiErrorMessage(error));
+      appToast.error("Erreur de fetch clients: ",getApiErrorMessage(error))
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchClients();
+}, [searchQuery, filterCity, currentPage]);
 
 
 
@@ -209,9 +168,15 @@ export default function ClientsList() {
 
           {/* Table */}
         <ClientsTable 
-            rows={paginatedClients} 
+            rows={clients}
+            setCurrentPage= {setCurrentPage}
+            currentPage= {currentPage}
+            totalPages= {totalPages}
+            loading= {loading}
+            totalElements= {totalElements}
             onDeleteRequest={setDeleteConfirmId}
             onUpdateRequest = {onUpdateRequest}
+            
         />
 
                 <ClientCreateModal
