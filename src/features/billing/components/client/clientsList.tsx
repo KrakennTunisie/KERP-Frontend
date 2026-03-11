@@ -128,7 +128,6 @@ export default function ClientsList() {
 
 
   const onUpdateRequest = (row : ClientPartnerItem)=>{
-    console.log("rows: ",row)
         setFormData(row)
         setShowUpdateModal(true)
   }

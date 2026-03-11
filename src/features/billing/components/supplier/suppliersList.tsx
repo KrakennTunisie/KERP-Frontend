@@ -122,7 +122,6 @@ export default function SuppliersList() {
 
 
   const onUpdateRequest = (row : SupplierPartnerItem)=>{
-      console.log("rows: ",row)
           setFormData(row)
           setShowUpdateModal(true)
     }

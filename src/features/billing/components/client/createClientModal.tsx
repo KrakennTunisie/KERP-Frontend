@@ -5,6 +5,8 @@ import { CreateClientPartner, createClientPartnerSchema } from "../../models/par
 import { Modal } from "@/shared/components/ui/modal";
 import { SubmitHandler } from "react-hook-form";
 import { appToast } from "@/shared/lib/toast";
+import { partnersApi } from "../../api/partners-api";
+import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 
 
 type Props = {
@@ -14,21 +16,20 @@ type Props = {
 };
 
 export default function ClientCreateModal({ open, onClose, onCreated }: Props) {
+      
+  const onSubmit: SubmitHandler<CreateClientPartner> = async (values) => {
+        try {
+          const createdClient = await partnersApi.createClient(values);
 
-      const onSubmit: SubmitHandler<CreateClientPartner> = async (values) => {
-        //const loadingId = appToast.loading("Création du client...", "Upload des documents en cours");
-
-        setTimeout(()=>{
-            console.log(values.email);
-            console.log(values.rne); // File
-            console.log(values.partnerType); // "SUPPLIER"
-        },3000)
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        onClose();
-        appToast.success("client créé avec succès");
-       // appToast.dismiss(loadingId);
-        //appToast.error("Échec de création", "Veuillez réessayer.");
-  
+          if (createdClient) {
+            appToast.success("Client créé avec succès");
+            onClose();
+          }
+        } catch (e: any) {
+          const message = getApiErrorMessage(e);
+          appToast.error('Échec de création , Veuillez réessayer.', message );
+          
+        }
       };
 
   return (

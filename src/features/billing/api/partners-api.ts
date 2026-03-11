@@ -14,15 +14,15 @@ export const partnersApi = {
   getSupplierById: (id: string) =>
     apiClient.get<SupplierPartner>(BILLING_ENDPOINTS.supplierById(id)),
 
-  createClient: (payload: unknown) =>
+  createClient: (payload: CreateClientPartner) =>
     apiClient.post<CreateClientPartner>(BILLING_ENDPOINTS.clients, payload),
 
-  createSupplier: (payload: unknown) =>
+  createSupplier: (payload: CreateSupplierPartner) =>
     apiClient.post<CreateSupplierPartner>(BILLING_ENDPOINTS.suppliers, payload),
 
-  updateClient : (id: string, payload: unknown) => apiClient.put<UpdatePartner>(BILLING_ENDPOINTS.clientById(id), payload),
+  updateClient : (id: string, payload: UpdatePartner) => apiClient.put<UpdatePartner>(BILLING_ENDPOINTS.clientById(id), payload),
 
-  updateSupplier : (id: string, payload: unknown) => apiClient.put<UpdatePartner>(BILLING_ENDPOINTS.supplierById(id), payload),
+  updateSupplier : (id: string, payload: UpdatePartner) => apiClient.put<UpdatePartner>(BILLING_ENDPOINTS.supplierById(id), payload),
 
   deleteClient: (id: string) =>
     apiClient.delete<void>(BILLING_ENDPOINTS.clientById(id)),

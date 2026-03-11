@@ -34,7 +34,6 @@ export default function PartnerForm<TSchema extends z.ZodTypeAny>({
     defaultValues,
   });
 
-  console.log("defaultValues: ", defaultValues)
 
 
 return (

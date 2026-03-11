@@ -3,33 +3,37 @@
 import { appToast } from "@/shared/lib/toast";
 import { useState } from "react";
 import ConfirmDeleteModal from "@/shared/components/ui/confirmDeleteModal";
+import { partnersApi } from "../../api/partners-api";
+import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 
 
 type Props = {
   open: boolean;
   onClose: () => void;
   onCreated?: () => void; // refresh list, etc. 
-  confirmDeleteId: string| null;
+  confirmDeleteId: string;
 };
 
 export default function ClientDeleteModal({ open, onClose, onCreated, confirmDeleteId }: Props) {
-    console.log("data: ", confirmDeleteId)
     const [isDeleting, setIsDeleting] = useState<boolean>(false)
       const handleDelete = async ( ) => {
-        setIsDeleting(true)
-        //const loadingId = appToast.loading("Création du client...", "Upload des documents en cours");
-
-        setTimeout(()=>{
-            console.log(confirmDeleteId);
-        },3000)
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        setIsDeleting(false)
-        onClose();
-        appToast.success("client supprimé avec succès");
-       // appToast.dismiss(loadingId);
-        //appToast.error("Échec de création", "Veuillez réessayer.");
+          try {
+            setIsDeleting(true)
+            await partnersApi.deleteClient(confirmDeleteId);
   
+              appToast.success("Client supprimé avec succès");
+              onClose();
+          } catch (e: any) {
+            const message = getApiErrorMessage(e);
+            appToast.error('Échec de suppression , Veuillez réessayer.', message );
+            
+          }
+          finally{
+            setIsDeleting(false)
+
+          }
       };
+
 
   return (
                 <ConfirmDeleteModal

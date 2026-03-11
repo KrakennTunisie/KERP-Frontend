@@ -7,6 +7,8 @@ import { Modal } from "@/shared/components/ui/modal";
 
 import { SubmitHandler } from "react-hook-form";
 import { appToast } from "@/shared/lib/toast";
+import { partnersApi } from "../../api/partners-api";
+import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 
 type SupplierCreateModalProps = {
   open: boolean;
@@ -15,20 +17,20 @@ type SupplierCreateModalProps = {
 
 export default function SupplierCreateModal({ open, onClose }: SupplierCreateModalProps) {
 
-    const onSubmit: SubmitHandler<CreateSupplierPartner> = async (values) => {
+      const onSubmit: SubmitHandler<CreateSupplierPartner> = async (values) => {
+        try {
+          const createdClient = await partnersApi.createSupplier(values);
 
-        setTimeout(()=>{
-            console.log(values.email);
-            console.log(values.rne); // File
-            console.log(values.partnerType); // "SUPPLIER"
-        },3000)
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        onClose();
-        //appToast.success("Fournisseur créé avec succès");
-        appToast.error("Échec de création", "Veuillez réessayer.");
-
-
-    };
+          if (createdClient) {
+            appToast.success("Fournisseur créé avec succès");
+            onClose();
+          }
+        } catch (e: any) {
+          const message = getApiErrorMessage(e);
+          appToast.error('Échec de création , Veuillez réessayer.', message );
+          
+        }
+      };
 
 
     return (

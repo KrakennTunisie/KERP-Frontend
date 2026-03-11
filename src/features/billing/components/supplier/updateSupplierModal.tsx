@@ -1,33 +1,35 @@
 "use client";
 
 import PartnerForm from "../partner/partnerForm";
-import { UpdatePartner, updatePartnerSchema } from "../../models/partner";
+import { SupplierPartnerItem, UpdatePartner, updatePartnerSchema } from "../../models/partner";
 import { Modal } from "@/shared/components/ui/modal";
 import { SubmitHandler } from "react-hook-form";
 import { appToast } from "@/shared/lib/toast";
+import { partnersApi } from "../../api/partners-api";
+import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 
 
 type Props = {
   open: boolean;
-  data: UpdatePartner;
+  data: SupplierPartnerItem;
   onClose: () => void;
   onCreated?: () => void; // refresh list, etc.
 };
 
 export default function SupplierUpdateModal({ open, onClose, onCreated, data }: Props) {
-    console.log("data: ", data)
       const onSubmit: SubmitHandler<UpdatePartner> = async (values) => {
-        //const loadingId = appToast.loading("Création du client...", "Upload des documents en cours");
+        try {
+          const updatedClient = await partnersApi.updateSupplier(data.idPartner, values);
 
-        setTimeout(()=>{
-            console.log(values.email);
-        },3000)
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        onClose();
-        appToast.success("fournisseur "+ values.name +" modifié avec succès");
-       // appToast.dismiss(loadingId);
-        //appToast.error("Échec de création", "Veuillez réessayer.");
-  
+          if (updatedClient) {
+            appToast.success("Fournisseur modifié avec succès");
+            onClose();
+          }
+        } catch (e: any) {
+          const message = getApiErrorMessage(e);
+          appToast.error(message);
+          
+        }
       };
 
   return (
