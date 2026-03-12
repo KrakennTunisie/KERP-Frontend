@@ -38,13 +38,13 @@ export default function PartnerInfoCard({
   const [previewDocument, setPreviewDocument] =
     useState<PreviewDocument>(null);
 
-  const formattedDate = useMemo(() => {
-    return new Date(partner.createdAt).toLocaleDateString("fr-FR", {
+/*   const formattedDate = useMemo(() => {
+    return new Date(partner?.createdAt).toLocaleDateString("fr-FR", {
       day: "numeric",
       month: "long",
       year: "numeric",
     });
-  }, [partner.createdAt]);
+  }, [partner.createdAt]); */
 
   return (
     <>
@@ -89,7 +89,7 @@ export default function PartnerInfoCard({
 
             <InfoItem
               label="Partenaire depuis"
-              value={formattedDate}
+              value={"2024-05-02"}
               icon={<CalendarDays className="w-5 h-5 text-gray-700" />}
             />
           </div>
@@ -103,13 +103,13 @@ export default function PartnerInfoCard({
 
             <DocumentItem
               label="Contrat"
-              document={partner.contract}
+              document={mockDocument}
               onOpen={setPreviewDocument}
             />
 
             <DocumentItem
               label="Patente"
-              document={partner.patente}
+              document={mockDocument}
               onOpen={setPreviewDocument}
             />
           </div>

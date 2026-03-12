@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 
 type InfoCardProps = {
   label: string;
-  value: string;
+  value: string | undefined;
   icon: ReactNode;
 };
 

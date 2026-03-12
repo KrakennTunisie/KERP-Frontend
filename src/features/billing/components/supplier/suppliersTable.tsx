@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useRouter } from "next/navigation";
@@ -10,18 +9,18 @@ import {
   Trash2,
   Truck,
 } from "lucide-react";
-import { DataTable, type DataTableColumn } from '@/shared/components/datatable';
+import { DataTable, type DataTableColumn } from "@/shared/components/datatable";
 import { SupplierPartnerItem } from "../../models/partner";
 
-export type SupplierTableProps = {
+type SupplierTableProps = {
   rows: SupplierPartnerItem[];
-  setCurrentPage: ()=> void,
-  currentPage: number,
-  totalPages : number,
-  loading: boolean,
-  totalElements: number
+  setCurrentPage: (page: number) => void;
+  currentPage: number;
+  totalPages: number;
+  loading: boolean;
+  totalElements: number;
   onDeleteRequest: (id: string) => void;
-  onUpdateRequest: (row: SupplierPartnerItem)=> void;
+  onUpdateRequest: (row: SupplierPartnerItem) => void;
 };
 
 export default function SuppliersTable({
@@ -32,7 +31,7 @@ export default function SuppliersTable({
   loading,
   totalElements,
   onDeleteRequest,
-  onUpdateRequest
+  onUpdateRequest,
 }: SupplierTableProps) {
   const router = useRouter();
 
@@ -43,7 +42,7 @@ export default function SuppliersTable({
       cell: (supplier) => (
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center">
-            <Truck className="w-5 h-5 text-emerald-600"/>
+            <Truck className="w-5 h-5 text-emerald-600" />
           </div>
           <div>
             <p className="text-sm font-black text-gray-900">{supplier.name}</p>
@@ -58,7 +57,9 @@ export default function SuppliersTable({
       key: "identifier",
       header: "Matricule Fiscal",
       cell: (supplier) => (
-        <p className="text-sm font-black text-gray-900">{supplier.taxRegistrationNumber}</p>
+        <p className="text-sm font-black text-gray-900">
+          {supplier.taxRegistrationNumber}
+        </p>
       ),
     },
     {

@@ -6,7 +6,7 @@ import { Eye, FileImage, FileText, Paperclip } from "lucide-react";
 
 type DocumentItemProps = {
   label: string;
-  document?: Document;
+  document?: Document | undefined;
   onOpen: (document: Document) => void;
 };
 

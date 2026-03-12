@@ -13,15 +13,15 @@ import {
 import { DataTable, type DataTableColumn } from '@/shared/components/datatable';
 import {  ClientPartnerItem } from "../../models/partner";
 
-export type ClientsTableProps = {
+type ClientsTableProps = {
   rows: ClientPartnerItem[];
-  setCurrentPage: ()=> void,
-  currentPage: number,
-  totalPages : number,
-  loading: boolean,
-  totalElements: number,
+  setCurrentPage: (page: number) => void;
+  currentPage: number;
+  totalPages: number;
+  loading: boolean;
+  totalElements: number;
   onDeleteRequest: (id: string) => void;
-  onUpdateRequest: (row: ClientPartnerItem)=> void;
+  onUpdateRequest: (row: ClientPartnerItem) => void;
 };
 
 export default function ClientsTable({

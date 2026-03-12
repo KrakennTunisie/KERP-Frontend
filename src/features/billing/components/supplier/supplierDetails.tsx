@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import PartnerDetails from "../partner/partnerDetails";
 import { useParams } from "next/navigation";
-import { SupplierPartner } from "../../models/partner";
+import { Partner, SupplierPartner } from "../../models/partner";
 import { partnersApi } from "../../api/partners-api";
 import { appToast } from "@/shared/lib/toast";
 import { getApiErrorMessage } from "@/shared/api/handle-api-error";
@@ -14,7 +14,7 @@ export default function SupplierDetails(){
 
   const supplierId = params?.supplierId as string;
 
-  const [supplier, setSupplier] = useState<SupplierPartner | null>(null);
+  const [supplier, setSupplier] = useState<SupplierPartner>();
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -55,8 +55,6 @@ if(supplier==null){
 
             <PartnerDetails
                 partner={supplier}
-                partnerType="SUPPLIER"
-                invoices={supplier?.invoices}
             />
         )
 

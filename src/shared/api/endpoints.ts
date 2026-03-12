@@ -4,8 +4,8 @@ import { GetPartnersParams } from "./types";
 export const BILLING_ENDPOINTS = {
   clients: "/partners/clients",
   suppliers: "/partners/suppliers",
-  getClients: (query? : GetPartnersParams)=> `/partners/clients?${buildQueryString(query)}`,
-  getSuppliers: (query? : GetPartnersParams)=> `/partners/suppliers?${buildQueryString(query)}`,
+  getClients: (query? : GetPartnersParams)=> `/partners/clients${buildQueryString(query)}`,
+  getSuppliers: (query? : GetPartnersParams)=> `/partners/suppliers${buildQueryString(query)}`,
   clientById: (id: string) => `/partners/clients/${id}`,
   supplierById: (id: string) => `/partners/suppliers/${id}`,
 

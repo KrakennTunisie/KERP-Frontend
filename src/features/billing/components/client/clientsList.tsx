@@ -9,16 +9,6 @@ import {
 import lazyComponent from "@/shared/utils/lazyComponent";
 
 
-const ClientsTable = lazyComponent(
-  () => import("./clientsTable"),
-  "Chargement des clients..."
-);
-
-const ClientCreateModal = lazyComponent(
-  () => import("./createClientModal"),
-  "Chargement du formulaire client..."
-);
-
 import { ClientPartnerItem } from '../../models/partner';
 import ClientUpdateModal from "./updateClientModal";
 import ClientDeleteModal from "./deleteClientModal";
@@ -26,6 +16,8 @@ import { partnersApi } from "../../api/partners-api";
 import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 import { appToast } from "@/shared/lib/toast";
 import { useDebounce } from '@/shared/hooks/useDebounce';
+import ClientsTable from './clientsTable';
+import ClientCreateModal from './createClientModal';
 
 
 export default function ClientsList() {
@@ -35,16 +27,19 @@ export default function ClientsList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
-  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string>('');
 
 
-  const [formData, setFormData] = useState<Partial<ClientPartnerItem>>({
+  const [formData, setFormData] = useState<ClientPartnerItem>({
     iban: '',
+    taxRegistrationNumber: '',
     name: '',
     adress: '',
     country: '',
     email: '',
     phoneNumber: '',
+    partnerType: "CLIENT",
+    idPartner:'',
   });
 
 const [error, setError] = useState<string | null>(null);
@@ -200,7 +195,7 @@ useEffect(() => {
 
                 <ClientDeleteModal
                     open={!!deleteConfirmId}
-                    onClose={() => setDeleteConfirmId(null)} 
+                    onClose={() => setDeleteConfirmId('')} 
                     confirmDeleteId={deleteConfirmId}                
                 />
         </div>

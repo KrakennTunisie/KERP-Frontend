@@ -14,50 +14,20 @@ import PartnerStatCard from "../widgets/partnerStatCard";
 import PartnerHeader from "./partnerHeroSection";
 import PartnerInfoCard from "./partnerInfoCard";
 import PartnerInvoicesCard from "./partnerInvoices";
-import { Partner } from "../../models/partner";
-
-type InvoiceStatus = "paid" | "pending" | "overdue";
-type PartnerType = "CLIENT" | "SUPPLIER";
-
-export interface PartnerInvoiceItem {
-  id: string;
-  number: string;
-  date: string;
-  dueDate: string;
-  amount: number;
-  status: InvoiceStatus;
-  type: string;
-}
-
-export interface PartnerDetailsData {
-  id: string;
-  identifier: string;
-  name: string;
-  address: string;
-  city: string;
-  postalCode: string;
-  country: string;
-  email?: string;
-  phone?: string;
-  createdAt: string;
-  iban: string,
-}
+import { ClientPartner,  Partner,  SupplierPartner } from "../../models/partner";
+import { Invoice } from "../../models/invoice";
 
 type PartnerDetailsProps = {
-  partnerType: PartnerType;
-  partner: PartnerDetailsData;
-  invoices: PartnerInvoiceItem[];
+  partner: ClientPartner | SupplierPartner;
 };
-
-export default function PartnerDetails(partner : Partner) {
+export default function PartnerDetails({ partner }: PartnerDetailsProps) {
   const isSupplier = partner.partnerType === "SUPPLIER";
 
   const totalInvoices = partner?.invoices?.length;
   const totalAmount = partner?.invoices?.reduce((sum, inv) => sum + inv.amount, 0);
   const paidInvoices = partner?.invoices?.filter((inv) => inv.status ===  "paid").length;
-  const pendingAmount = partner?.invoices?
-    .filter((inv) => inv.status !== "paid")
-    .reduce((sum, inv) => sum + inv.amount, 0);
+  const pendingAmount = partner?.invoices?.filter((inv: Partial<Invoice>) => inv.invoiceStatus !== "PAID")
+    .reduce((sum: number, inv: Partial<Invoice>) => sum + (inv?.totalInclTaxTND || 0), 0)
   const averageInvoice = totalInvoices? totalInvoices > 0 ? totalAmount / totalInvoices : 0 : undefined;
 
   const pageConfig = {

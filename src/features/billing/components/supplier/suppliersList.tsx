@@ -9,15 +9,8 @@ import {
 } from 'lucide-react';
 
 
-const SuppliersTable = lazyComponent(
-  () => import("./suppliersTable"),
-  "Chargement des fournisseurs..."
-);
-
-const SupplierCreateModal = dynamic((): any => import("./createSupplierModal"), {
-  loading: () => null,
-});
-
+import SuppliersTable from "./suppliersTable"
+import SupplierCreateModal from "./createSupplierModal";
 import {   SupplierPartnerItem } from '../../models/partner';
 import lazyComponent from "@/shared/utils/lazyComponent";
 import SupplierUpdateModal from "./updateSupplierModal";
@@ -33,11 +26,11 @@ export default function SuppliersList() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCity, setFilterCity] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(1);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [showUpdateModal, setShowUpdateModal] = useState(false);
-  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [showAddModal, setShowAddModal] = useState<boolean>(false);
+  const [showUpdateModal, setShowUpdateModal] = useState<boolean>(false);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string>('');
 
-  const [formData, setFormData] = useState<Partial<SupplierPartnerItem>>({
+  const [formData, setFormData] = useState<SupplierPartnerItem>({
     iban:'',
     taxRegistrationNumber: '',
     name: '',
@@ -45,6 +38,9 @@ export default function SuppliersList() {
     country: '',
     email: '',
     phoneNumber: '',
+    partnerType: "SUPPLIER",
+    idPartner:'',
+
   });
 
   const [error, setError] = useState<string | null>(null);
@@ -197,7 +193,7 @@ useEffect(() => {
 
                 <SupplierDeleteModal
                     open={!!deleteConfirmId}
-                    onClose={() => setDeleteConfirmId(null)} 
+                    onClose={() => setDeleteConfirmId('')} 
                     confirmDeleteId={deleteConfirmId}                
                 />
         </div>

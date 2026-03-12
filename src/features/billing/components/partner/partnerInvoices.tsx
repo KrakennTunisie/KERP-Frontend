@@ -16,7 +16,7 @@ type PartnerType = "CLIENT" | "SUPPLIER";
 export type PartnerInvoiceItem = Partial<Invoice>;
 
 type PartnerInvoicesCardProps = {
-  partnerType: PartnerType;
+  partnerType: PartnerType | undefined;
   invoices: PartnerInvoiceItem[] | undefined;
   subtitle: string;
   buttonHref: string;

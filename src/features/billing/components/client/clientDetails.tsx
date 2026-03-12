@@ -1,6 +1,5 @@
 'use client'
 
-import lazyComponent from "@/shared/utils/lazyComponent";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ClientPartner } from "../../models/partner";
@@ -8,27 +7,25 @@ import { partnersApi } from "../../api/partners-api";
 import { appToast } from "@/shared/lib/toast";
 import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 import PageLoader from "@/shared/components/ui/pageLoader";
+import PartnerDetails from "../partner/partnerDetails";
 
 
-const PartnerDetails = lazyComponent(
-  () => import("../partner/partnerDetails"),
-  "Chargement de détails client..."
-);
+
 
 export default function ClientDetails(){
  const params = useParams();
 
   const clientId = params?.clientId as string;
 
-  const [client, setClient] = useState<ClientPartner | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [client, setClient] = useState<ClientPartner>();
+  const [loading, setLoading] = useState<boolean>();
 
   useEffect(() => {
-  const fetchSupplier = async () => {
+  const fetchClient = async () => {
     try {
       setLoading(true)
-      const supplier = await partnersApi.getClientById(clientId);
-      setClient(supplier);
+      const client = await partnersApi.getClientById(clientId);
+      setClient(client);
     } catch (error) {
       appToast.error(getApiErrorMessage(error));
     }
@@ -37,7 +34,7 @@ export default function ClientDetails(){
     }
   };
 
-  fetchSupplier();
+  fetchClient();
 }, [params.id]);
 
 if(loading){
@@ -59,8 +56,6 @@ if(client==null){
         return(
             <PartnerDetails
                 partner={client}
-                partnerType="CLIENT"
-                invoices={client.invoices}
             />
         )
 

@@ -40,9 +40,16 @@ export const partnerSchema = z.object({
 
 export type Partner = z.infer<typeof partnerSchema>;
 
-export type ClientPartner = Partner & { partnerType: "CLIENT" };
+export const clientPartnerSchema = partnerSchema.extend({
+  partnerType: z.literal("CLIENT"),
+});
 
-export type SupplierPartner = Partner & { partnerType: "SUPPLIER" };
+export const supplierPartnerSchema = partnerSchema.extend({
+  partnerType: z.literal("SUPPLIER"),
+});
+
+export type ClientPartner = z.infer<typeof clientPartnerSchema>;
+export type SupplierPartner = z.infer<typeof supplierPartnerSchema>;
 
 export const partnerItemSchema = partnerSchema.omit({patente: true, rne: true, contract: true,  invoices: true})
 
