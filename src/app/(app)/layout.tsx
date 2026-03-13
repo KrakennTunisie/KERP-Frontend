@@ -6,6 +6,7 @@ import { ChevronDown } from "lucide-react";
 import { NAVIGATION_ITEMS } from "@/shared/constants/navigation";
 import { useMemo, useState } from "react";
 import { Navbar } from "@/shared/components/layout/navbar";
+import AppToaster from "@/shared/components/ui/appToaster";
 
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -169,7 +170,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
         {/* Main Content */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          <main className="flex-1 overflow-y-auto">{children}</main>
+          <main className="flex-1 overflow-y-auto">
+            {children}
+            <AppToaster/>
+            </main>
         </div>
       </div>
     </div>

@@ -34,7 +34,16 @@ export const NAVIGATION_ITEMS = [
   {
     title: "Finance",
     items: [
-      { title: "Facturation", icon: Receipt, href: "/billing" },
+      { title: "Facturation", 
+        icon: Receipt, 
+        subMenu: [
+          { title: "Tableau de board", href: "/billing/dashboard" },
+          { title: "Clients", href: "/billing/clients" },
+          { title: "Fournisseurs", href: "/billing/suppliers" },
+          { title: "Factures Clients", href: "/billing/clients-invoices" },
+          { title: "Factures Fournisseurs", href: "/billing/suppliers-invoices" },
+        ],
+      },
       {
         title: "Paie",
         icon: Wallet,
