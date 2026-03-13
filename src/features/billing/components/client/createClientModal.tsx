@@ -15,7 +15,7 @@ type Props = {
   onCreated?: () => void; // refresh list, etc.
 };
 
-export default function ClientCreateModal({ open, onClose, onCreated }: Props) {
+export default function ClientCreateModal({ open, onClose}: Props) {
       
   const onSubmit: SubmitHandler<CreateClientPartner> = async (values) => {
         try {
@@ -25,7 +25,7 @@ export default function ClientCreateModal({ open, onClose, onCreated }: Props) {
             appToast.success("Client créé avec succès");
             onClose();
           }
-        } catch (e: any) {
+        } catch (e:unknown) {
           const message = getApiErrorMessage(e);
           appToast.error('Échec de création , Veuillez réessayer.', message );
           
