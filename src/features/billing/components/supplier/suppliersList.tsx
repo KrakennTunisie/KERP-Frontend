@@ -34,7 +34,7 @@ export default function SuppliersList() {
     iban:'',
     taxRegistrationNumber: '',
     name: '',
-    adress: '',
+    address: '',
     country: '',
     email: '',
     phoneNumber: '',

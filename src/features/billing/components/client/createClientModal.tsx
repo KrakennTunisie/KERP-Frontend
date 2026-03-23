@@ -19,7 +19,25 @@ export default function ClientCreateModal({ open, onClose, onCreated }: Props) {
       
   const onSubmit: SubmitHandler<CreateClientPartner> = async (values) => {
         try {
-          const createdClient = await partnersApi.createClient(values);
+          const formData = new FormData();
+
+          formData.append("name", values.name);
+          formData.append("email", values.email);
+          formData.append("address", values.address);
+          formData.append("country", values.country);
+          formData.append("iban", values.iban);
+          formData.append("partnerType", values.partnerType);
+          formData.append("phoneNumber", values.phoneNumber);
+          formData.append("taxRegistrationNumber", values.taxRegistrationNumber);
+
+          // fichiers ⚠️ IMPORTANT
+          if (values.rne) formData.append("rne", values.rne);
+          if (values.patente) formData.append("patente", values.patente);
+          if (values.contract) formData.append("contract", values.contract);
+
+          console.log("form data: ", formData.getAll("rne"))
+
+          const createdClient = await partnersApi.createClient(formData);
 
           if (createdClient) {
             appToast.success("Client créé avec succès");

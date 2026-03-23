@@ -47,7 +47,7 @@ export default function SuppliersTable({
           <div>
             <p className="text-sm font-black text-gray-900">{supplier.name}</p>
             <p className="text-[10px] font-bold text-gray-500 uppercase tracking-tighter">
-              {supplier.adress}
+              {supplier.address}
             </p>
           </div>
         </div>

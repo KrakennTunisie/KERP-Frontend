@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { documentStorageMode } from "../types/documentStorageMode";
 
 
 export const documentSchema = z.object({
@@ -7,5 +8,7 @@ export const documentSchema = z.object({
   mimeType: z.string().min(1),
   storageURL: z.string().min(1),
   hash: z.string(),
+  storageMode: documentStorageMode,
+  
 });
 export type Document = z.infer<typeof documentSchema>;

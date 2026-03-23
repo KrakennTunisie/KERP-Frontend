@@ -70,7 +70,7 @@ export default function PartnerHeader({
                 <div className="flex items-center gap-2 text-gray-600">
                   <MapPin className={`w-4 h-4 ${pageConfig.heroInfoIconClass}`} />
                   <span className="text-sm font-bold">
-                    {partner.adress}, {partner.country}
+                    {partner.address}, {partner.country}
                   </span>
                 </div>
 

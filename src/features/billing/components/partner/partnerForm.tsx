@@ -112,13 +112,13 @@ export default function PartnerForm<TSchema extends AnyZodObject>({
 
         <div>
           <input
-            {...register("adress" as any)}
-            placeholder="Adresse"
+            {...register("address" as any)}
+            placeholder="addresse"
             className="w-full px-4 py-3 rounded-2xl bg-gray-50 font-bold"
           />
-          {errors?.["adress" as any]?.message && (
+          {errors?.["address" as any]?.message && (
             <p className="text-xs text-red-600 mt-1">
-              {String(errors["adress" as any]?.message)}
+              {String(errors["address" as any]?.message)}
             </p>
           )}
         </div>
