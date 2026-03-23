@@ -14,7 +14,7 @@ import PartnerStatCard from "../widgets/partnerStatCard";
 import PartnerHeader from "./partnerHeroSection";
 import PartnerInfoCard from "./partnerInfoCard";
 import PartnerInvoicesCard from "./partnerInvoices";
-import { ClientPartner,  Partner,  SupplierPartner } from "../../models/partner";
+import { ClientPartner,  SupplierPartner } from "../../models/partner";
 import { Invoice } from "../../models/invoice";
 
 type PartnerDetailsProps = {

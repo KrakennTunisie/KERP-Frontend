@@ -6,7 +6,6 @@ import {
   Plus
 } from 'lucide-react';
 
-import lazyComponent from "@/shared/utils/lazyComponent";
 
 
 import { ClientPartnerItem } from '../../models/partner';
@@ -49,11 +48,11 @@ const [totalElements, setTotalElements] = useState(0);
 const [loading, setLoading] = useState(false);
 const debouncedSearchQuery = useDebounce(searchQuery, 2000);
 
-const cities = useMemo(() => Array.from(new Set(clients.map((c) => c.country))), []);
+const cities = useMemo(() => Array.from(new Set(clients.map((c) => c.country))), [clients]);
 
 useEffect(() => {
   setCurrentPage(1);
-}, [debouncedSearchQuery, filterCity]);
+}, [clients,debouncedSearchQuery, filterCity,]);
 
 useEffect(() => {
   const fetchClients = async () => {
@@ -82,7 +81,7 @@ useEffect(() => {
   };
 
   fetchClients();
-}, [debouncedSearchQuery, filterCity, currentPage]);
+}, [debouncedSearchQuery, filterCity, currentPage,clients]);
 
 
 
