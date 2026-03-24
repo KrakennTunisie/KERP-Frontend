@@ -1,7 +1,7 @@
-import  { documentSchema } from "./document";
 import {  z } from "zod";
 import {  partnerTypeSchema } from "../types/partnerType";
 import {  invoiceSchema } from "./invoice";
+import { documentSchema } from "./document";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
@@ -26,7 +26,7 @@ export const partnerSchema = z.object({
   phoneNumber: z.string().min(1, "Le téléphone est obligatoire").min(8, "Le numéro de téléphone est invalide"),
   taxRegistrationNumber: z.string().min(1, "La matricule fiscale est obligatoire"),
   country: z.string().min(1, "Le pays est obligatoire"),
-  adress: z.string().min(1, "L'addresse est obligatoire"),
+  address: z.string().min(1, "L'addresse est obligatoire"),
   iban: z.string().min(1, "IBAN est obligatoire"),
 
   rne: fileSchema.nullable(),
@@ -35,7 +35,21 @@ export const partnerSchema = z.object({
 
   partnerType: partnerTypeSchema,
 
-  invoices: z.array(z.lazy((): any => invoiceSchema)).optional().nullable(),
+  invoices: z.array(z.lazy((): any => invoiceSchema)).optional(),
+});
+
+export const createPartnerSchema = z.object({
+  name: z.string().min(1, "Le nom est obligatoire").min(3, "Le nom doit contenir au moins 3 caractères"),
+  email: z.email("Email invalide"),
+  phoneNumber: z.string().min(1, "Le téléphone est obligatoire").min(8, "Le numéro de téléphone est invalide"),
+  taxRegistrationNumber: z.string().min(1, "La matricule fiscale est obligatoire"),
+  country: z.string().min(1, "Le pays est obligatoire"),
+  address: z.string().min(1, "L'addresse est obligatoire"),
+  iban: z.string().min(1, "IBAN est obligatoire"),
+
+  rne: fileSchema,
+  contract: fileSchema,
+  patente: fileSchema,
 });
 
 export type Partner = z.infer<typeof partnerSchema>;
@@ -59,7 +73,6 @@ export type ClientPartnerItem = PartnerItem & { partnerType: "CLIENT" };
 
 export type SupplierPartnerItem = PartnerItem & { partnerType: "SUPPLIER" };
 
-export const createPartnerSchema = partnerSchema.omit({idPartner: true, invoices: true})
 
 export const createClientPartnerSchema = createPartnerSchema.extend({
   partnerType: z.literal("CLIENT"),
@@ -70,7 +83,7 @@ export const createSupplierPartnerSchema = createPartnerSchema.extend({
 });
 
 export const updatePartnerSchema = createPartnerSchema
-  .omit({ partnerType: true, taxRegistrationNumber: true, rne: true, contract: true, patente: true })
+  .omit({ taxRegistrationNumber: true, rne: true, contract: true, patente: true })
   .partial();
 
 export type CreateClientPartner = z.infer<typeof createClientPartnerSchema>;

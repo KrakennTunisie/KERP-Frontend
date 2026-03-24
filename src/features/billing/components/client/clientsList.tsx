@@ -33,7 +33,7 @@ export default function ClientsList() {
     iban: '',
     taxRegistrationNumber: '',
     name: '',
-    adress: '',
+    address: '',
     country: '',
     email: '',
     phoneNumber: '',

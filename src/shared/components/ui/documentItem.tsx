@@ -2,7 +2,7 @@
 
 import { Document } from "@/features/billing/models/document";
 import getDocumentMeta from "@/shared/utils/getDocumentMeta";
-import { Eye, FileImage, FileText, Paperclip } from "lucide-react";
+import { Eye,  Paperclip } from "lucide-react";
 
 type DocumentItemProps = {
   label: string;
