@@ -6,11 +6,14 @@ import { Invoice } from "../../models/invoice";
 import { MOCK_INVOICES } from "../../mocks/invoice-mocks";
 import { InvoiceStatus, invoiceStatusColors, invoiceStatusSchema } from "../../types/invoiceStatus";
 import Link from "next/link";
+import { useClientInvoiceList } from "../../hooks/useClientsInvoiveList";
 
 export default function ClientsInvoiceList() {
-    const [search, setSearch] = useState("");
-    const [filtre, setFiltre] = useState<InvoiceStatus>();
 
+    const { router, search,
+        setSearch,
+        filtre,
+        setFiltre } = useClientInvoiceList();
     return (
         <div className="min-h-screen bg-gray-50 p-8 font-sans">
             {/* Header */}
@@ -180,7 +183,7 @@ export default function ClientsInvoiceList() {
 
                                             {/* Modifier */}
                                             <button
-                                                onClick={(e) => { e.stopPropagation(); console.log("edit", f.idInvoice); }}
+                                                onClick={(e) => { e.stopPropagation(); console.log("edit", f.idInvoice); router.push(`/billing/invoices/clients/${f.idInvoice}`); }}
                                                 className="p-2 rounded-xl bg-amber-50 text-amber-600 hover:bg-amber-100 transition-colors"
                                                 title="Modifier"
                                             >

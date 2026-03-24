@@ -4,9 +4,10 @@ import { tvaRateSchema } from "../../types/tvaRate"
 import { paymentMethodLabels, paymentMethodSchema } from "../../types/paymentMethod"
 import { SectionTitle } from "../widgets/sectionTitle"
 import InvoicePreview from "../widgets/invoicePreview"
-import { useCreateInvoice } from "../../hooks/useCreateInvoice"
+import { InvoiceFormClientProps, useCreateInvoice } from "../../hooks/useCreateInvoice"
 
-export default function CreateInvoiceClient() {
+export default function CreateInvoiceClient({ mode,
+    invoiceId, }: InvoiceFormClientProps) {
     const {
         items,
         addItem,
@@ -32,7 +33,7 @@ export default function CreateInvoiceClient() {
         form,
         onSubmit,
         router
-    } = useCreateInvoice()
+    } = useCreateInvoice({ mode, invoiceId })
 
     const { register } = form
 
@@ -41,16 +42,22 @@ export default function CreateInvoiceClient() {
             {/* ── Header ── */}
             <header className="sticky top-0 z-30 bg-white border-b border-slate-100 px-6 py-4 flex items-center justify-between shadow-sm">
                 <div className="flex items-center gap-4">
-                    <button 
-                     onClick={() => router.back()}
-                    className="w-9 h-9 rounded-xl border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-50 transition">
+                    <button
+                        onClick={() => router.back()}
+                        className="w-9 h-9 rounded-xl border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-50 transition">
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
                         </svg>
                     </button>
                     <div>
-                        <h1 className="text-xl font-bold text-slate-900 tracking-tight">Création du Facture Client</h1>
-                        <p className="text-xs text-slate-400 mt-0.5">Configurez les détails et prévisualisez</p>
+                        <h1 className="text-xl font-bold text-slate-900 tracking-tight">
+                            {mode === "create" ? "Création de facture client" : "Modification de facture client"}
+                        </h1>
+                        <p className="text-xs text-slate-400 mt-0.5">
+                            {mode === "create"
+                                ? "Configurez les détails et prévisualisez"
+                                : "Modifiez les détails et prévisualisez"}
+                        </p>
                     </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -64,7 +71,7 @@ export default function CreateInvoiceClient() {
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                         </svg>
-                        Envoyer au TTN
+                        {mode === "create" ? "Créer & Envoyer au TTN" : "Modifier & Envoyer au TTN"}
                     </button>
                 </div>
             </header>
@@ -163,7 +170,7 @@ export default function CreateInvoiceClient() {
                                                 className="w-full text-left px-4 py-3 hover:bg-blue-50 transition border-b border-slate-50 last:border-0"
                                             >
                                                 <p className="text-sm font-bold text-slate-800">{client.name}</p>
-                                                <p className="text-xs text-slate-400 mt-0.5">{client.adress}</p>
+                                                <p className="text-xs text-slate-400 mt-0.5">{client.address}</p>
                                             </button>
                                         ))}
                                     </div>
@@ -183,7 +190,7 @@ export default function CreateInvoiceClient() {
                                             </svg>
                                         </button>
                                     </div>
-                                    <p className="text-xs text-blue-500 mt-0.5">{selectedClient.adress}</p>
+                                    <p className="text-xs text-blue-500 mt-0.5">{selectedClient.address}</p>
                                     <div className="flex items-center gap-4 mt-2">
                                         <span className="flex items-center gap-1 text-[10px] font-bold text-blue-500 uppercase tracking-wide">
                                             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

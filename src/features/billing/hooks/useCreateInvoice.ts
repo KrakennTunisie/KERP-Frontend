@@ -1,9 +1,9 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter } from "next/navigation"
-import { invoiceSchema } from "../models/invoice";
+import { Invoice, invoiceSchema } from "../models/invoice";
 import { InvoiceItem } from "../models/invoiceItem";
 import { Partner } from "../models/partner";
 import { paymentMethod } from "../types/paymentMethod";
@@ -15,6 +15,11 @@ import {
 } from "../lib/invoiceCalculation";
 import { CurrencyType } from "../types/currency";
 
+export type InvoiceFormClientProps = {
+  mode: "create" | "edit"
+  invoiceId?: String
+}
+
 type InvoiceFormValues = z.infer<typeof invoiceSchema>;
 type UpdateableField =
   | "description"
@@ -22,7 +27,7 @@ type UpdateableField =
   | "unityPriceEXclTax"
   | "vatRate";
 
-export function useCreateInvoice() {
+export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
   const router = useRouter()
   const form = useForm<InvoiceFormValues>({
     resolver: zodResolver(invoiceSchema),
@@ -181,10 +186,17 @@ export function useCreateInvoice() {
     });
   };
 
-  const onSubmit = handleSubmit((data) => {
-    console.log("Invoice payload:", data);
-  });
+  const onSubmit = form.handleSubmit((data) => {
+    if (mode === "create") {
+      console.log("create invoice", data)
+    } else {
+      console.log("update invoice", data)
+    }
+  })
 
+  useEffect(() => {
+   console.log(invoiceId)
+  }, [invoiceId, mode])
   return {
     form,
     onSubmit,

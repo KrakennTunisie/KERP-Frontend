@@ -2,6 +2,6 @@ import CreateInvoiceClient from "@/features/billing/components/clientInvoice/cre
 
 export default function Page() {
     return (
-        <CreateInvoiceClient/>
+        <CreateInvoiceClient mode="create"/>
     );
 }

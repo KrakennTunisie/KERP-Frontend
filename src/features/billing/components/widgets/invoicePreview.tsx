@@ -89,7 +89,7 @@ export default function InvoicePreview({ data }: InvoicePreviewProps) {
                             {data.partner ? (
                                 <>
                                     <p className="text-base font-bold text-slate-900">{data.partner.name}</p>
-                                    <p className="text-sm text-slate-500 mt-0.5">{data.partner.adress}</p>
+                                    <p className="text-sm text-slate-500 mt-0.5">{data.partner.address}</p>
                                     <p className="text-sm font-bold text-blue-600 mt-2">{data.partner.email}</p>
                                 </>
                             ) : (
