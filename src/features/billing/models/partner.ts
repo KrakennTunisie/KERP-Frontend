@@ -29,13 +29,13 @@ export const partnerSchema = z.object({
   adress: z.string().min(1, "L'addresse est obligatoire"),
   iban: z.string().min(1, "IBAN est obligatoire"),
 
-  rne: fileSchema,
-  contract: fileSchema,
-  patente: fileSchema,
+  rne: fileSchema.nullable(),
+  contract: fileSchema.nullable(),
+  patente: fileSchema.nullable(),
 
   partnerType: partnerTypeSchema,
 
-  invoices: z.array(z.lazy((): any => invoiceSchema)).optional(),
+  invoices: z.array(z.lazy((): any => invoiceSchema)).optional().nullable(),
 });
 
 export type Partner = z.infer<typeof partnerSchema>;
