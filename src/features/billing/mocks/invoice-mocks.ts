@@ -5,7 +5,7 @@ type Invoice = z.infer<typeof invoiceSchema>;
 
 export const MOCK_INVOICES: Invoice[] = [
   {
-    idInvoice: "550e8400",
+    idInvoice: "550e84005",
     invoiceNumber: "FC-2025-001",
     issueDate: new Date("2025-01-15"),
     dueDate: new Date("2025-02-14"),
@@ -31,7 +31,7 @@ export const MOCK_INVOICES: Invoice[] = [
     invoiceDocument: null
   },
   {
-      idInvoice: "550e8400",
+      idInvoice: "550e84001",
       invoiceNumber: "FC-2025-002",
       issueDate: new Date("2025-02-01"),
       dueDate: new Date("2025-03-01"),
@@ -57,7 +57,7 @@ export const MOCK_INVOICES: Invoice[] = [
       invoiceDocument: null
   },
   {
-    idInvoice: "550e8400",
+    idInvoice: "550e84002",
     invoiceNumber: "FC-2026-001",
     issueDate: new Date("2026-01-10"),
     dueDate: new Date("2026-02-10"),

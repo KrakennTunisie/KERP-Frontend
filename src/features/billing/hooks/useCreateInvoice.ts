@@ -25,7 +25,9 @@ type UpdateableField =
   | "description"
   | "quantity"
   | "unityPriceEXclTax"
-  | "vatRate";
+  | "vatRate"
+  | "operationCategory";
+  
 
 export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
   const router = useRouter()

@@ -5,6 +5,7 @@ import { paymentMethodLabels, paymentMethodSchema } from "../../types/paymentMet
 import { SectionTitle } from "../widgets/sectionTitle"
 import InvoicePreview from "../widgets/invoicePreview"
 import { InvoiceFormClientProps, useCreateInvoice } from "../../hooks/useCreateInvoice"
+import { OperationCategoryLabels, operationCategorySchema } from "../../types/operationCategory"
 
 export default function CreateInvoiceClient({ mode,
     invoiceId, }: InvoiceFormClientProps) {
@@ -38,7 +39,7 @@ export default function CreateInvoiceClient({ mode,
     const { register } = form
 
     return (
-        <div>
+        <div className="flex flex-col h-screen overflow-hidden">
             {/* ── Header ── */}
             <header className="sticky top-0 z-30 bg-white border-b border-slate-100 px-6 py-4 flex items-center justify-between shadow-sm">
                 <div className="flex items-center gap-4">
@@ -77,10 +78,14 @@ export default function CreateInvoiceClient({ mode,
             </header>
 
             {/* ── Body ── */}
-            <div className="flex gap-0 bg-white max-w-[1600px]">
+            <div className="flex gap-0 bg-white max-w-[1600px] ">
 
                 {/* ── Left Panel ── */}
-                <div className="w-[440px] min-w-[440px] flex flex-col gap-6 p-6 overflow-y-auto max-h-[calc(100vh-73px)]">
+                <div className="w-[440px] min-w-[440px] flex flex-col  overflow-y-auto gap-6 p-6 max-h-[calc(100vh-73px)]"
+                 style={{
+                                scrollbarWidth: 'thin',
+                                scrollbarColor: '#CBD5E1 transparent',
+                            }}>
 
                     {/* Section 01 — Référence */}
                     <section>
@@ -247,7 +252,7 @@ export default function CreateInvoiceClient({ mode,
                         </div>
                     </section>
 
-                    {/* Section 03 — Services */}
+                    {/* Section 04 — Services */}
                     <section>
                         <div className="flex items-center justify-between">
                             <SectionTitle number="04" label="SERVICES" />
@@ -260,10 +265,13 @@ export default function CreateInvoiceClient({ mode,
                                 </svg>
                             </button>
                         </div>
+
                         <div className="flex flex-col gap-3 mt-3">
                             {items.map((item) => (
                                 <div key={item.idInvoiceItem} className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
-                                    <div className="flex items-start justify-between mb-3">
+
+                                    {/* Header : Désignation + bouton supprimer */}
+                                    <div className="flex items-start justify-between mb-1">
                                         <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                                             Désignation
                                         </label>
@@ -276,12 +284,32 @@ export default function CreateInvoiceClient({ mode,
                                             </svg>
                                         </button>
                                     </div>
+
+                                    {/* Input désignation */}
                                     <input
                                         type="text"
                                         value={item.description}
                                         onChange={(e) => updateItem(item.idInvoiceItem, "description", e.target.value)}
-                                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition mb-3"
+                                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition mb-4"
                                     />
+
+                                    {/* Catégorie */}
+                                    <div className="mb-4">
+                                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
+                                            Catégorie
+                                        </label>
+                                        <select
+                                            value={item.operationCategory}
+                                            onChange={(e) => updateItem(item.idInvoiceItem, "operationCategory", e.target.value)}
+                                            className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
+                                        >
+                                            {operationCategorySchema.options.map((value) => (
+                                                <option key={value} value={value}>{OperationCategoryLabels[value]}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    {/* QTÉ / P.U HT / TVA */}
                                     <div className="grid grid-cols-3 gap-2">
                                         <div>
                                             <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
@@ -322,6 +350,7 @@ export default function CreateInvoiceClient({ mode,
                                             </select>
                                         </div>
                                     </div>
+
                                 </div>
                             ))}
                         </div>
@@ -366,7 +395,13 @@ export default function CreateInvoiceClient({ mode,
                     </section>
 
                 </div>
+     <div
+                    className="flex-1 overflow-y-auto"
+                    style={{ scrollbarWidth: 'thin', scrollbarColor: '#CBD5E1 transparent' }}
+                >
+
                 <InvoicePreview data={previewData} />
+                </div>
             </div>
         </div>
     )

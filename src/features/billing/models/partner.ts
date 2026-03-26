@@ -1,7 +1,7 @@
 import {  z } from "zod";
 import {  partnerTypeSchema } from "../types/partnerType";
 import {  invoiceSchema } from "./invoice";
-import { documentSchema } from "./document";
+
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 

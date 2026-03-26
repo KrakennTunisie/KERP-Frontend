@@ -6,12 +6,17 @@ import { Invoice } from "../../models/invoice";
 import { MOCK_INVOICES } from "../../mocks/invoice-mocks";
 import { InvoiceStatus, invoiceStatusColors, invoiceStatusSchema } from "../../types/invoiceStatus";
 import { CategoriesFacturesFournisseur, categoriesFacturesFournisseurSchema } from "../../types/invoiceSupplierCategory";
+import useSupplierInvoiceList from "../../hooks/useSupplierInvoiceList";
 
 
 export default function SuppliersInvoiceList() {
-    const [search, setSearch] = useState("");
-    const [filtre, setFiltre] = useState<InvoiceStatus>();
-    const [categorie, setCategorie] = useState<CategoriesFacturesFournisseur>();
+
+    const { router, search,
+        setSearch,
+        filtre,
+        categorie,
+        setCategorie,
+        setFiltre } = useSupplierInvoiceList();
 
     return (
         <div className="min-h-screen bg-gray-50 p-8 font-sans">
@@ -94,8 +99,8 @@ export default function SuppliersInvoiceList() {
                                     key={f}
                                     onClick={() => setFiltre(f)}
                                     className={`px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${filtre === f
-                                            ? "bg-slate-900 text-white shadow"
-                                            : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
+                                        ? "bg-slate-900 text-white shadow"
+                                        : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
                                         }`}
                                 >
                                     {f}
@@ -111,8 +116,8 @@ export default function SuppliersInvoiceList() {
                                 key={cat}
                                 onClick={() => setCategorie(cat)}
                                 className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${categorie === cat
-                                        ? "bg-emerald-600 text-white shadow"
-                                        : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
+                                    ? "bg-emerald-600 text-white shadow"
+                                    : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
                                     }`}
                             >
                                 {cat === "Toutes catégories" && (
@@ -189,7 +194,7 @@ export default function SuppliersInvoiceList() {
 
                                             {/* Voir */}
                                             <button
-                                                onClick={(e) => { e.stopPropagation(); console.log("view", f.idInvoice); }}
+                                                onClick={(e) => { e.stopPropagation(); console.log("view", f.idInvoice); router.push(`/billing/invoices/suppliers/details/${f.idInvoice}`) }}
                                                 className="p-2 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
                                                 title="Voir"
                                             >

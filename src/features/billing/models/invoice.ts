@@ -9,7 +9,7 @@ import { exchangeRateSourceSchema } from "../types/exchangeRateSource";
 import { purchaseOrderSchema } from "./purchaseOrder";
 import { invoiceItemSchema } from "./invoiceItem";
 import { tvaRateSchema } from "../types/tvaRate";
-import { Currency } from "lucide-react";
+import { currencyTypeSchema } from "../types/currency";
 
 
 export const invoiceSchema = z.object({
@@ -20,7 +20,7 @@ export const invoiceSchema = z.object({
     invoiceType: invoiceTypeSchema,
     invoiceStatus: invoiceStatusSchema,
     invoiceComplianceStatus: invoiceComplianceStatusSchema,
-    currency:z.string(),
+    currency: currencyTypeSchema,
     totalExclTaxEUR: z.number(),
     totalInclTaxEUR: z.number(),
     totalExclTaxTND : z.number(),

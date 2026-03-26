@@ -171,7 +171,7 @@ export default function ClientsInvoiceList() {
 
                                             {/* Voir */}
                                             <button
-                                                onClick={(e) => { e.stopPropagation(); console.log("view", f.idInvoice); }}
+                                                onClick={(e) => { e.stopPropagation(); console.log("view", f.idInvoice);  router.push(`/billing/invoices/clients/${f.idInvoice}/details`)}}
                                                 className="p-2 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
                                                 title="Voir"
                                             >
@@ -183,7 +183,7 @@ export default function ClientsInvoiceList() {
 
                                             {/* Modifier */}
                                             <button
-                                                onClick={(e) => { e.stopPropagation(); console.log("edit", f.idInvoice); router.push(`/billing/invoices/clients/${f.idInvoice}`); }}
+                                                onClick={(e) => { e.stopPropagation(); console.log("edit", f.idInvoice); router.push(`/billing/invoices/clients/${f.idInvoice}/edit`); }}
                                                 className="p-2 rounded-xl bg-amber-50 text-amber-600 hover:bg-amber-100 transition-colors"
                                                 title="Modifier"
                                             >

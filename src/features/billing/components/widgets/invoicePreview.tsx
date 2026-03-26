@@ -2,6 +2,7 @@ import { DeepPartial } from "react-hook-form";
 import { invoiceSchema } from "../../models/invoice";
 import { z } from "zod"
 import { paymentMethodLabels } from "../../types/paymentMethod";
+import { OperationCategoryLabels } from "../../types/operationCategory";
 
 type InvoicePreviewProps = {
     data: DeepPartial<z.infer<typeof invoiceSchema>>
@@ -18,7 +19,7 @@ export default function InvoicePreview({ data }: InvoicePreviewProps) {
         date ? new Date(date).toLocaleDateString("fr-FR") : "—"
 
     return (
-        <div className="flex-1 p-6 overflow-y-auto max-h-[calc(100vh-73px)] bg-slate-100/60">
+        <div className="flex-1 p-6  max-h-[calc(100vh-73px)] bg-slate-100/60">
             <div className="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden max-w-[820px] mx-auto">
 
                 {/* Invoice Header */}
@@ -142,6 +143,7 @@ export default function InvoicePreview({ data }: InvoicePreviewProps) {
                                                 {item!.description || "—"}
                                             </p>
                                             <p className="text-xs text-slate-400 mt-0.5">TVA APPLIQUÉE: {item!.vatRate}%</p>
+                                            <p className="text-xs text-slate-400 mt-0.5">Catégorie: {OperationCategoryLabels[item!.operationCategory!]}</p>
                                         </td>
                                         <td className="text-right text-sm text-slate-600 py-4">{item!.quantity}</td>
                                         <td className="text-right text-sm text-slate-600 py-4">{item!.unityPriceEXclTax!.toFixed(2)}</td>

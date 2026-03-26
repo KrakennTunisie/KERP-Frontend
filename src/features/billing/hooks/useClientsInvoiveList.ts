@@ -1,7 +1,7 @@
 import { useRouter } from "next/navigation"
 import { useState } from "react";
 import { InvoiceStatus } from "../types/invoiceStatus";
-export type Props = {
+export type PropsClient = {
   params: {
     invoiceId: string
   }
