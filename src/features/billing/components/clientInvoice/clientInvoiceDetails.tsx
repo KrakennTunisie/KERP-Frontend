@@ -1,10 +1,8 @@
 "use client"
 
 import useClientInvoiceDetails, { downloadFile, InvoiceDetailsProps } from "../../hooks/useClientInvoiceDetails"
-import { mockInvoiceItem, mockInvoiceItems } from "../../mocks/invoice-items-mocks"
+import {  mockInvoiceItems } from "../../mocks/invoice-items-mocks"
 import { mockInvoiceEvents } from "../../mocks/invoiceEvent-mocks"
-import { Invoice } from "../../models/invoice"
-import { InvoiceItem } from "../../models/invoiceItem"
 import { InvoiceEventLabels } from "../../types/invoiceEventType"
 import Card from "../widgets/card"
 import { SectionLabel } from "../widgets/sectionLabel"
@@ -72,6 +70,7 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                         <SectionLabel>Actions rapides</SectionLabel>
                         <div className="grid grid-cols-2 gap-3">
                             <button
+                                onClick={()=> router.push(`/billing/invoices/clients/${invoiceId}/credit-note`)}
                                 disabled={invoice?.invoiceStatus == "PAYÉE"}
                                 className="flex items-center justify-center gap-2 py-3.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-600 text-sm font-bold hover:brightness-95 transition-all">
                                 <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">

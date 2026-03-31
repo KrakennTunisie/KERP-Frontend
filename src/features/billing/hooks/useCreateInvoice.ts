@@ -6,14 +6,16 @@ import { useRouter } from "next/navigation"
 import { Invoice, invoiceSchema } from "../models/invoice";
 import { InvoiceItem } from "../models/invoiceItem";
 import { Partner } from "../models/partner";
-import { paymentMethod } from "../types/paymentMethod";
 import { MOCK_PARTNERS } from "../mocks/clients-mocks";
 import {
+  calculateInvoiceTotals,
+  calculUnityPrice,
   convertItemCurrency,
-  defaultItem,
   recalculate,
 } from "../lib/invoiceCalculation";
 import { CurrencyType } from "../types/currency";
+import { PaymentConditionSchema } from "../types/paymentCondition";
+import defaultItem from "../mocks/invoice-items-mocks";
 
 export type InvoiceFormClientProps = {
   mode: "create" | "edit"
@@ -38,7 +40,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
       invoiceNumber: "FAC-609535",
       issueDate: new Date(),
       dueDate: new Date(),
-      PaymentCondition: "Net 15 jours",
+      PaymentCondition: PaymentConditionSchema.enum.NET_15,
       paymentMethod: undefined,
       partner: null,
       currency: "TND",
@@ -58,20 +60,10 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
   // UI state only
   const [clientSearch, setClientSearch] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
-
-  // Watch business values directly from RHF
+  const previousCurrencyRef = useRef<CurrencyType>("TND"); 
   const previewData = useWatch({ control });
-  const currency = useWatch({ control, name: "currency" }) as CurrencyType;
-  const exchangeRate = useWatch({ control, name: "appliedExchangeRate" }) ?? 4;
-  const selectedClient = useWatch({ control, name: "partner" }) as Partner | null;
-  const conditions = useWatch({ control, name: "PaymentCondition" }) ?? "Net 15 jours";
-  const methode = useWatch({ control, name: "paymentMethod" }) as
-    | paymentMethod
-    | undefined;
-  const items = useWatch({ control, name: "invoiceItems" }) ?? [];
-
-  const previousCurrencyRef = useRef<CurrencyType>("TND");
-
+  
+  //Filtrage de la liste des clients lors de la recherche 
   const filteredClients = useMemo(() => {
     return MOCK_PARTNERS.filter(
       (p) =>
@@ -79,116 +71,104 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
         p.name.toLowerCase().includes(clientSearch.toLowerCase())
     );
   }, [clientSearch]);
-
+ 
+  //Synchronisation des items lors d'un nouveau item
   const syncItems = (newItems: InvoiceItem[]) => {
     replace(newItems);
     setValue("invoiceItems", newItems, {
       shouldValidate: true,
       shouldDirty: true,
     });
+   
   };
 
+  
+  // Ajout d'un card qui permet l'ajout les données d'unt item (P.U ,QT , TVA)
   const addItem = () => {
     append(defaultItem(), {
       shouldFocus: false,
     });
   };
 
+
+// Suppression d'item et la mis à jour des totaux TTC / HT /TVA  
   const removeItem = (id: string) => {
-    const index = items.findIndex((item) => item.idInvoiceItem === id);
-    if (index !== -1) {
-      remove(index);
+  const currentItems = getValues("invoiceItems") ?? [];
+  
+  const index = currentItems.findIndex((item) => item.idInvoiceItem === id);
+  if (index !== -1) {
+    remove(index);
+  }
+
+  // Recalculer les totaux sans l'élément supprimé
+  const remainingItems = currentItems.filter((item) => item.idInvoiceItem !== id);
+  const totals = calculateInvoiceTotals(remainingItems);
+
+  setValue("totalExclTax", totals.totalHT, { shouldValidate: true, shouldDirty: true });
+  setValue("vatAmount", totals.totalTVA, { shouldValidate: true, shouldDirty: true });
+  setValue("totalInclTax", totals.totalTTC, { shouldValidate: true, shouldDirty: true });
+};
+
+
+// Mis à jour les données d'item (QT, P.U, TVA ) et calcul de nouveau les totaux 
+ const updateItem = ( id: string,  field: UpdateableField,value: string | number) => {
+  const currentItems = getValues("invoiceItems") ?? [];
+
+  const updatedItems = currentItems.map((item) => {
+    if (item.idInvoiceItem !== id) return item;
+    const updatedItem = { ...item, [field]: value };
+    if (field === "unityPriceEXclTax") {
+      const itemWithConvertedPrice = calculUnityPrice(
+        updatedItem,
+        getValues("currency"),
+        getValues("appliedExchangeRate")
+      );
+      return recalculate(itemWithConvertedPrice);
     }
-  };
+    return recalculate(updatedItem,);
+  });
+  const totals = calculateInvoiceTotals(updatedItems);
+  setValue("totalExclTax", totals.totalHT, { shouldValidate: true, shouldDirty: true });
+  setValue("vatAmount", totals.totalTVA, { shouldValidate: true, shouldDirty: true });
+  setValue("totalInclTax", totals.totalTTC, { shouldValidate: true, shouldDirty: true });
+  syncItems(updatedItems);
+};
+ 
 
-  const updateItem = (
-    id: string,
-    field: UpdateableField,
-    value: string | number
-  ) => {
-    const currentItems = getValues("invoiceItems") ?? [];
 
-    const updatedItems = currentItems.map((item) =>
-      item.idInvoiceItem !== id
-        ? item
-        : recalculate(
-            {
-              ...item,
-              [field]: value,
-            },
-            currency,
-            exchangeRate
-          )
-    );
-
-    syncItems(updatedItems);
-  };
-
-  const setCurrency = (newCurrency: CurrencyType) => {
-    const oldCurrency = previousCurrencyRef.current;
-    const currentItems = getValues("invoiceItems") ?? [];
-
-    const convertedItems = currentItems.map((item) =>
-      convertItemCurrency(item, oldCurrency, newCurrency, exchangeRate)
-    );
-
-    previousCurrencyRef.current = newCurrency;
-
-    setValue("currency", newCurrency, {
-      shouldValidate: true,
-      shouldDirty: true,
-    });
-
-    syncItems(convertedItems);
-  };
-
-  const setExchangeRate = (value: number) => {
-    const currentItems = getValues("invoiceItems") ?? [];
-
-    setValue("appliedExchangeRate", value, {
-      shouldValidate: true,
-      shouldDirty: true,
-    });
-
-    const recalculatedItems = currentItems.map((item) =>
-      recalculate(item, currency, value)
-    );
-
-    syncItems(recalculatedItems);
-  };
-
+// Sélection d'un client
   const selectClient = (client: Partner) => {
-    setValue("partner", client, {
-      shouldValidate: true,
-      shouldDirty: true,
-    });
+    setValue("partner", client, { shouldValidate: true, shouldDirty: true,});
     setClientSearch(client.name);
     setShowDropdown(false);
   };
 
+
+// Suppression de client selectionnée 
   const clearClient = () => {
-    setValue("partner", null, {
-      shouldValidate: true,
-      shouldDirty: true,
-    });
+    setValue("partner", null, { shouldValidate: true,shouldDirty: true,});
     setClientSearch("");
   };
+  
 
-  const setConditions = (value: string) => {
-    setValue("PaymentCondition", value, {
-      shouldValidate: true,
-      shouldDirty: true,
-    });
+  // changement de la devise EUR -> TND et vice versa
+  const setCurrency = (newCurrency: CurrencyType) => {
+    const oldCurrency = previousCurrencyRef.current;
+    const currentItems = getValues("invoiceItems") ?? [];
+    const convertedItems = currentItems.map((item) =>convertItemCurrency(item, oldCurrency, newCurrency, getValues("appliedExchangeRate")));
+
+  previousCurrencyRef.current = newCurrency;
+  setValue("currency", newCurrency, {shouldValidate: true,shouldDirty: true, });
+  const totals = calculateInvoiceTotals(convertedItems);
+  setValue("totalExclTax", totals.totalHT, { shouldValidate: true, shouldDirty: true });
+  setValue("vatAmount", totals.totalTVA, { shouldValidate: true, shouldDirty: true });
+  setValue("totalInclTax", totals.totalTTC, { shouldValidate: true, shouldDirty: true });
+  syncItems(convertedItems);
   };
 
-  const setMethode = (value: paymentMethod) => {
-    setValue("paymentMethod", value, {
-      shouldValidate: true,
-      shouldDirty: true,
-    });
-  };
-
-  const onSubmit = form.handleSubmit((data) => {
+ 
+  // Permet la génération de la facture une fois remplie 
+  const onSubmit = handleSubmit((data) => {
     if (mode === "create") {
       console.log("create invoice", data)
     } else {
@@ -196,9 +176,8 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
     }
   })
 
-  useEffect(() => {
-   console.log(invoiceId)
-  }, [invoiceId, mode])
+
+
   return {
     form,
     onSubmit,
@@ -207,8 +186,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
     previewData,
 
     // Items
-    items,
-    fields,
+   
     addItem,
     removeItem,
     updateItem,
@@ -216,24 +194,16 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
     // Client UI
     clientSearch,
     setClientSearch,
+    filteredClients,
     showDropdown,
     setShowDropdown,
-    filteredClients,
-    selectedClient,
     selectClient,
     clearClient,
-     
-    // Payment / currency
-    conditions,
-    setConditions,
-    methode,
-    setMethode,
-    currency,
     setCurrency,
-    exchangeRate,
-    setExchangeRate,
-
+     
+    
     //Navigation
-    router
+    router,
+  
   };
 }

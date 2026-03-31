@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { invoiceSchema } from "../models/invoice";
+import { PaymentConditionSchema } from "../types/paymentCondition";
 
 type Invoice = z.infer<typeof invoiceSchema>;
 
@@ -12,14 +13,14 @@ export const MOCK_INVOICES: Invoice[] = [
     invoiceType: "SALE",
     invoiceStatus: "PAYÉE",
     invoiceComplianceStatus: "RECEIVED",
-    totalExclTaxEUR: 10000,
-    totalInclTaxEUR: 11900,
-    totalExclTaxTND: 33500,
-    totalInclTaxTND: 39865,
-    PaymentCondition:"15 jours",
+   
+    
+    totalExclTax: 33500,
+    totalInclTax: 39865,
+    PaymentCondition:PaymentConditionSchema.enum.NET_15,
     vatRate: 19,
     paymentMethod: "BANK_TRANSFER",
-    
+     vatAmount:20,
     exchangeRateReferenceDate: new Date("2025-01-15"),
     appliedExchangeRate: 3.35,
     exchangeRateSource: "CENTRAL_BANK",
@@ -38,14 +39,13 @@ export const MOCK_INVOICES: Invoice[] = [
       invoiceType: "SALE",
       invoiceStatus: "À PAYER",
       invoiceComplianceStatus: "RECEIVED",
-      totalExclTaxEUR: 5200,
-      totalInclTaxEUR: 6188,
-      totalExclTaxTND: 17420,
-      totalInclTaxTND: 20729.80,
-      vatRate: 19,
-      PaymentCondition:"7 jours",
-      paymentMethod: "BANK_TRANSFER",
      
+      totalExclTax: 17420,
+      totalInclTax: 20729.80,
+      vatRate: 19,
+      PaymentCondition:PaymentConditionSchema.enum.NET_15,
+      paymentMethod: "BANK_TRANSFER",
+       vatAmount:20,
       exchangeRateReferenceDate: new Date("2025-02-01"),
       appliedExchangeRate: 3.35,
       exchangeRateSource: "CENTRAL_BANK",
@@ -64,12 +64,11 @@ export const MOCK_INVOICES: Invoice[] = [
     invoiceType: "SALE",
     invoiceStatus: "BROULLION",
     invoiceComplianceStatus: "RECEIVED",
-    totalExclTaxEUR: 8750,
-    totalInclTaxEUR: 10412.50,
-    totalExclTaxTND: 29312.50,
-    totalInclTaxTND: 34881.87,
+    vatAmount:20,
+    totalExclTax: 29312.50,
+    totalInclTax: 34881.87,
     vatRate: 19,
-    PaymentCondition:"7 jours",
+    PaymentCondition:PaymentConditionSchema.enum.NET_15,
     paymentMethod: "BANK_TRANSFER",
     exchangeRateReferenceDate: new Date("2026-01-10"),
     appliedExchangeRate: 3.35,

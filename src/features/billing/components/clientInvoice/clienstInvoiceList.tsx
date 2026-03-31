@@ -1,19 +1,14 @@
 'use client';
 
 import StatClientInvoiceCard from "@/shared/components/ui/statClientInvoiceCard";
-import { useState } from "react";
-import { Invoice } from "../../models/invoice";
 import { MOCK_INVOICES } from "../../mocks/invoice-mocks";
-import { InvoiceStatus, invoiceStatusColors, invoiceStatusSchema } from "../../types/invoiceStatus";
+import { invoiceStatusColors, invoiceStatusSchema } from "../../types/invoiceStatus";
 import Link from "next/link";
 import { useClientInvoiceList } from "../../hooks/useClientsInvoiveList";
 
 export default function ClientsInvoiceList() {
 
-    const { router, search,
-        setSearch,
-        filtre,
-        setFiltre } = useClientInvoiceList();
+    const { router, search,setSearch,filtre,setFiltre } = useClientInvoiceList();
     return (
         <div className="min-h-screen bg-gray-50 p-8 font-sans">
             {/* Header */}
@@ -114,7 +109,7 @@ export default function ClientsInvoiceList() {
                 <table className="w-full text-sm">
                     <thead>
                         <tr className="border-b border-slate-100">
-                            {["RÉFÉRENCE", "CLIENT", "STATUT", "MONTANT HT (EUR)", "MONTANT HT (TND)", "TAUX CHANGE", "DATE ÉCHÉANCE", "CONFORME", "ACTIONS"].map((col) => (
+                            {["RÉFÉRENCE", "CLIENT", "STATUT", "MONTANT TTC", "TAUX CHANGE", "DATE ÉCHÉANCE", "CONFORME", "ACTIONS"].map((col) => (
                                 <th
                                     key={col}
                                     className="px-5 py-3 text-left text-xs font-bold text-slate-400 tracking-widest uppercase"
@@ -148,11 +143,9 @@ export default function ClientsInvoiceList() {
                                         </span>
                                     </td>
                                     <td className="px-5 py-4 text-slate-700 font-medium">
-                                        {f.totalExclTaxEUR.toLocaleString("fr-FR")} €
+                                        {f.totalInclTax.toLocaleString("fr-FR")} €
                                     </td>
-                                    <td className="px-5 py-4 text-slate-700 font-medium">
-                                        {f.totalExclTaxTND.toLocaleString("fr-FR")} TND
-                                    </td>
+                                    
                                     <td className="px-5 py-4 text-slate-700">{f.appliedExchangeRate}</td>
                                     <td className="px-5 py-4 text-slate-600">{f.issueDate.toLocaleDateString("fr-FR")}</td>
                                     <td className="px-5 py-4 text-center">

@@ -10,6 +10,7 @@ import { purchaseOrderSchema } from "./purchaseOrder";
 import { invoiceItemSchema } from "./invoiceItem";
 import { tvaRateSchema } from "../types/tvaRate";
 import { currencyTypeSchema } from "../types/currency";
+import { PaymentConditionSchema } from "../types/paymentCondition";
 
 
 export const invoiceSchema = z.object({
@@ -21,17 +22,16 @@ export const invoiceSchema = z.object({
     invoiceStatus: invoiceStatusSchema,
     invoiceComplianceStatus: invoiceComplianceStatusSchema,
     currency: currencyTypeSchema,
-    totalExclTaxEUR: z.number(),
-    totalInclTaxEUR: z.number(),
-    totalExclTaxTND : z.number(),
-    totalInclTaxTND: z.number(),
+    totalExclTax: z.number(),
+    totalInclTax: z.number(),
+    vatAmount: z.number(),
     vatRate : tvaRateSchema,
     paymentMethod: paymentMethodSchema,
     exchangeRateReferenceDate: z.date(),
     appliedExchangeRate: z.number(),
     exchangeRateSource : exchangeRateSourceSchema,
     complianceQRcode : z.string(),
-    PaymentCondition: z.string(),
+    PaymentCondition: PaymentConditionSchema,
     purchaseOrder: purchaseOrderSchema.nullable(), // Null pour le momemnt , pour faciliter le test
     partner : z.lazy(()=>partnerSchema).nullable(),
     invoiceItems : z.array(invoiceItemSchema).nullable(),

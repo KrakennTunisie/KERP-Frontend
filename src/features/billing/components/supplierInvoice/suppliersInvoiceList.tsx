@@ -11,12 +11,7 @@ import useSupplierInvoiceList from "../../hooks/useSupplierInvoiceList";
 
 export default function SuppliersInvoiceList() {
 
-    const { router, search,
-        setSearch,
-        filtre,
-        categorie,
-        setCategorie,
-        setFiltre } = useSupplierInvoiceList();
+    const { router, search, setSearch, filtre, categorie, setCategorie, setFiltre } = useSupplierInvoiceList();
 
     return (
         <div className="min-h-screen bg-gray-50 p-8 font-sans">
@@ -172,10 +167,10 @@ export default function SuppliersInvoiceList() {
                                         </span>
                                     </td>
                                     <td className="px-5 py-4 text-slate-700 font-medium">
-                                        {f.totalExclTaxEUR.toLocaleString("fr-FR")} €
+                                        {f.totalExclTax.toLocaleString("fr-FR")} €
                                     </td>
                                     <td className="px-5 py-4 text-slate-700 font-medium">
-                                        {f.totalExclTaxTND.toLocaleString("fr-FR")} TND
+                                        {f.totalExclTax.toLocaleString("fr-FR")} TND
                                     </td>
                                     <td className="px-5 py-4 text-slate-600">{f.issueDate.toLocaleDateString("fr-FR")}</td>
                                     <td className="px-5 py-4 text-center">

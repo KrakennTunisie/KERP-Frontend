@@ -1,5 +1,18 @@
 import { InvoiceItem } from '../models/invoiceItem'
 
+export default function defaultItem(): InvoiceItem {
+  return {
+    idInvoiceItem: crypto.randomUUID(),
+    description: "",
+    quantity: 0,
+    unityPriceEXclTax: 0,
+    vatRate: 0,
+    itemTotalExclTax: 0,
+    itemTaxAmount: 0,
+    itemTotalInclTax: 0,
+    operationCategory: "SERVICES",
+  }
+}
 export const mockInvoiceItem: InvoiceItem = {
   idInvoiceItem: '123e4567-e89b-12d3-a456-426614174000',
   description: 'Conseil RH - T1 2025',

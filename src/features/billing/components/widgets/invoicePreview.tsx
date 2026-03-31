@@ -3,23 +3,23 @@ import { invoiceSchema } from "../../models/invoice";
 import { z } from "zod"
 import { paymentMethodLabels } from "../../types/paymentMethod";
 import { OperationCategoryLabels } from "../../types/operationCategory";
+import { CreditNoteSchema } from "../../models/creditNote";
+import { invoiceTypeLabels, invoiceTypeSchema } from "../../types/invoiceType";
+import { creditNoteTypeLabels } from "../../types/creditNoteType";
+import { PaymentConditionLabels } from "../../types/paymentCondition";
 
+
+export type InvoiceData = DeepPartial<z.infer<typeof invoiceSchema>>;
+export type CreditNoteData = DeepPartial<z.infer<typeof CreditNoteSchema>>;
 type InvoicePreviewProps = {
-    data: DeepPartial<z.infer<typeof invoiceSchema>>
+    data: InvoiceData | CreditNoteData;
+};
+function isCreditNote(data: InvoiceData | CreditNoteData): data is CreditNoteData {
+    return data.invoiceType === invoiceTypeSchema.enum.CREDITNOTE;
 }
-
 export default function InvoicePreview({ data }: InvoicePreviewProps) {
-    const items = data.invoiceItems ?? []
-
-    const totalHT  = items.reduce((acc, i) => acc + i!.itemTotalExclTax!, 0)
-    const totalTVA = items.reduce((acc, i) => acc + i!.itemTaxAmount!,     0)
-    const totalTTC = items.reduce((acc, i) => acc + i!.itemTotalInclTax!,  0)
-
-    const formatDate = (date?: Date | string | null) =>
-        date ? new Date(date).toLocaleDateString("fr-FR") : "—"
-
     return (
-        <div className="flex-1 p-6  max-h-[calc(100vh-73px)] bg-slate-100/60">
+        <div className="flex-1 p-6  bg-white">
             <div className="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden max-w-[820px] mx-auto">
 
                 {/* Invoice Header */}
@@ -43,13 +43,13 @@ export default function InvoicePreview({ data }: InvoicePreviewProps) {
                                     KRAKENN SARL
                                 </h2>
                                 <p className="text-xs font-bold text-slate-400 tracking-[0.15em] uppercase mt-0.5">
-                                    Services et conseil en informatique 
+                                    Services et conseil en informatique
                                 </p>
                             </div>
                         </div>
                         <div className="text-right">
                             <p className="text-4xl font-black text-slate-900 tracking-tight uppercase">
-                                {data.invoiceType === "SALE" ? "VENTE" : "ACHAT"}
+                                {invoiceTypeLabels[data.invoiceType!]}
                             </p>
                             <div className="mt-2 inline-flex items-center px-4 py-1.5 rounded-lg bg-blue-50 border border-blue-200">
                                 <span className="text-sm font-bold text-blue-700">
@@ -103,10 +103,15 @@ export default function InvoicePreview({ data }: InvoicePreviewProps) {
                 {/* Meta info bar */}
                 <div className="mx-8 mb-6 grid grid-cols-4 divide-x divide-slate-100 border border-slate-100 rounded-2xl overflow-hidden">
                     {[
-                        { label: "Date d'émission", value: formatDate(data.issueDate) },
-                        { label: "Échéance",         value: formatDate(data.dueDate) },
-                        { label: "Paiement",         value: data.PaymentCondition ?? "—" },
-                        { label: "Mode",             value: paymentMethodLabels[data!.paymentMethod!]  ?? "—" },
+                        ...(isCreditNote(data)
+                            ? [{ label: "Réf. facture", value: data.refOriginalInvoice ?? "—" }]
+                            : []),
+                        { label: "Date d'émission", value: data.issueDate?.toLocaleDateString() },
+                        ...(data.invoiceType !== invoiceTypeSchema.enum.CREDITNOTE
+                            ? [{ label: "Échéance", value: data.dueDate?.toLocaleDateString() }]
+                            : []),
+                        { label: "Paiement", value:   PaymentConditionLabels[data!.PaymentCondition!] ?? "—" },
+                        { label: "Mode", value: paymentMethodLabels[data!.paymentMethod!] ?? "—" },
                     ].map(({ label, value }) => (
                         <div key={label} className="px-4 py-3">
                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{label}</p>
@@ -129,21 +134,26 @@ export default function InvoicePreview({ data }: InvoicePreviewProps) {
                             </tr>
                         </thead>
                         <tbody>
-                            {items.length === 0 ? (
+                            {data.invoiceItems!.length === 0 ? (
                                 <tr>
                                     <td colSpan={4} className="text-center text-slate-400 italic py-8">
                                         Aucun service ajouté
                                     </td>
                                 </tr>
                             ) : (
-                                items.map((item) => (
+                                data.invoiceItems!.map((item) => (
                                     <tr key={item!.idInvoiceItem} className="border-b border-slate-50">
                                         <td className="py-4">
                                             <p className="text-sm font-bold text-slate-800">
                                                 {item!.description || "—"}
                                             </p>
-                                            <p className="text-xs text-slate-400 mt-0.5">TVA APPLIQUÉE: {item!.vatRate}%</p>
-                                            <p className="text-xs text-slate-400 mt-0.5">Catégorie: {OperationCategoryLabels[item!.operationCategory!]}</p>
+                                            {isCreditNote(data) && (
+                                                <p className="text-xs text-slate-400 mt-0.5">
+                                                    Motif de l'avoir : {creditNoteTypeLabels[data.creditNoteReason!] ?? "—"}
+                                                </p>
+                                            )}
+                                            <p className="text-xs text-slate-400 mt-0.5">TVA appliquée : {item!.vatRate}%</p>
+                                            <p className="text-xs text-slate-400 mt-0.5">Catégorie : {OperationCategoryLabels[item!.operationCategory!]}</p>
                                         </td>
                                         <td className="text-right text-sm text-slate-600 py-4">{item!.quantity}</td>
                                         <td className="text-right text-sm text-slate-600 py-4">{item!.unityPriceEXclTax!.toFixed(2)}</td>
@@ -174,7 +184,7 @@ export default function InvoicePreview({ data }: InvoicePreviewProps) {
                         <p className="text-xs text-slate-400 mt-2 leading-relaxed">
                             Document certifié conforme aux normes TTN de la République Tunisienne.
                             <br />
-                            Généré le {formatDate(new Date())} à {new Date().toLocaleTimeString("fr-FR")}
+                            Généré le {new Date().toLocaleDateString()} à {new Date().toLocaleTimeString("fr-FR")}
                         </p>
                     </div>
 
@@ -182,17 +192,17 @@ export default function InvoicePreview({ data }: InvoicePreviewProps) {
                     <div className="w-64 flex flex-col gap-2">
                         <div className="flex justify-between text-sm">
                             <span className="text-slate-500 font-medium">Total HT</span>
-                            <span className="font-bold text-slate-800">{totalHT.toFixed(2)} {data.currency}</span>
+                            <span className="font-bold text-slate-800">{data.totalExclTax?.toFixed(2)} {data.currency}</span>
                         </div>
                         <div className="flex justify-between text-sm">
                             <span className="text-slate-500 font-medium">Total TVA</span>
-                            <span className="font-bold text-slate-800">{totalTVA.toFixed(2)} {data.currency}</span>
+                            <span className="font-bold text-slate-800">{data.vatAmount?.toFixed(2)} {data.currency}</span>
                         </div>
                         <div className="h-px bg-slate-900 my-1" />
                         <div className="flex justify-between items-center">
                             <span className="text-sm font-bold text-slate-700">Total TTC</span>
                             <span className="text-3xl font-black text-blue-600 tracking-tight">
-                                {totalTTC.toFixed(2)}{" "}
+                                {data.totalInclTax?.toFixed(2)}{" "}
                                 <span className="text-lg">{data.currency}</span>
                             </span>
                         </div>
