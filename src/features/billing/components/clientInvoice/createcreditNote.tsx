@@ -8,9 +8,15 @@ import { tvaRateSchema } from '../../types/tvaRate';
 import { invoiceTypeSchema } from '../../types/invoiceType';
 import { creditNoteTypeLabels, CreditNoteTypeSchema } from '../../types/creditNoteType';
 import SummaryOriginalInvoice from '../widgets/summaryOriginalInvoice';
+import { PaymentConditionLabels, PaymentConditionSchema } from '../../types/paymentCondition';
+import { paymentMethodLabels, paymentMethodSchema } from '../../types/paymentMethod';
+import ErrorForm from '../widgets/errorForm';
+import { DocumentPreviewModal } from '@/shared/components/ui/documentPreviewModal';
+import { SendToTTNModal } from '../widgets/ttnConfirmationModal';
 
 export function CreateCreditNote() {
-    const {  previewData,  form,  removeItem,  addItem,  updateItem,  router} = useCreateCreditNote();
+    const { previewData, form, removeItem, addItem, updateItem, onSubmit, onCloseDocumentModal, createInvoice,
+        canCreateInvoice, invoiceRef, isModalOpen, TtnModalOpen, setTtnModalOpen, pdfUrl, loading, successMessage, sent, sendToTTN, router, errors } = useCreateCreditNote();
     const { register } = form
     return (
         <div className="flex-1 flex flex-col min-h-0 bg-white">
@@ -19,7 +25,7 @@ export function CreateCreditNote() {
                 <div className="max-w-7xl mx-auto flex items-center justify-between w-full">
                     <div className="flex items-center gap-6">
                         <button
-                            onClick={() => { router.back();}}
+                            onClick={() => { router.back(); }}
                             className="p-3 bg-gray-50 hover:bg-gray-100 rounded-2xl transition-all"
                         >
                             <ArrowLeft className="w-5 h-5 text-gray-700" />
@@ -35,27 +41,40 @@ export function CreateCreditNote() {
 
                     <div className="flex items-center gap-3">
                         <button
-                            onClick={() => { }}
-                            className="px-6 py-3 text-gray-500 font-bold text-sm hover:text-gray-900 transition-colors"
-                        >
-                            Annuler
-                        </button>
-                        <button
-                            onClick={()=>{}}
-                            className="flex items-center gap-2 px-8 py-3 bg-red-600 text-white rounded-2xl hover:bg-red-700 transition-all font-black text-sm shadow-xl shadow-purple-100"
-                        >
+                            onClick={()=>{onSubmit()}}
+                            disabled={false}
+                            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold shadow-md transition ${!canCreateInvoice
+                            ? "bg-gray-300 cursor-not-allowed text-gray-500 shadow-none"
+                            : "bg-red-600 hover:bg-red-700 text-white shadow-red-200"
+                            }`}>
                             <ShieldCheck className="w-4 h-4" />
-                            Créer & Envoyer au TTN
+                            Créer & Envoyer à TTN
                         </button>
                     </div>
                 </div>
             </header>
+            {/* Modal pour la facture générée  */}
+            <DocumentPreviewModal
+                open={isModalOpen}
+                onClose={onCloseDocumentModal}
+                onCreateInvoice={createInvoice}
+                document={pdfUrl} />
+            {/* Modal pour demander au user s'il veut envoyer la Facture au TTN */}
+            <SendToTTNModal
+                open={TtnModalOpen}
+                onClose={() => setTtnModalOpen(false)}
+                onConfirm={() => { sendToTTN() }}
+                loading={loading}
+                invoiceSent={sent}
+                invoiceRef={previewData.invoiceNumber}
+                successMessage={successMessage} />
+
 
             {/* Main Content - Two Column Layout */}
             <main className="flex-1 overflow-y-auto p-8">
                 <div className="max-w-7xl mx-auto">
 
-                   <SummaryOriginalInvoice data={previewData} />
+                    <SummaryOriginalInvoice data={previewData} />
                     {/* Two Column Grid: Form + Preview */}
                     <div className="grid grid-cols-3 gap-8">
 
@@ -78,12 +97,9 @@ export function CreateCreditNote() {
                                                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                                                     N° Avoir
                                                 </label>
-                                                <label className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest cursor-pointer">
-                                                    <input type="checkbox" defaultChecked className="rounded accent-red-600" />
-                                                    Auto-généré
-                                                </label>
                                             </div>
                                             <input
+                                                readOnly
                                                 type="text"
                                                 {...register("invoiceNumber")}
                                                 className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
@@ -230,30 +246,50 @@ export function CreateCreditNote() {
                                             ))}
                                         </div>
                                     </section>
+                                    {errors.invoiceItems?.message && (
+                                        <ErrorForm error={errors.invoiceItems?.message} />)}
                                 </div>
-                            </div>
-
-                            {/* Warning Notice */}
-                            <div className="bg-amber-50 rounded-[32px] p-6 border border-amber-200">
-                                <div className="flex items-start gap-4">
-                                    <div className="w-10 h-10 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center shrink-0">
-                                        <FileX className="w-5 h-5" />
+                                {/* Section 04 — Paiement */}
+                                <section>
+                                    <SectionTitle number="05" label="PAIEMENT" invoiceType={invoiceTypeSchema.enum.CREDITNOTE} />
+                                    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex flex-col gap-4 mt-3">
+                                        <div>
+                                            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
+                                                Conditions
+                                            </label>
+                                            <select
+                                                {...register("PaymentCondition", {
+                                                    onChange: (e) => { }
+                                                })}
+                                                className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition" >
+                                                {PaymentConditionSchema.options.map((condition) => (
+                                                    <option key={condition} value={condition}>{PaymentConditionLabels[condition]}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
+                                                Méthode
+                                            </label>
+                                            <select
+                                                {...register("paymentMethod")}
+                                                className="w-full px-3 py-2.5 rounded-xl border border-blue-300 bg-white text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition" >
+                                                {paymentMethodSchema.options.map((method) => (
+                                                    <option key={method} value={method}>
+                                                        {paymentMethodLabels[method]}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p className="text-sm font-black text-amber-900 mb-2">⚠️ Important</p>
-                                        <p className="text-xs font-bold text-amber-800 leading-relaxed">
-                                            Cette facture d'avoir sera automatiquement envoyée au TTN pour validation fiscale.
-                                            Le document sera ensuite transmis au client avec la référence de la facture originale.
-                                        </p>
-                                    </div>
-                                </div>
+                                </section>
                             </div>
 
                         </div>
 
                         {/* RIGHT COLUMN: Live Preview - Sticky  //  */}
                         <div className='col-span-2'>
-                            <InvoicePreview data={previewData} />
+                            <InvoicePreview ref={invoiceRef} data={previewData} />
                         </div>
 
 

@@ -3,17 +3,20 @@
 import { tvaRateSchema } from "../../types/tvaRate"
 import { paymentMethodLabels, paymentMethodSchema } from "../../types/paymentMethod"
 import { SectionTitle } from "../widgets/sectionTitle"
-import InvoicePreview, { InvoiceData } from "../widgets/invoicePreview"
+import InvoicePreview from "../widgets/invoicePreview"
 import { InvoiceFormClientProps, useCreateInvoice } from "../../hooks/useCreateInvoice"
 import { OperationCategoryLabels, operationCategorySchema } from "../../types/operationCategory"
 import { invoiceTypeSchema } from "../../types/invoiceType"
 import { CurrencyType, currencyTypeSchema } from "../../types/currency"
 import { PaymentConditionLabels, PaymentConditionSchema } from "../../types/paymentCondition"
+import { DocumentPreviewModal } from "@/shared/components/ui/documentPreviewModal"
+import ErrorForm from "../widgets/errorForm"
+import { SendToTTNModal } from "../widgets/ttnConfirmationModal"
 
 export default function CreateInvoiceClient({ mode,
     invoiceId, }: InvoiceFormClientProps) {
-    const { addItem, removeItem, updateItem, clientSearch, setClientSearch, showDropdown, setShowDropdown,
-        selectClient,clearClient,filteredClients,setCurrency,previewData,form,onSubmit, router,
+    const { addItem, removeItem, updateItem, clientSearch, setClientSearch, showDropdown, setShowDropdown, invoiceRef, pdfUrl, canCreateInvoice, errors,TtnModalOpen,setTtnModalOpen,sent,successMessage
+        ,selectClient, clearClient, filteredClients, setCurrency, previewData, form, onSubmit, isModalOpen, router, calculateDueDate, onCloseDocumentModal,createInvoice,sendToTTN,loading
     } = useCreateInvoice({ mode, invoiceId })
 
     const { register } = form
@@ -47,15 +50,34 @@ export default function CreateInvoiceClient({ mode,
                     </button>
                     <button
                         onClick={onSubmit}
-                        className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold shadow-md shadow-blue-200 transition"
-                    >
+                        disabled={!canCreateInvoice}
+                        className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold shadow-md transition ${!canCreateInvoice
+                            ? "bg-gray-300 cursor-not-allowed text-gray-500 shadow-none"
+                            : "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-200"
+                            }`}>
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                         </svg>
-                        {mode === "create" ? "Créer & Envoyer au TTN" : "Modifier & Envoyer au TTN"}
+                        {mode === "create" ? "Créer & Envoyer au TTN" : "Modifier & Envoyer à TTN"}
                     </button>
+
                 </div>
             </header>
+            {/* Modal pour la facture générée  */}
+            <DocumentPreviewModal
+                open={isModalOpen}
+                onClose={onCloseDocumentModal}
+                onCreateInvoice={createInvoice}
+                document={pdfUrl} />
+            {/* Modal pour demander au user s'il veut envoyer la Facture au TTN */}
+            <SendToTTNModal
+                open={TtnModalOpen}
+                onClose={() => setTtnModalOpen(false)}
+                onConfirm={() => {sendToTTN() }}
+                loading={loading}
+                invoiceSent={sent}
+                invoiceRef={previewData.invoiceNumber}
+                successMessage={successMessage}/>
 
             {/* ── Body ── */}
             <div className="flex gap-0 bg-white max-w-[1600px] ">
@@ -76,41 +98,34 @@ export default function CreateInvoiceClient({ mode,
                                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                                         N° Facture
                                     </label>
-                                    <label className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest cursor-pointer">
-                                        <input type="checkbox" defaultChecked className="rounded accent-blue-600" />
-                                        Auto-généré
-                                    </label>
                                 </div>
                                 <input
+                                    readOnly
                                     type="text"
                                     {...register("invoiceNumber")}
                                     className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
                                 />
                             </div>
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols gap-3">
                                 <div>
                                     <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
                                         Émission
                                     </label>
                                     <input
                                         type="date"
-                                        {...register("issueDate", { valueAsDate: true })}
+                                        {...register("issueDate", {
+                                            valueAsDate: true,
+                                            onChange: () => {
+                                                calculateDueDate();
+                                            },
+                                        })}
                                         min={new Date().toISOString().split("T")[0]}
-                                        className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-200 focus:border-violet-400 transition"
+                                        className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
                                     />
                                 </div>
-                                <div>
-                                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
-                                        Échéance
-                                    </label>
-                                    <input
-                                        type="date"
-                                        {...register("dueDate", { valueAsDate: true })}
-                                        min={new Date().toISOString().split("T")[0]}
-                                        className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-200 focus:border-violet-400 transition"
-                                    />
-                                </div>
+
                             </div>
+
                         </div>
                     </section>
 
@@ -224,7 +239,7 @@ export default function CreateInvoiceClient({ mode,
                                     <input
                                         type="text"
                                         readOnly
-                                        {...register("appliedExchangeRate")}
+                                        {...register("appliedExchangeRate", { valueAsNumber: true })}
                                         className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
                                     />
                                 </div>
@@ -247,8 +262,8 @@ export default function CreateInvoiceClient({ mode,
                         </div>
 
                         <div className="flex flex-col gap-3 mt-3">
-                            {(previewData.invoiceItems ?? []).map((item) => (
-                                <div key={item.idInvoiceItem} className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+                            {(previewData.invoiceItems ?? []).map((item, index) => (
+                                <div key={item.idInvoiceItem ?? index} className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
 
                                     {/* Header : Désignation + bouton supprimer */}
                                     <div className="flex items-start justify-between mb-1">
@@ -329,10 +344,11 @@ export default function CreateInvoiceClient({ mode,
                                             </select>
                                         </div>
                                     </div>
-
                                 </div>
                             ))}
                         </div>
+                        {errors.invoiceItems?.message && (
+                            <ErrorForm error={errors.invoiceItems?.message} />)}
                     </section>
 
                     {/* Section 04 — Paiement */}
@@ -344,7 +360,11 @@ export default function CreateInvoiceClient({ mode,
                                     Conditions
                                 </label>
                                 <select
-                                    {...register("PaymentCondition")}
+                                    {...register("PaymentCondition", {
+                                        onChange: (e) => {
+                                            calculateDueDate();
+                                        }
+                                    })}
                                     className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
                                 >
                                     {PaymentConditionSchema.options.map((condition) => (
@@ -376,7 +396,7 @@ export default function CreateInvoiceClient({ mode,
                     style={{ scrollbarWidth: 'thin', scrollbarColor: '#CBD5E1 transparent' }}
                 >
 
-                    <InvoicePreview data={previewData} />
+                    <InvoicePreview ref={invoiceRef} data={previewData} />
                 </div>
             </div>
         </div>

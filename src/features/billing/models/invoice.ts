@@ -11,6 +11,7 @@ import { invoiceItemSchema } from "./invoiceItem";
 import { tvaRateSchema } from "../types/tvaRate";
 import { currencyTypeSchema } from "../types/currency";
 import { PaymentConditionSchema } from "../types/paymentCondition";
+import { fileSchema } from "../types/pdfSchema";
 
 
 export const invoiceSchema = z.object({
@@ -20,7 +21,7 @@ export const invoiceSchema = z.object({
     dueDate:  z.date(),
     invoiceType: invoiceTypeSchema,
     invoiceStatus: invoiceStatusSchema,
-    invoiceComplianceStatus: invoiceComplianceStatusSchema,
+    invoiceComplianceStatus: invoiceComplianceStatusSchema.nullable(),
     currency: currencyTypeSchema,
     totalExclTax: z.number(),
     totalInclTax: z.number(),
@@ -34,9 +35,40 @@ export const invoiceSchema = z.object({
     PaymentCondition: PaymentConditionSchema,
     purchaseOrder: purchaseOrderSchema.nullable(), // Null pour le momemnt , pour faciliter le test
     partner : z.lazy(()=>partnerSchema).nullable(),
-    invoiceItems : z.array(invoiceItemSchema).nullable(),
-    invoiceDocument : documentSchema.nullable(),    
+    invoiceItems : z.array(invoiceItemSchema).nullable()
+   .refine((items) => {
+    if (!items) return true;
+    const keys = items.map((item) =>
+        `${item.description?.trim()}-${item.operationCategory}-${item.vatRate}`);
+    return new Set(keys).size === keys.length;}, {
+    message: "Les lignes de facture doivent être uniques",
+    }),
+    invoiceDocument : fileSchema.nullable(),    
 
-})
+}).superRefine((data, ctx) => {
+  const { issueDate, dueDate, PaymentCondition } = data;
+
+  if (!issueDate || !dueDate || !PaymentCondition) return;
+
+  let minDueDate = new Date(issueDate);
+
+  switch (PaymentCondition) {
+    case "NET_15":
+      minDueDate.setDate(minDueDate.getDate() + 15);
+      break;
+    case "NET_30":
+      minDueDate.setDate(minDueDate.getDate() + 30);
+      break;
+    case "IMMEDIATE":
+      break;
+  }
+  if (dueDate < minDueDate) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: `La date d'échéance doit être ≥ ${minDueDate.toLocaleDateString()}`,
+      path: ["dueDate"],
+    });
+  }
+});
 
 export type Invoice = z.infer<typeof invoiceSchema>;

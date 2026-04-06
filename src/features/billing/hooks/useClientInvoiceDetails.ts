@@ -32,6 +32,10 @@ export default function useClientInvoiceDetails ({invoiceId}:InvoiceDetailsProps
     const [client,setClient]= useState<Partner>();
     const [invoice , setInvoice]=useState<Invoice>();
     const [invoiceItems,setInvoiceItems]=useState<InvoiceItem>();
+    const [TtnModalOpen, setTtnModalOpen] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [sent, setSent] = useState(false);
+    const [successMessage, setSuccessMessage] = useState("");
     const router = useRouter()
     
   const setStatusPaiement = () => {
@@ -45,9 +49,20 @@ export default function useClientInvoiceDetails ({invoiceId}:InvoiceDetailsProps
   });
 };
 
-    useEffect(()=>{
+  useEffect(()=>{
 
-    },[invoiceId])
+    },[invoiceId]);
+
+function sendToTTN ()
+ {
+  setLoading(true);
+  setTimeout(() => {
+    setLoading(false)
+    setSuccessMessage("La facture a été envoyée avec succès au TTN.")
+    setSent(true)
+  }, 10000);
+ }
+
 
     return ({
         marked,
@@ -56,6 +71,12 @@ export default function useClientInvoiceDetails ({invoiceId}:InvoiceDetailsProps
         invoice,
         invoiceItems,
         client,
+        sendToTTN,
+        loading,
+        successMessage,
+        sent,
+        TtnModalOpen,
+        setTtnModalOpen,
         router
     })
 }

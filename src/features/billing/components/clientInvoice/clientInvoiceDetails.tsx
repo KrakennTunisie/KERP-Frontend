@@ -1,15 +1,16 @@
 "use client"
 
-import useClientInvoiceDetails, { downloadFile, InvoiceDetailsProps } from "../../hooks/useClientInvoiceDetails"
-import {  mockInvoiceItems } from "../../mocks/invoice-items-mocks"
+import useClientInvoiceDetails, {InvoiceDetailsProps } from "../../hooks/useClientInvoiceDetails"
+import { mockInvoiceItems } from "../../mocks/invoice-items-mocks"
 import { mockInvoiceEvents } from "../../mocks/invoiceEvent-mocks"
 import { InvoiceEventLabels } from "../../types/invoiceEventType"
 import Card from "../widgets/card"
 import { SectionLabel } from "../widgets/sectionLabel"
 import ShieldIcon from "../widgets/shieldIcon"
+import { SendToTTNModal } from "../widgets/ttnConfirmationModal"
 
 export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps) {
-    const { marked, setStatusPaiement, client, invoice, router } = useClientInvoiceDetails({ invoiceId });
+    const { marked, setStatusPaiement, client, invoice, sendToTTN, TtnModalOpen, setTtnModalOpen, loading, sent, successMessage, router } = useClientInvoiceDetails({ invoiceId });
     return (
         <div className="min-h-screen bg-[#f8f7ff] font-sans">
 
@@ -44,7 +45,7 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                     {/* Fiscal status */}
                     <Card>
                         <div className="flex items-center gap-4">
-                            <div className="w-13 h-13 rounded-2xl bg-violet-600 flex items-center justify-center shrink-0 p-3">
+                            <div className="w-13 h-13 rounded-2xl bg-blue-600 flex items-center justify-center shrink-0 p-3">
                                 <ShieldIcon />
                             </div>
                             <div className="flex-1">
@@ -62,15 +63,45 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                                     </p>
                                 )}
                             </div>
+                            {/* Bouton envoi TTN — visible seulement si pas encore envoyée */}
+                            {!invoice?.invoiceComplianceStatus && (
+                                <button
+                                    onClick={() => {setTtnModalOpen(true) }}
+                                    className="shrink-0 px-4 py-2 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue transition-colors cursor-pointer inline-flex items-center gap-2" >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        className="h-4 w-4"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                    >
+                                        <line x1="22" y1="2" x2="11" y2="13" />
+                                        <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                                    </svg>
+                                    Envoyer au TTN
+                                </button>
+                            )}
                         </div>
                     </Card>
+                     {/* Modal pour demander au user s'il veut envoyer la Facture au TTN */}
+                    <SendToTTNModal
+                        open={TtnModalOpen}
+                        onClose={() => setTtnModalOpen(false)}
+                        onConfirm={() => { sendToTTN() }}
+                        loading={loading}
+                        invoiceSent={sent}
+                        invoiceRef={invoice?.invoiceNumber}
+                        successMessage={successMessage} />
 
                     {/* Actions */}
                     <Card>
                         <SectionLabel>Actions rapides</SectionLabel>
                         <div className="grid grid-cols-2 gap-3">
                             <button
-                                onClick={()=> router.push(`/billing/invoices/clients/${invoiceId}/credit-note`)}
+                                onClick={() => router.push(`/billing/invoices/clients/${invoiceId}/credit-note`)}
                                 disabled={invoice?.invoiceStatus == "PAYÉE"}
                                 className="flex items-center justify-center gap-2 py-3.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-600 text-sm font-bold hover:brightness-95 transition-all">
                                 <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -198,7 +229,7 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                             <div className="w-64 h-px bg-gray-200 my-1" />
                             <div className="flex justify-between w-64 items-center">
                                 <span className="text-[10px] font-bold uppercase tracking-widest text-gray-700">Total TTC</span>
-                                <span className="text-2xl font-extrabold text-violet-600 tracking-tight">18 445 TND</span>
+                                <span className="text-2xl font-extrabold text-blue-600 tracking-tight">18 445 TND</span>
                             </div>
                         </div>
                     </Card>
@@ -210,12 +241,12 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                     {/* QR Card */}
                     <Card>
                         <div className="flex items-center gap-3 mb-4">
-                            <div className="w-10 h-10 rounded-xl bg-violet-600 flex items-center justify-center shrink-0">
+                            <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center shrink-0">
                                 <ShieldIcon size={18} />
                             </div>
                             <div>
                                 <p className="text-xs font-extrabold tracking-wide text-gray-900">CONFORMITÉ E-FACTURE</p>
-                                <p className="text-[11px] text-violet-600 font-semibold mt-0.5">Tunisie Trade Net</p>
+                                <p className="text-[11px] text-blue-600 font-semibold mt-0.5">Tunisie Trade Net</p>
                             </div>
                         </div>
 
@@ -299,7 +330,7 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                     <Card>
                         <SectionLabel>Documents attachés</SectionLabel>
                         <div
-                            onClick={() => downloadFile(invoice?.invoiceDocument?.storageURL!, 'Facture_FAC-2025-001.pdf')}
+                            onClick={() => { }}
                             className="flex items-center justify-between p-2.5 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer group">
                             <div className="flex items-center gap-2.5">
                                 <div className="w-9 h-9 rounded-lg bg-rose-50 flex items-center justify-center shrink-0">

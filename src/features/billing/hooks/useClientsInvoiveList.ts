@@ -9,11 +9,21 @@ export type PropsClient = {
 export function useClientInvoiceList () {
     const [search, setSearch] = useState("");
     const [filtre, setFiltre] = useState<InvoiceStatus>();
+    const [open, setOpen] = useState(false);
+    const [deleteOpen, setDeleteOpen] = useState(false);
+    const [invoiceRef ,setInvoiceRef] = useState("");
+    
      const router = useRouter()
     return {
      router,
      search,
      setSearch,
+     open,
+     setOpen,
+     deleteOpen,
+     setDeleteOpen,
+     invoiceRef,
+     setInvoiceRef,
      filtre,
      setFiltre
     }

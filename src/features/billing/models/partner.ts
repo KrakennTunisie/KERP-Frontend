@@ -1,23 +1,9 @@
 import {  z } from "zod";
 import {  partnerTypeSchema } from "../types/partnerType";
 import {  invoiceSchema } from "./invoice";
+import { fileSchema } from "../types/pdfSchema";
 
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-
-const ACCEPTED_TYPES = [
-  "application/pdf",
-  "image/jpeg",
-  "image/png"
-];
-
-const fileSchema = z
-  .instanceof(File, { message: "Fichier obligatoire" })
-  .refine((file) => file.size <= MAX_FILE_SIZE, "Le fichier doit être inférieur à 5MB")
-  .refine(
-    (file) => ACCEPTED_TYPES.includes(file.type),
-    "Format accepté : PDF, JPG, PNG"
-  );
 
 export const partnerSchema = z.object({
   idPartner: z.uuid(),

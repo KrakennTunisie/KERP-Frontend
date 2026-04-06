@@ -7,6 +7,7 @@ import { CreditNoteSchema } from "../../models/creditNote";
 import { invoiceTypeLabels, invoiceTypeSchema } from "../../types/invoiceType";
 import { creditNoteTypeLabels } from "../../types/creditNoteType";
 import { PaymentConditionLabels } from "../../types/paymentCondition";
+import { forwardRef } from "react";
 
 
 export type InvoiceData = DeepPartial<z.infer<typeof invoiceSchema>>;
@@ -17,9 +18,9 @@ type InvoicePreviewProps = {
 function isCreditNote(data: InvoiceData | CreditNoteData): data is CreditNoteData {
     return data.invoiceType === invoiceTypeSchema.enum.CREDITNOTE;
 }
-export default function InvoicePreview({ data }: InvoicePreviewProps) {
+const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }, ref) => {
     return (
-        <div className="flex-1 p-6  bg-white">
+        <div  ref={ref} className="flex-1 p-6  bg-white">
             <div className="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden max-w-[820px] mx-auto">
 
                 {/* Invoice Header */}
@@ -91,7 +92,7 @@ export default function InvoicePreview({ data }: InvoicePreviewProps) {
                                 <>
                                     <p className="text-base font-bold text-slate-900">{data.partner.name}</p>
                                     <p className="text-sm text-slate-500 mt-0.5">{data.partner.address}</p>
-                                    <p className="text-sm font-bold text-blue-600 mt-2">{data.partner.email}</p>
+                                    <p className="text-sm font-bold text-black mt-2">{data.partner.email}</p>
                                 </>
                             ) : (
                                 <p className="text-sm text-slate-400 italic">Aucun client sélectionné</p>
@@ -201,25 +202,17 @@ export default function InvoicePreview({ data }: InvoicePreviewProps) {
                         <div className="h-px bg-slate-900 my-1" />
                         <div className="flex justify-between items-center">
                             <span className="text-sm font-bold text-slate-700">Total TTC</span>
-                            <span className="text-3xl font-black text-blue-600 tracking-tight">
+                            <span className="text-3xl font-black text-slate-700">
                                 {data.totalInclTax?.toFixed(2)}{" "}
                                 <span className="text-lg">{data.currency}</span>
                             </span>
                         </div>
                     </div>
                 </div>
-
-                {/* Notice */}
-                <div className="mx-8 mb-8 flex items-center gap-3 bg-amber-50 border border-amber-100 rounded-2xl px-5 py-3.5">
-                    <div className="w-8 h-8 rounded-full border-2 border-amber-400 flex items-center justify-center flex-shrink-0">
-                        <span className="text-amber-500 font-black text-sm">!</span>
-                    </div>
-                    <p className="text-sm text-slate-700">
-                        La signature électronique est{" "}
-                        <strong>incluse par défaut</strong> sur toutes vos factures.
-                    </p>
-                </div>
             </div>
         </div>
     )
-}
+});
+InvoicePreview.displayName = "InvoicePreview";
+
+export default InvoicePreview;

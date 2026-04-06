@@ -15,7 +15,7 @@ export function Modal({ open, title, onClose, children, footer }: ModalProps) {
 
   return (
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-4 z-50">
-      <div className="bg-white w-full max-w-xl rounded-3xl p-6 shadow-xl border border-gray-100">
+      <div className="bg-white w-full max-w-3xl rounded-3xl p-6 shadow-xl border border-gray-100">
         
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
@@ -25,7 +25,7 @@ export function Modal({ open, title, onClose, children, footer }: ModalProps) {
 
           <button
             onClick={onClose}
-            className="w-10 h-10 rounded-xl border border-gray-200 hover:bg-gray-50 font-black cursor-pointer"
+            className="w-10 h-10 rounded-xl border border-black-400 hover:bg-gray-50 font-black text-black cursor-pointer"
             aria-label="Fermer"
           >
             ×

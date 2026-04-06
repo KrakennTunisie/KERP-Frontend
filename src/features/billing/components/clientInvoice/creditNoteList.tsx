@@ -1,18 +1,16 @@
 'use client';
-
-import StatClientInvoiceCard from "@/shared/components/ui/statClientInvoiceCard";
-import { MOCK_INVOICES } from "../../mocks/invoice-mocks";
 import { invoiceStatusColors, invoiceStatusSchema } from "../../types/invoiceStatus";
 import Link from "next/link";
 import { useClientInvoiceList } from "../../hooks/useClientsInvoiveList";
 import { SendInvoiceModal } from "../widgets/sendInvoiceModal";
 import { invoiceComplianceStatusSchema } from "../../types/invoiceComplianceStatus";
-import { DeleteInvoiceModal } from "../widgets/deleteInvoiceModal";
+import { mockCreditNotes } from "../../mocks/credit-note-mocks";
+import { creditNoteTypeLabels } from "../../types/creditNoteType";
 
-export default function ClientsInvoiceList() {
+export default function CreditNoteList() {
 
     const { router, search, setSearch, open, setOpen, deleteOpen, setDeleteOpen,
-        filtre, setFiltre, invoiceRef, setInvoiceRef } = useClientInvoiceList();
+        filtre, setFiltre, setInvoiceRef } = useClientInvoiceList();
     return (
         <div className="min-h-screen bg-gray-50 p-8 font-sans">
             <SendInvoiceModal
@@ -24,67 +22,19 @@ export default function ClientsInvoiceList() {
             <div className="flex items-start justify-between mb-8">
                 <div>
                     <h1 className="text-3xl font-black text-slate-900 tracking-tight">
-                        Factures Clients
+                        Factures d'avoir
                     </h1>
                     <p className="text-sm text-slate-500 mt-1">
-                        Gestion des factures de vente
+                        Gestion des factures d'avoir d'un client
                     </p>
                 </div>
                 <Link
                     href="/billing/invoices/clients/create"
-                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 transition-colors text-white font-bold px-6 py-3 rounded-xl shadow-md text-sm"
+                    className="flex items-center gap-2 bg-red-600 hover:bg-red-700 transition-colors text-white font-bold px-6 py-3 rounded-xl shadow-md text-sm"
                 >
                     <span className="text-lg leading-none">+</span>
-                    Nouvelle Facture Client
+                    Nouvelle Facture d'avoir
                 </Link>
-            </div>
-            {/* Stats */}
-            <div className="flex gap-4 mb-8">
-                <StatClientInvoiceCard
-                    icon={
-                        <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
-                        </svg>
-                    }
-                    label="Total Année 2026"
-                    eur={0}
-                    tnd={0}
-                    sub="Payé + À Encaisser"
-                    variant="blue"
-                />
-                <StatClientInvoiceCard
-                    icon={
-                        <svg className="w-5 h-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                            <circle cx="12" cy="12" r="9" />
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 7v5l3 3" />
-                        </svg>
-                    }
-                    label="À Encaisser 2026"
-                    eur={0}
-                    tnd={0}
-                    sub={`${0} factures`}
-                    variant="amber"
-                />
-                <StatClientInvoiceCard
-                    icon={
-                        <svg className="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                            <rect x="3" y="4" width="18" height="18" rx="2" />
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M16 2v4M8 2v4M3 10h18" />
-                        </svg>
-                    }
-                    label="Mois en Cours"
-                    eur={0}
-                    tnd={0}
-                    sub={`${0} factures`}
-                    variant="emerald"
-                />
-                <DeleteInvoiceModal
-                    open={deleteOpen}
-                    onClose={() => setDeleteOpen(false)}
-                    invoiceRef={invoiceRef}
-                    onConfirm={async () => {
-                        setDeleteOpen(false);
-                    }} />
             </div>
 
             {/* Table card */}
@@ -105,18 +55,24 @@ export default function ClientsInvoiceList() {
                         />
                     </div>
                     <div className="flex gap-2">
-                        {invoiceStatusSchema.options.map((f) => (
-                            <button
-                                key={f}
-                                onClick={() => setFiltre(f)}
-                                className={`px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${filtre === f
-                                    ? "bg-slate-900 text-white shadow"
-                                    : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
-                                    }`}
-                            >
-                                {f}
-                            </button>
-                        ))}
+                        {invoiceStatusSchema.options
+                            .filter((f) =>
+                                f.includes(invoiceStatusSchema.enum.REMBOURSÉE) ||
+                                f.includes(invoiceStatusSchema.enum["NON REMBOURSÉE"]) ||
+                                f.includes(invoiceStatusSchema.enum.BROULLION)
+                            )
+                            .map((f) => (
+                                <button
+                                    key={f}
+                                    onClick={() => setFiltre(f)}
+                                    className={`px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${filtre === f
+                                        ? "bg-slate-900 text-white shadow"
+                                        : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
+                                        }`}
+                                >
+                                    {f}
+                                </button>
+                            ))}
                     </div>
                 </div>
             </div>
@@ -125,7 +81,7 @@ export default function ClientsInvoiceList() {
                 <table className="w-full text-sm">
                     <thead>
                         <tr className="border-b border-slate-100">
-                            {["RÉFÉRENCE", "CLIENT", "STATUT", "MONTANT TTC", "TAUX CHANGE", "DATE ÉCHÉANCE", "CONFORME", "ACTIONS"].map((col) => (
+                            {["RÉFÉRENCE", "Facture Originale", "STATUS", "MOTIF DE L'AVOIR", "MONTANT TTC", "DATE EMISSION", "CONFORME", "ACTIONS"].map((col) => (
                                 <th
                                     key={col}
                                     className="px-5 py-3 text-left text-xs font-bold text-slate-400 tracking-widest uppercase"
@@ -136,14 +92,14 @@ export default function ClientsInvoiceList() {
                         </tr>
                     </thead>
                     <tbody>
-                        {MOCK_INVOICES.length === 0 ? (
+                        {mockCreditNotes.length === 0 ? (
                             <tr>
                                 <td colSpan={9} className="text-center py-12 text-slate-400 text-sm">
                                     Aucune facture trouvée.
                                 </td>
                             </tr>
                         ) : (
-                            MOCK_INVOICES.map((f) => (
+                            mockCreditNotes.map((f) => (
                                 <tr
                                     key={1}
                                     className="border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer"
@@ -151,7 +107,7 @@ export default function ClientsInvoiceList() {
                                     <td className="px-5 py-4 font-bold text-slate-800">
                                         {f.idInvoice}
                                     </td>
-                                    <td className="px-5 py-4 text-slate-700">SYSLAB</td>
+                                    <td className="px-5 py-4 text-slate-700">{f.refOriginalInvoice}</td>
                                     <td className="px-5 py-4">
                                         <span className={`px-3 py-1 rounded-full text-xs font-bold ${f.invoiceStatus !== "TOUTES" ? invoiceStatusColors[f.invoiceStatus] : ""
                                             }}`}>
@@ -159,10 +115,11 @@ export default function ClientsInvoiceList() {
                                         </span>
                                     </td>
                                     <td className="px-5 py-4 text-slate-700 font-medium">
-                                        {f.totalInclTax.toLocaleString("fr-FR")} €
+                                        {creditNoteTypeLabels[f.creditNoteReason]}
                                     </td>
-
-                                    <td className="px-5 py-4 text-slate-700">{f.appliedExchangeRate}</td>
+                                    <td className="text-red-500 font-bold">
+                                            - {f.totalInclTax} {f.currency}
+                                    </td>
                                     <td className="px-5 py-4 text-slate-600">{f.dueDate.toLocaleDateString("fr-FR")}</td>
                                     <td className="px-5 py-4 text-center">
                                         {f.invoiceComplianceStatus == invoiceComplianceStatusSchema.enum.TTN_ACCEPTED ? (
@@ -189,36 +146,6 @@ export default function ClientsInvoiceList() {
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
                                                 </svg>
                                             </button>
-
-                                            {/* Modifier */}
-                                            <button
-                                                onClick={(e) => { e.stopPropagation(); console.log("edit", f.idInvoice); router.push(`/billing/invoices/clients/${f.idInvoice}/edit`); }}
-                                                className="p-2 rounded-xl bg-amber-50 text-amber-600 hover:bg-amber-100 transition-colors"
-                                                title="Modifier"
-                                            >
-                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931zm0 0L19.5 7.125" />
-                                                </svg>
-                                            </button>
-                                            <button
-                                                disabled={([
-                                                    invoiceComplianceStatusSchema.enum.RECEIVED,
-                                                    invoiceComplianceStatusSchema.enum.COMPLETED,
-                                                    invoiceComplianceStatusSchema.enum.SIGNING_PENDING,
-                                                    invoiceComplianceStatusSchema.enum.SIGNING_SUCCEEDED,
-                                                    invoiceComplianceStatusSchema.enum.TTN_ACCEPTED,
-                                                    invoiceComplianceStatusSchema.enum.TTN_PENDING,
-                                                    invoiceComplianceStatusSchema.enum.TTN_SUBMITTED
-                                                ]as string[]).includes(f.invoiceComplianceStatus!)}
-                                                onClick={(e) => { setOpen(true); console.log("send", f.idInvoice); }}
-                                                className="p-2 rounded-xl bg-green-50 text-green-600 hover:bg-green-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                                title="Envoyer"
-                                            >
-                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12zm0 0h7.5" />
-                                                </svg>
-                                            </button>
-
                                             {/* Supprimer */}
                                             <button
                                                 disabled={f.invoiceComplianceStatus != null}

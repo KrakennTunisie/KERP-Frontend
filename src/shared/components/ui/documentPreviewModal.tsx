@@ -1,67 +1,112 @@
 "use client";
 
+import { z } from "zod";
+import { useEffect, useRef } from "react";
 import getDocumentType from "@/shared/utils/getDocumentType";
 import { Modal } from "./modal";
-import {
-  FileText,
-  Download,
-  ExternalLink,
-  File,
-} from "lucide-react";
-import { Document } from "@/features/billing/models/document";
+import { FileText, Download, ExternalLink, File as FileIcon } from "lucide-react";
+import { Document as BillingDocument } from "@/features/billing/models/document";
+import { FileSchema } from "../../../features/billing/types/pdfSchema";
+import { useCreateInvoice } from "@/features/billing/hooks/useCreateInvoice";
 
+
+type DocumentOrFile = BillingDocument| FileSchema | null;
+
+const isFile = (doc: DocumentOrFile): doc is File => doc instanceof File;
 
 type DocumentPreviewModalProps = {
   open: boolean;
   onClose: () => void;
-  document: Document | null
+  document: DocumentOrFile;
+  onCreateInvoice?: () => void;
 };
-
-
 
 export function DocumentPreviewModal({
   open,
   onClose,
-  document
+  document,
+  onCreateInvoice
 }: DocumentPreviewModalProps) {
+  const objectUrlRef = useRef<string | null>(null);
+
+  const { url, fileName } = (() => {
+    if (!document) return { url: null, fileName: null };
+    if (isFile(document)) {
+      const objectUrl = URL.createObjectURL(document);
+      objectUrlRef.current = objectUrl;
+      return { url: objectUrl, fileName: document.name };
+    }
+    return { url: document.storageURL, fileName: document.fileName };
+  })();
+
   const documentType = getDocumentType(document);
+
+  
+
+  useEffect(() => {
+    return () => {
+      if (objectUrlRef.current) {
+        URL.revokeObjectURL(objectUrlRef.current);
+        objectUrlRef.current = null;
+      }
+    };
+  }, [document]);
+
+  const handleClose = () => {
+    if (objectUrlRef.current) {
+      URL.revokeObjectURL(objectUrlRef.current);
+      objectUrlRef.current = null;
+    }
+    onClose();
+  };
 
   const footer = (
     <>
-      <a
-        href={document?.storageURL}
+      
+       <a href={url ?? undefined}
         target="_blank"
         rel="noreferrer"
-        className="px-5 py-3 rounded-2xl border border-gray-200 font-black hover:bg-gray-50 inline-flex items-center gap-2"
+        className="px-5 py-3 rounded-2xl border border-gray-200 font-black text-black hover:bg-gray-50 inline-flex items-center gap-2"
       >
         <ExternalLink className="w-4 h-4" />
         Ouvrir
       </a>
 
+     {isFile(document)  && onCreateInvoice ? (
+      <button
+        onClick={() => {
+         onCreateInvoice()
+        }}
+        className="px-5 py-3 rounded-2xl bg-blue-600 text-white font-black hover:bg-blue inline-flex items-center gap-2"
+      >
+        Créer la facture
+      </button>
+    ) : (
       <a
-        href={document?.storageURL}
-        download
-        className="px-5 py-3 rounded-2xl bg-gray-900 text-white font-black hover:bg-black inline-flex items-center gap-2"
+        href={url ?? undefined}
+        download={fileName ?? true}
+        className="px-5 py-3 rounded-2xl bg-blue-600 text-white font-black hover:bg-blue inline-flex items-center gap-2"
       >
         <Download className="w-4 h-4" />
         Télécharger
       </a>
+    )}
     </>
   );
 
   return (
     <Modal
       open={open}
-      onClose={onClose}
-      title={document?.fileName ?? "Prévisualisation du document"}
+      onClose={handleClose}
+      title={"Prévisualisation du facture : "+ fileName  }
       footer={footer}
     >
       <div className="w-full">
         {documentType === "image" && (
           <div className="rounded-3xl overflow-hidden border border-gray-100 bg-gray-50">
             <img
-              src={document?.storageURL}
-              alt={document?.fileName ?? "Document image"}
+              src={url ?? undefined}
+              alt={fileName ?? "Document image"}
               className="w-full max-h-[70vh] object-contain bg-white"
             />
           </div>
@@ -70,8 +115,8 @@ export function DocumentPreviewModal({
         {documentType === "pdf" && (
           <div className="rounded-3xl overflow-hidden border border-gray-100 bg-gray-50">
             <iframe
-              src={document?.storageURL}
-              title={document?.fileName ?? "Prévisualisation PDF"}
+              src={url ?? undefined}
+              title={fileName ?? "Prévisualisation PDF"}
               className="w-full h-[70vh] bg-white"
             />
           </div>
@@ -101,7 +146,7 @@ export function DocumentPreviewModal({
         {documentType === "unknown" && (
           <div className="rounded-3xl border border-gray-100 bg-gray-50 p-8 flex flex-col items-center text-center">
             <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mb-4">
-              <File className="w-8 h-8 text-gray-600" />
+              <FileIcon className="w-8 h-8 text-gray-600" />
             </div>
 
             <p className="text-lg font-black text-gray-900">
@@ -109,7 +154,7 @@ export function DocumentPreviewModal({
             </p>
             <p className="text-sm font-bold text-gray-600 mt-2 max-w-md">
               Ce type de document ne peut pas être affiché directement. Vous
-              pouvez l’ouvrir dans un nouvel onglet ou le télécharger.
+              pouvez l'ouvrir dans un nouvel onglet ou le télécharger.
             </p>
           </div>
         )}

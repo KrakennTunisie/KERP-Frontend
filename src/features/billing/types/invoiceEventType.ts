@@ -33,7 +33,7 @@ export const InvoiceEventLabels: Record<InvoiceEventType, string> = {
     SIGNATURE_REQUESTED:"Demande une signature",
     SIGNATURE_SUCCEEDED:"Succées de la signature",
     SIGNATURE_FAILED:"Echéc de la signature",
-    TTN_SUBMISSION_REQUESTED:"Soumission au TTN demandée",
+    TTN_SUBMISSION_REQUESTED:"Soumission à TTN demandée",
     TTN_SUBMITTED:"TTN a soumis la facture",
     TTN_ACCEPTED:"TTN a acceptée la facture",
     TTN_REJECTED:"TTN a rejetée la facture",

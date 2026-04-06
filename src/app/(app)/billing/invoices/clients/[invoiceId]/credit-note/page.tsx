@@ -1,9 +1,9 @@
-import { CreateCreditNote } from "@/features/billing/components/clientInvoice/createcreditNote";
+import CreditNoteList from "@/features/billing/components/clientInvoice/creditNoteList";
 
-export default function CreditNote() {
+export default function ListCreditNote () {
     return (
         <div>
-          <CreateCreditNote/>
+            <CreditNoteList/>
         </div>
     );
 }

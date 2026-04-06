@@ -1,4 +1,5 @@
 import { InvoiceItem } from '../models/invoiceItem'
+import { OperationCategoryLabels, operationCategorySchema } from '../types/operationCategory'
 
 export default function defaultItem(): InvoiceItem {
   return {
@@ -10,7 +11,7 @@ export default function defaultItem(): InvoiceItem {
     itemTotalExclTax: 0,
     itemTaxAmount: 0,
     itemTotalInclTax: 0,
-    operationCategory: "SERVICES",
+    operationCategory: operationCategorySchema.enum.SERVICE_PROVISION,
   }
 }
 export const mockInvoiceItem: InvoiceItem = {
@@ -22,7 +23,7 @@ export const mockInvoiceItem: InvoiceItem = {
   itemTotalExclTax: 10000,
   itemTaxAmount: 1900,
   itemTotalInclTax: 11900,
-  operationCategory: 'SERVICES'
+  operationCategory: operationCategorySchema.enum.SERVICE_PROVISION
 }
 
 export const mockInvoiceItems: InvoiceItem[] = [
