@@ -105,7 +105,9 @@ export default function ClientsInvoiceList() {
                         />
                     </div>
                     <div className="flex gap-2">
-                        {invoiceStatusSchema.options.map((f) => (
+                        {invoiceStatusSchema.options
+                        .filter(f => f !== invoiceStatusSchema.enum["NON REMBOURSÉE"] && f !== invoiceStatusSchema.enum.REMBOURSÉE)
+                        .map((f) => (
                             <button
                                 key={f}
                                 onClick={() => setFiltre(f)}

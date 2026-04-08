@@ -36,8 +36,10 @@ export default function useClientInvoiceDetails ({invoiceId}:InvoiceDetailsProps
     const [loading, setLoading] = useState(false);
     const [sent, setSent] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
+    const [hasCreditInvoice, setHasCreditInvoice] = useState(true);
     const router = useRouter()
-    
+   
+  //modifier la statut de paiement
   const setStatusPaiement = () => {
   setInvoice((prev) => {
     if (!prev) return prev;
@@ -53,6 +55,7 @@ export default function useClientInvoiceDetails ({invoiceId}:InvoiceDetailsProps
 
     },[invoiceId]);
 
+  // Envoyer la facture au TTN
 function sendToTTN ()
  {
   setLoading(true);
@@ -77,6 +80,7 @@ function sendToTTN ()
         sent,
         TtnModalOpen,
         setTtnModalOpen,
+        hasCreditInvoice,
         router
     })
 }

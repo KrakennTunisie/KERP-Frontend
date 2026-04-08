@@ -16,11 +16,15 @@ type InvoicePreviewProps = {
     data: InvoiceData | CreditNoteData;
 };
 function isCreditNote(data: InvoiceData | CreditNoteData): data is CreditNoteData {
-    return data.invoiceType === invoiceTypeSchema.enum.CREDITNOTE;
+    return "creditNoteReason" in data;
 }
+
 const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }, ref) => {
+    const isCredit = isCreditNote(data);
+    const partner = (isCreditNote(data) ? data.originalInvoice?.partner : data.partner);
+
     return (
-        <div  ref={ref} className="flex-1 p-6  bg-white">
+        <div ref={ref} className="flex-1 p-6  bg-white">
             <div className="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden max-w-[820px] mx-auto">
 
                 {/* Invoice Header */}
@@ -50,7 +54,7 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
                         </div>
                         <div className="text-right">
                             <p className="text-4xl font-black text-slate-900 tracking-tight uppercase">
-                                {invoiceTypeLabels[data.invoiceType!]}
+                                {isCredit ? "FACTURE D'AVOIR" : invoiceTypeLabels[data.invoiceType!]}
                             </p>
                             <div className="mt-2 inline-flex items-center px-4 py-1.5 rounded-lg bg-blue-50 border border-blue-200">
                                 <span className="text-sm font-bold text-blue-700">
@@ -88,11 +92,11 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">
                                 Destinataire
                             </p>
-                            {data.partner ? (
+                            {partner ? (
                                 <>
-                                    <p className="text-base font-bold text-slate-900">{data.partner.name}</p>
-                                    <p className="text-sm text-slate-500 mt-0.5">{data.partner.address}</p>
-                                    <p className="text-sm font-bold text-black mt-2">{data.partner.email}</p>
+                                    <p className="text-base font-bold text-slate-900">{partner.name}</p>
+                                    <p className="text-sm text-slate-500 mt-0.5">{partner.address}</p>
+                                    <p className="text-sm font-bold text-black mt-2">{partner.email}</p>
                                 </>
                             ) : (
                                 <p className="text-sm text-slate-400 italic">Aucun client sélectionné</p>
@@ -104,15 +108,19 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
                 {/* Meta info bar */}
                 <div className="mx-8 mb-6 grid grid-cols-4 divide-x divide-slate-100 border border-slate-100 rounded-2xl overflow-hidden">
                     {[
-                        ...(isCreditNote(data)
-                            ? [{ label: "Réf. facture", value: data.refOriginalInvoice ?? "—" }]
+                        ...(isCredit
+                            ? [{ label: "Réf. facture", value: data.originalInvoice?.invoiceNumber ?? "—" }]
                             : []),
                         { label: "Date d'émission", value: data.issueDate?.toLocaleDateString() },
-                        ...(data.invoiceType !== invoiceTypeSchema.enum.CREDITNOTE
+                        ...(!isCredit
                             ? [{ label: "Échéance", value: data.dueDate?.toLocaleDateString() }]
                             : []),
-                        { label: "Paiement", value:   PaymentConditionLabels[data!.PaymentCondition!] ?? "—" },
-                        { label: "Mode", value: paymentMethodLabels[data!.paymentMethod!] ?? "—" },
+                        ...(isCredit ? [
+                            { label: "Paiement", value: PaymentConditionLabels[data!.originalInvoice?.PaymentCondition!] ?? "—" },
+                            { label: "Mode", value: paymentMethodLabels[data!.originalInvoice?.paymentMethod!] ?? "—" }] :
+                            [{ label: "Paiement", value: PaymentConditionLabels[data!.PaymentCondition!] ?? "—" },
+                            { label: "Mode", value: paymentMethodLabels[data!.paymentMethod!] ?? "—" },])
+
                     ].map(({ label, value }) => (
                         <div key={label} className="px-4 py-3">
                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{label}</p>
@@ -148,7 +156,7 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
                                             <p className="text-sm font-bold text-slate-800">
                                                 {item!.description || "—"}
                                             </p>
-                                            {isCreditNote(data) && (
+                                            {isCredit && (
                                                 <p className="text-xs text-slate-400 mt-0.5">
                                                     Motif de l'avoir : {creditNoteTypeLabels[data.creditNoteReason!] ?? "—"}
                                                 </p>
@@ -193,18 +201,25 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
                     <div className="w-64 flex flex-col gap-2">
                         <div className="flex justify-between text-sm">
                             <span className="text-slate-500 font-medium">Total HT</span>
-                            <span className="font-bold text-slate-800">{data.totalExclTax?.toFixed(2)} {data.currency}</span>
+                            <span className="font-bold text-slate-800">{data.totalExclTax?.toFixed(2)} 
+                                {isCredit ? data.originalInvoice?.currency : data.currency}
+                            </span>
                         </div>
                         <div className="flex justify-between text-sm">
                             <span className="text-slate-500 font-medium">Total TVA</span>
-                            <span className="font-bold text-slate-800">{data.vatAmount?.toFixed(2)} {data.currency}</span>
+                            <span className="font-bold text-slate-800">
+                                {data.vatAmount?.toFixed(2)} 
+                                {isCredit ? data.originalInvoice?.currency : data.currency}
+                            </span>
                         </div>
                         <div className="h-px bg-slate-900 my-1" />
                         <div className="flex justify-between items-center">
                             <span className="text-sm font-bold text-slate-700">Total TTC</span>
                             <span className="text-3xl font-black text-slate-700">
                                 {data.totalInclTax?.toFixed(2)}{" "}
-                                <span className="text-lg">{data.currency}</span>
+                                <span className="text-lg">
+                                {isCredit ? data.originalInvoice?.currency : data.currency}
+                                </span>
                             </span>
                         </div>
                     </div>

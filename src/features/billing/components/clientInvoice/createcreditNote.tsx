@@ -1,56 +1,53 @@
 "use client"
-import { ArrowLeft, FileX, ShieldCheck, Plus, Trash2 } from 'lucide-react';
+import { FileX, ShieldCheck} from 'lucide-react';
 import InvoicePreview from '../widgets/invoicePreview';
 import useCreateCreditNote from '../../hooks/useCreateCreditNote';
-import { OperationCategoryLabels, operationCategorySchema } from '../../types/operationCategory';
 import { SectionTitle } from '../widgets/sectionTitle';
 import { tvaRateSchema } from '../../types/tvaRate';
 import { invoiceTypeSchema } from '../../types/invoiceType';
 import { creditNoteTypeLabels, CreditNoteTypeSchema } from '../../types/creditNoteType';
 import SummaryOriginalInvoice from '../widgets/summaryOriginalInvoice';
-import { PaymentConditionLabels, PaymentConditionSchema } from '../../types/paymentCondition';
-import { paymentMethodLabels, paymentMethodSchema } from '../../types/paymentMethod';
 import ErrorForm from '../widgets/errorForm';
 import { DocumentPreviewModal } from '@/shared/components/ui/documentPreviewModal';
 import { SendToTTNModal } from '../widgets/ttnConfirmationModal';
 
 export function CreateCreditNote() {
     const { previewData, form, removeItem, addItem, updateItem, onSubmit, onCloseDocumentModal, createInvoice,
+        setItemSearchMap, setShowDropdownMap, itemSearchMap, showDropdownMap, creditNoteItemMap, setCreditNoteItemMap, filteredItems, fields,
         canCreateInvoice, invoiceRef, isModalOpen, TtnModalOpen, setTtnModalOpen, pdfUrl, loading, successMessage, sent, sendToTTN, router, errors } = useCreateCreditNote();
     const { register } = form
     return (
         <div className="flex-1 flex flex-col min-h-0 bg-white">
             {/* Header */}
             <header className="bg-white border-b border-gray-100 px-8 py-6 sticky top-0 z-10">
-                <div className="max-w-7xl mx-auto flex items-center justify-between w-full">
-                    <div className="flex items-center gap-6">
-                        <button
-                            onClick={() => { router.back(); }}
-                            className="p-3 bg-gray-50 hover:bg-gray-100 rounded-2xl transition-all"
-                        >
-                            <ArrowLeft className="w-5 h-5 text-gray-700" />
-                        </button>
+                <div className="flex items-center justify-between w-full">
+                    <div className="flex items-center  gap-6">
+                         <button
+                          onClick={() => router.back()}
+                          className="w-9 h-9 rounded-xl border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors">
+                          <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                              <path d="M19 12H5M12 5l-7 7 7 7" />
+                          </svg>
+                      </button>
                         <div>
                             <div className="flex items-center gap-3">
                                 <FileX className="w-8 h-8 text-rose-600" />
                                 <h1 className="text-xl font-black text-gray-900 tracking-tighter">Créer une Facture d'Avoir</h1>
                             </div>
-                            <p className="text-sm font-medium text-gray-500 mt-1">Référence facture originale : {previewData.refOriginalInvoice}</p>
+                            <p className="text-sm font-medium text-gray-500 mt-1">Référence facture originale : {previewData.originalInvoice?.invoiceNumber}</p>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                        <button
-                            onClick={()=>{onSubmit()}}
-                            disabled={false}
-                            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold shadow-md transition ${!canCreateInvoice
+                    <button
+                        onClick={() => { onSubmit() }}
+                        disabled={!canCreateInvoice}
+                        className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold shadow-md transition ${!canCreateInvoice
                             ? "bg-gray-300 cursor-not-allowed text-gray-500 shadow-none"
                             : "bg-red-600 hover:bg-red-700 text-white shadow-red-200"
                             }`}>
-                            <ShieldCheck className="w-4 h-4" />
-                            Créer & Envoyer à TTN
-                        </button>
-                    </div>
+                        <ShieldCheck className="w-4 h-4" />
+                        Créer & Envoyer à TTN
+                    </button>
                 </div>
             </header>
             {/* Modal pour la facture générée  */}
@@ -111,7 +108,6 @@ export function CreateCreditNote() {
                                             <input
                                                 type="date"
                                                 {...register("issueDate", { valueAsDate: true })}
-                                                min={new Date().toISOString().split("T")[0]}
                                                 className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
                                             />
                                         </div>
@@ -140,161 +136,212 @@ export function CreateCreditNote() {
                                         </div>
                                     </div>
                                 </div>
+                                {/* Section 03 — services */}
+                                <section>
+                                    <div className="flex items-center justify-between">
+                                        <SectionTitle number="03" label="SERVICES" invoiceType={invoiceTypeSchema.enum.CREDITNOTE} />
+                                        <button
+                                            onClick={addItem}
+                                            className="w-8 h-8 rounded-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center shadow-md shadow-blue-200 transition"
+                                        >
+                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                                            </svg>
+                                        </button>
+                                    </div>
 
-                                {/* Section 04 — Services */}
-                                <div className="space-y-6">
+                                    <div className="flex flex-col gap-3 mt-3">
+                                        {fields.map((field, index) => (
+                                            <div key={field.idInvoiceItem} className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex flex-col gap-3">
 
-                                    <section>
-                                        <div className="flex items-center justify-between">
-                                            <SectionTitle number="04" label="SERVICES" invoiceType={invoiceTypeSchema.enum.CREDITNOTE} />
-                                            <button
-                                                onClick={addItem}
-                                                className="w-8 h-8 rounded-full bg-red-600 hover:bg-blue-700 text-white flex items-center justify-center shadow-md shadow-blue-200 transition"
-                                            >
-                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                                                </svg>
-                                            </button>
-                                        </div>
+                                                <div className="flex items-center justify-between">
+                                                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                                        Sélectionner un produit
+                                                    </label>
+                                                    <button
+                                                        onClick={() => removeItem(field.idInvoiceItem)}
+                                                        className="text-slate-300 hover:text-red-400 transition"
+                                                    >
+                                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
 
-                                        <div className="flex flex-col gap-3 mt-3">
-                                            {previewData.invoiceItems!.map((item) => (
-                                                <div key={item.idInvoiceItem} className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
-
-                                                    {/* Header : Désignation + bouton supprimer */}
-                                                    <div className="flex items-start justify-between mb-1">
-                                                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                                                            Désignation
-                                                        </label>
-                                                        <button
-                                                            onClick={() => removeItem(item.idInvoiceItem!)}
-                                                            className="text-slate-300 hover:text-red-400 transition"
-                                                        >
-                                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                            </svg>
-                                                        </button>
-                                                    </div>
-
-                                                    {/* Input désignation */}
+                                                {/* Dropdown */}
+                                                <div className="relative" key={field.idInvoiceItem}>
                                                     <input
                                                         type="text"
-                                                        value={item.description}
-                                                        onChange={(e) => updateItem(item.idInvoiceItem!, "description", e.target.value)}
-                                                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition mb-4"
+                                                        readOnly
+                                                        placeholder="Sélectionner un produit..."
+                                                        value={itemSearchMap[index] || ""}
+                                                        onChange={(e) => {
+                                                            setItemSearchMap((prev) => ({
+                                                                ...prev,
+                                                                [index]: e.target.value,
+                                                            }));
+                                                            setShowDropdownMap((prev) => ({
+                                                                ...prev,
+                                                                [index]: true,
+                                                            }));
+                                                        }}
+                                                        onFocus={() =>
+                                                            setShowDropdownMap((prev) => ({
+                                                                ...prev,
+                                                                [index]: true,
+                                                            }))
+                                                        }
+                                                        onBlur={() =>
+                                                            setTimeout(() => {
+                                                                setShowDropdownMap((prev) => ({
+                                                                    ...prev,
+                                                                    [index]: false,
+                                                                }));
+                                                            }, 150)
+                                                        }
+                                                        className="w-full px-3 py-2.5 pr-9 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
                                                     />
-
-                                                    {/* Catégorie */}
-                                                    <div className="mb-4">
-                                                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
-                                                            Catégorie
-                                                        </label>
-                                                        <select
-                                                            value={item.operationCategory}
-                                                            onChange={(e) => updateItem(item.idInvoiceItem!, "operationCategory", e.target.value)}
-                                                            className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
-                                                        >
-                                                            {operationCategorySchema.options.map((value) => (
-                                                                <option key={value} value={value}>{OperationCategoryLabels[value]}</option>
-                                                            ))}
-                                                        </select>
+                                                    <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+                                                        <svg className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${showDropdownMap ? "rotate-180" : ""}`}
+                                                            fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                                                        </svg>
                                                     </div>
 
-                                                    {/* QTÉ / P.U HT / TVA */}
-                                                    <div className="grid grid-cols-3 gap-2">
+                                                    {showDropdownMap[index] && filteredItems!.length > 0 && (
+                                                        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-20 overflow-hidden">
+                                                            {filteredItems!.map((filteredItem) => (
+                                                                <button
+                                                                    key={filteredItem.idInvoiceItem}
+                                                                    type="button"
+                                                                    onMouseDown={(e) => {
+                                                                        e.preventDefault();
+
+                                                                        setCreditNoteItemMap((prev) => ({
+                                                                            ...prev,
+                                                                            [index]: filteredItem,
+                                                                        }));
+
+                                                                        setItemSearchMap((prev) => ({
+                                                                            ...prev,
+                                                                            [index]: filteredItem.description,
+                                                                        }));
+                                                                        setShowDropdownMap((prev) => ({
+                                                                            ...prev,
+                                                                            [index]: false,
+                                                                        }));
+                                                                        updateItem(field.idInvoiceItem!, {
+                                                                            description: filteredItem.description,
+                                                                            quantity: filteredItem.quantity,
+                                                                            unityPriceEXclTax: filteredItem.unityPriceEXclTax,
+                                                                            vatRate: filteredItem.vatRate,
+                                                                            operationCategory: filteredItem.operationCategory,
+                                                                        });
+                                                                    }}
+                                                                    className="w-full text-left px-4 py-3 hover:bg-blue-50 transition border-b border-slate-50 last:border-0"
+                                                                >
+                                                                    <p className="text-sm font-bold text-slate-800">
+                                                                        {filteredItem.description}
+                                                                    </p>
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                {/* Champs QTÉ / P.U HT / TVA */}
+                                                {creditNoteItemMap[index] && (
+                                                    <div className="grid grid-cols-3 gap-2 mt-3">
                                                         <div>
                                                             <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
                                                                 QTÉ
                                                             </label>
                                                             <input
-                                                                type="number"
-                                                                min={1}
-                                                                value={item.quantity}
-                                                                onChange={(e) => updateItem(item.idInvoiceItem!, "quantity", parseFloat(e.target.value) || 0)}
+                                                                type="text"
+                                                                value={creditNoteItemMap[index]?.quantity ?? ""}
+                                                                onChange={(e) => {
+                                                                    const val = parseFloat(e.target.value) || 0;
+
+                                                                    setCreditNoteItemMap((prev) => ({
+                                                                        ...prev,
+                                                                        [index]: {
+                                                                            ...prev[index],
+                                                                            quantity: val,
+                                                                        },
+                                                                    }));
+
+                                                                    updateItem(field.idInvoiceItem!, { quantity: val });
+                                                                }}
                                                                 className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 text-center focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
                                                             />
                                                         </div>
+
                                                         <div>
                                                             <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
                                                                 P.U HT
                                                             </label>
                                                             <input
-                                                                type="number"
-                                                                min={100}
-                                                                value={item.unityPriceEXclTax}
-                                                                onChange={(e) => updateItem(item.idInvoiceItem!, "unityPriceEXclTax", parseFloat(e.target.value) || 0)}
+                                                                type="text"
+                                                                value={creditNoteItemMap[index]?.unityPriceEXclTax ?? ""}
+                                                                onChange={(e) => {
+                                                                    const val = parseFloat(e.target.value) || 0;
+                                                                    setCreditNoteItemMap((prev) => ({
+                                                                        ...prev,
+                                                                        [index]: {
+                                                                            ...prev[index],
+                                                                            unityPriceEXclTax: val,
+                                                                        },
+                                                                    }));
+
+                                                                    updateItem(field.idInvoiceItem!, { unityPriceEXclTax: val });
+                                                                }}
                                                                 className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 text-center focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
                                                             />
                                                         </div>
+
                                                         <div>
                                                             <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
                                                                 TVA %
                                                             </label>
                                                             <select
-                                                                value={item.vatRate}
-                                                                onChange={(e) => updateItem(item.idInvoiceItem!, "vatRate", Number(e.target.value))}
+                                                                value={creditNoteItemMap[index].vatRate}
+                                                                onChange={(e) => {
+                                                                    const val = Number(e.target.value);
+
+                                                                    setCreditNoteItemMap((prev) => ({
+                                                                        ...prev,
+                                                                        [index]: {
+                                                                            ...prev[index],
+                                                                            vatRate: val,
+                                                                        },
+                                                                    }));
+
+                                                                    updateItem(field.idInvoiceItem!, { vatRate: val });
+                                                                }}
                                                                 className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 text-center focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
                                                             >
                                                                 {tvaRateSchema.options.map((rate) => (
-                                                                    <option key={rate.value} value={rate.value}>{rate.value}%</option>
+                                                                    <option key={rate.value} value={rate.value}>
+                                                                        {rate.value}%
+                                                                    </option>
                                                                 ))}
                                                             </select>
                                                         </div>
                                                     </div>
-
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </section>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
                                     {errors.invoiceItems?.message && (
                                         <ErrorForm error={errors.invoiceItems?.message} />)}
-                                </div>
-                                {/* Section 04 — Paiement */}
-                                <section>
-                                    <SectionTitle number="05" label="PAIEMENT" invoiceType={invoiceTypeSchema.enum.CREDITNOTE} />
-                                    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex flex-col gap-4 mt-3">
-                                        <div>
-                                            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
-                                                Conditions
-                                            </label>
-                                            <select
-                                                {...register("PaymentCondition", {
-                                                    onChange: (e) => { }
-                                                })}
-                                                className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition" >
-                                                {PaymentConditionSchema.options.map((condition) => (
-                                                    <option key={condition} value={condition}>{PaymentConditionLabels[condition]}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
-                                                Méthode
-                                            </label>
-                                            <select
-                                                {...register("paymentMethod")}
-                                                className="w-full px-3 py-2.5 rounded-xl border border-blue-300 bg-white text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition" >
-                                                {paymentMethodSchema.options.map((method) => (
-                                                    <option key={method} value={method}>
-                                                        {paymentMethodLabels[method]}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                    </div>
                                 </section>
                             </div>
-
                         </div>
-
                         {/* RIGHT COLUMN: Live Preview - Sticky  //  */}
                         <div className='col-span-2'>
                             <InvoicePreview ref={invoiceRef} data={previewData} />
                         </div>
-
-
                     </div>
-
                 </div>
             </main>
         </div>

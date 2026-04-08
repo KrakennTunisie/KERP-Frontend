@@ -12,7 +12,7 @@ export function useClientInvoiceList () {
     const [open, setOpen] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
     const [invoiceRef ,setInvoiceRef] = useState("");
-    
+   
      const router = useRouter()
     return {
      router,
@@ -22,8 +22,8 @@ export function useClientInvoiceList () {
      setOpen,
      deleteOpen,
      setDeleteOpen,
-     invoiceRef,
      setInvoiceRef,
+     invoiceRef,
      filtre,
      setFiltre
     }

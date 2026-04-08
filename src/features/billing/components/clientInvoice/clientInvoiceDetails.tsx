@@ -1,18 +1,20 @@
 "use client"
 
-import useClientInvoiceDetails, {InvoiceDetailsProps } from "../../hooks/useClientInvoiceDetails"
+import useClientInvoiceDetails, { InvoiceDetailsProps } from "../../hooks/useClientInvoiceDetails"
 import { mockInvoiceItems } from "../../mocks/invoice-items-mocks"
 import { mockInvoiceEvents } from "../../mocks/invoiceEvent-mocks"
 import { InvoiceEventLabels } from "../../types/invoiceEventType"
+import { invoiceStatusSchema } from "../../types/invoiceStatus"
 import Card from "../widgets/card"
 import { SectionLabel } from "../widgets/sectionLabel"
 import ShieldIcon from "../widgets/shieldIcon"
 import { SendToTTNModal } from "../widgets/ttnConfirmationModal"
 
 export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps) {
-    const { marked, setStatusPaiement, client, invoice, sendToTTN, TtnModalOpen, setTtnModalOpen, loading, sent, successMessage, router } = useClientInvoiceDetails({ invoiceId });
+    const { marked, setStatusPaiement, client, invoice, sendToTTN, TtnModalOpen, setTtnModalOpen,
+        hasCreditInvoice,loading, sent, successMessage, router } = useClientInvoiceDetails({ invoiceId });
     return (
-        <div className="min-h-screen bg-[#f8f7ff] font-sans">
+        <div className="min-h-screen bg-gray-50 font-sans">
 
             {/* TOP BAR */}
             <div className="bg-white border-b border-gray-200 px-6 py-3.5 flex items-center justify-between sticky top-0 z-50 shadow-sm">
@@ -66,7 +68,7 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                             {/* Bouton envoi TTN — visible seulement si pas encore envoyée */}
                             {!invoice?.invoiceComplianceStatus && (
                                 <button
-                                    onClick={() => {setTtnModalOpen(true) }}
+                                    onClick={() => { setTtnModalOpen(true) }}
                                     className="shrink-0 px-4 py-2 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue transition-colors cursor-pointer inline-flex items-center gap-2" >
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
@@ -86,7 +88,7 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                             )}
                         </div>
                     </Card>
-                     {/* Modal pour demander au user s'il veut envoyer la Facture au TTN */}
+                    {/* Modal pour demander au user s'il veut envoyer la Facture au TTN */}
                     <SendToTTNModal
                         open={TtnModalOpen}
                         onClose={() => setTtnModalOpen(false)}
@@ -100,8 +102,20 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                     <Card>
                         <SectionLabel>Actions rapides</SectionLabel>
                         <div className="grid grid-cols-2 gap-3">
-                            <button
+                            {hasCreditInvoice ?
+                             <button
                                 onClick={() => router.push(`/billing/invoices/clients/${invoiceId}/credit-note`)}
+                                disabled={invoice?.invoiceStatus == "PAYÉE"}
+                                className="flex items-center justify-center gap-2 py-3.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-600 text-sm font-bold hover:brightness-95 transition-all">
+                                <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                                    <polyline points="14 2 14 8 20 8" />
+                                    <line x1="9" y1="15" x2="15" y2="15" />
+                                </svg>
+                                Liste facture d'avoir
+                            </button> :
+                            <button
+                                onClick={() => router.push(`/billing/invoices/clients/${invoiceId}/credit-note/create`)}
                                 disabled={invoice?.invoiceStatus == "PAYÉE"}
                                 className="flex items-center justify-center gap-2 py-3.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-600 text-sm font-bold hover:brightness-95 transition-all">
                                 <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -111,19 +125,20 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                                 </svg>
                                 Créer Avoir
                             </button>
+                            }
                             <button
-                                disabled={invoice?.invoiceStatus == "PAYÉE"}
-                                onClick={() => invoice?.invoiceStatus == "PAYÉE" ? " " : setStatusPaiement()}
-                                className={`flex items-center justify-center gap-2 py-3.5 rounded-xl border text-sm font-bold transition-all ${marked
-                                    ? 'bg-green-100 border-green-300 text-green-700'
-                                    : 'bg-green-50 border-green-200 text-green-600 hover:brightness-95'
+                                disabled={invoice?.invoiceStatus == invoiceStatusSchema.enum.PAYÉE}
+                                onClick={() => setStatusPaiement()}
+                                className={`flex items-center justify-center gap-2 py-3.5 rounded-xl border text-sm font-bold transition-all ${invoiceStatusSchema.enum.PAYÉE
+                                    ? 'bg-blue-100 border-blue-300 text-blue-700'
+                                    : 'bg-blue-50 border-blue-200 text-blue-600 hover:brightness-95'
                                     }`}
                             >
                                 <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                                     <polyline points="9 11 12 14 22 4" />
                                     <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
                                 </svg>
-                                {marked ? 'Marqué Payé ✓' : 'Marquer Payé'}
+                                {invoice?.invoiceStatus == invoiceStatusSchema.enum.PAYÉE ? 'Marqué Payé ✓' : 'Marquer Payé'}
                             </button>
                         </div>
                     </Card>

@@ -15,10 +15,13 @@ import { fileSchema } from "../types/pdfSchema";
 
 
 export const invoiceSchema = z.object({
-    idInvoice : z.uuid(),
+    idInvoice : z.string(),
     invoiceNumber: z.string(),
     issueDate:  z.date(),
     dueDate:  z.date(),
+    sentToTTNDate:  z.date().nullable(),
+    sentToclientDate:  z.date().nullable(),
+    creationDate: z.date().nullable(),
     invoiceType: invoiceTypeSchema,
     invoiceStatus: invoiceStatusSchema,
     invoiceComplianceStatus: invoiceComplianceStatusSchema.nullable(),
@@ -26,7 +29,6 @@ export const invoiceSchema = z.object({
     totalExclTax: z.number(),
     totalInclTax: z.number(),
     vatAmount: z.number(),
-    vatRate : tvaRateSchema,
     paymentMethod: paymentMethodSchema,
     exchangeRateReferenceDate: z.date(),
     appliedExchangeRate: z.number(),

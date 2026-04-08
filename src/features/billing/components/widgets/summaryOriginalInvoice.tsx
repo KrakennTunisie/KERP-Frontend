@@ -1,5 +1,4 @@
 import { DeepPartial } from "react-hook-form";
-import { invoiceSchema } from "../../models/invoice";
 import { z } from "zod"
 import { CreditNoteSchema } from "../../models/creditNote";
 
@@ -23,7 +22,7 @@ export default function SummaryOriginalInvoice({data}:InvoicePreviewProps) {
     <div className="pr-5">
       <p className="text-[9px] font-black text-red-300 uppercase tracking-widest mb-1">Numéro</p>
       <p className="text-sm font-black text-red-500">{data.invoiceNumber ?? "—"}</p>
-      <p className="text-[10px] text-red-300 mt-0.5">{data.refOriginalInvoice ?? ""}</p>
+      <p className="text-[10px] text-red-300 mt-0.5">{data.originalInvoice?.invoiceNumber ?? ""}</p>
     </div>
 
     <div className="px-5">
@@ -39,17 +38,17 @@ export default function SummaryOriginalInvoice({data}:InvoicePreviewProps) {
 
     <div className="px-5">
       <p className="text-[9px] font-black text-red-300 uppercase tracking-widest mb-1">Client</p>
-      <p className="text-sm font-black text-red-900">{data.partner?.name ?? "—"}</p>
-      <p className="text-[10px] text-red-300 mt-0.5">{data.partner?.email ?? ""}</p>
+      <p className="text-sm font-black text-red-900">{data.originalInvoice?.partner?.name ?? "—"}</p>
+      <p className="text-[10px] text-red-300 mt-0.5">{data.originalInvoice?.partner?.email ?? ""}</p>
     </div>
 
     <div className="pl-5">
       <p className="text-[9px] font-black text-red-300 uppercase tracking-widest mb-1">Montant TTC</p>
       <p className="text-base font-black text-red-900 tracking-tight">
         {data.totalInclTax != null
-          ? new Intl.NumberFormat("fr-TN").format(data.totalInclTax)
+          ? new Intl.NumberFormat("fr-TN").format(data.originalInvoice?.totalInclTax!)
           : "—"}{" "}
-        <span className="text-xs font-bold text-red-300">{data.currency ?? ""}</span>
+        <span className="text-xs font-bold text-red-300">{data.originalInvoice?.currency ?? ""}</span>
       </p>
     </div>
 

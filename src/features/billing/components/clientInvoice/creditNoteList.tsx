@@ -1,44 +1,78 @@
 'use client';
 import { invoiceStatusColors, invoiceStatusSchema } from "../../types/invoiceStatus";
 import Link from "next/link";
-import { useClientInvoiceList } from "../../hooks/useClientsInvoiveList";
+import { PropsClient, useClientInvoiceList } from "../../hooks/useClientsInvoiveList";
 import { SendInvoiceModal } from "../widgets/sendInvoiceModal";
 import { invoiceComplianceStatusSchema } from "../../types/invoiceComplianceStatus";
 import { mockCreditNotes } from "../../mocks/credit-note-mocks";
 import { creditNoteTypeLabels } from "../../types/creditNoteType";
+import useCreditNoteList from "../../hooks/useCreditNoteList";
+import { PropsCreditNote } from "../../hooks/useCreditNoteDetails";
+import { DeleteInvoiceModal } from "../widgets/deleteInvoiceModal";
 
-export default function CreditNoteList() {
+export default function CreditNoteList({ params }: PropsClient) {
 
-    const { router, search, setSearch, open, setOpen, deleteOpen, setDeleteOpen,
-        filtre, setFiltre, setInvoiceRef } = useClientInvoiceList();
+    const { router, search, setSearch, open, setOpen, setDeleteOpen, deleteOpen, creditNoteRef,
+        filtre, setFiltre, invoiceRef, deleteCreditNote } = useCreditNoteList({ params });
     return (
-        <div className="min-h-screen bg-gray-50 p-8 font-sans">
-            <SendInvoiceModal
-                isOpen={open}
-                onClose={() => setOpen(false)}
-                onSend={({ to }) => alert(`Envoyé à : ${to}`)}
-            />
-            {/* Header */}
-            <div className="flex items-start justify-between mb-8">
-                <div>
-                    <h1 className="text-3xl font-black text-slate-900 tracking-tight">
-                        Factures d'avoir
-                    </h1>
-                    <p className="text-sm text-slate-500 mt-1">
-                        Gestion des factures d'avoir d'un client
-                    </p>
+        <div className="min-h-screen bg-gray-50 p font-sans">
+            {/* TOP BAR */}
+            {/* TOP BAR */}
+            <div className="bg-white border-b border-gray-200 px-6 py-3.5 flex items-start justify-between mb-8 sticky top-0 z-50 shadow-sm">
+
+                {/* LEFT */}
+                <div className="flex items-center gap-4">
+                    <button
+                        onClick={() => router.back()}
+                        className="w-9 h-9 rounded-xl border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors"
+                    >
+                        <svg
+                            width="16"
+                            height="16"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2.5"
+                            viewBox="0 0 24 24"
+                        >
+                            <path d="M19 12H5M12 5l-7 7 7 7" />
+                        </svg>
+                    </button>
+
+                    <div>
+                        <h1 className="text-3xl font-black text-slate-900 tracking-tight">
+                            Factures d'avoir
+                        </h1>
+                        <p className="text-sm text-slate-500 mt-1">
+                         Référence de la facture origianle : {params.invoiceId}
+                        </p>
+                    </div>
                 </div>
+
+                {/* RIGHT */}
                 <Link
-                    href="/billing/invoices/clients/create"
+                    href={`/billing/invoices/clients/${params.invoiceId}/credit-note/create`}
                     className="flex items-center gap-2 bg-red-600 hover:bg-red-700 transition-colors text-white font-bold px-6 py-3 rounded-xl shadow-md text-sm"
                 >
                     <span className="text-lg leading-none">+</span>
                     Nouvelle Facture d'avoir
                 </Link>
             </div>
+            <DeleteInvoiceModal
+                open={deleteOpen}
+                onClose={() => setDeleteOpen(false)}
+                invoiceRef={creditNoteRef}
+                onConfirm={async () => {
+                    setDeleteOpen(false);
+                }} />
 
+            <SendInvoiceModal
+                isOpen={open}
+                onClose={() => setOpen(false)}
+                onSend={({ to }) => alert(`Envoyé à : ${to}`)}
+            />
+            <div className="px-8">
             {/* Table card */}
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+            <div className="bg-white rounded-2xl  shadow-sm border border-slate-100 overflow-hidden">
                 {/* Search + Filters */}
                 <div className="flex items-center gap-4 p-5 border-b border-slate-100">
                     <div className="relative flex-1">
@@ -105,9 +139,9 @@ export default function CreditNoteList() {
                                     className="border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer"
                                 >
                                     <td className="px-5 py-4 font-bold text-slate-800">
-                                        {f.idInvoice}
+                                        {f.invoiceNumber}
                                     </td>
-                                    <td className="px-5 py-4 text-slate-700">{f.refOriginalInvoice}</td>
+                                    <td className="px-5 py-4 text-slate-700">{f.originalInvoice.invoiceNumber}</td>
                                     <td className="px-5 py-4">
                                         <span className={`px-3 py-1 rounded-full text-xs font-bold ${f.invoiceStatus !== "TOUTES" ? invoiceStatusColors[f.invoiceStatus] : ""
                                             }}`}>
@@ -118,9 +152,9 @@ export default function CreditNoteList() {
                                         {creditNoteTypeLabels[f.creditNoteReason]}
                                     </td>
                                     <td className="text-red-500 font-bold">
-                                            - {f.totalInclTax} {f.currency}
+                                        - {f.totalInclTax} {f.originalInvoice.currency}
                                     </td>
-                                    <td className="px-5 py-4 text-slate-600">{f.dueDate.toLocaleDateString("fr-FR")}</td>
+                                    <td className="px-5 py-4 text-slate-600">{f.issueDate.toLocaleDateString("fr-FR")}</td>
                                     <td className="px-5 py-4 text-center">
                                         {f.invoiceComplianceStatus == invoiceComplianceStatusSchema.enum.TTN_ACCEPTED ? (
                                             <svg className="w-5 h-5 text-emerald-500 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -137,7 +171,7 @@ export default function CreditNoteList() {
 
                                             {/* Voir */}
                                             <button
-                                                onClick={(e) => { e.stopPropagation(); console.log("view", f.idInvoice); router.push(`/billing/invoices/clients/${f.idInvoice}/details`) }}
+                                                onClick={(e) => { e.stopPropagation(); console.log("view", f.invoiceNumber); router.push(`/billing/invoices/clients/${params.invoiceId}/credit-note/${f.invoiceNumber}`) }}
                                                 className="p-2 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
                                                 title="Voir"
                                             >
@@ -146,10 +180,29 @@ export default function CreditNoteList() {
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
                                                 </svg>
                                             </button>
+                                            {/** Send To TTn button */}
+                                            <button
+                                                disabled={([
+                                                    invoiceComplianceStatusSchema.enum.RECEIVED,
+                                                    invoiceComplianceStatusSchema.enum.COMPLETED,
+                                                    invoiceComplianceStatusSchema.enum.SIGNING_PENDING,
+                                                    invoiceComplianceStatusSchema.enum.SIGNING_SUCCEEDED,
+                                                    invoiceComplianceStatusSchema.enum.TTN_ACCEPTED,
+                                                    invoiceComplianceStatusSchema.enum.TTN_PENDING,
+                                                    invoiceComplianceStatusSchema.enum.TTN_SUBMITTED
+                                                ] as string[]).includes(f.invoiceComplianceStatus!)}
+                                                onClick={(e) => { setOpen(true); console.log("send", f.invoiceNumber); }}
+                                                className="p-2 rounded-xl bg-green-50 text-green-600 hover:bg-green-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                title="Envoyer"
+                                            >
+                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12zm0 0h7.5" />
+                                                </svg>
+                                            </button>
                                             {/* Supprimer */}
                                             <button
                                                 disabled={f.invoiceComplianceStatus != null}
-                                                onClick={(e) => { setDeleteOpen(true); setInvoiceRef(f.invoiceNumber); console.log("delete", f.idInvoice); }}
+                                                onClick={(e) => { deleteCreditNote(f.invoiceNumber) }}
                                                 className="p-2 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                                 title="Supprimer"
                                             >
@@ -166,6 +219,7 @@ export default function CreditNoteList() {
                     </tbody>
                 </table>
             </div>
+        </div>
         </div>
 
     );

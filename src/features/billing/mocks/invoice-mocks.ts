@@ -2,22 +2,25 @@ import { z } from "zod";
 import { invoiceSchema } from "../models/invoice";
 import { PaymentConditionSchema } from "../types/paymentCondition";
 import { invoiceComplianceStatusSchema } from "../types/invoiceComplianceStatus";
+import { mockInvoiceItems } from "./invoice-items-mocks";
 
 type Invoice = z.infer<typeof invoiceSchema>;
 
 export const MOCK_INVOICES: Invoice[] = [
   {
-    idInvoice: "550e84005",
+    idInvoice: "55dcs565sx",
     invoiceNumber: "FC-2025-001",
     issueDate: new Date("2025-01-15"),
     dueDate: new Date("2025-02-14"),
+    sentToTTNDate:  new Date(),
+    sentToclientDate:  new Date(),
+    creationDate: new Date(),
     invoiceType: "SALE",
     invoiceStatus: "PAYÉE",
     invoiceComplianceStatus: invoiceComplianceStatusSchema.enum.TTN_ACCEPTED,
     totalExclTax: 33500,
     totalInclTax: 39865,
     PaymentCondition: PaymentConditionSchema.enum.NET_15,
-    vatRate: 19,
     paymentMethod: "BANK_TRANSFER",
     vatAmount: 20,
     exchangeRateReferenceDate: new Date("2025-01-15"),
@@ -41,7 +44,7 @@ export const MOCK_INVOICES: Invoice[] = [
       patente: null,
       invoices: [],
     },
-    invoiceItems: null,
+    invoiceItems: mockInvoiceItems,
     invoiceDocument: null
   },
   {
@@ -49,13 +52,15 @@ export const MOCK_INVOICES: Invoice[] = [
     invoiceNumber: "FC-2025-002",
     issueDate: new Date("2025-02-01"),
     dueDate: new Date("2025-03-01"),
+    sentToTTNDate:  new Date(),
+    sentToclientDate:  new Date(),
+    creationDate: new Date(),
     invoiceType: "SALE",
     invoiceStatus: "À PAYER",
     invoiceComplianceStatus: null,
 
     totalExclTax: 17420,
     totalInclTax: 20729.80,
-    vatRate: 19,
     PaymentCondition: PaymentConditionSchema.enum.NET_15,
     paymentMethod: "BANK_TRANSFER",
     vatAmount: 20,
@@ -66,7 +71,7 @@ export const MOCK_INVOICES: Invoice[] = [
     currency: "EUR",
     purchaseOrder: null,
     partner: null,
-    invoiceItems: null,
+    invoiceItems: mockInvoiceItems,
     invoiceDocument: null
   },
   {
@@ -74,13 +79,15 @@ export const MOCK_INVOICES: Invoice[] = [
     invoiceNumber: "FC-2026-001",
     issueDate: new Date("2026-01-10"),
     dueDate: new Date("2026-02-10"),
+    sentToTTNDate:  new Date(),
+    sentToclientDate:  new Date(),
+    creationDate: new Date(),
     invoiceType: "SALE",
     invoiceStatus: "BROULLION",
     invoiceComplianceStatus: invoiceComplianceStatusSchema.enum.TTN_PENDING,
     vatAmount: 20,
     totalExclTax: 29312.50,
     totalInclTax: 34881.87,
-    vatRate: 19,
     PaymentCondition: PaymentConditionSchema.enum.NET_15,
     paymentMethod: "BANK_TRANSFER",
     exchangeRateReferenceDate: new Date("2026-01-10"),
@@ -90,7 +97,7 @@ export const MOCK_INVOICES: Invoice[] = [
     complianceQRcode: "",
     purchaseOrder: null,
     partner: null,
-    invoiceItems: null,
+    invoiceItems: mockInvoiceItems,
     invoiceDocument: null,
   },
 ];

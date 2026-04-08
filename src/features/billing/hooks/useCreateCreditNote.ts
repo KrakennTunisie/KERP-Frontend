@@ -7,32 +7,18 @@ import {
     calculUnityPrice,
     recalculate,
 } from "../lib/invoiceCalculation";
-import { InvoiceItem } from "../models/invoiceItem";
-import { useEffect, useRef, useState } from "react";
-import { invoiceTypeSchema } from "../types/invoiceType";
+import { InvoiceItem} from "../models/invoiceItem";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { CreditNoteTypeSchema } from "../types/creditNoteType";
-import { MOCK_PARTNERS } from "../mocks/clients-mocks";
-import { Invoice } from "../models/invoice";
 import { useRouter } from "next/navigation";
-import { PaymentConditionSchema } from "../types/paymentCondition";
-import defaultItem from "../mocks/invoice-items-mocks";
+import defaultItem, { mockInvoiceItems } from "../mocks/invoice-items-mocks";
 import { handleSaveAsPDF } from "../lib/buildInvoicePDF";
-import { invoiceStatusSchema } from "../types/invoiceStatus";
+import { MOCK_INVOICES } from "../mocks/invoice-mocks";
 import { invoiceComplianceStatusSchema } from "../types/invoiceComplianceStatus";
-import { paymentMethodSchema } from "../types/paymentMethod";
-import { exchangeRateSourceSchema } from "../types/exchangeRateSource";
-import { currencyTypeSchema } from "../types/currency";
+import { invoiceStatusSchema } from "../types/invoiceStatus";
 
 type creditNoteFormValues = z.infer<typeof CreditNoteSchema>;
-type UpdateableField =
-    | "description"
-    | "quantity"
-    | "unityPriceEXclTax"
-    | "vatRate"
-    | "operationCategory";
-
 export default function useCreateCreditNote() {
-    const [originalInvoice, setOriginalInvoice] = useState<Invoice>();
     const router = useRouter();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [TtnModalOpen, setTtnModalOpen] = useState(false);
@@ -41,90 +27,43 @@ export default function useCreateCreditNote() {
     const [successMessage, setSuccessMessage] = useState("");
     const invoiceRef = useRef<HTMLDivElement>(null);
     const [pdfUrl, setPdfUrl] = useState<File | null>(null);
+    const [itemSearchMap, setItemSearchMap] = useState<Record<number, string>>({});
+    const [showDropdownMap, setShowDropdownMap] = useState<Record<number, boolean>>({});
+    const [creditNoteItemMap, setCreditNoteItemMap] = useState<Record<number, any>>({});
+    
 
+    //Initialisation du formulaire
     const form = useForm<creditNoteFormValues>({
         resolver: zodResolver(CreditNoteSchema),
         defaultValues: {
-            // valeurs par défaut minimales, sans dépendance à originalInvoice
-            invoiceType: invoiceTypeSchema.enum.CREDITNOTE,
-            invoiceNumber: "AV-2024-001",
+            invoiceNumber: crypto.randomUUID(),
             issueDate: new Date(),
+            creationDate: new Date(),
+            sentToclientDate: null,
+            sentToTTNDate: null,
             creditNoteReason: CreditNoteTypeSchema.enum["Quality Issue"],
             invoiceItems: [defaultItem()],
+            QRCode: " ",
+            invoiceComplianceStatus: invoiceComplianceStatusSchema.enum.TTN_ACCEPTED,
+            invoiceStatus: invoiceStatusSchema.enum.BROULLION,
+            invoiceDocument: null,
+            totalExclTax: 0,
+            totalInclTax: 0,
+            vatAmount: 0,
+            originalInvoice: MOCK_INVOICES[0]
         },
         mode: "onChange",
     });
-    const { control, setValue, getValues, handleSubmit, reset, formState: { isDirty, isValid, errors } } = form;
-    const { append, remove, } = useFieldArray({
+    const { control, setValue, getValues, handleSubmit, formState: { isDirty, isValid, errors } } = form;
+    const { fields, append, remove, } = useFieldArray({
         control,
         name: "invoiceItems",
+        keyName: "fieldId",
     });
     const previewData = useWatch({ control });
-    // useEffect 1 : chargement de la facture originale // aprés on va changer par un appel d'api
-    useEffect(() => {
-        const fetchedInvoice: Invoice = {
-            idInvoice: crypto.randomUUID(),
-            invoiceNumber: "FA-2024-001",
-            issueDate: new Date("2024-03-01"),
-            dueDate: new Date("2024-03-16"),
-            invoiceType: invoiceTypeSchema.enum.SALE,
-            invoiceStatus: invoiceStatusSchema.enum.PAYÉE,
-            invoiceComplianceStatus: invoiceComplianceStatusSchema.enum.TTN_PENDING,
-            currency: currencyTypeSchema.enum.TND,
-            totalExclTax: 3900.00,
-            totalInclTax: 4680.00,
-            vatAmount: 40,
-            vatRate: 19,
-            paymentMethod: paymentMethodSchema.enum.BANK_TRANSFER,
-            exchangeRateReferenceDate: new Date("2024-03-01"),
-            appliedExchangeRate: 3.25,
-            exchangeRateSource: exchangeRateSourceSchema.enum.CENTRAL_BANK,
-            complianceQRcode: "https://qr.example.com/FA-2024-001",
-            PaymentCondition: PaymentConditionSchema.enum.NET_15,
-            purchaseOrder: null,
-            partner: MOCK_PARTNERS[1],
-            invoiceItems: null,
-            invoiceDocument: null,
-        };
-        setOriginalInvoice(fetchedInvoice);
-    }, []);
 
-    // useEffect 2 : reset du formulaire quand originalInvoice est disponible
-    useEffect(() => {
-        if (!originalInvoice) return;
-reset({
-    // ── champs hérités ───────────────────────────────────────
-    partner: originalInvoice.partner ?? undefined,
-    currency: originalInvoice.currency,
-    paymentMethod: originalInvoice.paymentMethod ?? undefined,
-    PaymentCondition: originalInvoice.PaymentCondition ?? undefined,
-    appliedExchangeRate: originalInvoice.appliedExchangeRate ?? undefined,
-    totalInclTax: originalInvoice.totalInclTax,
-    invoiceItems: originalInvoice.invoiceItems ?? [defaultItem()],
 
-    // ── champs overridés ─────────────────────────────────────
-    invoiceType: invoiceTypeSchema.enum.CREDITNOTE,
-    invoiceNumber: "AV-2024-001",
-    issueDate: new Date(),
 
-    // ── champs spécifiques à l'avoir ─────────────────────────
-    refOriginalInvoice: originalInvoice.idInvoice,
-    creditNoteReason: CreditNoteTypeSchema.enum["Quality Issue"],
-
-    // ── champs manquants ─────────────────────────────────────
-    idInvoice: crypto.randomUUID(),
-    dueDate: new Date(),              
-    exchangeRateReferenceDate: originalInvoice.exchangeRateReferenceDate ,
-    exchangeRateSource: originalInvoice.exchangeRateSource,
-    invoiceComplianceStatus: originalInvoice.invoiceComplianceStatus,  
-    invoiceStatus: invoiceStatusSchema.enum["À PAYER"],
-    invoiceDocument: originalInvoice.invoiceDocument,      
-    purchaseOrder:originalInvoice.purchaseOrder,       
-    vatRate: originalInvoice.vatRate,
-    complianceQRcode: "",
-});
-    }, [originalInvoice, reset]);
-    
     // Validation des données 
     const canCreateInvoice =
         isDirty &&
@@ -132,25 +71,50 @@ reset({
         !!previewData.creditNoteReason &&
         !!previewData.invoiceItems?.length &&
         !!previewData.issueDate &&
-        !!previewData.PaymentCondition &&
-        !!previewData.paymentMethod &&
         previewData.invoiceItems.every(
             (item) =>
                 item.description?.trim() &&
-                item.operationCategory?.trim() &&
                 item.quantity! > 0 &&
                 item.unityPriceEXclTax! >= 0 &&
                 item.vatRate! >= 0
         );
 
+    //filtrage des éléments aprés la sélection
+    const filteredItems = useMemo(() => {
+        const selectedDescriptions = Object.values(creditNoteItemMap)
+            .filter(Boolean)
+            .map((item) => item!.description);
+
+        return mockInvoiceItems!.filter((item) =>
+            !selectedDescriptions.includes(item.description)
+        );
+    }, [creditNoteItemMap]);
+
+    // Synchronisation des items avec invoicePreview
     const syncItems = (newItems: InvoiceItem[]) => {
         setValue("invoiceItems", newItems, { shouldValidate: true, shouldDirty: true, });
         calculateInvoiceTotals(getValues("invoiceItems")!);
     };
-    
+
     // L'ajout d'une carte pour une prestation
     const addItem = () => {
-        append(defaultItem(), { shouldFocus: false, });
+        const newIndex = fields.length;
+
+        append(defaultItem(), { shouldFocus: false });
+        setItemSearchMap((prev) => ({
+            ...prev,
+            [newIndex]: "",
+        }));
+
+        setShowDropdownMap((prev) => ({
+            ...prev,
+            [newIndex]: false,
+        }));
+
+        setCreditNoteItemMap((prev) => ({
+            ...prev,
+            [newIndex]: null,
+        }));
     };
 
     // Suppression d'item et la mis à jour des totaux TTC / HT /TVA  
@@ -173,34 +137,40 @@ reset({
 
 
     // Mis à jour les données d'item (QT, P.U, TVA ) et calcul de nouveau les totaux 
-    const updateItem = (id: string, field: UpdateableField, value: string | number) => {
+    const updateItem = (id: string, patch: Partial<InvoiceItem>) => {
         const currentItems = getValues("invoiceItems") ?? [];
 
         const updatedItems = currentItems.map((item) => {
             if (item.idInvoiceItem !== id) return item;
-            const updatedItem = { ...item, [field]: value };
-            if (field === "unityPriceEXclTax") {
-                const itemWithConvertedPrice = calculUnityPrice(
-                    updatedItem,
-                    getValues("currency"),
-                    getValues("appliedExchangeRate")
-                );
-                return recalculate(itemWithConvertedPrice);
-            }
-            return recalculate(updatedItem,);
+
+            let updatedItem = {
+                ...item,
+                ...patch,
+            };
+
+            updatedItem = calculUnityPrice(
+                updatedItem,
+                getValues("originalInvoice.currency"),
+                getValues("originalInvoice.appliedExchangeRate")
+            );
+
+            console.log(updatedItem)
+            return recalculate(updatedItem);
         });
+
         const totals = calculateInvoiceTotals(updatedItems);
+
+        setValue("invoiceItems", updatedItems, { shouldValidate: true, shouldDirty: true });
         setValue("totalExclTax", totals.totalHT, { shouldValidate: true, shouldDirty: true });
         setValue("vatAmount", totals.totalTVA, { shouldValidate: true, shouldDirty: true });
         setValue("totalInclTax", totals.totalTTC, { shouldValidate: true, shouldDirty: true });
+
         syncItems(updatedItems);
     };
-     
+
     //Génération et visualisation du document PDF Facture Avoir 
     const onSubmit = handleSubmit(
-       
         async (data) => {
-             console.log("hi")
             const file = await handleSaveAsPDF(invoiceRef, getValues("invoiceNumber"));
             if (file) {
                 setValue("invoiceDocument", file, { shouldValidate: true, shouldDirty: true });
@@ -248,6 +218,7 @@ reset({
         removeItem,
         addItem,
         updateItem,
+        fields,
 
 
         createInvoice,
@@ -265,6 +236,15 @@ reset({
         //data validation
         canCreateInvoice,
         errors,
-        router
+        router,
+
+        showDropdownMap,
+        setShowDropdownMap,
+        itemSearchMap,
+        setItemSearchMap,
+        creditNoteItemMap,
+        setCreditNoteItemMap,
+        filteredItems,
+        syncItems
     }
 }
