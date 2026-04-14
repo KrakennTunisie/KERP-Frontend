@@ -41,7 +41,7 @@ export default function ConfirmDeleteModal({
           <button
             onClick={onCancel}
             disabled={isLoading}
-            className="px-5 py-3 rounded-2xl border border-gray-200 font-black hover:bg-gray-50 disabled:opacity-60"
+            className="px-5 py-3 rounded-2xl border border-gray-200 font-black hover:bg-gray-50 disabled:opacity-60 cursor-pointer"
           >
             {cancelLabel}
           </button>
@@ -49,7 +49,7 @@ export default function ConfirmDeleteModal({
           <button
             onClick={onConfirm}
             disabled={isLoading}
-            className="px-5 py-3 rounded-2xl bg-rose-600 text-white font-black hover:bg-rose-700 disabled:opacity-60"
+            className="px-5 py-3 rounded-2xl bg-rose-600 text-white font-black hover:bg-rose-700 disabled:opacity-60 cursor-pointer"
           >
             {isLoading ? "Suppression..." : confirmLabel}
           </button>

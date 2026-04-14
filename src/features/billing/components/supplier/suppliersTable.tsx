@@ -102,7 +102,7 @@ export default function SuppliersTable({
         <div className="flex items-center justify-center gap-2">
           <button
             onClick={() => router.push(`/billing/suppliers/${supplier.idPartner}`)}
-            className="p-2.5 bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 rounded-xl shadow-sm transition-all"
+            className="p-2.5 bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 rounded-xl shadow-sm transition-all cursor-pointer"
             title="Voir"
           >
             <Eye className="w-4 h-4" />
@@ -110,7 +110,7 @@ export default function SuppliersTable({
 
           <button
             onClick={() => onUpdateRequest(supplier)}
-            className="p-2.5 bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 rounded-xl shadow-sm transition-all"
+            className="p-2.5 bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 rounded-xl shadow-sm transition-all cursor-pointer"
             title="Modifier"
           >
             <Edit className="w-4 h-4" />
@@ -118,7 +118,7 @@ export default function SuppliersTable({
 
           <button
             onClick={() => onDeleteRequest(supplier.idPartner)}
-            className="p-2.5 bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 rounded-xl shadow-sm transition-all"
+            className="p-2.5 bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 rounded-xl shadow-sm transition-all cursor-pointer"
             title="Supprimer"
           >
             <Trash2 className="w-4 h-4" />

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import PartnerDetails from "../partner/partnerDetails";
 import { useParams } from "next/navigation";
-import { Partner, SupplierPartner } from "../../models/partner";
+import {  SupplierPartner } from "../../models/partner";
 import { partnersApi } from "../../api/partners-api";
 import { appToast } from "@/shared/lib/toast";
 import { getApiErrorMessage } from "@/shared/api/handle-api-error";
@@ -24,7 +24,7 @@ export default function SupplierDetails(){
       const supplier = await partnersApi.getSupplierById(supplierId);
       setSupplier(supplier);
     } catch (error) {
-      appToast.error(getApiErrorMessage(error));
+      appToast.error("Erreur fetch du fournisseur: ",getApiErrorMessage(error));
     }
     finally{
       setLoading(false)
@@ -32,7 +32,7 @@ export default function SupplierDetails(){
   };
 
   fetchSupplier();
-}, [params.id]);
+}, [supplierId]);
 
 if(loading){
   return(

@@ -13,7 +13,7 @@ type Props = {
   open: boolean;
   data: SupplierPartnerItem;
   onClose: () => void;
-  onCreated?: () => void; // refresh list, etc.
+  onCreated: () => void; // refresh list, etc.
 };
 
 export default function SupplierUpdateModal({ open, onClose, onCreated, data }: Props) {
@@ -24,10 +24,11 @@ export default function SupplierUpdateModal({ open, onClose, onCreated, data }: 
           if (updatedSupplier) {
             appToast.success("Fournisseur modifié avec succès");
             onClose();
+            onCreated();
           }
         } catch (e: any) {
           const message = getApiErrorMessage(e);
-          appToast.error(message);
+          appToast.error("Erreur modification du fournisseur: ",message);
           
         }
       };

@@ -13,9 +13,10 @@ import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 type SupplierCreateModalProps = {
   open: boolean;
   onClose: () => void;
+  onCreated: ()=> void,
 };
 
-export default function SupplierCreateModal({ open, onClose }: SupplierCreateModalProps) {
+export default function SupplierCreateModal({ open, onClose, onCreated }: SupplierCreateModalProps) {
 
       const onSubmit: SubmitHandler<CreateSupplierPartner> = async (values) => {
         try {
@@ -43,6 +44,7 @@ export default function SupplierCreateModal({ open, onClose }: SupplierCreateMod
           if (createdClient) {
             appToast.success("Fournisseur créé avec succès");
             onClose();
+            onCreated();
           }
         } catch (e: any) {
           const message = getApiErrorMessage(e);

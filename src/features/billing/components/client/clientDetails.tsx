@@ -27,7 +27,7 @@ export default function ClientDetails(){
       const client = await partnersApi.getClientById(clientId);
       setClient(client);
     } catch (error) {
-      appToast.error(getApiErrorMessage(error));
+      appToast.error("Erreur Fetch du client:",getApiErrorMessage(error));
     }
     finally{
       setLoading(false)
@@ -35,7 +35,7 @@ export default function ClientDetails(){
   };
 
   fetchClient();
-}, [params.id,clientId]);
+}, [clientId]);
 
 if(loading){
   return(

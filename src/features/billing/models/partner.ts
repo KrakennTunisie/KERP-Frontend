@@ -13,7 +13,7 @@ const ACCEPTED_TYPES = [
 
 const fileSchema = z
   .instanceof(File, { message: "Fichier obligatoire" })
-  .refine((file) => file.size <= MAX_FILE_SIZE, "Le fichier doit être inférieur à 5MB")
+  .refine((file) => file.size <= MAX_FILE_SIZE, "Le fichier doit être inférieur à 3MB")
   .refine(
     (file) => ACCEPTED_TYPES.includes(file.type),
     "Format accepté : PDF, JPG, PNG"
@@ -46,6 +46,8 @@ export const createPartnerSchema = z.object({
   country: z.string().min(1, "Le pays est obligatoire"),
   address: z.string().min(1, "L'addresse est obligatoire"),
   iban: z.string().min(1, "IBAN est obligatoire"),
+
+  partnerType: partnerTypeSchema,
 
   rne: fileSchema,
   contract: fileSchema,

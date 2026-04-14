@@ -12,10 +12,10 @@ import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 type Props = {
   open: boolean;
   onClose: () => void;
-  onCreated?: () => void; // refresh list, etc.
+  onCreated: () => void; // refresh list, etc.
 };
 
-export default function ClientCreateModal({ open, onClose}: Props) {
+export default function ClientCreateModal({ open, onClose, onCreated}: Props) {
       
   const onSubmit: SubmitHandler<CreateClientPartner> = async (values) => {
         try {
@@ -42,6 +42,7 @@ export default function ClientCreateModal({ open, onClose}: Props) {
           if (createdClient) {
             appToast.success("Client créé avec succès");
             onClose();
+            onCreated();
           }
         } catch (e:unknown) {
           const message = getApiErrorMessage(e);
