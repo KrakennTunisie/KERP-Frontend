@@ -3,7 +3,7 @@ import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter } from "next/navigation"
-import { invoiceSchema } from "../models/invoice";
+import { Invoice, invoiceSchema } from "../models/invoice";
 import { InvoiceItem } from "../models/invoiceItem";
 import { Partner } from "../models/partner";
 import { MOCK_PARTNERS } from "../mocks/clients-mocks";
@@ -21,13 +21,13 @@ import { invoiceComplianceStatusSchema } from "../types/invoiceComplianceStatus"
 import { paymentMethodSchema } from "../types/paymentMethod";
 import { exchangeRateSourceSchema } from "../types/exchangeRateSource";
 import { handleSaveAsPDF } from "../lib/buildInvoicePDF";
+import { PurchaseOrder } from "../models/purchaseOrder";
 
 export type InvoiceFormClientProps = {
   mode: "create" | "edit"
   invoiceId?: String
 }
 
-type InvoiceFormValues = z.infer<typeof invoiceSchema>;
 type UpdateableField =
   | "description"
   | "quantity"
@@ -38,7 +38,7 @@ type UpdateableField =
 
 export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
   const router = useRouter()
-  const form = useForm<InvoiceFormValues>({
+  const form = useForm<Invoice>({
     resolver: zodResolver(invoiceSchema),
     defaultValues: {
       invoiceType: "SALE",
@@ -49,7 +49,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
       creationDate: new Date(),
       sentToclientDate: null,
       sentToTTNDate: null,
-      dueDate:new Date(new Date().setDate(new Date().getDate() + 15)) ,
+      dueDate: new Date(new Date().setDate(new Date().getDate() + 15)),
       invoiceItems: [defaultItem()],
       totalExclTax: 0,
       totalInclTax: 0,
@@ -71,7 +71,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
     mode: "onChange",
   });
 
-  const { control, setValue, getValues, handleSubmit ,formState: { isDirty, isValid,errors} } = form;
+  const { control, setValue, getValues, handleSubmit, formState: { isDirty, isValid, errors } } = form;
   const { append, remove, replace } = useFieldArray({
     control,
     name: "invoiceItems",
@@ -83,7 +83,12 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
   const [sent, setSent] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const invoiceRef = useRef<HTMLDivElement>(null);
-  const [pdfUrl, setPdfUrl] = useState< File | null>(null);
+  const [pdfUrl, setPdfUrl] = useState<File | null>(null);
+
+
+  // Linked to purchaseOrder 
+  const [linkedToPO, setLinkedToPO] = useState(false);
+  const [selectedPO, setSelectedPO] = useState<PurchaseOrder | null>(null);
 
 
   // UI state only
@@ -94,26 +99,62 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
 
   // Validation des données obligatoire
 
-const canCreateInvoice =
-  isDirty &&
-  isValid &&
-  !!previewData.partner &&
-  !!previewData.invoiceItems?.length &&
-  !!previewData.dueDate &&
-  !!previewData.issueDate &&
-  !!previewData.PaymentCondition &&
-  !!previewData.paymentMethod &&
-  previewData.invoiceItems.every(
-    (item) =>
-      item.description?.trim() &&
-      item.operationCategory?.trim() &&
-      item.quantity! > 0 &&
-      item.unityPriceEXclTax! >= 0 &&
-      item.vatRate! >= 0
-  ); 
+  const canCreateInvoice =
+    isDirty &&
+    isValid &&
+    !!previewData.partner &&
+    !!previewData.invoiceItems?.length &&
+    !!previewData.dueDate &&
+    !!previewData.PaymentCondition &&
+    !!previewData.paymentMethod &&
+    previewData.invoiceItems.every(
+      (item) =>
+        item.description?.trim() &&
+        item.operationCategory?.trim() &&
+        item.quantity! > 0 &&
+        item.unityPriceEXclTax! >= 0 &&
+        item.vatRate! >= 0
+    );
 
-
-
+  
+  // Recupération les données d'un bon de commande lorsque la facture est liée à un bon de commande 
+  function handleSelectPO(po: PurchaseOrder) {
+    setSelectedPO(po);
+    // Pré-remplir les champs du form
+    console.log(po.issueDate.toLocaleDateString)
+    form.setValue("issueDate",  new Date(po.issueDate).toISOString().split("T")[0] as unknown as Date);
+    form.setValue("issueDate",po.issueDate, { shouldValidate: true, shouldDirty: true,});
+    form.setValue("PaymentCondition", po.PaymentCondition);
+    form.setValue("paymentMethod", po.paymentMethod);
+    calculateDueDate()
+    form.setValue("currency", po.currency);
+    selectClient(po?.partner!);
+    const totals = calculateInvoiceTotals(po.purchaseOrderItems!);
+    setValue("totalExclTax", totals.totalHT, { shouldValidate: true, shouldDirty: true });
+    setValue("vatAmount", totals.totalTVA, { shouldValidate: true, shouldDirty: true });
+    setValue("totalInclTax", totals.totalTTC, { shouldValidate: true, shouldDirty: true });
+    syncItems(po.purchaseOrderItems!)
+    // pré-remplir les items
+    po?.purchaseOrderItems!.forEach(() => addItem());
+  }
+   
+  // Suppression des données du bon de commande lorsque le reclique sur le checkbox 
+  function handleTogglePO(checked: boolean) {
+    setLinkedToPO(checked);
+    if (!checked) {
+      setSelectedPO(null);
+      clearClient();
+      setValue("invoiceItems", [defaultItem()], { shouldValidate: true, shouldDirty: true, });
+      setValue("issueDate", new Date(), { shouldValidate: true, shouldDirty: true, });
+      setValue("currency", currencyTypeSchema.enum.TND, { shouldValidate: true, shouldDirty: true, });
+      setValue("PaymentCondition", PaymentConditionSchema.enum.NET_15, { shouldValidate: true, shouldDirty: true, });
+      setValue("paymentMethod", paymentMethodSchema.enum.BANK_TRANSFER, { shouldValidate: true, shouldDirty: true, });
+      setValue("totalExclTax", 0, { shouldValidate: true, shouldDirty: true });
+      setValue("vatAmount", 0, { shouldValidate: true, shouldDirty: true });
+      setValue("totalInclTax", 0, { shouldValidate: true, shouldDirty: true });
+      // reset les champs si besoin
+    }
+  }
 
 
   //Filtrage de la liste des clients lors de la recherche 
@@ -220,20 +261,19 @@ const canCreateInvoice =
   };
 
   // calcule de la date d'échance lors la saisie de condition de paiement 
-  
-  const calculateDueDate = (): Date => {
-   const date = new Date(getValues("issueDate"));
-   console.log(date)
-  switch (getValues("PaymentCondition")) {
-    case PaymentConditionSchema.enum.NET_15: date.setDate(date.getDate() + 15); break;
-    case  PaymentConditionSchema.enum.NET_30: date.setDate(date.getDate() + 30); break;
-    case  PaymentConditionSchema.enum.NET_45: date.setDate(date.getDate() + 45); break;
-    case "IMMEDIATE": break;
-  }
-   setValue("dueDate", date, { shouldValidate: true });
-  return date;
-};
 
+  const calculateDueDate = (): Date => {
+    const date = new Date(getValues("issueDate"));
+    switch (getValues("PaymentCondition")) {
+      case PaymentConditionSchema.enum.NET_15: date.setDate(date.getDate() + 15); break;
+      case PaymentConditionSchema.enum.NET_30: date.setDate(date.getDate() + 30); break;
+      case PaymentConditionSchema.enum.NET_45: date.setDate(date.getDate() + 45); break;
+      case "IMMEDIATE": break;
+    }
+    setValue("dueDate", date, { shouldValidate: true });
+    return date;
+  };
+ 
   // Permet la visualisation  de la facture en PDF une fois remplie
   const onSubmit = handleSubmit(
     async (data) => {
@@ -250,31 +290,29 @@ const canCreateInvoice =
   );
 
   //fermer le document modal 
-  function onCloseDocumentModal()
-  {
-  setIsModalOpen(false);
-  setPdfUrl(null);
+  function onCloseDocumentModal() {
+    setIsModalOpen(false);
+    setPdfUrl(null);
   }
 
- //créer facture
- function createInvoice(){
-  //Appel de l'api
-  setIsModalOpen(false); 
-  setSuccessMessage("La facture a été créée avec succès.")      
-  setTtnModalOpen(true);
- 
- }
+  //créer facture
+  function createInvoice() {
+    //Appel de l'api
+    setIsModalOpen(false);
+    setSuccessMessage("La facture a été créée avec succès.")
+    setTtnModalOpen(true);
 
- // Envoyer la facture au TTN 
- function sendToTTN ()
- {
-  setLoading(true);
-  setTimeout(() => {
-    setLoading(false)
-    setSuccessMessage("La facture a été envoyée avec succès au TTN.")
-    setSent(true)
-  }, 10000);
- }
+  }
+
+  // Envoyer la facture au TTN 
+  function sendToTTN() {
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false)
+      setSuccessMessage("La facture a été envoyée avec succès au TTN.")
+      setSent(true)
+    }, 10000);
+  }
 
 
   return {
@@ -300,7 +338,7 @@ const canCreateInvoice =
     clearClient,
     setCurrency,
 
-    
+
     setTtnModalOpen,
     TtnModalOpen,
     isModalOpen,
@@ -311,17 +349,21 @@ const canCreateInvoice =
     onCloseDocumentModal,
     invoiceRef,
     pdfUrl,
-  
- 
+
+
+    linkedToPO,
+    setLinkedToPO,
+    selectedPO,
+    handleSelectPO,
+    handleTogglePO,
 
     //data validation
-   
+
     canCreateInvoice,
     errors,
 
     //dueDate
     calculateDueDate,
-
     //createInvoice
     createInvoice,
     //Navigation

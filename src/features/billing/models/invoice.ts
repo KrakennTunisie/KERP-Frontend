@@ -35,7 +35,7 @@ export const invoiceSchema = z.object({
     exchangeRateSource : exchangeRateSourceSchema,
     complianceQRcode : z.string(),
     PaymentCondition: PaymentConditionSchema,
-    purchaseOrder: purchaseOrderSchema.nullable(), // Null pour le momemnt , pour faciliter le test
+    purchaseOrder: z.lazy(() => purchaseOrderSchema).nullable(), // Null pour le momemnt , pour faciliter le test
     partner : z.lazy(()=>partnerSchema).nullable(),
     invoiceItems : z.array(invoiceItemSchema).nullable()
    .refine((items) => {

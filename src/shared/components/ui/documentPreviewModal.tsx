@@ -7,7 +7,7 @@ import { Modal } from "./modal";
 import { FileText, Download, ExternalLink, File as FileIcon } from "lucide-react";
 import { Document as BillingDocument } from "@/features/billing/models/document";
 import { FileSchema } from "../../../features/billing/types/pdfSchema";
-import { useCreateInvoice } from "@/features/billing/hooks/useCreateInvoice";
+import { useCreateInvoice } from "@/features/billing/hooks/useCreateEditInvoice";
 
 
 type DocumentOrFile = BillingDocument| FileSchema | null;

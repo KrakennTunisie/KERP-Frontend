@@ -57,7 +57,7 @@ export const mockInvoiceItems: InvoiceItem[] = [
     description: 'Licence Logiciel Annuelle',
     quantity: 3,
     unityPriceEXclTax: 600,
-    vatRate: 0,
+    vatRate: 19,
     itemTotalExclTax: 1800,
     itemTaxAmount: 126,
     itemTotalInclTax: 1926,
