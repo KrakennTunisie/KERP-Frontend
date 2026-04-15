@@ -1,23 +1,9 @@
 import {  z } from "zod";
 import {  partnerTypeSchema } from "../types/partnerType";
 import {  invoiceSchema } from "./invoice";
-import { documentSchema } from "./document";
+import { fileSchema } from "../types/pdfSchema";
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
-const ACCEPTED_TYPES = [
-  "application/pdf",
-  "image/jpeg",
-  "image/png"
-];
-
-const fileSchema = z
-  .instanceof(File, { message: "Fichier obligatoire" })
-  .refine((file) => file.size <= MAX_FILE_SIZE, "Le fichier doit être inférieur à 3MB")
-  .refine(
-    (file) => ACCEPTED_TYPES.includes(file.type),
-    "Format accepté : PDF, JPG, PNG"
-  );
 
 export const partnerSchema = z.object({
   idPartner: z.uuid(),
@@ -29,9 +15,9 @@ export const partnerSchema = z.object({
   address: z.string().min(1, "L'addresse est obligatoire"),
   iban: z.string().min(1, "IBAN est obligatoire"),
 
-  rne: documentSchema,
-  contract: documentSchema,
-  patente: documentSchema,
+  rne: fileSchema.nullable(),
+  contract: fileSchema.nullable(),
+  patente: fileSchema.nullable(),
 
   partnerType: partnerTypeSchema,
 
@@ -88,6 +74,15 @@ export const updatePartnerSchema = createPartnerSchema
   .omit({ taxRegistrationNumber: true, rne: true, contract: true, patente: true })
   .partial();
 
+export const partnerSummarySchema = partnerSchema.pick({
+  idPartner: true,
+  name: true,
+  email: true,
+  address: true,
+  phoneNumber: true,
+  partnerType: true,
+});
+export type PartnerSummary = z.infer<typeof partnerSummarySchema>;
 export type CreateClientPartner = z.infer<typeof createClientPartnerSchema>;
 export type CreateSupplierPartner = z.infer<typeof createSupplierPartnerSchema>;
 export type UpdatePartner = z.infer<typeof updatePartnerSchema>;
