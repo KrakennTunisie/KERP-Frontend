@@ -26,7 +26,7 @@ import { purchaseOrderStatusSchema } from "../types/purchaseOrderStatus";
 
 export type InvoiceFormClientProps = {
   mode: "create" | "edit"
-  invoiceId?: String
+  invoiceId?: string
 }
 type UpdateableField =
   | "description"

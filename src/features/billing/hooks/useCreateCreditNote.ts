@@ -169,9 +169,13 @@ export default function useCreateCreditNote() {
     };
 
     //Génération et visualisation du document PDF Facture Avoir 
+     /* eslint-disable react-hooks/refs */
     const onSubmit = handleSubmit(
-        async (data) => {
-            const file = await handleSaveAsPDF(invoiceRef, getValues("invoiceNumber"));
+        async () => {
+            const element = invoiceRef.current;
+
+            if (!element) return;
+            const file = await handleSaveAsPDF(element, getValues("invoiceNumber"));
             if (file) {
                 setValue("invoiceDocument", file, { shouldValidate: true, shouldDirty: true });
                 setPdfUrl(file);

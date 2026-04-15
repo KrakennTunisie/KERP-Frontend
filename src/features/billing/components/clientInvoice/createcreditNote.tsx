@@ -32,9 +32,9 @@ export function CreateCreditNote() {
                         <div>
                             <div className="flex items-center gap-3">
                                 <FileX className="w-8 h-8 text-rose-600" />
-                                <h1 className="text-xl font-black text-gray-900 tracking-tighter">Créer une Facture d'Avoir</h1>
+                                <h1 className="text-xl font-black text-gray-900 tracking-tighter">{"Créer une Facture d'Avoir"}</h1>
                             </div>
-                            <p className="text-sm font-medium text-gray-500 mt-1">Référence facture originale : {previewData.originalInvoice?.invoiceNumber}</p>
+                            <p className="text-sm font-medium text-gray-500 mt-1">{"Référence facture originale :"} {previewData.originalInvoice?.invoiceNumber}</p>
                         </div>
                     </div>
 
@@ -46,7 +46,7 @@ export function CreateCreditNote() {
                             : "bg-red-600 hover:bg-red-700 text-white shadow-red-200"
                             }`}>
                         <ShieldCheck className="w-4 h-4" />
-                        Créer & Envoyer à TTN
+                        {"Créer & Envoyer à TTN"}
                     </button>
                 </div>
             </header>
@@ -104,7 +104,7 @@ export function CreateCreditNote() {
                                         </div>
 
                                         <div className="space-y-2">
-                                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Date d'émission</label>
+                                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{"Date d'émission"}</label>
                                             <input
                                                 type="date"
                                                 {...register("issueDate", { valueAsDate: true })}
@@ -123,7 +123,7 @@ export function CreateCreditNote() {
 
                                     <div className="space-y-6">
                                         <div className="space-y-2">
-                                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Motif de l'avoir *</label>
+                                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{"Motif de l'avoir *"}</label>
                                             <select
                                                 {...register("creditNoteReason")}
                                                 className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
@@ -254,7 +254,7 @@ export function CreateCreditNote() {
                                                     <div className="grid grid-cols-3 gap-2 mt-3">
                                                         <div>
                                                             <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
-                                                                QTÉ
+                                                                {"QTÉ"}
                                                             </label>
                                                             <input
                                                                 type="text"

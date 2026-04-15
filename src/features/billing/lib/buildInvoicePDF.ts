@@ -4,12 +4,10 @@ import { useReactToPrint } from "react-to-print";
 import { fileSchema } from "../types/pdfSchema";
 
 export const handleSaveAsPDF = async (
-  invoiceRef: React.RefObject<HTMLDivElement | null>,
+  element: HTMLElement,
   invoiceNumber: string
 ): Promise<File | null> => {
-  if (!invoiceRef.current) return null;
-
-  const element = invoiceRef.current;
+  
 
   try {
     const originalHeight = element.style.height;

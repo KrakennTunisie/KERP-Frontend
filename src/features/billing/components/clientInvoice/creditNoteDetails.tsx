@@ -53,15 +53,15 @@ export default function CreditNoteDetails({params}:PropsCreditNote)
                               <div className="flex-1">
                                   {invoice?.invoiceComplianceStatus === "TTN_ACCEPTED" ? (
                                       <p className="text-sm text-green-600 mt-0.5">
-                                          Ce document est validé par l'administration fiscale.
+                                          {"Ce document est validé par l'administration fiscale."}
                                       </p>
                                   ) : invoice?.invoiceComplianceStatus === "TTN_REJECTED" ? (
                                       <p className="text-sm text-red-600 mt-0.5">
-                                          Ce document est rejeté par l'administration fiscale.
+                                         {" Ce document est rejeté par l'administration fiscale."}
                                       </p>
                                   ) : (
                                       <p className="text-sm text-gray-500 mt-0.5">
-                                          Ce document est en attente de validation.
+                                          {"Ce document est en attente de validation."}
                                       </p>
                                   )}
                               </div>
@@ -100,7 +100,7 @@ export default function CreditNoteDetails({params}:PropsCreditNote)
   
                       {/* Actions */}
                       <Card>
-                          <SectionLabel>Détails administratifs</SectionLabel>
+                          <SectionLabel>{"Détails administratifs"}</SectionLabel>
                               <div className="grid grid-cols-3 gap-3">
                                   <div key="Bon du commande">
                                       <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Client</p>
@@ -117,11 +117,11 @@ export default function CreditNoteDetails({params}:PropsCreditNote)
                               </div>
                               <div className="grid grid-cols-3 gap-3">
                                   <div key="Bon du commande">
-                                      <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Montant à remboursser</p>
+                                      <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">{"Montant à remboursser"}</p>
                                       <p className="text-sm font-bold text-gray-900"></p>
                                   </div>
                                   <div key="Méthode de paiement">
-                                      <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Motif de l'avoir</p>
+                                      <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">{"Motif de l'avoir"}</p>
                                       <p className="text-sm font-bold text-gray-900"></p>
                                   </div>
                                   <div key="Devise">
@@ -150,7 +150,7 @@ export default function CreditNoteDetails({params}:PropsCreditNote)
                       {/* Items table */}
                       <Card>
                           <div className="flex items-center justify-between mb-4">
-                              <span className="text-[15px] font-bold text-gray-900">Détails des prestations</span>
+                              <span className="text-[15px] font-bold text-gray-900">{"Détails des prestations"}</span>
                           </div>
   
                           <div className="grid grid-cols-[1fr_70px_90px_100px] gap-2 pb-2.5 border-b border-gray-100">
@@ -215,7 +215,7 @@ export default function CreditNoteDetails({params}:PropsCreditNote)
                                   <ShieldIcon size={18} />
                               </div>
                               <div>
-                                  <p className="text-xs font-extrabold tracking-wide text-gray-900">CONFORMITÉ E-FACTURE</p>
+                                  <p className="text-xs font-extrabold tracking-wide text-gray-900">{"CONFORMITÉ E-FACTURE"}</p>
                                   <p className="text-[11px] text-red-600 font-semibold mt-0.5">Tunisie Trade Net</p>
                               </div>
                           </div>
@@ -227,7 +227,7 @@ export default function CreditNoteDetails({params}:PropsCreditNote)
                                   </svg>
                               ) : invoice?.invoiceComplianceStatus === "TTN_REJECTED" ? (
                                   <p className="text-sm text-red-600 text-center">
-                                      Facture rejetée par l'administration fiscale
+                                      {"Facture rejetée par l'administration fiscale"}
                                   </p>
                               ) : (
                                   <p className="text-sm text-gray-500 text-center">
@@ -249,7 +249,7 @@ export default function CreditNoteDetails({params}:PropsCreditNote)
   
                                   <div className="bg-violet-50 rounded-xl p-3 text-center mt-3">
                                       <p className="text-[11px] text-violet-600 font-semibold leading-relaxed">
-                                          Scannez ce QR code pour vérifier l'authenticité de cette facture électronique
+                                          {"Scannez ce QR code pour vérifier l'authenticité de cette facture électronique"}
                                       </p>
                                   </div>
                               </>
@@ -266,7 +266,7 @@ export default function CreditNoteDetails({params}:PropsCreditNote)
                       {/* Audit */}
                       <Card>
                           <div className="flex items-center justify-between mb-4">
-                              <SectionLabel>Journal d'audit</SectionLabel>
+                              <SectionLabel>{"Journal d'audit"}</SectionLabel>
                           </div>
                           <div
                               className="flex flex-col gap-3.5 max-h-[300px] overflow-y-auto pr-2"
@@ -298,7 +298,7 @@ export default function CreditNoteDetails({params}:PropsCreditNote)
   
                       {/* Documents */}
                       <Card>
-                          <SectionLabel>Documents attachés</SectionLabel>
+                          <SectionLabel>{"Documents attachés"}</SectionLabel>
                           <div
                               onClick={() => { }}
                               className="flex items-center justify-between p-2.5 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer group">

@@ -52,7 +52,7 @@ export const invoiceSchema = z.object({
 
   if (!issueDate || !dueDate || !PaymentCondition) return;
 
-  let minDueDate = new Date(issueDate);
+  const minDueDate = new Date(issueDate);
 
   switch (PaymentCondition) {
     case "NET_15":

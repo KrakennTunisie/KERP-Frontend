@@ -1,19 +1,19 @@
 'use client';
 import { invoiceStatusColors, invoiceStatusLabels, invoiceStatusSchema } from "../../types/invoiceStatus";
 import Link from "next/link";
-import { PropsClient, useClientInvoiceList } from "../../hooks/useClientsInvoiveList";
+import { PropsClient } from "../../hooks/useClientsInvoiveList";
 import { SendInvoiceModal } from "../widgets/sendInvoiceModal";
 import { invoiceComplianceStatusSchema } from "../../types/invoiceComplianceStatus";
 import { mockCreditNotes } from "../../mocks/credit-note-mocks";
 import { creditNoteTypeLabels } from "../../types/creditNoteType";
 import useCreditNoteList from "../../hooks/useCreditNoteList";
-import { PropsCreditNote } from "../../hooks/useCreditNoteDetails";
+
 import { DeleteInvoiceModal } from "../widgets/deleteInvoiceModal";
 
 export default function CreditNoteList({ params }: PropsClient) {
 
     const { router, search, setSearch, open, setOpen, setDeleteOpen, deleteOpen, creditNoteRef,
-        filtre, setFiltre, invoiceRef, deleteCreditNote } = useCreditNoteList({ params });
+        filtre, setFiltre, deleteCreditNote } = useCreditNoteList({ params });
     return (
         <div className="min-h-screen bg-gray-50 p font-sans">
             {/* TOP BAR */}
@@ -40,10 +40,10 @@ export default function CreditNoteList({ params }: PropsClient) {
 
                     <div>
                         <h1 className="text-3xl font-black text-slate-900 tracking-tight">
-                            Factures d'avoir
+                            {"Factures d'avoir"}
                         </h1>
                         <p className="text-sm text-slate-500 mt-1">
-                         Référence de la facture origianle : {params.invoiceId}
+                         {"Référence de la facture origianle :"} {params.invoiceId}
                         </p>
                     </div>
                 </div>
@@ -54,7 +54,7 @@ export default function CreditNoteList({ params }: PropsClient) {
                     className="flex items-center gap-2 bg-red-600 hover:bg-red-700 transition-colors text-white font-bold px-6 py-3 rounded-xl shadow-md text-sm"
                 >
                     <span className="text-lg leading-none">+</span>
-                    Nouvelle Facture d'avoir
+                    {"Nouvelle Facture d'avoir"}
                 </Link>
             </div>
             <DeleteInvoiceModal
@@ -129,7 +129,7 @@ export default function CreditNoteList({ params }: PropsClient) {
                         {mockCreditNotes.length === 0 ? (
                             <tr>
                                 <td colSpan={9} className="text-center py-12 text-slate-400 text-sm">
-                                    Aucune facture trouvée.
+                                    {"Aucune facture trouvée."}
                                 </td>
                             </tr>
                         ) : (

@@ -4,7 +4,7 @@ import { Invoice } from "../models/invoice";
 import { Partner } from "../models/partner";
 import { InvoiceItem } from "../models/invoiceItem";
 export type InvoiceDetailsProps = {
-  invoiceId?: String
+  invoiceId?: string
 }
 
 // à reformuler aprés

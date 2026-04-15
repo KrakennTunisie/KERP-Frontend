@@ -7,7 +7,7 @@ import { invoiceStatusSchema } from "../types/invoiceStatus";
 
 
 export type PropsCreditNote = {
-    params: { creditNoteId: String }
+    params: { creditNoteId: string }
 }
 
 export default function useCreditNoteDetails({ params }: PropsCreditNote) {

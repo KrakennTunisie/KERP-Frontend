@@ -12,7 +12,7 @@ import { PaymentConditionLabels, PaymentConditionSchema } from "../../types/paym
 import { DocumentPreviewModal } from "@/shared/components/ui/documentPreviewModal"
 import ErrorForm from "../widgets/errorForm"
 import { SendToTTNModal } from "../widgets/ttnConfirmationModal"
-import { mockPurchaseOrder, mockPurchaseOrders } from "../../mocks/purchase-order-mocks"
+import { mockPurchaseOrders } from "../../mocks/purchase-order-mocks"
 
 export default function CreateInvoiceClient({ mode,
     invoiceId, }: InvoiceFormClientProps) {
@@ -452,7 +452,7 @@ export default function CreateInvoiceClient({ mode,
                                 </label>
                                 <select
                                     {...register("PaymentCondition", {
-                                        onChange: (e) => {
+                                        onChange: () => {
                                             calculateDueDate();
                                         }
                                     })}

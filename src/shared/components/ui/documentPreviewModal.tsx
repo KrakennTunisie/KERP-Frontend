@@ -28,7 +28,7 @@ export function DocumentPreviewModal({
   onCreateInvoice
 }: DocumentPreviewModalProps) {
   const objectUrlRef = useRef<string | null>(null);
-
+   /* eslint-disable react-hooks/refs */
   const { url, fileName } = (() => {
     if (!document) return { url: null, fileName: null };
     if (isFile(document)) {
@@ -153,8 +153,7 @@ export function DocumentPreviewModal({
               Prévisualisation indisponible
             </p>
             <p className="text-sm font-bold text-gray-600 mt-2 max-w-md">
-              Ce type de document ne peut pas être affiché directement. Vous
-              pouvez l'ouvrir dans un nouvel onglet ou le télécharger.
+              {"Ce type de document ne peut pas être affiché directement. Vous pouvez l'ouvrir dans un nouvel onglet ou le télécharger."}
             </p>
           </div>
         )}

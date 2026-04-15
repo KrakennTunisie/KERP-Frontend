@@ -11,7 +11,7 @@ import ShieldIcon from "../widgets/shieldIcon"
 import { SendToTTNModal } from "../widgets/ttnConfirmationModal"
 
 export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps) {
-    const { marked, setStatusPaiement, client, invoice, sendToTTN, TtnModalOpen, setTtnModalOpen,
+    const {setStatusPaiement, client, invoice, sendToTTN, TtnModalOpen, setTtnModalOpen,
         hasCreditInvoice,loading, sent, successMessage, router } = useClientInvoiceDetails({ invoiceId });
     return (
         <div className="min-h-screen bg-gray-50 font-sans">
@@ -53,15 +53,15 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                             <div className="flex-1">
                                 {invoice?.invoiceComplianceStatus === "TTN_ACCEPTED" ? (
                                     <p className="text-sm text-green-600 mt-0.5">
-                                        Ce document est validé par l'administration fiscale.
+                                        {"Ce document est validé par l'administration fiscale."}
                                     </p>
                                 ) : invoice?.invoiceComplianceStatus === "TTN_REJECTED" ? (
                                     <p className="text-sm text-red-600 mt-0.5">
-                                        Ce document est rejeté par l'administration fiscale.
+                                        {"Ce document est rejeté par l'administration fiscale."}
                                     </p>
                                 ) : (
                                     <p className="text-sm text-gray-500 mt-0.5">
-                                        Ce document est en attente de validation.
+                                        {"Ce document est en attente de validation."}
                                     </p>
                                 )}
                             </div>
@@ -112,7 +112,7 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                                     <polyline points="14 2 14 8 20 8" />
                                     <line x1="9" y1="15" x2="15" y2="15" />
                                 </svg>
-                                Liste facture d'avoir
+                                {"Liste facture d'avoir"}
                             </button> :
                             <button
                                 onClick={() => router.push(`/billing/invoices/clients/${invoiceId}/credit-note/create`)}
@@ -123,7 +123,7 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                                     <polyline points="14 2 14 8 20 8" />
                                     <line x1="9" y1="15" x2="15" y2="15" />
                                 </svg>
-                                Créer Avoir
+                                {"Créer Avoir"}
                             </button>
                             }
                             <button
@@ -182,7 +182,7 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                                     <p className="text-sm font-bold text-gray-900"></p>
                                 </div>
                                 <div key="Méthode de paiement">
-                                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Méthode de paiement</p>
+                                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">{"Méthode de paiement"}</p>
                                     <p className="text-sm font-bold text-gray-900"></p>
                                 </div>
                                 <div key="Devise">
@@ -196,7 +196,7 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                     {/* Items table */}
                     <Card>
                         <div className="flex items-center justify-between mb-4">
-                            <span className="text-[15px] font-bold text-gray-900">Détails des prestations</span>
+                            <span className="text-[15px] font-bold text-gray-900">{"Détails des prestations"}</span>
                         </div>
 
                         <div className="grid grid-cols-[1fr_70px_90px_100px] gap-2 pb-2.5 border-b border-gray-100">
@@ -260,7 +260,7 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                                 <ShieldIcon size={18} />
                             </div>
                             <div>
-                                <p className="text-xs font-extrabold tracking-wide text-gray-900">CONFORMITÉ E-FACTURE</p>
+                                <p className="text-xs font-extrabold tracking-wide text-gray-900">{"CONFORMITÉ E-FACTURE"}</p>
                                 <p className="text-[11px] text-blue-600 font-semibold mt-0.5">Tunisie Trade Net</p>
                             </div>
                         </div>
@@ -272,7 +272,7 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                                 </svg>
                             ) : invoice?.invoiceComplianceStatus === "TTN_REJECTED" ? (
                                 <p className="text-sm text-red-600 text-center">
-                                    Facture rejetée par l'administration fiscale
+                                    {"Facture rejetée par l'administration fiscale"}
                                 </p>
                             ) : (
                                 <p className="text-sm text-gray-500 text-center">
@@ -294,13 +294,13 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
 
                                 <div className="bg-violet-50 rounded-xl p-3 text-center mt-3">
                                     <p className="text-[11px] text-violet-600 font-semibold leading-relaxed">
-                                        Scannez ce QR code pour vérifier l'authenticité de cette facture électronique
+                                       {" Scannez ce QR code pour vérifier l'authenticité de cette facture électronique"}
                                     </p>
                                 </div>
                             </>
                         ) : invoice?.invoiceComplianceStatus === "TTN_REJECTED" ? (
                             <p className="text-sm text-red-600 text-center mt-3">
-                                Aucun identifiant de validation (facture rejetée)
+                                {"Aucun identifiant de validation (facture rejetée)"}
                             </p>
                         ) : (
                             <p className="text-sm text-gray-500 text-center mt-3">
@@ -311,7 +311,7 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                     {/* Audit */}
                     <Card>
                         <div className="flex items-center justify-between mb-4">
-                            <SectionLabel>Journal d'audit</SectionLabel>
+                            <SectionLabel>{"Journal d'audit"}</SectionLabel>
                         </div>
                         <div
                             className="flex flex-col gap-3.5 max-h-[300px] overflow-y-auto pr-2"
@@ -343,7 +343,7 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
 
                     {/* Documents */}
                     <Card>
-                        <SectionLabel>Documents attachés</SectionLabel>
+                        <SectionLabel>{"Documents attachés"}</SectionLabel>
                         <div
                             onClick={() => { }}
                             className="flex items-center justify-between p-2.5 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer group">
@@ -356,7 +356,7 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                                 </div>
                                 <div>
                                     <p className="text-sm font-semibold text-gray-900">Facture_FAC-2025-001.pdf</p>
-                                    <p className="text-[11px] text-gray-400 mt-0.5">245 KB · 2025-01-15</p>
+                                    <p className="text-[11px] text-gray-400 mt-0.5">{"245 KB · 2025-01-15"}</p>
                                 </div>
                             </div>
                             <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" className="text-gray-400 group-hover:text-gray-700 transition-colors">

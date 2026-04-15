@@ -8,7 +8,7 @@ type SendToTTNModalProps = {
     invoiceRef?: string;
     loading?: boolean;
     invoiceSent?: boolean
-    successMessage?: String
+    successMessage?: string
 };
 
 export function SendToTTNModal({
@@ -160,7 +160,7 @@ export function SendToTTNModal({
                     </span>
                 </div>
                 <div className="flex items-center justify-between">
-                    <span className="text-gray-500">Date d'envoi</span>
+                    <span className="text-gray-500">{"Date d'envoi"}</span>
                     <span className="font-semibold text-gray-900">
                         {new Date().toLocaleDateString("fr-TN", {
                             day: "2-digit",
@@ -173,7 +173,7 @@ export function SendToTTNModal({
 
             {/* Confirmation question */}
             <p className="mt-4 text-sm text-gray-600">
-                Souhaitez-vous confirmer l'envoi de cette facture aux autorités fiscales ?
+                {"Souhaitez-vous confirmer l'envoi de cette facture aux autorités fiscales ?"}
             </p>
         </Modal>
     );

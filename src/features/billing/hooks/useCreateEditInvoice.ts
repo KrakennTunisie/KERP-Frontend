@@ -25,7 +25,7 @@ import { PurchaseOrder } from "../models/purchaseOrder";
 
 export type InvoiceFormClientProps = {
   mode: "create" | "edit"
-  invoiceId?: String
+  invoiceId?: string
 }
 
 type UpdateableField =
@@ -128,7 +128,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
     form.setValue("paymentMethod", po.paymentMethod);
     calculateDueDate()
     form.setValue("currency", po.currency);
-    selectClient(po?.partner!);
+    po?.partner && selectClient(po.partner);
     const totals = calculateInvoiceTotals(po.purchaseOrderItems!);
     setValue("totalExclTax", totals.totalHT, { shouldValidate: true, shouldDirty: true });
     setValue("vatAmount", totals.totalTVA, { shouldValidate: true, shouldDirty: true });
@@ -273,20 +273,24 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
     setValue("dueDate", date, { shouldValidate: true });
     return date;
   };
- 
+
   // Permet la visualisation  de la facture en PDF une fois remplie
+  /* eslint-disable react-hooks/refs */
   const onSubmit = handleSubmit(
-    async (data) => {
-      const file = await handleSaveAsPDF(invoiceRef, getValues("invoiceNumber"));
-      if (file) {
-        setValue("invoiceDocument", file, { shouldValidate: true, shouldDirty: true });
-        setPdfUrl(file);
-      }
-      setIsModalOpen(true);
-    },
-    (errors) => {
-      console.log("erreurs validation", errors);
-    }
+    async () => {
+      const element = invoiceRef.current;
+
+            if (!element) return;
+            const file = await handleSaveAsPDF(element, getValues("invoiceNumber"));
+            if (file) {
+                setValue("invoiceDocument", file, { shouldValidate: true, shouldDirty: true });
+                setPdfUrl(file);
+            }
+            setIsModalOpen(true);
+        },
+        (errors) => {
+            console.log("erreurs validation", errors);
+        }
   );
 
   //fermer le document modal 

@@ -22,7 +22,7 @@ export default function SuppliersInvoiceList() {
                         Factures Fournisseurs
                     </h1>
                     <p className="text-sm text-slate-500 mt-1">
-                        Gestion des factures d'achat
+                        {"Gestion des factures d'achat"}
                     </p>
                 </div>
             </div>

@@ -212,7 +212,7 @@ export default function ClientsInvoiceList() {
                                                     invoiceComplianceStatusSchema.enum.TTN_PENDING,
                                                     invoiceComplianceStatusSchema.enum.TTN_SUBMITTED
                                                 ]as string[]).includes(f.invoiceComplianceStatus!)}
-                                                onClick={(e) => { setOpen(true); console.log("send", f.idInvoice); }}
+                                                onClick={() => { setOpen(true); console.log("send", f.idInvoice); }}
                                                 className="p-2 rounded-xl bg-green-50 text-green-600 hover:bg-green-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                                 title="Envoyer"
                                             >
@@ -224,7 +224,7 @@ export default function ClientsInvoiceList() {
                                             {/* Supprimer */}
                                             <button
                                                 disabled={f.invoiceComplianceStatus != null}
-                                                onClick={(e) => { setDeleteOpen(true); setInvoiceRef(f.invoiceNumber); console.log("delete", f.idInvoice); }}
+                                                onClick={() => { setDeleteOpen(true); setInvoiceRef(f.invoiceNumber); console.log("delete", f.idInvoice); }}
                                                 className="p-2 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                                 title="Supprimer"
                                             >

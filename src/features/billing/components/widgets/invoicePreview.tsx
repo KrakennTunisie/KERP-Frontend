@@ -116,8 +116,8 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
                             ? [{ label: "Échéance", value: data.dueDate?.toLocaleDateString() }]
                             : []),
                         ...(isCredit ? [
-                            { label: "Paiement", value: PaymentConditionLabels[data!.originalInvoice?.PaymentCondition!] ?? "—" },
-                            { label: "Mode", value: paymentMethodLabels[data!.originalInvoice?.paymentMethod!] ?? "—" }] :
+                           {label: "Paiement",value: data?.originalInvoice?.PaymentCondition? PaymentConditionLabels[data.originalInvoice.PaymentCondition]: "—",},
+                            { label: "Mode", value:data?.originalInvoice!.paymentMethod ? paymentMethodLabels[data.originalInvoice.paymentMethod] : "—" }] :
                             [{ label: "Paiement", value: PaymentConditionLabels[data!.PaymentCondition!] ?? "—" },
                             { label: "Mode", value: paymentMethodLabels[data!.paymentMethod!] ?? "—" },])
 
@@ -158,7 +158,7 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
                                             </p>
                                             {isCredit && (
                                                 <p className="text-xs text-slate-400 mt-0.5">
-                                                    Motif de l'avoir : {creditNoteTypeLabels[data.creditNoteReason!] ?? "—"}
+                                                    {"Motif de l'avoir : "}{creditNoteTypeLabels[data.creditNoteReason!] ?? "—"}
                                                 </p>
                                             )}
                                             <p className="text-xs text-slate-400 mt-0.5">TVA appliquée : {item!.vatRate}%</p>
