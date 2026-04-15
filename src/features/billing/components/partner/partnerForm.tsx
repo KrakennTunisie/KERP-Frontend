@@ -1,12 +1,12 @@
 "use client";
 
-import { DefaultValues, SubmitHandler, useForm } from "react-hook-form";
+import { DefaultValues, SubmitHandler, useForm, Path, FieldErrors } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { z } from "zod";
+import { z } from "zod";
 import FilePicker from "@/shared/components/ui/filePicker";
 import LoadingButton from "@/shared/components/ui/loadingButton";
 
-type AnyZodObject = z.ZodObject<any, any>;
+type AnyZodObject = z.ZodObject;
 
 type PartnerFormProps<TSchema extends AnyZodObject> = {
   schema: TSchema;
@@ -25,114 +25,83 @@ export default function PartnerForm<TSchema extends AnyZodObject>({
 }: PartnerFormProps<TSchema>) {
   type FormValues = z.infer<TSchema>;
 
+  const fields = {
+    name: "name" as Path<FormValues>,
+    email: "email" as Path<FormValues>,
+    phoneNumber: "phoneNumber" as Path<FormValues>,
+    taxRegistrationNumber: "taxRegistrationNumber" as Path<FormValues>,
+    country: "country" as Path<FormValues>,
+    adress: "adress" as Path<FormValues>,
+    iban: "iban" as Path<FormValues>,
+    rne: "rne" as Path<FormValues>,
+    contract: "contract" as Path<FormValues>,
+    patente: "patente" as Path<FormValues>,
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const useFormAny = useForm as unknown as (opts: any) => ReturnType<typeof useForm<FormValues>>;
+
   const {
     register,
     handleSubmit,
     setValue,
     watch,
     formState: { errors, isSubmitting },
-  } = useForm<FormValues>({
-    resolver: zodResolver(schema) as any,
+  } = useFormAny({
+    resolver: zodResolver(schema),
     defaultValues,
   });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const setValueAny = setValue as (field: string, value: unknown, options?: object) => void;
+
+  const getError = (field: Path<FormValues>) => {
+    const err = (errors as FieldErrors<Record<string, unknown>>)[field];
+    return err?.message ? String(err.message) : undefined;
+  };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} id="form-partner" className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <input
-            {...register("name" as any)}
-            placeholder="Nom"
-            className="w-full px-4 py-3 rounded-2xl bg-gray-50 font-bold"
-          />
-          {errors?.["name" as any]?.message && (
-            <p className="text-xs text-red-600 mt-1">
-              {String(errors["name" as any]?.message)}
-            </p>
-          )}
-        </div>
+        {[
+          { field: fields.name, placeholder: "Nom" },
+          { field: fields.email, placeholder: "Email" },
+          { field: fields.phoneNumber, placeholder: "Téléphone" },
+          { field: fields.country, placeholder: "Pays" },
+          { field: fields.adress, placeholder: "Adresse" },
+        ].map(({ field, placeholder }) => (
+          <div key={field}>
+            <input
+              {...register(field)}
+              placeholder={placeholder}
+              className="w-full px-4 py-3 rounded-2xl bg-gray-50 font-bold"
+            />
+            {getError(field) && (
+              <p className="text-xs text-red-600 mt-1">{getError(field)}</p>
+            )}
+          </div>
+        ))}
 
         <div>
           <input
-            {...register("email" as any)}
-            placeholder="Email"
-            className="w-full px-4 py-3 rounded-2xl bg-gray-50 font-bold"
-          />
-          {errors?.["email" as any]?.message && (
-            <p className="text-xs text-red-600 mt-1">
-              {String(errors["email" as any]?.message)}
-            </p>
-          )}
-        </div>
-
-        <div>
-          <input
-            {...register("phoneNumber" as any)}
-            placeholder="Téléphone"
-            className="w-full px-4 py-3 rounded-2xl bg-gray-50 font-bold"
-          />
-          {errors?.["phoneNumber" as any]?.message && (
-            <p className="text-xs text-red-600 mt-1">
-              {String(errors["phoneNumber" as any]?.message)}
-            </p>
-          )}
-        </div>
-
-        <div>
-          <input
-            {...register("taxRegistrationNumber" as any)}
+            {...register(fields.taxRegistrationNumber)}
             placeholder="Matricule fiscal"
             disabled={type !== "create"}
-            className={`w-full px-4 py-3 rounded-2xl font-bold
-              ${
-                type !== "create"
-                  ? "bg-gray-100 text-gray-500 cursor-not-allowed"
-                  : "bg-gray-50"
+            className={`w-full px-4 py-3 rounded-2xl font-bold ${type !== "create" ? "bg-gray-100 text-gray-500 cursor-not-allowed" : "bg-gray-50"
               }`}
           />
-          {errors?.["taxRegistrationNumber" as any]?.message && (
-            <p className="text-xs text-red-600 mt-1">
-              {String(errors["taxRegistrationNumber" as any]?.message)}
-            </p>
-          )}
-        </div>
-
-        <div>
-          <input
-            {...register("country" as any)}
-            placeholder="Pays"
-            className="w-full px-4 py-3 rounded-2xl bg-gray-50 font-bold"
-          />
-          {errors?.["country" as any]?.message && (
-            <p className="text-xs text-red-600 mt-1">
-              {String(errors["country" as any]?.message)}
-            </p>
-          )}
-        </div>
-
-        <div>
-          <input
-            {...register("adress" as any)}
-            placeholder="Adresse"
-            className="w-full px-4 py-3 rounded-2xl bg-gray-50 font-bold"
-          />
-          {errors?.["adress" as any]?.message && (
-            <p className="text-xs text-red-600 mt-1">
-              {String(errors["adress" as any]?.message)}
-            </p>
+          {getError(fields.taxRegistrationNumber) && (
+            <p className="text-xs text-red-600 mt-1">{getError(fields.taxRegistrationNumber)}</p>
           )}
         </div>
 
         <div className="md:col-span-2">
           <input
-            {...register("iban" as any)}
+            {...register(fields.iban)}
             placeholder="IBAN"
             className="w-full px-4 py-3 rounded-2xl bg-gray-50 font-bold"
           />
-          {errors?.["iban" as any]?.message && (
-            <p className="text-xs text-red-600 mt-1">
-              {String(errors["iban" as any]?.message)}
-            </p>
+          {getError(fields.iban) && (
+            <p className="text-xs text-red-600 mt-1">{getError(fields.iban)}</p>
           )}
         </div>
       </div>
@@ -145,73 +114,21 @@ export default function PartnerForm<TSchema extends AnyZodObject>({
               Veuillez joindre les 3 documents requis avant de créer le partenaire.
             </p>
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[
+              { field: fields.rne, label: "RNE" },
+              { field: fields.contract, label: "Contrat" },
+              { field: fields.patente, label: "Patente" },
+            ].map(({ field, label }) => (
               <FilePicker
-                label="RNE"
-                file={watch("rne" as any) as File | undefined}
-                error={
-                  errors?.["rne" as any]?.message
-                    ? String(errors["rne" as any]?.message)
-                    : undefined
-                }
-                onPick={(file) =>
-                  setValue("rne" as any, file as any, {
-                    shouldValidate: true,
-                    shouldDirty: true,
-                  })
-                }
-                onRemove={() =>
-                  setValue("rne" as any, undefined as any, {
-                    shouldValidate: true,
-                    shouldDirty: true,
-                  })
-                }
+                key={field}
+                label={label}
+                file={watch(field) as File | undefined}
+                error={getError(field)}
+                onPick={(file) => setValueAny(field, file, { shouldValidate: true, shouldDirty: true })}
+                onRemove={() => setValueAny(field, undefined, { shouldValidate: true, shouldDirty: true })}
               />
-
-              <FilePicker
-                label="Contrat"
-                file={watch("contract" as any) as File | undefined}
-                error={
-                  errors?.["contract" as any]?.message
-                    ? String(errors["contract" as any]?.message)
-                    : undefined
-                }
-                onPick={(file) =>
-                  setValue("contract" as any, file as any, {
-                    shouldValidate: true,
-                    shouldDirty: true,
-                  })
-                }
-                onRemove={() =>
-                  setValue("contract" as any, undefined as any, {
-                    shouldValidate: true,
-                    shouldDirty: true,
-                  })
-                }
-              />
-
-              <FilePicker
-                label="Patente"
-                file={watch("patente" as any) as File | undefined}
-                error={
-                  errors?.["patente" as any]?.message
-                    ? String(errors["patente" as any]?.message)
-                    : undefined
-                }
-                onPick={(file) =>
-                  setValue("patente" as any, file as any, {
-                    shouldValidate: true,
-                    shouldDirty: true,
-                  })
-                }
-                onRemove={() =>
-                  setValue("patente" as any, undefined as any, {
-                    shouldValidate: true,
-                    shouldDirty: true,
-                  })
-                }
-              />
+            ))}
           </div>
         </div>
       )}
@@ -222,9 +139,10 @@ export default function PartnerForm<TSchema extends AnyZodObject>({
         type="submit"
         form="form-partner"
         className="px-5 py-3 rounded-2xl bg-gray-900 text-white font-black hover:bg-black disabled:opacity-60 cursor-pointer"
-        children={submitLabel}
         loadingText="Chargement..."
-      />
+      >
+        {submitLabel}
+      </LoadingButton>
     </form>
   );
 }

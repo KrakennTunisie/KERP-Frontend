@@ -159,7 +159,7 @@ export default function PartnerInvoicesCard({
                 <div className="flex items-center gap-6">
                   <div className="text-right">
                     <p className="text-2xl font-black text-gray-900 tracking-tighter">
-                      {invoice?.totalInclTaxTND?.toLocaleString()}{" "}
+                      {invoice?.totalInclTax?.toLocaleString()}{" "}
                       <span className="text-sm text-gray-600">TND</span>
                     </p>
                     <p className="text-[10px] font-bold text-gray-500 uppercase tracking-tighter mt-1">

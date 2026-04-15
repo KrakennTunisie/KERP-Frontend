@@ -2,10 +2,12 @@
 import { ApiError } from "./api-error";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+type JsonBody = Record<string, unknown> | unknown[] | null;
+type RequestBody = JsonBody | FormData | undefined;
 
 type RequestOptions = {
   method?: HttpMethod;
-  body?: unknown;
+  body?: RequestBody;
   headers?: HeadersInit;
   token?: string;
   signal?: AbortSignal;
@@ -23,22 +25,57 @@ async function parseResponse(response: Response) {
   return response.text();
 }
 
+function isFormData(body: RequestBody): body is FormData {
+  return typeof FormData !== "undefined" && body instanceof FormData;
+}
+
+function normalizeHeaders(headers?: HeadersInit): Record<string, string> {
+  if (!headers) return {};
+
+  if (headers instanceof Headers) {
+    return Object.fromEntries(headers.entries());
+  }
+
+  if (Array.isArray(headers)) {
+    return Object.fromEntries(headers);
+  }
+
+  return { ...headers };
+}
+
 export async function apiRequest<T>(
   endpoint: string,
   options: RequestOptions = {}
 ): Promise<T> {
   const { method = "GET", body, headers, token, signal } = options;
 
+  const multipart = isFormData(body);
+  const finalHeaders = normalizeHeaders(headers);
+
+  if (token) {
+    finalHeaders.Authorization = `Bearer ${token}`;
+  }
+
+  if (multipart) {
+    delete finalHeaders["Content-Type"];
+    delete finalHeaders["content-type"];
+  } else if (body !== undefined && body !== null) {
+    if (!finalHeaders["Content-Type"] && !finalHeaders["content-type"]) {
+      finalHeaders["Content-Type"] = "application/json";
+    }
+  }
+
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     method,
-    headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...headers,
-    },
-    body: body ? JSON.stringify(body) : undefined,
+    headers: finalHeaders,
+    body:
+      body == null
+        ? undefined
+        : multipart
+        ? body
+        : JSON.stringify(body),
     signal,
-    credentials: "include", // useful if backend uses cookies
+    credentials: "include",
     cache: "no-store",
   });
 
@@ -62,19 +99,19 @@ export const apiClient = {
 
   post: <T>(
     endpoint: string,
-    body?: unknown,
+    body?: RequestBody,
     options?: Omit<RequestOptions, "method" | "body">
   ) => apiRequest<T>(endpoint, { ...options, method: "POST", body }),
 
   put: <T>(
     endpoint: string,
-    body?: unknown,
+    body?: RequestBody,
     options?: Omit<RequestOptions, "method" | "body">
   ) => apiRequest<T>(endpoint, { ...options, method: "PUT", body }),
 
   patch: <T>(
     endpoint: string,
-    body?: unknown,
+    body?: RequestBody,
     options?: Omit<RequestOptions, "method" | "body">
   ) => apiRequest<T>(endpoint, { ...options, method: "PATCH", body }),
 

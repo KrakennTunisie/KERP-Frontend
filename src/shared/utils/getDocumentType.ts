@@ -1,33 +1,22 @@
-import { Document } from "@/features/billing/models/document";
+import { Document as BillingDocument } from "@/features/billing/models/document";
+import { FileSchema } from "@/features/billing/types/pdfSchema";
 
-type DocumentType = "image" | "pdf" | "word" | "unknown";
+type DocumentOrFile = BillingDocument | FileSchema | null;
 
-
-export default function getDocumentType(document : Document | null): DocumentType {
+const getDocumentType = (document: DocumentOrFile): "pdf" | "image" | "word" | "unknown" => {
   if (!document) return "unknown";
 
-  const url = document.storageURL.toLowerCase();
-  const mime = document.mimeType.toLowerCase() ?? "";
+  // ✅ Récupère le mimeType selon le type
+  const mimeType = document instanceof File ? document.type : document.mimeType;
 
+  if (mimeType === "application/pdf") return "pdf";
+  if (mimeType.startsWith("image/")) return "image";
   if (
-    mime.startsWith("image/") ||
-    /\.(png|jpg|jpeg|webp|gif|bmp|svg)$/.test(url)
-  ) {
-    return "image";
-  }
-
-  if (mime === "application/pdf" || url.endsWith(".pdf")) {
-    return "pdf";
-  }
-
-  if (
-    mime.includes("word") ||
-    mime.includes("officedocument.wordprocessingml.document") ||
-    url.endsWith(".doc") ||
-    url.endsWith(".docx")
-  ) {
-    return "word";
-  }
+    mimeType === "application/msword" ||
+    mimeType === "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+  ) return "word";
 
   return "unknown";
-}
+};
+
+export default getDocumentType;

@@ -17,10 +17,10 @@ export const partnersApi = {
   getSupplierById: (id: string) =>
     apiClient.get<SupplierPartner>(BILLING_ENDPOINTS.supplierById(id)),
 
-  createClient: (payload: CreateClientPartner) =>
+  createClient: (payload: FormData) =>
     apiClient.post<CreateClientPartner>(BILLING_ENDPOINTS.clients, payload),
 
-  createSupplier: (payload: CreateSupplierPartner) =>
+  createSupplier: (payload: FormData) =>
     apiClient.post<CreateSupplierPartner>(BILLING_ENDPOINTS.suppliers, payload),
 
   updateClient : (id: string, payload: UpdatePartner) => apiClient.put<UpdatePartner>(BILLING_ENDPOINTS.clientById(id), payload),

@@ -48,7 +48,7 @@ export default function ClientsTable({
           <div>
             <p className="text-sm font-black text-gray-900">{client.name}</p>
             <p className="text-[10px] font-bold text-gray-500 uppercase tracking-tighter">
-              {client.adress}
+              {client.address}
             </p>
           </div>
         </div>

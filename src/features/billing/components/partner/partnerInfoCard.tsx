@@ -15,37 +15,13 @@ type PartnerInfoCardProps = {
   typeLabel: string;
 };
 
-const mockDocument: Document = {
-  fileName: "Contract",
-  storageURL: "/documents/contract.pdf",
-  mimeType: "application/pdf",
-  idDocument: "",
-  hash: ""
-}
-
-const mockImage = {
-  fileName: "Image",
-  fileUrl: "https://sl.bing.net/qKW5uRubng",
-  mimeType: "image/jpg",
-}
-
 type PreviewDocument = Document | null;
 
 export default function PartnerInfoCard({
   partner,
   typeLabel,
 }: PartnerInfoCardProps) {
-  const [previewDocument, setPreviewDocument] =
-    useState<PreviewDocument>(null);
-
-/*   const formattedDate = useMemo(() => {
-    return new Date(partner?.createdAt).toLocaleDateString("fr-FR", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
-  }, [partner.createdAt]); */
-
+  const [previewDocument, setPreviewDocument] =useState<PreviewDocument>(null);
   return (
     <>
       <div className="bg-white rounded-[32px] border border-gray-100 shadow-sm p-6 md:p-8">
@@ -71,7 +47,7 @@ export default function PartnerInfoCard({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <InfoItem
               label="Matricule fiscal"
-              value={partner.idPartner}
+              value={partner.taxRegistrationNumber}
               icon={<ReceiptText className="w-5 h-5 text-gray-700" />}
             />
 
@@ -94,25 +70,25 @@ export default function PartnerInfoCard({
             />
           </div>
 
-          <div className="space-y-4">
+          {/*<div className="space-y-4">
             <DocumentItem
               label="RNE"
-              document={mockDocument}
+              document={partner.rne}
               onOpen={setPreviewDocument}
             />
 
             <DocumentItem
               label="Contrat"
-              document={mockDocument}
+              document={partner.contract}
               onOpen={setPreviewDocument}
             />
 
             <DocumentItem
               label="Patente"
-              document={mockDocument}
+              document={partner.patente}
               onOpen={setPreviewDocument}
             />
-          </div>
+          </div>*/}
         </div>
       </div>
 

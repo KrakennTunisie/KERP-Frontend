@@ -35,7 +35,7 @@ export default function ClientDetails(){
   };
 
   fetchClient();
-}, [params.id]);
+}, [params.id,clientId]);
 
 if(loading){
   return(

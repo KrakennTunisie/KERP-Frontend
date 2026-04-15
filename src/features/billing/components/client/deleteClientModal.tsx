@@ -14,7 +14,7 @@ type Props = {
   confirmDeleteId: string;
 };
 
-export default function ClientDeleteModal({ open, onClose, onCreated, confirmDeleteId }: Props) {
+export default function ClientDeleteModal({ open, onClose, /*onCreated*/ confirmDeleteId }: Props) {
     const [isDeleting, setIsDeleting] = useState<boolean>(false)
       const handleDelete = async ( ) => {
           try {
@@ -23,7 +23,7 @@ export default function ClientDeleteModal({ open, onClose, onCreated, confirmDel
   
               appToast.success("Client supprimé avec succès");
               onClose();
-          } catch (e: any) {
+          } catch (e: unknown) {
             const message = getApiErrorMessage(e);
             appToast.error('Échec de suppression , Veuillez réessayer.', message );
             
