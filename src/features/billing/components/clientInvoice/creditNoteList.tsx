@@ -1,5 +1,5 @@
 'use client';
-import { invoiceStatusColors, invoiceStatusSchema } from "../../types/invoiceStatus";
+import { invoiceStatusColors, invoiceStatusLabels, invoiceStatusSchema } from "../../types/invoiceStatus";
 import Link from "next/link";
 import { PropsClient, useClientInvoiceList } from "../../hooks/useClientsInvoiveList";
 import { SendInvoiceModal } from "../widgets/sendInvoiceModal";
@@ -91,9 +91,9 @@ export default function CreditNoteList({ params }: PropsClient) {
                     <div className="flex gap-2">
                         {invoiceStatusSchema.options
                             .filter((f) =>
-                                f.includes(invoiceStatusSchema.enum.REMBOURSÉE) ||
-                                f.includes(invoiceStatusSchema.enum["NON REMBOURSÉE"]) ||
-                                f.includes(invoiceStatusSchema.enum.BROULLION)
+                                f.includes(invoiceStatusSchema.enum.REFUNDED) ||
+                                f.includes(invoiceStatusSchema.enum["NOT_REFUNDED"]) ||
+                                f.includes(invoiceStatusSchema.enum.DRAFT)
                             )
                             .map((f) => (
                                 <button
@@ -104,7 +104,7 @@ export default function CreditNoteList({ params }: PropsClient) {
                                         : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
                                         }`}
                                 >
-                                    {f}
+                                    { invoiceStatusLabels[f]}
                                 </button>
                             ))}
                     </div>
@@ -143,9 +143,9 @@ export default function CreditNoteList({ params }: PropsClient) {
                                     </td>
                                     <td className="px-5 py-4 text-slate-700">{f.originalInvoice.invoiceNumber}</td>
                                     <td className="px-5 py-4">
-                                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${f.invoiceStatus !== "TOUTES" ? invoiceStatusColors[f.invoiceStatus] : ""
+                                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${f.invoiceStatus !== "ALL" ? invoiceStatusColors[f.invoiceStatus] : ""
                                             }}`}>
-                                            {f.invoiceStatus}
+                                            { f.invoiceStatus}
                                         </span>
                                     </td>
                                     <td className="px-5 py-4 text-slate-700 font-medium">

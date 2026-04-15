@@ -45,7 +45,7 @@ export default function useCreateCreditNote() {
             invoiceItems: [defaultItem()],
             QRCode: " ",
             invoiceComplianceStatus: invoiceComplianceStatusSchema.enum.TTN_ACCEPTED,
-            invoiceStatus: invoiceStatusSchema.enum.BROULLION,
+            invoiceStatus: invoiceStatusSchema.enum.DRAFT,
             invoiceDocument: null,
             totalExclTax: 0,
             totalInclTax: 0,

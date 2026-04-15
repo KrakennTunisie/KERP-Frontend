@@ -28,7 +28,7 @@ export default function useCreditNoteDetails({ params }: PropsCreditNote) {
 
             return {
                 ...prev,
-                invoiceStatus: invoiceStatusSchema.enum.PAYÉE,
+                invoiceStatus: invoiceStatusSchema.enum.PAID,
             };
         });
     };

@@ -46,7 +46,7 @@ export default function useClientInvoiceDetails ({invoiceId}:InvoiceDetailsProps
 
     return {
       ...prev,
-      invoiceStatus: "PAYÉE",
+      invoiceStatus: "PAID",
     };
   });
 };

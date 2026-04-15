@@ -44,7 +44,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
       invoiceType: "SALE",
       invoiceNumber: "FAC-609535",
       idInvoice: crypto.randomUUID(),
-      invoiceStatus: invoiceStatusSchema.enum["À ENCAISSER"],
+      invoiceStatus: invoiceStatusSchema.enum["NOT_REFUNDED"],
       issueDate: new Date(),
       creationDate: new Date(),
       sentToclientDate: null,

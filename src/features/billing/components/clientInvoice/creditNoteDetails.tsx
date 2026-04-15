@@ -131,9 +131,9 @@ export default function CreditNoteDetails({params}:PropsCreditNote)
                               </div>
                           <div className="flex justify-end ">
                               <button
-                                  disabled={invoice?.invoiceStatus == invoiceStatusSchema.enum.PAYÉE}
+                                  disabled={invoice?.invoiceStatus == invoiceStatusSchema.enum.PAID}
                                   onClick={() => setStatusPaiement()}
-                                  className={`flex items-center justify-center px-4  gap-2 py-3.5 rounded-xl border text-sm font-bold transition-all ${invoice?.invoiceStatus == invoiceStatusSchema.enum.PAYÉE
+                                  className={`flex items-center justify-center px-4  gap-2 py-3.5 rounded-xl border text-sm font-bold transition-all ${invoice?.invoiceStatus == invoiceStatusSchema.enum.PAID
                                       ? 'bg-red-100 border-red-300 text-red-700'
                                       : 'bg-red-50 border-red-200 text-red-600 hover:brightness-95'
                                       }`}
@@ -142,7 +142,7 @@ export default function CreditNoteDetails({params}:PropsCreditNote)
                                       <polyline points="9 11 12 14 22 4" />
                                       <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
                                   </svg>
-                                  {invoice?.invoiceStatus == invoiceStatusSchema.enum.PAYÉE ? 'Marqué Payé ✓' : 'Marquer Payé'}
+                                  {invoice?.invoiceStatus == invoiceStatusSchema.enum.PAID ? 'Marqué Payé ✓' : 'Marquer Payé'}
                               </button>
                           </div>
                       </Card>

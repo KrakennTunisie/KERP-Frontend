@@ -17,7 +17,7 @@ export const partnerSchema = z.object({
 
   rne: fileSchema.nullable(),
   contract: fileSchema.nullable(),
-  patente: fileSchema.nullable(),
+  patente: fileSchema.nullable() ,
 
   partnerType: partnerTypeSchema,
 
@@ -35,7 +35,7 @@ export const createPartnerSchema = z.object({
 
   rne: fileSchema,
   contract: fileSchema,
-  patente: fileSchema,
+  patente: fileSchema ,
 });
 
 export type Partner = z.infer<typeof partnerSchema>;

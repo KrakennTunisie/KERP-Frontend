@@ -18,7 +18,7 @@ export const mockCreditNotes : CreditNote[] = [
     sentToTTNDate:  new Date(),
     sentToclientDate:  new Date(),
     creationDate: new Date(),
-    invoiceStatus: invoiceStatusSchema.enum["NON REMBOURSÉE"],  // Valeur à ajuster selon le schéma
+    invoiceStatus: invoiceStatusSchema.enum["NOT_REFUNDED"],  // Valeur à ajuster selon le schéma
     invoiceComplianceStatus: invoiceComplianceStatusSchema.enum.TTN_ACCEPTED,
     totalExclTax: 500,
     totalInclTax: 600,  // Total avec taxe
@@ -35,7 +35,7 @@ export const mockCreditNotes : CreditNote[] = [
     sentToTTNDate:  new Date(),
     sentToclientDate:  new Date(),
     creationDate: new Date(),
-    invoiceStatus: invoiceStatusSchema.enum.BROULLION,  // Valeur à ajuster selon le schéma
+    invoiceStatus: invoiceStatusSchema.enum.DRAFT,  // Valeur à ajuster selon le schéma
     invoiceComplianceStatus: invoiceComplianceStatusSchema.enum.TTN_PENDING,
     totalExclTax: 500,
     totalInclTax: 600,  // Total avec taxe
@@ -53,7 +53,7 @@ export const mockCreditNotes : CreditNote[] = [
     sentToTTNDate:  new Date(),
     sentToclientDate:  new Date(),
     creationDate: new Date(),
-    invoiceStatus: invoiceStatusSchema.enum.REMBOURSÉE,  // Valeur à ajuster selon le schéma
+    invoiceStatus: invoiceStatusSchema.enum.REFUNDED,  // Valeur à ajuster selon le schéma
     invoiceComplianceStatus: invoiceComplianceStatusSchema.enum.TTN_ACCEPTED,
     totalExclTax: 500,
     totalInclTax: 600,  // Total avec taxe

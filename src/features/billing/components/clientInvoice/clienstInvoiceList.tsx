@@ -2,7 +2,7 @@
 
 import StatClientInvoiceCard from "@/shared/components/ui/statClientInvoiceCard";
 import { MOCK_INVOICES } from "../../mocks/invoice-mocks";
-import { invoiceStatusColors, invoiceStatusSchema } from "../../types/invoiceStatus";
+import { invoiceStatusColors, invoiceStatusLabels, invoiceStatusSchema } from "../../types/invoiceStatus";
 import Link from "next/link";
 import { useClientInvoiceList } from "../../hooks/useClientsInvoiveList";
 import { SendInvoiceModal } from "../widgets/sendInvoiceModal";
@@ -106,7 +106,7 @@ export default function ClientsInvoiceList() {
                     </div>
                     <div className="flex gap-2">
                         {invoiceStatusSchema.options
-                        .filter(f => f !== invoiceStatusSchema.enum["NON REMBOURSÉE"] && f !== invoiceStatusSchema.enum.REMBOURSÉE)
+                        .filter(f => f !== invoiceStatusSchema.enum["NOT_REFUNDED"] && f !== invoiceStatusSchema.enum.REFUNDED)
                         .map((f) => (
                             <button
                                 key={f}
@@ -116,7 +116,7 @@ export default function ClientsInvoiceList() {
                                     : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
                                     }`}
                             >
-                                {f}
+                                { invoiceStatusLabels[f]}
                             </button>
                         ))}
                     </div>
@@ -155,9 +155,9 @@ export default function ClientsInvoiceList() {
                                     </td>
                                     <td className="px-5 py-4 text-slate-700">SYSLAB</td>
                                     <td className="px-5 py-4">
-                                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${f.invoiceStatus !== "TOUTES" ? invoiceStatusColors[f.invoiceStatus] : ""
+                                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${f.invoiceStatus !== "ALL" ? invoiceStatusColors[f.invoiceStatus] : ""
                                             }}`}>
-                                            {f.invoiceStatus}
+                                            {invoiceStatusLabels[f.invoiceStatus]}
                                         </span>
                                     </td>
                                     <td className="px-5 py-4 text-slate-700 font-medium">

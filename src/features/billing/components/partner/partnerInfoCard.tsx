@@ -21,10 +21,7 @@ export default function PartnerInfoCard({
   partner,
   typeLabel,
 }: PartnerInfoCardProps) {
-  const [previewDocument, setPreviewDocument] =
-    useState<PreviewDocument>(null);
-
-
+  const [previewDocument, setPreviewDocument] =useState<PreviewDocument>(null);
   return (
     <>
       <div className="bg-white rounded-[32px] border border-gray-100 shadow-sm p-6 md:p-8">
@@ -73,7 +70,7 @@ export default function PartnerInfoCard({
             />
           </div>
 
-          <div className="space-y-4">
+          {/*<div className="space-y-4">
             <DocumentItem
               label="RNE"
               document={partner.rne}
@@ -91,7 +88,7 @@ export default function PartnerInfoCard({
               document={partner.patente}
               onOpen={setPreviewDocument}
             />
-          </div>
+          </div>*/}
         </div>
       </div>
 

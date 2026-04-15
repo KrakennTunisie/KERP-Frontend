@@ -105,7 +105,7 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                             {hasCreditInvoice ?
                              <button
                                 onClick={() => router.push(`/billing/invoices/clients/${invoiceId}/credit-note`)}
-                                disabled={invoice?.invoiceStatus == "PAYÉE"}
+                                disabled={invoice?.invoiceStatus == "PAID"}
                                 className="flex items-center justify-center gap-2 py-3.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-600 text-sm font-bold hover:brightness-95 transition-all">
                                 <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                                     <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
@@ -116,7 +116,7 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                             </button> :
                             <button
                                 onClick={() => router.push(`/billing/invoices/clients/${invoiceId}/credit-note/create`)}
-                                disabled={invoice?.invoiceStatus == "PAYÉE"}
+                                disabled={invoice?.invoiceStatus == "PAID"}
                                 className="flex items-center justify-center gap-2 py-3.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-600 text-sm font-bold hover:brightness-95 transition-all">
                                 <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                                     <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
@@ -127,9 +127,9 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                             </button>
                             }
                             <button
-                                disabled={invoice?.invoiceStatus == invoiceStatusSchema.enum.PAYÉE}
+                                disabled={invoice?.invoiceStatus == invoiceStatusSchema.enum.PAID}
                                 onClick={() => setStatusPaiement()}
-                                className={`flex items-center justify-center gap-2 py-3.5 rounded-xl border text-sm font-bold transition-all ${invoiceStatusSchema.enum.PAYÉE
+                                className={`flex items-center justify-center gap-2 py-3.5 rounded-xl border text-sm font-bold transition-all ${invoiceStatusSchema.enum.PAID
                                     ? 'bg-blue-100 border-blue-300 text-blue-700'
                                     : 'bg-blue-50 border-blue-200 text-blue-600 hover:brightness-95'
                                     }`}
@@ -138,7 +138,7 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                                     <polyline points="9 11 12 14 22 4" />
                                     <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
                                 </svg>
-                                {invoice?.invoiceStatus == invoiceStatusSchema.enum.PAYÉE ? 'Marqué Payé ✓' : 'Marquer Payé'}
+                                {invoice?.invoiceStatus == invoiceStatusSchema.enum.PAID ? 'Marqué Payé ✓' : 'Marquer Payé'}
                             </button>
                         </div>
                     </Card>

@@ -4,7 +4,7 @@ import StatClientInvoiceCard from "@/shared/components/ui/statClientInvoiceCard"
 import { useMemo, useState } from "react";
 import { Invoice } from "../../models/invoice";
 import { MOCK_INVOICES } from "../../mocks/invoice-mocks";
-import { InvoiceStatus, invoiceStatusColors, invoiceStatusSchema } from "../../types/invoiceStatus";
+import { InvoiceStatus, invoiceStatusColors, invoiceStatusLabels, invoiceStatusSchema } from "../../types/invoiceStatus";
 import { CategoriesFacturesFournisseur, categoriesFacturesFournisseurSchema } from "../../types/invoiceSupplierCategory";
 import useSupplierInvoiceList from "../../hooks/useSupplierInvoiceList";
 
@@ -89,7 +89,7 @@ export default function SuppliersInvoiceList() {
                             />
                         </div>
                         <div className="flex gap-2">
-                            {invoiceStatusSchema.options.filter((f) => f === "À PAYER" || f === "PAYÉE" || f === "TOUTES").map((f) => (
+                            {invoiceStatusSchema.options.filter((f) => f === "TO_PAY" || f === "PAID" || f === "ALL").map((f) => (
                                 <button
                                     key={f}
                                     onClick={() => setFiltre(f)}
@@ -98,7 +98,7 @@ export default function SuppliersInvoiceList() {
                                         : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
                                         }`}
                                 >
-                                    {f}
+                                    { invoiceStatusLabels[f]}
                                 </button>
                             ))}
                         </div>
@@ -161,9 +161,9 @@ export default function SuppliersInvoiceList() {
                                     </td>
                                     <td className="px-5 py-4 text-slate-700">SYSLAB</td>
                                     <td className="px-5 py-4">
-                                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${f.invoiceStatus !== "TOUTES" ? invoiceStatusColors[f.invoiceStatus] : ""
+                                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${f.invoiceStatus !== "ALL" ? invoiceStatusColors[f.invoiceStatus] : ""
                                             }}`}>
-                                            {f.invoiceStatus}
+                                            { invoiceStatusLabels[f.invoiceStatus]}
                                         </span>
                                     </td>
                                     <td className="px-5 py-4 text-slate-700 font-medium">
