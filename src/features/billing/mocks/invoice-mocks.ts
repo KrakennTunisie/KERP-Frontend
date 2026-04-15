@@ -3,7 +3,7 @@ import { invoiceSchema } from "../models/invoice";
 import { PaymentConditionSchema } from "../types/paymentCondition";
 import { invoiceComplianceStatusSchema } from "../types/invoiceComplianceStatus";
 import { mockInvoiceItems } from "./invoice-items-mocks";
-
+import { v4 as uuidv4 } from "uuid";
 type Invoice = z.infer<typeof invoiceSchema>;
 
 export const MOCK_INVOICES: Invoice[] = [
@@ -30,7 +30,7 @@ export const MOCK_INVOICES: Invoice[] = [
     currency: "TND",
     purchaseOrder: null,
     partner: {
-      idPartner: crypto.randomUUID(),
+      idPartner: uuidv4(),
       name: "Beta Industrie SA",
       email: "info@beta.tn",
       phoneNumber: "+21674000003",

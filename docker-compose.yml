@@ -13,7 +13,7 @@ services:
     environment:
       # Nginx tuning
       - BACKEND_URL=${BACKEND_URL:-http://billing-server:8081}
-      - PUBLIC_URL=${PUBLIC_URL:-http://localhost:80}
+      - PUBLIC_URL=${PUBLIC_URL:-http://localhost:3000}
       - NGINX_MAX_FILE_SIZE=${NGINX_MAX_FILE_SIZE:-50M}
       - NGINX_PROXY_READ_TIMEOUT=${NGINX_PROXY_READ_TIMEOUT:-300}
       - NGINX_PROXY_CONNECT_TIMEOUT=${NGINX_PROXY_CONNECT_TIMEOUT:-75}

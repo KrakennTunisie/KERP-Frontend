@@ -1,10 +1,10 @@
 import { InvoiceItem } from '../models/invoiceItem'
 import { OperationCategoryLabels, operationCategorySchema } from '../types/operationCategory'
 import { tvaRateSchema } from '../types/tvaRate'
-
+import { v4 as uuidv4 } from "uuid";
 export default function defaultItem(): InvoiceItem {
   return {
-    idInvoiceItem: crypto.randomUUID(),
+    idInvoiceItem: uuidv4() ,
     description: "",
     quantity: 0,
     unityPriceEXclTax: 0,

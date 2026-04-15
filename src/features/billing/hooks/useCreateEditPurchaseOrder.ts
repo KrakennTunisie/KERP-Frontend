@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { v4 as uuidv4 } from "uuid";
 import { useRouter } from "next/navigation"
 import { Invoice, invoiceSchema } from "../models/invoice";
 import { InvoiceItem } from "../models/invoiceItem";
@@ -42,7 +43,7 @@ export function useCreatePurchaseOrder({ mode, invoiceId }: InvoiceFormClientPro
     resolver: zodResolver(purchaseOrderSchema),
     defaultValues: {
       purchaseOrderNumber: "FAC-609535",
-      idPurchaseOrder: crypto.randomUUID(),
+      idPurchaseOrder: uuidv4(),
       Status: purchaseOrderStatusSchema.enum.BROULLION,
       creationDate: new Date(),
       purchaseOrderItems: [defaultItem()],
