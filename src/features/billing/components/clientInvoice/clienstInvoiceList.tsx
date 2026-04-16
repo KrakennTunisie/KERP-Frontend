@@ -1,18 +1,27 @@
 'use client';
 
 import StatClientInvoiceCard from "@/shared/components/ui/statClientInvoiceCard";
-import { MOCK_INVOICES } from "../../mocks/invoice-mocks";
 import { invoiceStatusColors, invoiceStatusLabels, invoiceStatusSchema } from "../../types/invoiceStatus";
 import Link from "next/link";
 import { useClientInvoiceList } from "../../hooks/useClientsInvoiveList";
 import { SendInvoiceModal } from "../widgets/sendInvoiceModal";
 import { invoiceComplianceStatusSchema } from "../../types/invoiceComplianceStatus";
 import { DeleteInvoiceModal } from "../widgets/deleteInvoiceModal";
+import PageLoader from "@/shared/components/ui/pageLoader";
 
 export default function ClientsInvoiceList() {
 
     const { router, search, setSearch, open, setOpen, deleteOpen, setDeleteOpen,
-        filtre, setFiltre, invoiceRef, setInvoiceRef } = useClientInvoiceList();
+        filtre, setFiltre, invoiceRef, setInvoiceRef, clientsInvoices,
+        currentPage,
+        setCurrentPage,
+        totalElements,
+        totalPages,
+        deleteLoading,
+        deleteId,
+        setDeleteId,
+        deleteClientInvoice,
+        loading } = useClientInvoiceList();
     return (
         <div className="min-h-screen bg-gray-50 p-8 font-sans">
             <SendInvoiceModal
@@ -82,9 +91,8 @@ export default function ClientsInvoiceList() {
                     open={deleteOpen}
                     onClose={() => setDeleteOpen(false)}
                     invoiceRef={invoiceRef}
-                    onConfirm={async () => {
-                        setDeleteOpen(false);
-                    }} />
+                    onConfirm={deleteClientInvoice} 
+                    loading={deleteLoading}/>
             </div>
 
             {/* Table card */}
@@ -106,7 +114,7 @@ export default function ClientsInvoiceList() {
                     </div>
                     <div className="flex gap-2">
                         {invoiceStatusSchema.options
-                        .filter(f => f !== invoiceStatusSchema.enum["NOT_REFUNDED"] && f !== invoiceStatusSchema.enum.REFUNDED)
+                        .filter(f => f !== invoiceStatusSchema.enum.REFUNDED && f !== invoiceStatusSchema.enum.NOT_REFUNDED)
                         .map((f) => (
                             <button
                                 key={f}
@@ -116,7 +124,7 @@ export default function ClientsInvoiceList() {
                                     : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
                                     }`}
                             >
-                                { invoiceStatusLabels[f]}
+                                {invoiceStatusLabels[f]}
                             </button>
                         ))}
                     </div>
@@ -138,22 +146,33 @@ export default function ClientsInvoiceList() {
                         </tr>
                     </thead>
                     <tbody>
-                        {MOCK_INVOICES.length === 0 ? (
+                        {
+                            loading ? 
+                            (
+                                        <tr>
+                                            <td
+                                            className="px-8 py-10 text-sm font-bold text-gray-500"
+                                            >
+                                            <PageLoader label="Chargement..."/>
+                                            </td>
+                                        </tr>
+                                        )
+                        :clientsInvoices.length === 0 ? (
                             <tr>
                                 <td colSpan={9} className="text-center py-12 text-slate-400 text-sm">
                                     Aucune facture trouvée.
                                 </td>
                             </tr>
                         ) : (
-                            MOCK_INVOICES.map((f) => (
+                            clientsInvoices.map((f) => (
                                 <tr
                                     key={1}
                                     className="border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer"
                                 >
                                     <td className="px-5 py-4 font-bold text-slate-800">
-                                        {f.idInvoice}
+                                        {f.invoiceNumber}
                                     </td>
-                                    <td className="px-5 py-4 text-slate-700">SYSLAB</td>
+                                    <td className="px-5 py-4 text-slate-700">{f.partner.name}</td>
                                     <td className="px-5 py-4">
                                         <span className={`px-3 py-1 rounded-full text-xs font-bold ${f.invoiceStatus !== "ALL" ? invoiceStatusColors[f.invoiceStatus] : ""
                                             }}`}>
@@ -161,11 +180,15 @@ export default function ClientsInvoiceList() {
                                         </span>
                                     </td>
                                     <td className="px-5 py-4 text-slate-700 font-medium">
-                                        {f.totalInclTax.toLocaleString("fr-FR")} €
+                                        {f.invoiceCurrency=="EUR" 
+                                            ? f.totalExclTaxEUR?.toLocaleString("fr-FR")+" €"
+                                            : f.invoiceCurrency=="TND"
+                                                ? f.totalInclTaxTND.toLocaleString("fr-FR")+" TND"
+                                                : f.totalInclTaxTND+" $"} 
                                     </td>
 
                                     <td className="px-5 py-4 text-slate-700">{f.appliedExchangeRate}</td>
-                                    <td className="px-5 py-4 text-slate-600">{f.dueDate.toLocaleDateString("fr-FR")}</td>
+                                    <td className="px-5 py-4 text-slate-600">{f.dueDate?.toLocaleString()}</td>
                                     <td className="px-5 py-4 text-center">
                                         {f.invoiceComplianceStatus == invoiceComplianceStatusSchema.enum.TTN_ACCEPTED ? (
                                             <svg className="w-5 h-5 text-emerald-500 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -209,7 +232,7 @@ export default function ClientsInvoiceList() {
                                                     invoiceComplianceStatusSchema.enum.SIGNING_PENDING,
                                                     invoiceComplianceStatusSchema.enum.SIGNING_SUCCEEDED,
                                                     invoiceComplianceStatusSchema.enum.TTN_ACCEPTED,
-                                                    invoiceComplianceStatusSchema.enum.TTN_PENDING,
+                                                    //invoiceComplianceStatusSchema.enum.TTN_PENDING,
                                                     invoiceComplianceStatusSchema.enum.TTN_SUBMITTED
                                                 ]as string[]).includes(f.invoiceComplianceStatus!)}
                                                 onClick={() => { setOpen(true); console.log("send", f.idInvoice); }}
@@ -223,8 +246,8 @@ export default function ClientsInvoiceList() {
 
                                             {/* Supprimer */}
                                             <button
-                                                disabled={f.invoiceComplianceStatus != null}
-                                                onClick={() => { setDeleteOpen(true); setInvoiceRef(f.invoiceNumber); console.log("delete", f.idInvoice); }}
+                                               // disabled={f.invoiceComplianceStatus != null}
+                                                onClick={(e) => { setDeleteOpen(true); setInvoiceRef(f.invoiceNumber); setDeleteId(f.idInvoice); console.log("delete", f.idInvoice); }}
                                                 className="p-2 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                                 title="Supprimer"
                                             >
@@ -241,6 +264,7 @@ export default function ClientsInvoiceList() {
                     </tbody>
                 </table>
             </div>
+
         </div>
 
     );

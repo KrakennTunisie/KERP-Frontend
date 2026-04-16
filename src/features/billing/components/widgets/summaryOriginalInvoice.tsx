@@ -1,9 +1,9 @@
 import { DeepPartial } from "react-hook-form";
 import { z } from "zod"
-import { CreditNoteSchema } from "../../models/creditNote";
+import { invoiceCreditNoteSchema } from "../../models/creditNote";
 
 type InvoicePreviewProps = {
-  data: DeepPartial<z.infer<typeof CreditNoteSchema>>;
+    data: DeepPartial<z.infer<typeof invoiceCreditNoteSchema>>;
 };
 export default function SummaryOriginalInvoice({ data }: InvoicePreviewProps) {
   return (
@@ -19,46 +19,44 @@ export default function SummaryOriginalInvoice({ data }: InvoicePreviewProps) {
 
       <div className="grid grid-cols-1 md:grid-cols-4 divide-x divide-red-200">
 
-        <div className="pr-5">
-          <p className="text-[9px] font-black text-red-300 uppercase tracking-widest mb-1">Numéro</p>
-          <p className="text-sm font-black text-red-500">{data.invoiceNumber ?? "—"}</p>
-          <p className="text-[10px] text-red-300 mt-0.5">{data.originalInvoice?.invoiceNumber ?? ""}</p>
-        </div>
+    <div className="pr-5">
+      <p className="text-[9px] font-black text-red-300 uppercase tracking-widest mb-1">Numéro</p>
+      <p className="text-sm font-black text-red-500">{data.invoiceCreditNoteNumber ?? "—"}</p>
+      <p className="text-[10px] text-red-300 mt-0.5">{data.originalInvoice?.invoiceNumber ?? ""}</p>
+    </div>
 
-        <div className="px-5">
-          <p className="text-[9px] font-black text-red-300 uppercase tracking-widest mb-1">{"Date d'émission"}</p>
-          <p className="text-sm font-black text-red-900">
-            {data.issueDate
-              ? new Intl.DateTimeFormat("fr-FR", {
-                day: "2-digit", month: "short", year: "numeric",
-              }).format(new Date(data.issueDate))
-              : "—"}
-          </p>
-        </div>
+    <div className="px-5">
+      <p className="text-[9px] font-black text-red-300 uppercase tracking-widest mb-1">{"Date d'émission"}</p>
+      <p className="text-sm font-black text-red-900">
+        {data.issueDate
+          ? new Intl.DateTimeFormat("fr-FR", {
+              day: "2-digit", month: "short", year: "numeric",
+            }).format(new Date(data.issueDate))
+          : "—"}
+      </p>
+    </div>
 
-        <div className="px-5">
-          <p className="text-[9px] font-black text-red-300 uppercase tracking-widest mb-1">Client</p>
-          <p className="text-sm font-black text-red-900">{data.originalInvoice?.partner?.name ?? "—"}</p>
-          <p className="text-[10px] text-red-300 mt-0.5">{data.originalInvoice?.partner?.email ?? ""}</p>
-        </div>
+    <div className="px-5">
+      <p className="text-[9px] font-black text-red-300 uppercase tracking-widest mb-1">Client</p>
+      <p className="text-sm font-black text-red-900">{data.originalInvoice?.partner?.name ?? "—"}</p>
+      <p className="text-[10px] text-red-300 mt-0.5">{data.originalInvoice?.partner?.email ?? ""}</p>
+    </div>
 
-        <div className="pl-5">
-          <p className="text-[9px] font-black text-red-300 uppercase tracking-widest mb-1">Montant TTC</p>
-          <p className="text-base font-black text-red-900 tracking-tight">
-            {
+    <div className="pl-5">
+      <p className="text-[9px] font-black text-red-300 uppercase tracking-widest mb-1">Montant TTC</p>
+      <p className="text-base font-black text-red-900 tracking-tight">
+        {
               data?.originalInvoice?.totalInclTax != null
                 ? new Intl.NumberFormat("fr-TN").format(
                   data.originalInvoice.totalInclTax
                 )
                 : "—"
             }{" "}
-            <span className="text-xs font-bold text-red-300">
-              {data?.originalInvoice?.currency ?? ""}
-            </span>
-          </p>
-        </div>
-
-      </div>
+        <span className="text-xs font-bold text-red-300">{data.originalInvoice?.invoiceCurrency ?? ""}</span>
+      </p>
     </div>
-  );
+
+  </div>
+</div>
+    );
 }

@@ -15,5 +15,6 @@ invoiceItemSchema = z.object({
     itemTaxAmount : z.number(),
     itemTotalInclTax : z.number(),
     operationCategory : operationCategorySchema,
-});
+    invoice:z.string().nullable(),
+}).strict();
 export type InvoiceItem = z.infer<typeof invoiceItemSchema>;

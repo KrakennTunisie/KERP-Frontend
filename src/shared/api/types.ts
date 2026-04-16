@@ -8,6 +8,6 @@ export type PageResponse<T> = {
 
 export type GetPartnersParams = {
   keyword?: string;
-  country?: string;
+  filter?: string;
   page?: number;
 };

@@ -39,9 +39,9 @@ export function convertItemCurrency(
   let convertedUnitPrice = item.unityPriceEXclTax;
 
   if (fromCurrency === "TND" && toCurrency === "EUR") {
-    convertedUnitPrice = item.unityPriceEXclTax / exchangeRate;
+    convertedUnitPrice = item.unityPriceEXclTax;
   } else if (fromCurrency === "EUR" && toCurrency === "TND") {
-    convertedUnitPrice = item.unityPriceEXclTax *exchangeRate;
+    convertedUnitPrice = item.unityPriceEXclTax ;
   }
 
  return recalculate({ ...item, unityPriceEXclTax: convertedUnitPrice });
@@ -80,6 +80,6 @@ export function calculUnityPrice(
     ...item,
     unityPriceEXclTax: currency === "TND"
       ? round2(item.unityPriceEXclTax)  // TND → EUR
-      : round2(item.unityPriceEXclTax / exchangeRate), // EUR → TND
+      : round2(item.unityPriceEXclTax ), // EUR → TND
   };
 }

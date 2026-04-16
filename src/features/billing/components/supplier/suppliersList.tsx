@@ -1,6 +1,5 @@
 'use client';
 
-import dynamic from "next/dynamic";
 
 import { useEffect, useMemo, useState } from 'react';
 import {
@@ -12,7 +11,6 @@ import {
 import SuppliersTable from "./suppliersTable"
 import SupplierCreateModal from "./createSupplierModal";
 import {   SupplierPartnerItem } from '../../models/partner';
-import lazyComponent from "@/shared/utils/lazyComponent";
 import SupplierUpdateModal from "./updateSupplierModal";
 import SupplierDeleteModal from "./deleteSupplierModal";
 import { partnersApi } from "../../api/partners-api";
@@ -43,7 +41,6 @@ export default function SuppliersList() {
 
   });
 
-  const [error, setError] = useState<string | null>(null);
   const [suppliers, setSuppliers] = useState<SupplierPartnerItem[]>([]);
   const [totalPages, setTotalPages] = useState(1);
   const [totalElements, setTotalElements] = useState(0);
@@ -51,17 +48,11 @@ export default function SuppliersList() {
   
   const debouncedSearchQuery = useDebounce(searchQuery, 2000);
 
-const cities = useMemo(() => Array.from(new Set(suppliers.map((c) => c.country))), []);
+const cities = useMemo(() => Array.from(new Set(suppliers.map((c) => c.country))), [suppliers]);
 
-useEffect(() => {
-  setCurrentPage(1);
-}, [debouncedSearchQuery, filterCity]);
-
-useEffect(() => {
-  const fetchClients = async () => {
+const fetchClients = async () => {
     try {
       setLoading(true);
-      setError(null);
       const keyword =
         debouncedSearchQuery.trim().length >= 3
           ? debouncedSearchQuery.trim()
@@ -69,7 +60,7 @@ useEffect(() => {
 
       const response = await partnersApi.getSuppliers({
         keyword: keyword,
-        country: filterCity !== "all" ? filterCity : undefined,
+        filter: filterCity !== "all" ? filterCity : undefined,
         page: currentPage - 1,
       });
 
@@ -77,13 +68,19 @@ useEffect(() => {
       setTotalPages(response.totalPages);
       setTotalElements(response.totalElements);
     } catch (error) {
-      setError(getApiErrorMessage(error));
       appToast.error("Erreur de fetch clients: ",getApiErrorMessage(error))
     } finally {
       setLoading(false);
     }
   };
 
+
+useEffect(() => {
+  setCurrentPage(1);
+}, [debouncedSearchQuery, filterCity]);
+
+useEffect(() => {
+  
   fetchClients();
 }, [debouncedSearchQuery, filterCity, currentPage]);
 
@@ -182,18 +179,20 @@ useEffect(() => {
                 <SupplierCreateModal
                     open={showAddModal}
                     onClose={() => setShowAddModal(false)}
+                    onCreated={fetchClients}
                     />
                 
                 <SupplierUpdateModal
                   open ={showUpdateModal}
                   onClose={()=> setShowUpdateModal(false)}
-                  onCreated={()=>{}}
+                  onCreated={fetchClients}
                   data={formData}
                 />
 
                 <SupplierDeleteModal
                     open={!!deleteConfirmId}
                     onClose={() => setDeleteConfirmId('')} 
+                    onCreated={fetchClients}
                     confirmDeleteId={deleteConfirmId}                
                 />
         </div>

@@ -13,10 +13,10 @@ type Props = {
   open: boolean;
   data: ClientPartnerItem;
   onClose: () => void;
-  onCreated?: () => void; // refresh list, etc.
+  onCreated: () => void; // refresh list, etc.
 };
 
-export default function ClientUpdateModal({ open, onClose, /*onCreated*/ data }: Props) {
+export default function ClientUpdateModal({ open, onClose, onCreated, data }: Props) {
       const onSubmit: SubmitHandler<UpdatePartner> = async (values) => {
         try {
           const updatedClient = await partnersApi.updateClient(data.idPartner, values);
@@ -24,6 +24,7 @@ export default function ClientUpdateModal({ open, onClose, /*onCreated*/ data }:
           if (updatedClient) {
             appToast.success("Client modifié avec succès");
             onClose();
+            onCreated();
           }
         } catch (e: unknown) {
           const message = getApiErrorMessage(e);

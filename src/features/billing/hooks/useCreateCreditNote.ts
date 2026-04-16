@@ -1,5 +1,5 @@
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
-import { CreditNoteSchema, } from "../models/creditNote";
+import { invoiceCreditNoteSchema } from "../models/creditNote";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
@@ -19,7 +19,7 @@ import { invoiceComplianceStatusSchema } from "../types/invoiceComplianceStatus"
 import { invoiceStatusSchema } from "../types/invoiceStatus";
 import { uuid4 } from "node_modules/zod/v4/core/regexes.cjs";
 
-type creditNoteFormValues = z.infer<typeof CreditNoteSchema>;
+type creditNoteFormValues = z.infer<typeof invoiceCreditNoteSchema>;
 export default function useCreateCreditNote() {
     const router = useRouter();
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -36,19 +36,19 @@ export default function useCreateCreditNote() {
 
     //Initialisation du formulaire
     const form = useForm<creditNoteFormValues>({
-        resolver: zodResolver(CreditNoteSchema),
+        resolver: zodResolver(invoiceCreditNoteSchema),
         defaultValues: {
-            invoiceNumber: uuidv4(),
+            invoiceCreditNoteNumber: uuidv4(),
             issueDate: new Date(),
             creationDate: new Date(),
             sentToclientDate: null,
             sentToTTNDate: null,
-            creditNoteReason: CreditNoteTypeSchema.enum["Quality Issue"],
+            motif: CreditNoteTypeSchema.enum["Quality Issue"],
             invoiceItems: [defaultItem()],
             QRCode: " ",
-            invoiceComplianceStatus: invoiceComplianceStatusSchema.enum.TTN_ACCEPTED,
-            invoiceStatus: invoiceStatusSchema.enum.DRAFT,
-            invoiceDocument: null,
+            invoiceCreditNoteComplianceStatus: invoiceComplianceStatusSchema.enum.TTN_ACCEPTED,
+            invoiceCreditNoteStatus: invoiceStatusSchema.enum.DRAFT,
+            invoiceCreditNoteDocument: null,
             totalExclTax: 0,
             totalInclTax: 0,
             vatAmount: 0,
@@ -70,7 +70,7 @@ export default function useCreateCreditNote() {
     const canCreateInvoice =
         isDirty &&
         isValid &&
-        !!previewData.creditNoteReason &&
+        !!previewData.motif &&
         !!previewData.invoiceItems?.length &&
         !!previewData.issueDate &&
         previewData.invoiceItems.every(
@@ -152,7 +152,7 @@ export default function useCreateCreditNote() {
 
             updatedItem = calculUnityPrice(
                 updatedItem,
-                getValues("originalInvoice.currency"),
+                getValues("originalInvoice.invoiceCurrency"),
                 getValues("originalInvoice.appliedExchangeRate")
             );
 
@@ -171,15 +171,15 @@ export default function useCreateCreditNote() {
     };
 
     //Génération et visualisation du document PDF Facture Avoir 
-     /* eslint-disable react-hooks/refs */
+    /* eslint-disable react-hooks/refs */
     const onSubmit = handleSubmit(
         async () => {
             const element = invoiceRef.current;
 
             if (!element) return;
-            const file = await handleSaveAsPDF(element, getValues("invoiceNumber"));
+            const file = await handleSaveAsPDF(element, getValues("invoiceCreditNoteNumber"));
             if (file) {
-                setValue("invoiceDocument", file, { shouldValidate: true, shouldDirty: true });
+                setValue("invoiceCreditNoteDocument", file, { shouldValidate: true, shouldDirty: true });
                 setPdfUrl(file);
             }
             setIsModalOpen(true);

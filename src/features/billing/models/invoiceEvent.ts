@@ -1,12 +1,15 @@
-import { InvoiceEventSource } from '../types/invoiceEventSource'
-import { InvoiceEventType } from '../types/invoiceEventType'
-import { Invoice } from './invoice'
+import {  InvoiceEventSourceSchema } from '../types/invoiceEventSource'
+import {  InvoiceEventTypeSchema } from '../types/invoiceEventType'
+import {  z } from "zod";
 
-export interface InvoiceEvent {
-  idInvoiceEvent: string        
-  invoice: Invoice              
-  invoiceEventType: InvoiceEventType
-  eventDate: Date
-  description: string
-  eventSource:InvoiceEventSource
-}
+
+export const InvoiceEventSchema = z.object({
+  idInvoiceEvent: z.uuid(),
+  invoiceEventType: InvoiceEventTypeSchema,
+  eventDate: z.date(),
+  description: z.string(),
+  eventTrigger: InvoiceEventSourceSchema,
+  triggeredBy: z.string()
+})
+
+export type InvoiceEvent = z.infer<typeof InvoiceEventSchema>

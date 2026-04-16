@@ -13,6 +13,7 @@ export default function defaultItem(): InvoiceItem {
     itemTaxAmount: 0,
     itemTotalInclTax: 0,
     operationCategory: operationCategorySchema.enum.SERVICE_PROVISION,
+    invoice:null,
   }
 }
 
@@ -27,7 +28,8 @@ export const mockInvoiceItems: InvoiceItem[] = [
     itemTotalExclTax: 10000,
     itemTaxAmount: 1900,
     itemTotalInclTax: 11900,
-    operationCategory: operationCategorySchema.enum.SERVICE_PROVISION
+    operationCategory: operationCategorySchema.enum.SERVICE_PROVISION,
+    invoice: null
   },
   {
     idInvoiceItem: '323e4567-e89b-12d3-a456-426614174002',
@@ -38,8 +40,9 @@ export const mockInvoiceItems: InvoiceItem[] = [
     itemTotalExclTax: 4000,
     itemTaxAmount: 760,
     itemTotalInclTax: 4760,
-    operationCategory: operationCategorySchema.enum.SERVICE_PROVISION
-    },
+    operationCategory: operationCategorySchema.enum.SERVICE_PROVISION,
+    invoice: null
+  },
 
   {
     idInvoiceItem: '423e4567-e89b-12d3-a456-426614174003',
@@ -50,7 +53,8 @@ export const mockInvoiceItems: InvoiceItem[] = [
     itemTotalExclTax: 4000,
     itemTaxAmount: 760,
     itemTotalInclTax: 4760,
-    operationCategory: operationCategorySchema.enum.SERVICE_PROVISION
+    operationCategory: operationCategorySchema.enum.SERVICE_PROVISION,
+    invoice: null
   },
   {
     idInvoiceItem: '523e4567-e89b-12d3-a456-426614174004',
@@ -61,6 +65,7 @@ export const mockInvoiceItems: InvoiceItem[] = [
     itemTotalExclTax: 1800,
     itemTaxAmount: 126,
     itemTotalInclTax: 1926,
-    operationCategory: operationCategorySchema.enum.SERVICE_PROVISION
+    operationCategory: operationCategorySchema.enum.SERVICE_PROVISION,
+    invoice: null
   },
 ]

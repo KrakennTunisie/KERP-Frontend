@@ -1,8 +1,8 @@
 "use client"
 
+import { DocumentPreviewModal } from "@/shared/components/ui/documentPreviewModal"
 import useClientInvoiceDetails, { InvoiceDetailsProps } from "../../hooks/useClientInvoiceDetails"
 import { mockInvoiceItems } from "../../mocks/invoice-items-mocks"
-import { mockInvoiceEvents } from "../../mocks/invoiceEvent-mocks"
 import { InvoiceEventLabels } from "../../types/invoiceEventType"
 import { invoiceStatusSchema } from "../../types/invoiceStatus"
 import Card from "../widgets/card"
@@ -11,7 +11,7 @@ import ShieldIcon from "../widgets/shieldIcon"
 import { SendToTTNModal } from "../widgets/ttnConfirmationModal"
 
 export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps) {
-    const {setStatusPaiement, client, invoice, sendToTTN, TtnModalOpen, setTtnModalOpen,
+    const {  setStatusPaiement, client, invoice, previewDocument, setPreviewDocument, sendToTTN, TtnModalOpen, setTtnModalOpen,
         hasCreditInvoice,loading, sent, successMessage, router } = useClientInvoiceDetails({ invoiceId });
     return (
         <div className="min-h-screen bg-gray-50 font-sans">
@@ -33,7 +33,7 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                                 {invoice?.invoiceStatus}
                             </span>
                         </div>
-                        <p className="text-xs text-gray-400 mt-0.5">Emise le {invoice?.issueDate.toISOString()} · Échéance le {invoice?.dueDate.toISOString()}</p>
+                        <p className="text-xs text-gray-400 mt-0.5">Emise le {invoice?.issueDate.toLocaleString()} · Échéance le {invoice?.dueDate.toLocaleString()}</p>
                     </div>
                 </div>
             </div>
@@ -83,7 +83,7 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                                         <line x1="22" y1="2" x2="11" y2="13" />
                                         <polygon points="22 2 15 22 11 13 2 9 22 2" />
                                     </svg>
-                                    Envoyer au TTN
+                                    {"Envoyer au TTN"}
                                 </button>
                             )}
                         </div>
@@ -157,18 +157,18 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                                 <div>
                                     <p className="font-bold text-gray-900 text-sm">{client?.name}</p>
                                     <p className="text-xs text-gray-500 mt-1 leading-5">
-                                        {client?.address}<br />{client?.country}
+                                        {invoice?.partner?.address}<br />{invoice?.partner?.country}
                                     </p>
                                 </div>
                             </div>
                             <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-gray-100">
                                 <div>
-                                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Matricule fiscal</p>
-                                    <p className="text-xs font-bold text-gray-900 font-mono">{client?.taxRegistrationNumber}</p>
+                                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Téléphone</p>
+                                    <p className="text-xs font-bold text-gray-900 font-mono">{invoice?.partner?.phoneNumber}</p>
                                 </div>
                                 <div>
                                     <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Contact</p>
-                                    <p className="text-sm font-bold text-gray-900">{client?.name}</p>
+                                    <p className="text-sm font-bold text-gray-900">{invoice?.partner?.name}</p>
                                 </div>
                             </div>
                         </Card>
@@ -182,12 +182,12 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                                     <p className="text-sm font-bold text-gray-900"></p>
                                 </div>
                                 <div key="Méthode de paiement">
-                                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">{"Méthode de paiement"}</p>
-                                    <p className="text-sm font-bold text-gray-900"></p>
+                                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Méthode de paiement</p>
+                                    <p className="text-sm font-bold text-gray-900">{invoice?.paymentMethod}</p>
                                 </div>
                                 <div key="Devise">
                                     <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Devise</p>
-                                    <p className="text-sm font-semibold text-gray-700">TND</p>
+                                    <p className="text-sm font-semibold text-gray-700">{invoice?.invoiceCurrency}</p>
                                 </div>
                             </div>
                         </Card>
@@ -214,7 +214,7 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                                 scrollbarColor: '#CBD5E1 transparent',
                             }}
                         >
-                            {mockInvoiceItems.map((item, index) => (
+                            {invoice?.invoiceItems?.map((item, index) => (
                                 <div
                                     key={item.idInvoiceItem}
                                     className={`grid grid-cols-[1fr_70px_90px_100px] gap-2 py-3.5 items-center ${index < mockInvoiceItems.length - 1 ? 'border-b border-gray-50' : ''
@@ -222,7 +222,7 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                                 >
                                     <div>
                                         <p className="text-sm font-semibold text-gray-900">{item.description}</p>
-                                        <p className="text-xs text-gray-400 mt-0.5">TVA 19%</p>
+                                        <p className="text-xs text-gray-400 mt-0.5">{item.vatRate + '%'}</p>
                                     </div>
                                     <p className="text-sm text-gray-700 text-right">{item.quantity}</p>
                                     <p className="text-sm text-gray-700 text-right">{item.unityPriceEXclTax}</p>
@@ -233,8 +233,16 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
 
                         <div className="mt-4 flex flex-col items-end gap-2">
                             {[
-                                { label: 'Sous-total HT', value: '15 500 TND' },
-                                { label: 'Total TVA', value: '2 945 TND' },
+                                { label: 'Sous-total HT', value: invoice?.invoiceCurrency == "EUR" 
+                                                                            ? invoice.totalExclTaxEUR 
+                                                                            : invoice?.invoiceCurrency =="TND" 
+                                                                                ? invoice.totalExclTaxTND
+                                                                                :invoice?.totalInclTax},
+                                { label: 'Total TVA', value: invoice?.invoiceCurrency == "EUR" 
+                                                                            ? (invoice.totalInclTaxEUR - invoice.totalExclTaxEUR).toFixed(2)
+                                                                            : invoice?.invoiceCurrency =="TND" 
+                                                                                ? (invoice.totalInclTaxTND - invoice.totalExclTaxTND).toFixed(2)
+                                                                                :invoice?.totalInclTax},
                             ].map(({ label, value }) => (
                                 <div key={label} className="flex justify-between w-64">
                                     <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">{label}</span>
@@ -244,7 +252,13 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                             <div className="w-64 h-px bg-gray-200 my-1" />
                             <div className="flex justify-between w-64 items-center">
                                 <span className="text-[10px] font-bold uppercase tracking-widest text-gray-700">Total TTC</span>
-                                <span className="text-2xl font-extrabold text-blue-600 tracking-tight">18 445 TND</span>
+                                <span className="text-2xl font-extrabold text-blue-600 tracking-tight">
+                                    {invoice?.invoiceCurrency == "EUR" 
+                                                                            ? invoice.totalInclTaxEUR + " EUR"
+                                                                            : invoice?.invoiceCurrency =="TND" 
+                                                                                ? invoice.totalInclTaxTND +" TND" 
+                                                                                :invoice?.totalInclTax}
+                                                                            </span>
                             </div>
                         </div>
                     </Card>
@@ -276,8 +290,8 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                                 </p>
                             ) : (
                                 <p className="text-sm text-gray-500 text-center">
-                                    QR CODE non fourni <br />
-                                    (en attente de validation)
+                                    {"QR CODE non fourni"} <br />
+                                    ({"en attente de validation"})
                                 </p>
                             )}
                         </div>
@@ -285,7 +299,7 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                         {invoice?.invoiceComplianceStatus == "TTN_ACCEPTED" ? (
                             <>
                                 <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 text-center mt-3">
-                                    ID de validation
+                                    {"ID de validation"}
                                 </p>
 
                                 <p className="text-sm font-bold text-violet-600 text-center mt-1 font-mono tracking-wide">
@@ -294,7 +308,7 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
 
                                 <div className="bg-violet-50 rounded-xl p-3 text-center mt-3">
                                     <p className="text-[11px] text-violet-600 font-semibold leading-relaxed">
-                                       {" Scannez ce QR code pour vérifier l'authenticité de cette facture électronique"}
+                                        {"Scannez ce QR code pour vérifier l'authenticité de cette facture électronique"}
                                     </p>
                                 </div>
                             </>
@@ -304,7 +318,7 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                             </p>
                         ) : (
                             <p className="text-sm text-gray-500 text-center mt-3">
-                                ID de validation non disponible (en attente)
+                                {"ID de validation non disponible (en attente)"}
                             </p>
                         )}
                     </Card>
@@ -320,10 +334,10 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                                 scrollbarColor: '#CBD5E1 transparent',
                             }}
                         >
-                            {mockInvoiceEvents.map((event, index) => (
+                            {invoice?.invoiceEvents?.map((event, index) => (
                                 <div key={event.idInvoiceEvent} className="flex items-start gap-2.5 relative">
                                     {/* Ligne verticale entre les points */}
-                                    {index < mockInvoiceEvents.length - 1 && (
+                                    {index < (invoice?.invoiceEvents?.length || 0) - 1 && (
                                         <div className="absolute left-[4px] top-3.5 w-px h-full bg-blue-100" />
                                     )}
                                     <div className="w-2.5 h-2.5 rounded-full bg-blue-500 shrink-0 mt-1 z-10" />
@@ -332,7 +346,7 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                                             {InvoiceEventLabels[event.invoiceEventType]}
                                         </p>
                                         <p className="text-[11px] font-semibold text-gray-400 mt-0.5">
-                                            {event.eventDate.toDateString()} - {event.eventSource}
+                                            {event.eventDate.toLocaleString()} - {event.eventTrigger}
                                         </p>
                                         <p className="text-[11px] text-gray-400 mt-0.5">{event.description}</p>
                                     </div>
@@ -345,7 +359,7 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                     <Card>
                         <SectionLabel>{"Documents attachés"}</SectionLabel>
                         <div
-                            onClick={() => { }}
+                            onClick={() => { setPreviewDocument(invoice?.invoiceDocument)}}
                             className="flex items-center justify-between p-2.5 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer group">
                             <div className="flex items-center gap-2.5">
                                 <div className="w-9 h-9 rounded-lg bg-rose-50 flex items-center justify-center shrink-0">
@@ -355,7 +369,7 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                                     </svg>
                                 </div>
                                 <div>
-                                    <p className="text-sm font-semibold text-gray-900">Facture_FAC-2025-001.pdf</p>
+                                    <p className="text-sm font-semibold text-gray-900">{invoice?.invoiceDocument?.fileName}</p>
                                     <p className="text-[11px] text-gray-400 mt-0.5">{"245 KB · 2025-01-15"}</p>
                                 </div>
                             </div>
@@ -367,6 +381,11 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
 
                 </div>
             </div>
+                <DocumentPreviewModal
+                    open={!!previewDocument}
+                    onClose={() => setPreviewDocument(null)}
+                    document={previewDocument}
+                  />
         </div>
     );
 }

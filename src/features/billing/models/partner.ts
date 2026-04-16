@@ -33,6 +33,8 @@ export const createPartnerSchema = z.object({
   address: z.string().min(1, "L'addresse est obligatoire"),
   iban: z.string().min(1, "IBAN est obligatoire"),
 
+  partnerType: partnerTypeSchema,
+
   rne: fileSchema,
   contract: fileSchema,
   patente: fileSchema ,
@@ -72,6 +74,15 @@ export const updatePartnerSchema = createPartnerSchema
   .omit({ taxRegistrationNumber: true, rne: true, contract: true, patente: true })
   .partial();
 
+export const partnerSummarySchema = partnerSchema.pick({
+  idPartner: true,
+  name: true,
+  email: true,
+  address: true,
+  phoneNumber: true,
+  partnerType: true,
+});
+export type PartnerSummary = z.infer<typeof partnerSummarySchema>;
 export type CreateClientPartner = z.infer<typeof createClientPartnerSchema>;
 export type CreateSupplierPartner = z.infer<typeof createSupplierPartnerSchema>;
 export type UpdatePartner = z.infer<typeof updatePartnerSchema>;

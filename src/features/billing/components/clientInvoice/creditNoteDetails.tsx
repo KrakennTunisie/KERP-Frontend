@@ -57,7 +57,7 @@ export default function CreditNoteDetails({params}:PropsCreditNote)
                                       </p>
                                   ) : invoice?.invoiceComplianceStatus === "TTN_REJECTED" ? (
                                       <p className="text-sm text-red-600 mt-0.5">
-                                         {" Ce document est rejeté par l'administration fiscale."}
+                                          {"Ce document est rejeté par l'administration fiscale."}
                                       </p>
                                   ) : (
                                       <p className="text-sm text-gray-500 mt-0.5">
@@ -83,7 +83,7 @@ export default function CreditNoteDetails({params}:PropsCreditNote)
                                           <line x1="22" y1="2" x2="11" y2="13" />
                                           <polygon points="22 2 15 22 11 13 2 9 22 2" />
                                       </svg>
-                                      Envoyer au TTN
+                                      {"Envoyer au TTN"}
                                   </button>
                               )}
                           </div>
@@ -227,7 +227,7 @@ export default function CreditNoteDetails({params}:PropsCreditNote)
                                   </svg>
                               ) : invoice?.invoiceComplianceStatus === "TTN_REJECTED" ? (
                                   <p className="text-sm text-red-600 text-center">
-                                      {"Facture rejetée par l'administration fiscale"}
+                                     {" Facture rejetée par l'administration fiscale"}
                                   </p>
                               ) : (
                                   <p className="text-sm text-gray-500 text-center">
@@ -284,10 +284,10 @@ export default function CreditNoteDetails({params}:PropsCreditNote)
                                       <div className="w-2.5 h-2.5 rounded-full bg-red-200 shrink-0 mt-1 z-10" />
                                       <div>
                                           <p className="text-sm font-semibold leading-snug text-black">
-                                              {InvoiceEventLabels[event.invoiceEventType]}
+                                              {InvoiceEventLabels[event?.invoiceEventType]}
                                           </p>
                                           <p className="text-[11px] font-semibold text-gray-400 mt-0.5">
-                                              {event.eventDate.toDateString()} - {event.eventSource}
+                                              {event.eventDate.toDateString()} - {event.eventTrigger}
                                           </p>
                                           <p className="text-[11px] text-gray-400 mt-0.5">{event.description}</p>
                                       </div>

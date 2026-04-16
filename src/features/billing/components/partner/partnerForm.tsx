@@ -31,7 +31,7 @@ export default function PartnerForm<TSchema extends AnyZodObject>({
     phoneNumber: "phoneNumber" as Path<FormValues>,
     taxRegistrationNumber: "taxRegistrationNumber" as Path<FormValues>,
     country: "country" as Path<FormValues>,
-    adress: "adress" as Path<FormValues>,
+    address: "address" as Path<FormValues>,
     iban: "iban" as Path<FormValues>,
     rne: "rne" as Path<FormValues>,
     contract: "contract" as Path<FormValues>,
@@ -51,7 +51,7 @@ export default function PartnerForm<TSchema extends AnyZodObject>({
     resolver: zodResolver(schema),
     defaultValues,
   });
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   const setValueAny = setValue as (field: string, value: unknown, options?: object) => void;
 
   const getError = (field: Path<FormValues>) => {
@@ -67,7 +67,7 @@ export default function PartnerForm<TSchema extends AnyZodObject>({
           { field: fields.email, placeholder: "Email" },
           { field: fields.phoneNumber, placeholder: "Téléphone" },
           { field: fields.country, placeholder: "Pays" },
-          { field: fields.adress, placeholder: "Adresse" },
+          { field: fields.address, placeholder: "Addresse" },
         ].map(({ field, placeholder }) => (
           <div key={field}>
             <input

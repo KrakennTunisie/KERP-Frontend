@@ -3,7 +3,7 @@ import { invoiceSchema } from "../../models/invoice";
 import { z } from "zod"
 import { paymentMethodLabels } from "../../types/paymentMethod";
 import { OperationCategoryLabels } from "../../types/operationCategory";
-import { CreditNoteSchema } from "../../models/creditNote";
+import { invoiceCreditNoteSchema } from "../../models/creditNote";
 import { invoiceTypeLabels, invoiceTypeSchema } from "../../types/invoiceType";
 import { creditNoteTypeLabels } from "../../types/creditNoteType";
 import { PaymentConditionLabels } from "../../types/paymentCondition";
@@ -11,12 +11,12 @@ import { forwardRef } from "react";
 
 
 export type InvoiceData = DeepPartial<z.infer<typeof invoiceSchema>>;
-export type CreditNoteData = DeepPartial<z.infer<typeof CreditNoteSchema>>;
+export type CreditNoteData = DeepPartial<z.infer<typeof invoiceCreditNoteSchema>>;
 type InvoicePreviewProps = {
-    data: InvoiceData | CreditNoteData;
+    data: InvoiceData | CreditNoteData ;
 };
 function isCreditNote(data: InvoiceData | CreditNoteData): data is CreditNoteData {
-    return "creditNoteReason" in data;
+    return "invoiceCreditNoteNumber" in data;
 }
 
 const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }, ref) => {
@@ -58,7 +58,11 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
                             </p>
                             <div className="mt-2 inline-flex items-center px-4 py-1.5 rounded-lg bg-blue-50 border border-blue-200">
                                 <span className="text-sm font-bold text-blue-700">
-                                    N° {data.invoiceNumber ?? "—"}
+                                    N° {"invoiceNumber" in data
+                                        ? `N° ${data.invoiceNumber}`
+                                        : "invoiceCreditNoteNumber" in data ? `N° ${data.invoiceCreditNoteNumber}`
+                                                    : ""
+                                        }
                                 </span>
                             </div>
                         </div>
@@ -116,9 +120,9 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
                             ? [{ label: "Échéance", value: data.dueDate?.toLocaleDateString() }]
                             : []),
                         ...(isCredit ? [
-                           {label: "Paiement",value: data?.originalInvoice?.PaymentCondition? PaymentConditionLabels[data.originalInvoice.PaymentCondition]: "—",},
+                              {label: "Paiement",value: data?.originalInvoice?.paymentCondition? PaymentConditionLabels[data.originalInvoice.paymentCondition]: "—",},
                             { label: "Mode", value:data?.originalInvoice!.paymentMethod ? paymentMethodLabels[data.originalInvoice.paymentMethod] : "—" }] :
-                            [{ label: "Paiement", value: PaymentConditionLabels[data!.PaymentCondition!] ?? "—" },
+                            [{ label: "Paiement", value: PaymentConditionLabels[data!.paymentCondition!] ?? "—" },
                             { label: "Mode", value: paymentMethodLabels[data!.paymentMethod!] ?? "—" },])
 
                     ].map(({ label, value }) => (
@@ -150,7 +154,7 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
                                     </td>
                                 </tr>
                             ) : (
-                                data.invoiceItems!.map((item) => (
+                                data.invoiceItems?.map((item) => (
                                     <tr key={item!.idInvoiceItem} className="border-b border-slate-50">
                                         <td className="py-4">
                                             <p className="text-sm font-bold text-slate-800">
@@ -158,7 +162,7 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
                                             </p>
                                             {isCredit && (
                                                 <p className="text-xs text-slate-400 mt-0.5">
-                                                    {"Motif de l'avoir : "}{creditNoteTypeLabels[data.creditNoteReason!] ?? "—"}
+                                                   {" Motif de l'avoir : "}{creditNoteTypeLabels[data.motif!] ?? "—"}
                                                 </p>
                                             )}
                                             <p className="text-xs text-slate-400 mt-0.5">TVA appliquée : {item!.vatRate}%</p>
@@ -202,14 +206,14 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
                         <div className="flex justify-between text-sm">
                             <span className="text-slate-500 font-medium">Total HT</span>
                             <span className="font-bold text-slate-800">{data.totalExclTax?.toFixed(2)} 
-                                {isCredit ? data.originalInvoice?.currency : data.currency}
+                                {isCredit ? data.originalInvoice?.invoiceCurrency : data.invoiceCurrency}
                             </span>
                         </div>
                         <div className="flex justify-between text-sm">
                             <span className="text-slate-500 font-medium">Total TVA</span>
                             <span className="font-bold text-slate-800">
-                                {data.vatAmount?.toFixed(2)} 
-                                {isCredit ? data.originalInvoice?.currency : data.currency}
+                                {data.totalInclTax?.toFixed(2)} 
+                                {isCredit ? data.originalInvoice?.invoiceCurrency : data.invoiceCurrency}
                             </span>
                         </div>
                         <div className="h-px bg-slate-900 my-1" />
@@ -218,7 +222,7 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
                             <span className="text-3xl font-black text-slate-700">
                                 {data.totalInclTax?.toFixed(2)}{" "}
                                 <span className="text-lg">
-                                {isCredit ? data.originalInvoice?.currency : data.currency}
+                                {isCredit ? data.originalInvoice?.invoiceCurrency : data.invoiceCurrency}
                                 </span>
                             </span>
                         </div>

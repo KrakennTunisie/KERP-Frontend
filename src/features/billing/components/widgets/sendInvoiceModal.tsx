@@ -177,7 +177,7 @@ export function SendInvoiceModal({
                 MONTANT
               </span>
               <span style={{ fontSize: 19, fontWeight: 800, color: "#1e3a8a", letterSpacing: "-0.02em" }}>
-                {invoice.totalInclTax} {invoice.currency}
+                {invoice.totalInclTax} {invoice.invoiceCurrency}
               </span>
             </div>
           </div>

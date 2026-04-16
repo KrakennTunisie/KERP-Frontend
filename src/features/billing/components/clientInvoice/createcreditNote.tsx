@@ -34,7 +34,7 @@ export function CreateCreditNote() {
                                 <FileX className="w-8 h-8 text-rose-600" />
                                 <h1 className="text-xl font-black text-gray-900 tracking-tighter">{"Créer une Facture d'Avoir"}</h1>
                             </div>
-                            <p className="text-sm font-medium text-gray-500 mt-1">{"Référence facture originale :"} {previewData.originalInvoice?.invoiceNumber}</p>
+                            <p className="text-sm font-medium text-gray-500 mt-1">{"Référence facture originale : "}{previewData.originalInvoice?.invoiceNumber}</p>
                         </div>
                     </div>
 
@@ -63,7 +63,7 @@ export function CreateCreditNote() {
                 onConfirm={() => { sendToTTN() }}
                 loading={loading}
                 invoiceSent={sent}
-                invoiceRef={previewData.invoiceNumber}
+                invoiceRef={previewData.invoiceCreditNoteNumber}
                 successMessage={successMessage} />
 
 
@@ -98,7 +98,7 @@ export function CreateCreditNote() {
                                             <input
                                                 readOnly
                                                 type="text"
-                                                {...register("invoiceNumber")}
+                                                {...register("invoiceCreditNoteNumber")}
                                                 className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
                                             />
                                         </div>
@@ -123,9 +123,9 @@ export function CreateCreditNote() {
 
                                     <div className="space-y-6">
                                         <div className="space-y-2">
-                                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{"Motif de l'avoir *"}</label>
+                                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{"Motif de l'avoir "}</label>
                                             <select
-                                                {...register("creditNoteReason")}
+                                                {...register("motif")}
                                                 className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
                                             >
                                                 {CreditNoteTypeSchema.options.map((type) => (
@@ -156,7 +156,7 @@ export function CreateCreditNote() {
 
                                                 <div className="flex items-center justify-between">
                                                     <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                                                        Sélectionner un produit
+                                                        {"Sélectionner un produit"}
                                                     </label>
                                                     <button
                                                         onClick={() => removeItem(field.idInvoiceItem)}

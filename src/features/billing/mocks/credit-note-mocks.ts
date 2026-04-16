@@ -1,5 +1,4 @@
 import { Currency } from "lucide-react";
-import { CreditNote } from "../models/creditNote";
 import { creditNoteTypeLabels, CreditNoteTypeSchema } from "../types/creditNoteType";
 import { exchangeRateSourceSchema } from "../types/exchangeRateSource";
 import { invoiceStatusSchema } from "../types/invoiceStatus";
@@ -9,60 +8,69 @@ import { currencyTypeSchema } from "../types/currency";
 import { invoiceComplianceStatusSchema } from "../types/invoiceComplianceStatus";
 import { MOCK_INVOICES } from "./invoice-mocks";
 import defaultItem from "./invoice-items-mocks";
+import { InvoiceCreditNote } from "../models/creditNote";
 
-export const mockCreditNotes : CreditNote[] = [
+export const mockCreditNotes : InvoiceCreditNote[] = [
   {
-   
-    invoiceNumber: "FAC-1001",
+    invoiceCreditNoteNumber: "FAC-1001",
     issueDate: new Date('2024-03-01'),
-    sentToTTNDate:  new Date(),
-    sentToclientDate:  new Date(),
+    sentToTTNDate: new Date(),
+    sentToclientDate: new Date(),
     creationDate: new Date(),
-    invoiceStatus: invoiceStatusSchema.enum["NOT_REFUNDED"],  // Valeur à ajuster selon le schéma
-    invoiceComplianceStatus: invoiceComplianceStatusSchema.enum.TTN_ACCEPTED,
+    invoiceCreditNoteStatus: invoiceStatusSchema.enum["NOT_REFUNDED"],  // Valeur à ajuster selon le schéma
+    invoiceCreditNoteComplianceStatus: invoiceComplianceStatusSchema.enum.TTN_ACCEPTED,
     totalExclTax: 500,
-    totalInclTax: 600,  // Total avec taxe
+    totalInclTax: 600, // Total avec taxe
     vatAmount: 100,
     QRCode: "QR12345",
     invoiceItems: [defaultItem()],
-    invoiceDocument: null,
-    creditNoteReason: CreditNoteTypeSchema.enum["Quality Issue"],
-    originalInvoice:MOCK_INVOICES[1] ,
+    invoiceCreditNoteDocument: null,
+    motif: CreditNoteTypeSchema.enum["Quality Issue"],
+    originalInvoice: MOCK_INVOICES[1],
+    description: "",
+    total: 0,
+    idInvoiceCreditNote: ""
   },
   {
-     invoiceNumber: "FAC-1001",
+    invoiceCreditNoteNumber: "FAC-1001",
     issueDate: new Date('2024-03-01'),
-    sentToTTNDate:  new Date(),
-    sentToclientDate:  new Date(),
+    sentToTTNDate: new Date(),
+    sentToclientDate: new Date(),
     creationDate: new Date(),
-    invoiceStatus: invoiceStatusSchema.enum.DRAFT,  // Valeur à ajuster selon le schéma
-    invoiceComplianceStatus: invoiceComplianceStatusSchema.enum.TTN_PENDING,
+    invoiceCreditNoteStatus: invoiceStatusSchema.enum.DRAFT,  // Valeur à ajuster selon le schéma
+    invoiceCreditNoteComplianceStatus: invoiceComplianceStatusSchema.enum.TTN_PENDING,
     totalExclTax: 500,
-    totalInclTax: 600,  // Total avec taxe
+    totalInclTax: 600, // Total avec taxe
     vatAmount: 100,
 
     QRCode: "QR12345",
     invoiceItems: [defaultItem()],
-    invoiceDocument: null,
-    creditNoteReason: CreditNoteTypeSchema.enum["Quality Issue"],
-    originalInvoice:MOCK_INVOICES[1] ,
+    invoiceCreditNoteDocument: null,
+    motif: CreditNoteTypeSchema.enum["Quality Issue"],
+    originalInvoice: MOCK_INVOICES[1],
+    description: "",
+    total: 0,
+    idInvoiceCreditNote: ""
   },
   {
-     invoiceNumber: "FAC-1001",
+    invoiceCreditNoteNumber: "FAC-1001",
     issueDate: new Date('2024-03-01'),
-    sentToTTNDate:  new Date(),
-    sentToclientDate:  new Date(),
+    sentToTTNDate: new Date(),
+    sentToclientDate: new Date(),
     creationDate: new Date(),
-    invoiceStatus: invoiceStatusSchema.enum.REFUNDED,  // Valeur à ajuster selon le schéma
-    invoiceComplianceStatus: invoiceComplianceStatusSchema.enum.TTN_ACCEPTED,
+    invoiceCreditNoteStatus: invoiceStatusSchema.enum.REFUNDED, // Valeur à ajuster selon le schéma
+    invoiceCreditNoteComplianceStatus: invoiceComplianceStatusSchema.enum.TTN_ACCEPTED,
     totalExclTax: 500,
-    totalInclTax: 600,  // Total avec taxe
+    totalInclTax: 600, // Total avec taxe
     vatAmount: 100,
     QRCode: "QR12345",
     invoiceItems: [defaultItem()],
-    invoiceDocument: null,
-    creditNoteReason: CreditNoteTypeSchema.enum["Quality Issue"],
-    originalInvoice:MOCK_INVOICES[1] ,
+    invoiceCreditNoteDocument: null,
+    motif: CreditNoteTypeSchema.enum["Quality Issue"],
+    originalInvoice: MOCK_INVOICES[1],
+    description: "",
+    total: 0,
+    idInvoiceCreditNote: ""
   }
 ];
 

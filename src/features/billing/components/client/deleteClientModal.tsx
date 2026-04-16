@@ -10,11 +10,11 @@ import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 type Props = {
   open: boolean;
   onClose: () => void;
-  onCreated?: () => void; // refresh list, etc. 
+  onCreated: () => void; // refresh list, etc. 
   confirmDeleteId: string;
 };
 
-export default function ClientDeleteModal({ open, onClose, /*onCreated*/ confirmDeleteId }: Props) {
+export default function ClientDeleteModal({ open, onClose, onCreated, confirmDeleteId }: Props) {
     const [isDeleting, setIsDeleting] = useState<boolean>(false)
       const handleDelete = async ( ) => {
           try {
@@ -23,6 +23,7 @@ export default function ClientDeleteModal({ open, onClose, /*onCreated*/ confirm
   
               appToast.success("Client supprimé avec succès");
               onClose();
+              onCreated();
           } catch (e: unknown) {
             const message = getApiErrorMessage(e);
             appToast.error('Échec de suppression , Veuillez réessayer.', message );

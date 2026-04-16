@@ -10,7 +10,7 @@ import { FileSchema } from "../../../features/billing/types/pdfSchema";
 import { useCreateInvoice } from "@/features/billing/hooks/useCreateEditInvoice";
 
 
-type DocumentOrFile = BillingDocument| FileSchema | null;
+export type DocumentOrFile = BillingDocument| FileSchema | null | undefined;
 
 const isFile = (doc: DocumentOrFile): doc is File => doc instanceof File;
 
@@ -19,13 +19,15 @@ type DocumentPreviewModalProps = {
   onClose: () => void;
   document: DocumentOrFile;
   onCreateInvoice?: () => void;
+  loading?: boolean,
 };
 
 export function DocumentPreviewModal({
   open,
   onClose,
   document,
-  onCreateInvoice
+  onCreateInvoice,
+  loading
 }: DocumentPreviewModalProps) {
   const objectUrlRef = useRef<string | null>(null);
    /* eslint-disable react-hooks/refs */
@@ -74,6 +76,7 @@ export function DocumentPreviewModal({
 
      {isFile(document)  && onCreateInvoice ? (
       <button
+       disabled={loading}
         onClick={() => {
          onCreateInvoice()
         }}

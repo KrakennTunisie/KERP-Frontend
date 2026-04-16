@@ -3,9 +3,15 @@ import { useEffect, useState } from "react";
 import { Invoice } from "../models/invoice";
 import { Partner } from "../models/partner";
 import { InvoiceItem } from "../models/invoiceItem";
+import { InvoicesAPI } from "../api/partners-api";
+import { appToast } from "@/shared/lib/toast";
+import { getApiErrorMessage } from "@/shared/api/handle-api-error";
+import { DocumentOrFile } from "@/shared/components/ui/documentPreviewModal";
 export type InvoiceDetailsProps = {
-  invoiceId?: string
+  invoiceId: string
 }
+
+
 
 // à reformuler aprés
 export const downloadFile = async (fileUrl: string, fileName: string): Promise<void> => {
@@ -30,6 +36,7 @@ export const downloadFile = async (fileUrl: string, fileName: string): Promise<v
 export default function useClientInvoiceDetails ({invoiceId}:InvoiceDetailsProps){
     const [marked, setMarked] = useState(false)
     const [client,setClient]= useState<Partner>();
+    const [previewDocument, setPreviewDocument] =useState<DocumentOrFile>(null);
     const [invoice , setInvoice]=useState<Invoice>();
     const [invoiceItems,setInvoiceItems]=useState<InvoiceItem>();
     const [TtnModalOpen, setTtnModalOpen] = useState(false);
@@ -51,10 +58,24 @@ export default function useClientInvoiceDetails ({invoiceId}:InvoiceDetailsProps
   });
 };
 
-  useEffect(()=>{
+  const fetchInvoice = async () => {
+    try {
+      setLoading(true)
+      const invoice = await InvoicesAPI.getClientInvoiceById(invoiceId);
+      setInvoice(invoice);
+    } catch (error) {
+      appToast.error("Erreur Fetch du client:",getApiErrorMessage(error));
+    }
+    finally{
+      setLoading(false)
+    }
+  };
 
-    },[invoiceId]);
 
+  useEffect(() => {
+  fetchInvoice();
+
+}, [invoiceId]);
   // Envoyer la facture au TTN
 function sendToTTN ()
  {
@@ -74,6 +95,8 @@ function sendToTTN ()
         invoice,
         invoiceItems,
         client,
+        previewDocument,
+        setPreviewDocument,
         sendToTTN,
         loading,
         successMessage,

@@ -41,31 +41,25 @@ export default function ClientsList() {
     idPartner:'',
   });
 
-const [error, setError] = useState<string | null>(null);
 const [clients, setClients] = useState<ClientPartnerItem[]>([]);
 const [totalPages, setTotalPages] = useState(1);
 const [totalElements, setTotalElements] = useState(0);
 const [loading, setLoading] = useState(false);
-const debouncedSearchQuery = useDebounce(searchQuery, 2000);
+
+const debouncedSearchQuery = useDebounce(searchQuery, 400);
 
 const cities = useMemo(() => Array.from(new Set(clients.map((c) => c.country))), [clients]);
 
-useEffect(() => {
-  setCurrentPage(1);
-}, [clients,debouncedSearchQuery, filterCity,]);
-
-useEffect(() => {
   const fetchClients = async () => {
     try {
       setLoading(true);
-      setError(null);
       const keyword =
         debouncedSearchQuery.trim().length >= 3
           ? debouncedSearchQuery.trim()
           : undefined;
       const response = await partnersApi.getClients({
         keyword: keyword,
-        country: filterCity !== "all" ? filterCity : undefined,
+        filter: filterCity !== "all" ? filterCity : undefined,
         page: currentPage - 1,
       });
 
@@ -73,15 +67,21 @@ useEffect(() => {
       setTotalPages(response.totalPages);
       setTotalElements(response.totalElements);
     } catch (error) {
-      setError(getApiErrorMessage(error));
       appToast.error("Erreur de fetch clients: ",getApiErrorMessage(error))
     } finally {
       setLoading(false);
     }
   };
 
+useEffect(() => {
+  setCurrentPage(1);
+}, [clients,debouncedSearchQuery, filterCity]);
+
+useEffect(() => {
+
   fetchClients();
-}, [debouncedSearchQuery, filterCity, currentPage,clients]);
+}, [debouncedSearchQuery, filterCity, currentPage]);
+
 
 
 
@@ -181,20 +181,19 @@ useEffect(() => {
                 <ClientCreateModal
                     open={showAddModal}
                     onClose={() => setShowAddModal(false)}
-                    onCreated={() => {
-                    // refresh list (re-fetch)
-                    }}
+                    onCreated={fetchClients}
                 />
                 <ClientUpdateModal
                   open ={showUpdateModal}
                   onClose={()=> setShowUpdateModal(false)}
-                  onCreated={()=>{}}
+                  onCreated={fetchClients}
                   data={formData}
                 />
 
                 <ClientDeleteModal
                     open={!!deleteConfirmId}
                     onClose={() => setDeleteConfirmId('')} 
+                    onCreated={fetchClients}
                     confirmDeleteId={deleteConfirmId}                
                 />
         </div>

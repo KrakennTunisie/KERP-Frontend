@@ -10,7 +10,7 @@ import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 type Props = {
   open: boolean;
   onClose: () => void;
-  onCreated?: () => void; // refresh list, etc. 
+  onCreated: () => void; // refresh list, etc. 
   confirmDeleteId: string;
 };
 
@@ -23,6 +23,7 @@ export default function SupplierDeleteModal({ open, onClose, onCreated, confirmD
 
               appToast.success("Fournisseur supprimé avec succès");
               onClose();
+              onCreated();
           } catch (e: any) {
             const message = getApiErrorMessage(e);
             appToast.error('Échec de suppression , Veuillez réessayer.', message );

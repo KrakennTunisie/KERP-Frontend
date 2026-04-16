@@ -16,9 +16,9 @@ import { mockPurchaseOrders } from "../../mocks/purchase-order-mocks"
 
 export default function CreateInvoiceClient({ mode,
     invoiceId, }: InvoiceFormClientProps) {
-    const { addItem, removeItem, updateItem, clientSearch, setClientSearch, showDropdown, setShowDropdown, invoiceRef, pdfUrl, canCreateInvoice, errors, TtnModalOpen, setTtnModalOpen, sent, successMessage, selectedPO
-        , selectClient, clearClient, filteredClients, setCurrency, previewData, form, onSubmit, isModalOpen, router, calculateDueDate, onCloseDocumentModal, createInvoice, sendToTTN, loading, linkedToPO, handleSelectPO, handleTogglePO
-    } = useCreateInvoice({ mode, invoiceId })
+    const { addItem, removeItem, updateItem, clientSearch, setClientSearch, showDropdown, setShowDropdown, invoiceRef, pdfUrl, canCreateInvoice, errors,TtnModalOpen,setTtnModalOpen,sent,successMessage,
+        linkedToPO,selectedPO, handleSelectPO,setLinkedToPO, handleTogglePO,selectClient, clearClient, updateInvoice, clients, setCurrency, previewData, form, onSubmit, isModalOpen, router, calculateDueDate, onCloseDocumentModal,createInvoice,sendToTTN,loading
+    } = useCreateInvoice({ mode, invoiceId })    
 
     const { register } = form
 
@@ -68,7 +68,7 @@ export default function CreateInvoiceClient({ mode,
             <DocumentPreviewModal
                 open={isModalOpen}
                 onClose={onCloseDocumentModal}
-                onCreateInvoice={createInvoice}
+                onCreateInvoice={mode=="create"? createInvoice: updateInvoice}
                 document={pdfUrl} />
             {/* Modal pour demander au user s'il veut envoyer la Facture au TTN */}
             <SendToTTNModal
@@ -223,7 +223,7 @@ export default function CreateInvoiceClient({ mode,
                             <div className="relative">
                                 <input
                                     type="text"
-                                    readOnly={linkedToPO && !!selectedPO}
+                                    //readOnly={linkedToPO && !!selectedPO}
                                     placeholder="Rechercher un client..."
                                     value={clientSearch}
                                     onChange={(e) => { setClientSearch(e.target.value); setShowDropdown(true) }}
@@ -242,9 +242,9 @@ export default function CreateInvoiceClient({ mode,
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                                     </svg>
                                 </div>
-                                {showDropdown && filteredClients.length > 0 && (
-                                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-20 overflow-hidden">
-                                        {filteredClients.map((client) => (
+                                {showDropdown && clients.length > 0 && (
+                                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-20 max-h-48 overflow-y-auto">                                        
+                                    {clients.map((client) => (
                                             <button
                                                 key={client.idPartner}
                                                 type="button"
@@ -307,8 +307,7 @@ export default function CreateInvoiceClient({ mode,
                                         Devise de saisie
                                     </label>
                                     <select
-                                        {...register("currency")}
-                                        disabled={linkedToPO && !!selectedPO}
+                                        {...register("invoiceCurrency")}
                                         onChange={(e) => setCurrency(e.target.value as CurrencyType)}
                                         className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
                                     >
@@ -451,8 +450,8 @@ export default function CreateInvoiceClient({ mode,
                                     Conditions
                                 </label>
                                 <select
-                                    {...register("PaymentCondition", {
-                                        onChange: () => {
+                                    {...register("paymentCondition", {
+                                        onChange: (e) => {
                                             calculateDueDate();
                                         }
                                     })}

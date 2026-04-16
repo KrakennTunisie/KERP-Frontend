@@ -11,5 +11,6 @@ export function buildQueryString(params?: Record<string, string | number | undef
   });
 
   const queryString = searchParams.toString();
+  console.log(queryString)
   return queryString ? `?${queryString}` : "";
 }

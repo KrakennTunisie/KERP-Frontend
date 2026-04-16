@@ -92,7 +92,7 @@ export default function CreditNoteList({ params }: PropsClient) {
                         {invoiceStatusSchema.options
                             .filter((f) =>
                                 f.includes(invoiceStatusSchema.enum.REFUNDED) ||
-                                f.includes(invoiceStatusSchema.enum["NOT_REFUNDED"]) ||
+                                f.includes(invoiceStatusSchema.enum.NOT_REFUNDED) ||
                                 f.includes(invoiceStatusSchema.enum.DRAFT)
                             )
                             .map((f) => (
@@ -139,24 +139,24 @@ export default function CreditNoteList({ params }: PropsClient) {
                                     className="border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer"
                                 >
                                     <td className="px-5 py-4 font-bold text-slate-800">
-                                        {f.invoiceNumber}
+                                        {f.invoiceCreditNoteNumber}
                                     </td>
                                     <td className="px-5 py-4 text-slate-700">{f.originalInvoice.invoiceNumber}</td>
                                     <td className="px-5 py-4">
-                                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${f.invoiceStatus !== "ALL" ? invoiceStatusColors[f.invoiceStatus] : ""
+                                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${f.invoiceCreditNoteStatus !== "ALL" ? invoiceStatusColors[f.invoiceCreditNoteStatus] : ""
                                             }}`}>
-                                            { f.invoiceStatus}
+                                            {f.invoiceCreditNoteStatus}
                                         </span>
                                     </td>
                                     <td className="px-5 py-4 text-slate-700 font-medium">
-                                        {creditNoteTypeLabels[f.creditNoteReason]}
+                                        {creditNoteTypeLabels[f.motif]}
                                     </td>
                                     <td className="text-red-500 font-bold">
-                                        - {f.totalInclTax} {f.originalInvoice.currency}
+                                        - {f.totalInclTax} {f.originalInvoice.invoiceCurrency}
                                     </td>
                                     <td className="px-5 py-4 text-slate-600">{f.issueDate.toLocaleDateString("fr-FR")}</td>
                                     <td className="px-5 py-4 text-center">
-                                        {f.invoiceComplianceStatus == invoiceComplianceStatusSchema.enum.TTN_ACCEPTED ? (
+                                        {f.invoiceCreditNoteComplianceStatus == invoiceComplianceStatusSchema.enum.TTN_ACCEPTED ? (
                                             <svg className="w-5 h-5 text-emerald-500 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                             </svg>
@@ -171,7 +171,7 @@ export default function CreditNoteList({ params }: PropsClient) {
 
                                             {/* Voir */}
                                             <button
-                                                onClick={(e) => { e.stopPropagation(); console.log("view", f.invoiceNumber); router.push(`/billing/invoices/clients/${params.invoiceId}/credit-note/${f.invoiceNumber}`) }}
+                                                onClick={(e) => { e.stopPropagation(); console.log("view", f.invoiceCreditNoteNumber); router.push(`/billing/invoices/clients/${params.invoiceId}/credit-note/${f.invoiceCreditNoteNumber}`) }}
                                                 className="p-2 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
                                                 title="Voir"
                                             >
@@ -190,8 +190,8 @@ export default function CreditNoteList({ params }: PropsClient) {
                                                     invoiceComplianceStatusSchema.enum.TTN_ACCEPTED,
                                                     invoiceComplianceStatusSchema.enum.TTN_PENDING,
                                                     invoiceComplianceStatusSchema.enum.TTN_SUBMITTED
-                                                ] as string[]).includes(f.invoiceComplianceStatus!)}
-                                                onClick={(e) => { setOpen(true); console.log("send", f.invoiceNumber); }}
+                                                ] as string[]).includes(f.invoiceCreditNoteComplianceStatus!)}
+                                                onClick={(e) => { setOpen(true); console.log("send", f.invoiceCreditNoteNumber); }}
                                                 className="p-2 rounded-xl bg-green-50 text-green-600 hover:bg-green-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                                 title="Envoyer"
                                             >
@@ -201,8 +201,8 @@ export default function CreditNoteList({ params }: PropsClient) {
                                             </button>
                                             {/* Supprimer */}
                                             <button
-                                                disabled={f.invoiceComplianceStatus != null}
-                                                onClick={(e) => { deleteCreditNote(f.invoiceNumber) }}
+                                                disabled={f.invoiceCreditNoteComplianceStatus != null}
+                                                onClick={(e) => { deleteCreditNote(f.invoiceCreditNoteNumber) }}
                                                 className="p-2 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                                 title="Supprimer"
                                             >

@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from "uuid";
 import { useRouter } from "next/navigation"
 import { Invoice, invoiceSchema } from "../models/invoice";
 import { InvoiceItem } from "../models/invoiceItem";
-import { Partner } from "../models/partner";
+import { Partner, PartnerSummary } from "../models/partner";
 import { MOCK_PARTNERS } from "../mocks/clients-mocks";
 import {
   calculateInvoiceTotals,
@@ -24,6 +24,10 @@ import { exchangeRateSourceSchema } from "../types/exchangeRateSource";
 import { handleSaveAsPDF } from "../lib/buildInvoicePDF";
 import { PurchaseOrder, purchaseOrderSchema } from "../models/purchaseOrder";
 import { purchaseOrderStatusSchema } from "../types/purchaseOrderStatus";
+import { useDebounce } from "@/shared/hooks/useDebounce";
+import { partnersApi } from "../api/partners-api";
+import { appToast } from "@/shared/lib/toast";
+import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 
 export type InvoiceFormClientProps = {
   mode: "create" | "edit"
@@ -49,8 +53,6 @@ export function useCreatePurchaseOrder({ mode, invoiceId }: InvoiceFormClientPro
       purchaseOrderItems: [defaultItem()],
       totalExclTax: 0,
       totalInclTax: 0,
-      vatAmount: 0,
-      PaymentCondition: PaymentConditionSchema.enum.NET_15,
       paymentMethod: paymentMethodSchema.enum.BANK_TRANSFER,
       partner: null,
       currency: currencyTypeSchema.enum.TND,
@@ -61,7 +63,7 @@ export function useCreatePurchaseOrder({ mode, invoiceId }: InvoiceFormClientPro
     mode: "onChange",
   });
 
-  const { control, setValue, getValues, handleSubmit ,formState: { isDirty, isValid,errors} } = form;
+  const { control, setValue, getValues, handleSubmit, reset ,formState: { isDirty, isValid,errors} } = form;
   const { append, remove, replace } = useFieldArray({
     control,
     name: "purchaseOrderItems",
@@ -69,6 +71,8 @@ export function useCreatePurchaseOrder({ mode, invoiceId }: InvoiceFormClientPro
 
   // UI state only
   const [clientSearch, setClientSearch] = useState("");
+  const [clients, setClients]=useState<PartnerSummary[] | []>([])
+  const [loadingClients, setLoadingClients]= useState(false)
   const [showDropdown, setShowDropdown] = useState(false);
   const previousCurrencyRef = useRef<CurrencyType>("TND");
   const previewData = useWatch({ control });
@@ -76,12 +80,11 @@ export function useCreatePurchaseOrder({ mode, invoiceId }: InvoiceFormClientPro
   // Validation des données obligatoire
 
 const canCreateInvoice =
-  isDirty &&
-  isValid &&
+ // (mode == "create" ? isDirty: true )&&
+ // isValid &&
   !!previewData.partner &&
   !!previewData.purchaseOrderItems?.length &&
   !!previewData.issueDate &&
-  !!previewData.PaymentCondition &&
   !!previewData.paymentMethod &&
   previewData.purchaseOrderItems.every(
     (item) =>
@@ -93,14 +96,32 @@ const canCreateInvoice =
   ); 
 
   //Filtrage de la liste des clients lors de la recherche 
-  const filteredClients = useMemo(() => {
-    return MOCK_PARTNERS.filter(
-      (p) =>
-        p.partnerType === "CLIENT" &&
-        p.name.toLowerCase().includes(clientSearch.toLowerCase())
-    );
-  }, [clientSearch]);
+  const debouncedSearchQuery = useDebounce(clientSearch, 2000);
 
+    const getClients = async ()=>{
+        try {
+          setLoadingClients(true);
+          const keyword =
+            debouncedSearchQuery.trim().length >= 3
+              ? debouncedSearchQuery.trim()
+              : undefined;
+
+          const response = await partnersApi.getSummaryClients({
+            keyword: keyword,
+          });
+
+          setClients(response);
+        } catch (error) {
+          appToast.error("Erreur de fetch clients: ",getApiErrorMessage(error))
+        } finally {
+          setLoadingClients(false);
+        }
+      };
+
+    useEffect(() => {
+      
+      getClients();
+    }, [debouncedSearchQuery]);
   //Synchronisation des items lors d'un nouveau item
   const syncItems = (newItems: InvoiceItem[]) => {
     replace(newItems);
@@ -149,7 +170,7 @@ const canCreateInvoice =
       if (field === "unityPriceEXclTax") {
         const itemWithConvertedPrice = calculUnityPrice(
           updatedItem,
-          getValues("currency"),
+          getValues("invoiceCurrency"),
           getValues("appliedExchangeRate")
         );
         return recalculate(itemWithConvertedPrice);
@@ -164,7 +185,7 @@ const canCreateInvoice =
   };
 
   // Sélection d'un client
-  const selectClient = (client: Partner) => {
+  const selectClient = (client: PartnerSummary) => {
     setValue("partner", client, { shouldValidate: true, shouldDirty: true, });
     setClientSearch(client.name);
     setShowDropdown(false);
@@ -185,7 +206,7 @@ const canCreateInvoice =
     const convertedItems = currentItems.map((item) => convertItemCurrency(item, oldCurrency, newCurrency, getValues("appliedExchangeRate")));
 
     previousCurrencyRef.current = newCurrency;
-    setValue("currency", newCurrency, { shouldValidate: true, shouldDirty: true, });
+    setValue("invoiceCurrency", newCurrency, { shouldValidate: true, shouldDirty: true, });
     const totals = calculateInvoiceTotals(convertedItems);
     setValue("totalExclTax", totals.totalHT, { shouldValidate: true, shouldDirty: true });
     setValue("vatAmount", totals.totalTVA, { shouldValidate: true, shouldDirty: true });
@@ -195,6 +216,7 @@ const canCreateInvoice =
 
  
   // Permet la visualisation  de la facture en PDF une fois remplie
+  /* eslint-disable react-hooks/refs */
   const onSubmit = handleSubmit(
     async (data) => {
       
@@ -230,7 +252,7 @@ const canCreateInvoice =
     // Client UI
     clientSearch,
     setClientSearch,
-    filteredClients,
+    clients,
     showDropdown,
     setShowDropdown,
     selectClient,
