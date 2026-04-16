@@ -4,7 +4,7 @@ import { tvaRateSchema } from "../../types/tvaRate"
 import { paymentMethodLabels, paymentMethodSchema } from "../../types/paymentMethod"
 import { SectionTitle } from "../widgets/sectionTitle"
 import InvoicePreview from "../widgets/invoicePreview"
-import { InvoiceFormClientProps, useCreateInvoice } from "../../hooks/useCreateInvoice"
+import { InvoiceFormClientProps, useCreateInvoice } from "../../hooks/useCreateEditInvoice"
 import { OperationCategoryLabels, operationCategorySchema } from "../../types/operationCategory"
 import { invoiceTypeSchema } from "../../types/invoiceType"
 import { CurrencyType, currencyTypeSchema } from "../../types/currency"
@@ -12,12 +12,13 @@ import { PaymentConditionLabels, PaymentConditionSchema } from "../../types/paym
 import { DocumentPreviewModal } from "@/shared/components/ui/documentPreviewModal"
 import ErrorForm from "../widgets/errorForm"
 import { SendToTTNModal } from "../widgets/ttnConfirmationModal"
+import { mockPurchaseOrders } from "../../mocks/purchase-order-mocks"
 
 export default function CreateInvoiceClient({ mode,
     invoiceId, }: InvoiceFormClientProps) {
-    const { addItem, removeItem, updateItem, clientSearch, setClientSearch, showDropdown, setShowDropdown, invoiceRef, pdfUrl, canCreateInvoice, errors,TtnModalOpen,setTtnModalOpen,sent,successMessage
-        ,selectClient, clearClient, updateInvoice, clients, setCurrency, previewData, form, onSubmit, isModalOpen, router, calculateDueDate, onCloseDocumentModal,createInvoice,sendToTTN,loading
-    } = useCreateInvoice({ mode, invoiceId })
+    const { addItem, removeItem, updateItem, clientSearch, setClientSearch, showDropdown, setShowDropdown, invoiceRef, pdfUrl, canCreateInvoice, errors,TtnModalOpen,setTtnModalOpen,sent,successMessage,
+        linkedToPO,selectedPO, handleSelectPO,setLinkedToPO, handleTogglePO,selectClient, clearClient, updateInvoice, clients, setCurrency, previewData, form, onSubmit, isModalOpen, router, calculateDueDate, onCloseDocumentModal,createInvoice,sendToTTN,loading
+    } = useCreateInvoice({ mode, invoiceId })    
 
     const { register } = form
 
@@ -73,14 +74,14 @@ export default function CreateInvoiceClient({ mode,
             <SendToTTNModal
                 open={TtnModalOpen}
                 onClose={() => setTtnModalOpen(false)}
-                onConfirm={() => {sendToTTN() }}
+                onConfirm={() => { sendToTTN() }}
                 loading={loading}
                 invoiceSent={sent}
                 invoiceRef={previewData.invoiceNumber}
-                successMessage={successMessage}/>
+                successMessage={successMessage} />
 
             {/* ── Body ── */}
-            <div className="flex gap-0 bg-white max-w-[1600px] ">
+            <div className="flex gap-0 bg-white max-w-[1700px] ">
 
                 {/* ── Left Panel ── */}
                 <div className="w-[440px] min-w-[440px] flex flex-col gap-6 p-6 border-r border-slate-300/40"
@@ -113,19 +114,102 @@ export default function CreateInvoiceClient({ mode,
                                     </label>
                                     <input
                                         type="date"
-                                        {...register("issueDate", {
-                                            valueAsDate: true,
-                                            onChange: () => {
-                                                calculateDueDate();
-                                            },
-                                        })}
+                                        {...register("issueDate")}
+                                        value={
+                                            form.watch("issueDate")
+                                                ? new Date(form.watch("issueDate")).toISOString().split("T")[0]
+                                                : ""
+                                        }
+                                        onChange={(e) => {
+                                            form.setValue("issueDate", new Date(e.target.value));
+                                            calculateDueDate();
+                                        }}
                                         min={new Date().toISOString().split("T")[0]}
                                         className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
                                     />
                                 </div>
 
                             </div>
+                            {/* ── Toggle bon de commande ── */}
+                            <div className="pt-3 border-t border-slate-100">
+                                <div className="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3">
+                                    {/* Texte à gauche */}
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">
+                                            Lié à un bon de commande
+                                        </p>
+                                        <p className="text-sm text-slate-500 mt-1 leading-snug">
+                                            Les champs seront pré-remplis automatiquement depuis la commande sélectionnée.
+                                        </p>
+                                    </div>
 
+                                    {/* Switch amélioré */}
+                                    <label className="flex items-center gap-3 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={linkedToPO}
+                                            onChange={(e) => handleTogglePO(e.target.checked)}
+                                            className="w-5 h-5 rounded-xl border-2 border-slate-200 bg-white 000 accent-blue-600 cursor-pointer transition"
+                                        />
+
+                                    </label>
+                                </div>
+                                {/* Select bon de commande — visible seulement si toggle ON */}
+                                {linkedToPO && (
+                                    <div className="mt-4">
+                                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
+                                            Sélectionner le bon de commande
+                                        </label>
+                                        <select
+                                            onChange={(e) => {
+                                                const po = mockPurchaseOrders.find((p) => p.idPurchaseOrder === e.target.value);
+                                                if (po) handleSelectPO(po);
+                                            }}
+                                            className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
+                                        >
+                                            <option value="">-- Choisir une commande --</option>
+                                            {mockPurchaseOrders.map((po) => (
+                                                <option key={po.idPurchaseOrder} value={po.idPurchaseOrder}>
+                                                    {po.purchaseOrderNumber} — {po.partner?.name}
+                                                </option>
+                                            ))}
+                                        </select>
+
+                                        {selectedPO && (
+                                            <div className="mt-3 bg-blue-50/50 border border-blue-100 rounded-xl p-3 flex items-center gap-3">
+                                                <div className="w-9 h-9 rounded-xl bg-blue-100 flex items-center justify-center shrink-0">
+                                                    <svg
+                                                        className="w-4 h-4 text-blue-600"
+                                                        fill="none"
+                                                        viewBox="0 0 24 24"
+                                                        stroke="currentColor"
+                                                        strokeWidth={2}
+                                                    >
+                                                        <path
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                                        />
+                                                    </svg>
+                                                </div>
+
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm font-semibold text-blue-700 truncate">
+                                                        {selectedPO.purchaseOrderNumber}
+                                                    </p>
+                                                    <p className="text-xs text-blue-500 mt-0.5 truncate">
+                                                        {selectedPO.partner?.name}
+                                                    </p>
+                                                </div>
+
+                                                <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wide bg-blue-100 px-2.5 py-1 rounded-full">
+                                                    {selectedPO.currency}
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </section>
 
@@ -139,6 +223,7 @@ export default function CreateInvoiceClient({ mode,
                             <div className="relative">
                                 <input
                                     type="text"
+                                    //readOnly={linkedToPO && !!selectedPO}
                                     placeholder="Rechercher un client..."
                                     value={clientSearch}
                                     onChange={(e) => { setClientSearch(e.target.value); setShowDropdown(true) }}
@@ -283,6 +368,7 @@ export default function CreateInvoiceClient({ mode,
                                     {/* Input désignation */}
                                     <input
                                         type="text"
+                                        readOnly={linkedToPO && !!selectedPO}
                                         value={item.description}
                                         onChange={(e) => updateItem(item.idInvoiceItem!, "description", e.target.value)}
                                         className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition mb-4"
@@ -295,6 +381,7 @@ export default function CreateInvoiceClient({ mode,
                                         </label>
                                         <select
                                             value={item.operationCategory}
+                                            disabled={linkedToPO && !!selectedPO}
                                             onChange={(e) => updateItem(item.idInvoiceItem!, "operationCategory", e.target.value)}
                                             className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
                                         >
@@ -312,6 +399,7 @@ export default function CreateInvoiceClient({ mode,
                                             </label>
                                             <input
                                                 type="number"
+                                                readOnly={linkedToPO && !!selectedPO}
                                                 min={1}
                                                 value={item.quantity}
                                                 onChange={(e) => updateItem(item.idInvoiceItem!, "quantity", parseFloat(e.target.value) || 0)}
@@ -324,6 +412,7 @@ export default function CreateInvoiceClient({ mode,
                                             </label>
                                             <input
                                                 type="text"
+                                                readOnly={linkedToPO && !!selectedPO}
                                                 defaultValue={item.unityPriceEXclTax}
                                                 onBlur={(e) => updateItem(item.idInvoiceItem!, "unityPriceEXclTax", parseFloat(e.target.value))}
                                                 className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 text-center focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
@@ -335,6 +424,7 @@ export default function CreateInvoiceClient({ mode,
                                             </label>
                                             <select
                                                 value={item.vatRate}
+                                                disabled={linkedToPO && !!selectedPO}
                                                 onChange={(e) => updateItem(item.idInvoiceItem!, "vatRate", Number(e.target.value))}
                                                 className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 text-center focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
                                             >
@@ -365,6 +455,7 @@ export default function CreateInvoiceClient({ mode,
                                             calculateDueDate();
                                         }
                                     })}
+                                    disabled={linkedToPO && !!selectedPO}
                                     className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
                                 >
                                     {PaymentConditionSchema.options.map((condition) => (
@@ -379,6 +470,7 @@ export default function CreateInvoiceClient({ mode,
                                 <select
                                     {...register("paymentMethod")}
                                     className="w-full px-3 py-2.5 rounded-xl border border-blue-300 bg-white text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
+                                    disabled={linkedToPO && !!selectedPO}
                                 >
                                     {paymentMethodSchema.options.map((method) => (
                                         <option key={method} value={method}>

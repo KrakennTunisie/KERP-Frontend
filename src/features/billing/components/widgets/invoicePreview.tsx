@@ -16,7 +16,7 @@ type InvoicePreviewProps = {
     data: InvoiceData | CreditNoteData ;
 };
 function isCreditNote(data: InvoiceData | CreditNoteData): data is CreditNoteData {
-    return "creditNoteReason" in data;
+    return "invoiceCreditNoteNumber" in data;
 }
 
 const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }, ref) => {
@@ -58,7 +58,11 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
                             </p>
                             <div className="mt-2 inline-flex items-center px-4 py-1.5 rounded-lg bg-blue-50 border border-blue-200">
                                 <span className="text-sm font-bold text-blue-700">
-                                    N° {data.totalExclTax ?? "—"}
+                                    N° {"invoiceNumber" in data
+                                        ? `N° ${data.invoiceNumber}`
+                                        : "invoiceCreditNoteNumber" in data ? `N° ${data.invoiceCreditNoteNumber}`
+                                                    : ""
+                                        }
                                 </span>
                             </div>
                         </div>

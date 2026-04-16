@@ -26,6 +26,7 @@ import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 import { InvoicesAPI, partnersApi } from "../api/partners-api";
 import { useDebounce } from "@/shared/hooks/useDebounce";
 import { nextNumber } from "../types/nextNumber";
+import { PurchaseOrder } from "../models/purchaseOrder";
 
 export type InvoiceFormClientProps = {
   mode: "create" | "edit"
@@ -182,6 +183,9 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
   const invoiceRef = useRef<HTMLDivElement>(null);
   const [pdfUrl, setPdfUrl] = useState< File | null>(null);
 
+  
+  const [linkedToPO, setLinkedToPO] = useState(false);
+  const [selectedPO, setSelectedPO] = useState<PurchaseOrder | null>(null);
 
   // UI state only
   const [clientSearch, setClientSearch] = useState("");
@@ -351,11 +355,52 @@ const canCreateInvoice =
   return date;
 };
 
+// Recupération les données d'un bon de commande lorsque la facture est liée à un bon de commande 
+  function handleSelectPO(po: PurchaseOrder) {
+    setSelectedPO(po);
+    // Pré-remplir les champs du form
+    console.log(po.issueDate.toLocaleDateString)
+    form.setValue("issueDate",  new Date(po.issueDate).toISOString().split("T")[0] as unknown as Date);
+    form.setValue("issueDate",po.issueDate, { shouldValidate: true, shouldDirty: true,});
+    form.setValue("paymentCondition", po.PaymentCondition);
+    form.setValue("paymentMethod", po.paymentMethod);
+    calculateDueDate()
+    form.setValue("invoiceCurrency", po.currency);
+    po?.partner && selectClient(po.partner);
+    const totals = calculateInvoiceTotals(po.purchaseOrderItems!);
+    setValue("totalExclTax", totals.totalHT, { shouldValidate: true, shouldDirty: true });
+    setValue("vatAmount", totals.totalTVA, { shouldValidate: true, shouldDirty: true });
+    setValue("totalInclTax", totals.totalTTC, { shouldValidate: true, shouldDirty: true });
+    syncItems(po.purchaseOrderItems!)
+    // pré-remplir les items
+    po?.purchaseOrderItems!.forEach(() => addItem());
+  }
+
+    function handleTogglePO(checked: boolean) {
+    setLinkedToPO(checked);
+    if (!checked) {
+      setSelectedPO(null);
+      clearClient();
+      setValue("invoiceItems", [defaultItem()], { shouldValidate: true, shouldDirty: true, });
+      setValue("issueDate", new Date(), { shouldValidate: true, shouldDirty: true, });
+      setValue("invoiceCurrency", currencyTypeSchema.enum.TND, { shouldValidate: true, shouldDirty: true, });
+      setValue("paymentCondition", PaymentConditionSchema.enum.NET_15, { shouldValidate: true, shouldDirty: true, });
+      setValue("paymentMethod", paymentMethodSchema.enum.BANK_TRANSFER, { shouldValidate: true, shouldDirty: true, });
+      setValue("totalExclTax", 0, { shouldValidate: true, shouldDirty: true });
+      setValue("vatAmount", 0, { shouldValidate: true, shouldDirty: true });
+      setValue("totalInclTax", 0, { shouldValidate: true, shouldDirty: true });
+      // reset les champs si besoin
+    }
+  }
+
   // Permet la visualisation  de la facture en PDF une fois remplie
   /* eslint-disable react-hooks/refs */
   const onSubmit = handleSubmit(
     async () => {
-      const file = await handleSaveAsPDF(invoiceRef, getValues("invoiceNumber"));
+                  const element = invoiceRef.current;
+
+            if (!element) return;
+      const file = await handleSaveAsPDF(element, getValues("invoiceNumber"));
       if (file) {
         setValue("invoiceDocument", file, { shouldValidate: true, shouldDirty: true });
         setPdfUrl(file);
@@ -561,6 +606,11 @@ async function createInvoice() {
     invoiceRef,
     pdfUrl,
   
+    linkedToPO,
+    setLinkedToPO,
+    selectedPO,
+    handleSelectPO,
+    handleTogglePO,
  
 
     //data validation

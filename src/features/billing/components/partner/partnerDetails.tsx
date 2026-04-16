@@ -27,7 +27,7 @@ export default function PartnerDetails({ partner }: PartnerDetailsProps) {
   const totalAmount = partner?.invoices?.reduce((sum, inv) => sum + inv.amount, 0);
   const paidInvoices = partner?.invoices?.filter((inv) => inv.status ===  "paid").length;
   const pendingAmount = partner?.invoices?.filter((inv: Partial<Invoice>) => inv.invoiceStatus !== "PAID")
-    .reduce((sum: number, inv: Partial<Invoice>) => sum + (inv?.totalInclTaxTND || 0), 0)
+    .reduce((sum: number, inv: Partial<Invoice>) => sum + (inv?.totalInclTax || 0), 0)
   const averageInvoice = totalInvoices? totalInvoices > 0 ? totalAmount / totalInvoices : 0 : undefined;
 
   const pageConfig = {

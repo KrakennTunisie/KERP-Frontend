@@ -100,7 +100,7 @@ export default function CreditNoteDetails({params}:PropsCreditNote)
   
                       {/* Actions */}
                       <Card>
-                          <SectionLabel>Détails administratifs</SectionLabel>
+                          <SectionLabel>{"Détails administratifs"}</SectionLabel>
                               <div className="grid grid-cols-3 gap-3">
                                   <div key="Bon du commande">
                                       <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Client</p>
@@ -117,7 +117,7 @@ export default function CreditNoteDetails({params}:PropsCreditNote)
                               </div>
                               <div className="grid grid-cols-3 gap-3">
                                   <div key="Bon du commande">
-                                      <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Montant à remboursser</p>
+                                      <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">{"Montant à remboursser"}</p>
                                       <p className="text-sm font-bold text-gray-900"></p>
                                   </div>
                                   <div key="Méthode de paiement">
@@ -150,7 +150,7 @@ export default function CreditNoteDetails({params}:PropsCreditNote)
                       {/* Items table */}
                       <Card>
                           <div className="flex items-center justify-between mb-4">
-                              <span className="text-[15px] font-bold text-gray-900">Détails des prestations</span>
+                              <span className="text-[15px] font-bold text-gray-900">{"Détails des prestations"}</span>
                           </div>
   
                           <div className="grid grid-cols-[1fr_70px_90px_100px] gap-2 pb-2.5 border-b border-gray-100">
@@ -215,7 +215,7 @@ export default function CreditNoteDetails({params}:PropsCreditNote)
                                   <ShieldIcon size={18} />
                               </div>
                               <div>
-                                  <p className="text-xs font-extrabold tracking-wide text-gray-900">CONFORMITÉ E-FACTURE</p>
+                                  <p className="text-xs font-extrabold tracking-wide text-gray-900">{"CONFORMITÉ E-FACTURE"}</p>
                                   <p className="text-[11px] text-red-600 font-semibold mt-0.5">Tunisie Trade Net</p>
                               </div>
                           </div>
@@ -298,7 +298,7 @@ export default function CreditNoteDetails({params}:PropsCreditNote)
   
                       {/* Documents */}
                       <Card>
-                          <SectionLabel>Documents attachés</SectionLabel>
+                          <SectionLabel>{"Documents attachés"}</SectionLabel>
                           <div
                               onClick={() => { }}
                               className="flex items-center justify-between p-2.5 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer group">

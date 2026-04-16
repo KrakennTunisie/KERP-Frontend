@@ -2,7 +2,10 @@ import { z } from "zod";
 import { operationCategorySchema } from "../types/operationCategory";
 
 
-export const invoiceItemSchema = z.object({
+export const 
+
+
+invoiceItemSchema = z.object({
     idInvoiceItem : z.uuid(),
     description : z.string(),
     quantity: z.number(),

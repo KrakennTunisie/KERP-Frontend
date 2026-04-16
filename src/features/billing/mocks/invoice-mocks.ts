@@ -3,7 +3,7 @@ import { invoiceSchema } from "../models/invoice";
 import { PaymentConditionSchema } from "../types/paymentCondition";
 import { invoiceComplianceStatusSchema } from "../types/invoiceComplianceStatus";
 import { mockInvoiceItems } from "./invoice-items-mocks";
-
+import { v4 as uuidv4 } from "uuid";
 type Invoice = z.infer<typeof invoiceSchema>;
 
 export const MOCK_INVOICES: Invoice[] = [
@@ -16,7 +16,7 @@ export const MOCK_INVOICES: Invoice[] = [
     sentToclientDate:  new Date(),
     creationDate: new Date(),
     invoiceType: "SALE",
-    invoiceStatus: "PAYÉE",
+    invoiceStatus: "TO_PAY",
     invoiceComplianceStatus: invoiceComplianceStatusSchema.enum.TTN_ACCEPTED,
     totalExclTax: 33500,
     totalInclTax: 39865,
@@ -30,7 +30,7 @@ export const MOCK_INVOICES: Invoice[] = [
     currency: "TND",
     purchaseOrder: null,
     partner: {
-      idPartner: crypto.randomUUID(),
+      idPartner: uuidv4(),
       name: "Beta Industrie SA",
       email: "info@beta.tn",
       phoneNumber: "+21674000003",
@@ -56,7 +56,7 @@ export const MOCK_INVOICES: Invoice[] = [
     sentToclientDate:  new Date(),
     creationDate: new Date(),
     invoiceType: "SALE",
-    invoiceStatus: "À PAYER",
+    invoiceStatus: "DRAFT",
     invoiceComplianceStatus: null,
 
     totalExclTax: 17420,
@@ -83,7 +83,7 @@ export const MOCK_INVOICES: Invoice[] = [
     sentToclientDate:  new Date(),
     creationDate: new Date(),
     invoiceType: "SALE",
-    invoiceStatus: "BROULLION",
+    invoiceStatus: "PAID",
     invoiceComplianceStatus: invoiceComplianceStatusSchema.enum.TTN_PENDING,
     vatAmount: 20,
     totalExclTax: 29312.50,

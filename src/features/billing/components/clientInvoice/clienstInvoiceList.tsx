@@ -235,7 +235,7 @@ export default function ClientsInvoiceList() {
                                                     //invoiceComplianceStatusSchema.enum.TTN_PENDING,
                                                     invoiceComplianceStatusSchema.enum.TTN_SUBMITTED
                                                 ]as string[]).includes(f.invoiceComplianceStatus!)}
-                                                onClick={(e) => { setOpen(true); console.log("send", f.idInvoice); }}
+                                                onClick={() => { setOpen(true); console.log("send", f.idInvoice); }}
                                                 className="p-2 rounded-xl bg-green-50 text-green-600 hover:bg-green-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                                 title="Envoyer"
                                             >

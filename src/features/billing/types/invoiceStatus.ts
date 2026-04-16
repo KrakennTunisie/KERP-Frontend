@@ -43,3 +43,4 @@ export const invoiceStatusColors: Record<
   REFUNDED: "bg-emerald-100 text-emerald-700 border border-emerald-200",
   NOT_REFUNDED: "bg-red-100 text-red-700 border border-red-200",
 };
+

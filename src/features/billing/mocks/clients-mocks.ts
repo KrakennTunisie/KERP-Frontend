@@ -1,9 +1,9 @@
 
 import type { Partner } from "../models/partner";
-
+import { v4 as uuidv4 } from "uuid";
 export const MOCK_PARTNERS: Partner[] = [
     {
-        idPartner: crypto.randomUUID(),
+        idPartner: uuidv4(),
         name: "TechCorp Solutions SA",
         email: "finance@techcorp.tn",
         phoneNumber: "+21671000001",
@@ -33,7 +33,7 @@ export const MOCK_PARTNERS: Partner[] = [
         invoices: [],
     },
     {
-        idPartner: crypto.randomUUID(),
+        idPartner: uuidv4(),
         name: "Beta Industrie SA",
         email: "info@beta.tn",
         phoneNumber: "+21674000003",
@@ -48,7 +48,7 @@ export const MOCK_PARTNERS: Partner[] = [
         invoices: [],
     },
     {
-        idPartner: crypto.randomUUID(),
+        idPartner: uuidv4(),
         name: "Gamma Consulting",
         email: "direction@gamma.tn",
         phoneNumber: "+21670000004",

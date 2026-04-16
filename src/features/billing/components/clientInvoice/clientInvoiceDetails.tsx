@@ -123,7 +123,7 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                                     <polyline points="14 2 14 8 20 8" />
                                     <line x1="9" y1="15" x2="15" y2="15" />
                                 </svg>
-                                Créer Avoir
+                                {"Créer Avoir"}
                             </button>
                             }
                             <button
@@ -196,7 +196,7 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                     {/* Items table */}
                     <Card>
                         <div className="flex items-center justify-between mb-4">
-                            <span className="text-[15px] font-bold text-gray-900">Détails des prestations</span>
+                            <span className="text-[15px] font-bold text-gray-900">{"Détails des prestations"}</span>
                         </div>
 
                         <div className="grid grid-cols-[1fr_70px_90px_100px] gap-2 pb-2.5 border-b border-gray-100">
@@ -274,7 +274,7 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                                 <ShieldIcon size={18} />
                             </div>
                             <div>
-                                <p className="text-xs font-extrabold tracking-wide text-gray-900">CONFORMITÉ E-FACTURE</p>
+                                <p className="text-xs font-extrabold tracking-wide text-gray-900">{"CONFORMITÉ E-FACTURE"}</p>
                                 <p className="text-[11px] text-blue-600 font-semibold mt-0.5">Tunisie Trade Net</p>
                             </div>
                         </div>

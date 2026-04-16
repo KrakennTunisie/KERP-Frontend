@@ -1,6 +1,32 @@
 services:
-  app:
+  kerp-frontend:
     build: .
-    ports:
-      - "3000:3000"
+    container_name: kerp-frontend
     restart: unless-stopped
+    networks: 
+      - ms-net
+  nginx:
+    image: nginx:alpine
+    container_name: nginx_proxy
+    ports:
+      - "${FRONTEND_PORT:-3000}:80"
+    environment:
+      # Nginx tuning
+      - BACKEND_URL=${BACKEND_URL:-http://billing-server:8081}
+      - PUBLIC_URL=${PUBLIC_URL:-http://localhost:3000}
+      - NGINX_MAX_FILE_SIZE=${NGINX_MAX_FILE_SIZE:-50M}
+      - NGINX_PROXY_READ_TIMEOUT=${NGINX_PROXY_READ_TIMEOUT:-300}
+      - NGINX_PROXY_CONNECT_TIMEOUT=${NGINX_PROXY_CONNECT_TIMEOUT:-75}
+      - NGINX_PROXY_SEND_TIMEOUT=${NGINX_PROXY_SEND_TIMEOUT:-300}
+    volumes:
+      - ./nginx.conf.template:/etc/nginx/templates/nginx.conf.template
+      - /dev/null:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - kerp-frontend
+    restart: unless-stopped
+    networks: 
+      - ms-net
+
+networks:
+  ms-net:
+    external: true

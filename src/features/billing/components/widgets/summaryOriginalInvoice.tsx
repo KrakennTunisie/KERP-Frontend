@@ -5,19 +5,19 @@ import { invoiceCreditNoteSchema } from "../../models/creditNote";
 type InvoicePreviewProps = {
     data: DeepPartial<z.infer<typeof invoiceCreditNoteSchema>>;
 };
-export default function SummaryOriginalInvoice({data}:InvoicePreviewProps) {
-    return (
-      <div className="bg-gradient-to-br from-red-50 to-red-100/50 
+export default function SummaryOriginalInvoice({ data }: InvoicePreviewProps) {
+  return (
+    <div className="bg-gradient-to-br from-red-50 to-red-100/50 
                 rounded-2xl px-6 py-4 border border-red-300 mb-8">
 
-  <div className="flex items-center gap-3 mb-4">
-    <h3 className="text-[10px] font-black text-red-500 uppercase tracking-widest whitespace-nowrap">
-      Facture Originale
-    </h3>
-    <div className="flex-1 h-px bg-red-200" />
-  </div>
+      <div className="flex items-center gap-3 mb-4">
+        <h3 className="text-[10px] font-black text-red-500 uppercase tracking-widest whitespace-nowrap">
+          Facture Originale
+        </h3>
+        <div className="flex-1 h-px bg-red-200" />
+      </div>
 
-  <div className="grid grid-cols-1 md:grid-cols-4 divide-x divide-red-200">
+      <div className="grid grid-cols-1 md:grid-cols-4 divide-x divide-red-200">
 
     <div className="pr-5">
       <p className="text-[9px] font-black text-red-300 uppercase tracking-widest mb-1">Numéro</p>

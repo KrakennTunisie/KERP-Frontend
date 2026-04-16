@@ -1,6 +1,7 @@
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { invoiceCreditNoteSchema } from "../models/creditNote";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
 import {
     calculateInvoiceTotals,
@@ -16,6 +17,7 @@ import { handleSaveAsPDF } from "../lib/buildInvoicePDF";
 import { MOCK_INVOICES } from "../mocks/invoice-mocks";
 import { invoiceComplianceStatusSchema } from "../types/invoiceComplianceStatus";
 import { invoiceStatusSchema } from "../types/invoiceStatus";
+import { uuid4 } from "node_modules/zod/v4/core/regexes.cjs";
 
 type creditNoteFormValues = z.infer<typeof invoiceCreditNoteSchema>;
 export default function useCreateCreditNote() {
@@ -36,7 +38,7 @@ export default function useCreateCreditNote() {
     const form = useForm<creditNoteFormValues>({
         resolver: zodResolver(invoiceCreditNoteSchema),
         defaultValues: {
-            invoiceCreditNoteNumber: crypto.randomUUID(),
+            invoiceCreditNoteNumber: uuidv4(),
             issueDate: new Date(),
             creationDate: new Date(),
             sentToclientDate: null,
@@ -172,7 +174,10 @@ export default function useCreateCreditNote() {
     /* eslint-disable react-hooks/refs */
     const onSubmit = handleSubmit(
         async () => {
-            const file = await handleSaveAsPDF(invoiceRef, getValues("invoiceCreditNoteNumber"));
+            const element = invoiceRef.current;
+
+            if (!element) return;
+            const file = await handleSaveAsPDF(element, getValues("invoiceCreditNoteNumber"));
             if (file) {
                 setValue("invoiceCreditNoteDocument", file, { shouldValidate: true, shouldDirty: true });
                 setPdfUrl(file);
