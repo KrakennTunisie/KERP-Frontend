@@ -1,5 +1,5 @@
 import { DeepPartial } from "react-hook-form";
-import { invoiceSchema } from "../../models/invoice";
+import { InvoiceCreate, invoiceSchema } from "../../models/invoice";
 import { z } from "zod"
 import { paymentMethodLabels } from "../../types/paymentMethod";
 import { OperationCategoryLabels } from "../../types/operationCategory";
@@ -13,9 +13,9 @@ import { forwardRef } from "react";
 export type InvoiceData = DeepPartial<z.infer<typeof invoiceSchema>>;
 export type CreditNoteData = DeepPartial<z.infer<typeof invoiceCreditNoteSchema>>;
 type InvoicePreviewProps = {
-    data: InvoiceData | CreditNoteData ;
+    data: InvoiceCreate | CreditNoteData ;
 };
-function isCreditNote(data: InvoiceData | CreditNoteData): data is CreditNoteData {
+function isCreditNote(data: InvoiceCreate | CreditNoteData): data is CreditNoteData {
     return "invoiceCreditNoteNumber" in data;
 }
 
@@ -58,7 +58,7 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
                             </p>
                             <div className="mt-2 inline-flex items-center px-4 py-1.5 rounded-lg bg-blue-50 border border-blue-200">
                                 <span className="text-sm font-bold text-blue-700">
-                                    N° {"invoiceNumber" in data
+                                 {"invoiceNumber" in data
                                         ? `N° ${data.invoiceNumber}`
                                         : "invoiceCreditNoteNumber" in data ? `N° ${data.invoiceCreditNoteNumber}`
                                                     : ""

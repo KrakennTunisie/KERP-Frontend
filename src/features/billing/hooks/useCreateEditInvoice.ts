@@ -76,7 +76,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
     fetchNextNumber()
   },[])
   const router = useRouter()
-  const form = useForm<InvoiceFormValues>({
+  const form = useForm<InvoiceCreate>({
     resolver: zodResolver(invoiceCreateSchema),
     defaultValues: {
       invoiceType: "SALE",
@@ -193,13 +193,13 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
   const [loadingClients, setLoadingClients]= useState(false)
   const [showDropdown, setShowDropdown] = useState(false);
   const previousCurrencyRef = useRef<CurrencyType>("TND");
-  const previewData = useWatch({ control });
-
+ // const previewData = useWatch({ control });
+ const previewData = getValues();
   // Validation des données obligatoire
 
 const canCreateInvoice =
- // (mode == "create" ? isDirty: true )&&
- // isValid &&
+  (mode == "create" ? isDirty: true )&&
+   isValid &&
   !!previewData.partner &&
   !!previewData.invoiceItems?.length &&
   !!previewData.dueDate &&

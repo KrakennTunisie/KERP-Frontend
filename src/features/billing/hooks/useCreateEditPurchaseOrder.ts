@@ -1,13 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect,  useRef, useState } from "react";
 import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { v4 as uuidv4 } from "uuid";
 import { useRouter } from "next/navigation"
-import { Invoice, invoiceSchema } from "../models/invoice";
 import { InvoiceItem } from "../models/invoiceItem";
 import { Partner, PartnerSummary } from "../models/partner";
-import { MOCK_PARTNERS } from "../mocks/clients-mocks";
 import {
   calculateInvoiceTotals,
   calculUnityPrice,
@@ -15,13 +12,9 @@ import {
   recalculate,
 } from "../lib/invoiceCalculation";
 import { CurrencyType, currencyTypeSchema } from "../types/currency";
-import { PaymentConditionSchema } from "../types/paymentCondition";
 import defaultItem from "../mocks/invoice-items-mocks";
-import { invoiceStatusSchema } from "../types/invoiceStatus";
-import { invoiceComplianceStatusSchema } from "../types/invoiceComplianceStatus";
 import { paymentMethodSchema } from "../types/paymentMethod";
 import { exchangeRateSourceSchema } from "../types/exchangeRateSource";
-import { handleSaveAsPDF } from "../lib/buildInvoicePDF";
 import { PurchaseOrder, purchaseOrderSchema } from "../models/purchaseOrder";
 import { purchaseOrderStatusSchema } from "../types/purchaseOrderStatus";
 import { useDebounce } from "@/shared/hooks/useDebounce";
@@ -170,7 +163,7 @@ const canCreateInvoice =
       if (field === "unityPriceEXclTax") {
         const itemWithConvertedPrice = calculUnityPrice(
           updatedItem,
-          getValues("invoiceCurrency"),
+          getValues("currency"),
           getValues("appliedExchangeRate")
         );
         return recalculate(itemWithConvertedPrice);
@@ -185,7 +178,7 @@ const canCreateInvoice =
   };
 
   // Sélection d'un client
-  const selectClient = (client: PartnerSummary) => {
+  const selectClient = (client: Partner) => {
     setValue("partner", client, { shouldValidate: true, shouldDirty: true, });
     setClientSearch(client.name);
     setShowDropdown(false);
@@ -206,7 +199,7 @@ const canCreateInvoice =
     const convertedItems = currentItems.map((item) => convertItemCurrency(item, oldCurrency, newCurrency, getValues("appliedExchangeRate")));
 
     previousCurrencyRef.current = newCurrency;
-    setValue("invoiceCurrency", newCurrency, { shouldValidate: true, shouldDirty: true, });
+    setValue("currency", newCurrency, { shouldValidate: true, shouldDirty: true, });
     const totals = calculateInvoiceTotals(convertedItems);
     setValue("totalExclTax", totals.totalHT, { shouldValidate: true, shouldDirty: true });
     setValue("vatAmount", totals.totalTVA, { shouldValidate: true, shouldDirty: true });

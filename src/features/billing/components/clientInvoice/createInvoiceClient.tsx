@@ -488,7 +488,7 @@ export default function CreateInvoiceClient({ mode,
                     style={{ scrollbarWidth: 'thin', scrollbarColor: '#CBD5E1 transparent' }}
                 >
 
-                    <InvoicePreview ref={invoiceRef} data={previewData} />
+                    <InvoicePreview ref={invoiceRef} data={{...previewData,     invoiceType: previewData.invoiceType!}} />
                 </div>
             </div>
         </div>
