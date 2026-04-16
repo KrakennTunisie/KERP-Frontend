@@ -1,12 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect,  useRef, useState } from "react";
 import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter } from "next/navigation"
-import { Invoice, InvoiceCreate, invoiceCreateSchema, invoiceSchema } from "../models/invoice";
+import { Invoice, InvoiceCreate, invoiceCreateSchema } from "../models/invoice";
 import { InvoiceItem } from "../models/invoiceItem";
-import { Partner, PartnerSummary } from "../models/partner";
-import { MOCK_PARTNERS } from "../mocks/clients-mocks";
+import {  PartnerSummary } from "../models/partner";
 import {
   calculateInvoiceTotals,
   calculUnityPrice,

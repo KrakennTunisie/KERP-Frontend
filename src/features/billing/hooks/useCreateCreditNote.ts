@@ -9,7 +9,7 @@ import {
     recalculate,
 } from "../lib/invoiceCalculation";
 import { InvoiceItem} from "../models/invoiceItem";
-import { useEffect, useMemo, useRef, useState } from "react";
+import {  useMemo, useRef, useState } from "react";
 import { CreditNoteTypeSchema } from "../types/creditNoteType";
 import { useRouter } from "next/navigation";
 import defaultItem, { mockInvoiceItems } from "../mocks/invoice-items-mocks";
@@ -17,7 +17,6 @@ import { handleSaveAsPDF } from "../lib/buildInvoicePDF";
 import { MOCK_INVOICES } from "../mocks/invoice-mocks";
 import { invoiceComplianceStatusSchema } from "../types/invoiceComplianceStatus";
 import { invoiceStatusSchema } from "../types/invoiceStatus";
-import { uuid4 } from "node_modules/zod/v4/core/regexes.cjs";
 
 type creditNoteFormValues = z.infer<typeof invoiceCreditNoteSchema>;
 export default function useCreateCreditNote() {
