@@ -13,7 +13,7 @@ type RequestOptions = {
   signal?: AbortSignal;
 };
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "/api";
+const API_BASE_URL = "/api";
 
 async function parseResponse(response: Response) {
   const contentType = response.headers.get("content-type");
