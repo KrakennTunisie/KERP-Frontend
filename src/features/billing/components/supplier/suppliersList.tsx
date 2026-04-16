@@ -60,7 +60,7 @@ const fetchClients = async () => {
 
       const response = await partnersApi.getSuppliers({
         keyword: keyword,
-        country: filterCity !== "all" ? filterCity : undefined,
+        filter: filterCity !== "all" ? filterCity : undefined,
         page: currentPage - 1,
       });
 

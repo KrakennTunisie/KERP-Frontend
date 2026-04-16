@@ -59,7 +59,7 @@ const cities = useMemo(() => Array.from(new Set(clients.map((c) => c.country))),
           : undefined;
       const response = await partnersApi.getClients({
         keyword: keyword,
-        country: filterCity !== "all" ? filterCity : undefined,
+        filter: filterCity !== "all" ? filterCity : undefined,
         page: currentPage - 1,
       });
 

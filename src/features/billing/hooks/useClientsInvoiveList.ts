@@ -53,6 +53,7 @@ export function useClientInvoiceList () {
 
           const response = await InvoicesAPI.getClientsInvoices({
             keyword: keyword,
+            filter: filtre?.toString(),
             page: currentPage - 1,
           });
 
@@ -74,7 +75,7 @@ useEffect(() => {
 useEffect(() => {
   
   fetchClientsInvoices();
-}, [debouncedSearchQuery, currentPage]);
+}, [debouncedSearchQuery, currentPage, filtre]);
 
     return {
      router,
