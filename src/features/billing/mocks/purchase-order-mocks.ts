@@ -18,7 +18,8 @@ export const mockPurchaseOrder: PurchaseOrder = {
   exchangeRateSource: "EXTERNAL_API",
   PaymentCondition: "NET_30",
   partner: MOCK_PARTNERS[0],
-  purchaseOrderItems: mockInvoiceItems
+  purchaseOrderItems: mockInvoiceItems,
+  purchaseOrderDocument: null
 };
 
 // Plusieurs mocks pour les tests
@@ -41,6 +42,7 @@ export const mockPurchaseOrders: PurchaseOrder[] = [
     PaymentCondition: "NET_15",
     partner: null,
     purchaseOrderItems: null,
+    purchaseOrderDocument: null
   },
   {
     idPurchaseOrder: "PO-2024-003",
@@ -59,5 +61,6 @@ export const mockPurchaseOrders: PurchaseOrder[] = [
     PaymentCondition: "IMMEDIATE",
     partner: null,
     purchaseOrderItems: [],
+    purchaseOrderDocument: null
   },
 ];

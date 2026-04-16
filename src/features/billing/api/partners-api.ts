@@ -2,19 +2,18 @@
 import { apiClient } from "@/shared/api/api-client";
 import { BILLING_ENDPOINTS, INVOICES_CREDIT_NOTE_ENDPOINTS, INVOICES_ENDPOINTS, PURCHASE_ORDER_ENDPOINTS } from "@/shared/api/endpoints";
 import { ClientPartner, ClientPartnerItem, CreateClientPartner, CreateSupplierPartner, PartnerSummary, SupplierPartner, SupplierPartnerItem, UpdatePartner } from "../models/partner";
-import { GetPartnersParams, PageResponse } from "@/shared/api/types";
-import { Invoice, InvoiceCreate, InvoicePageItem, InvoiceUpdate } from "../models/invoice";
-import { InvoiceCreditNote, InvoiceCreditNoteCreate, InvoiceCreditNotePageItem } from "../models/creditNote";
+import { GetListParams, PageResponse } from "@/shared/api/types";
 import { nextNumber } from "../types/nextNumber";
+import { Invoice, InvoiceCreate, InvoicePageItem } from "../models/invoice";
+import { InvoiceCreditNote, InvoiceCreditNoteCreate, InvoiceCreditNotePageItem } from "../models/creditNote";
 
 export const partnersApi = {
-  getClients: (query? : GetPartnersParams) => 
+  getClients: (query? : GetListParams) => 
     apiClient.get<PageResponse<ClientPartnerItem>>(BILLING_ENDPOINTS.getClients(query)),
-
-  getSummaryClients: (query? : GetPartnersParams) =>
+  getSummaryClients: (query? : GetListParams) =>
     apiClient.get<PartnerSummary[]>(BILLING_ENDPOINTS.getClientsSummary(query)),
 
-  getSuppliers: (query? : GetPartnersParams) => 
+  getSuppliers: (query? : GetListParams) => 
     apiClient.get<PageResponse<SupplierPartnerItem>>(BILLING_ENDPOINTS.getSuppliers(query)),
 
   getClientById: (id: string) =>
@@ -43,10 +42,10 @@ export const partnersApi = {
 export const InvoicesAPI = {
   getNextInvoiceNumber :()=> apiClient.get<nextNumber>(INVOICES_ENDPOINTS.nextNumber),
 
-  getClientsInvoices: (query? : GetPartnersParams) => 
+  getClientsInvoices: (query? : GetListParams) => 
     apiClient.get<PageResponse<InvoicePageItem>>(INVOICES_ENDPOINTS.getClientsInvoices(query)),
 
-  getSuppliersInvoices: (query? : GetPartnersParams) => 
+  getSuppliersInvoices: (query? : GetListParams) => 
     apiClient.get<PageResponse<InvoicePageItem>>(INVOICES_ENDPOINTS.getSuppliersInvoices(query)),
 
   getClientInvoiceById: (id?: string) =>
@@ -91,10 +90,10 @@ export const InvoicesCreditNoteAPI = {
 export const PurchaseOrderAPI = {
   getNextInvoiceNumber :()=> apiClient.get(PURCHASE_ORDER_ENDPOINTS.nextNumber),
 
-  getClientsPurchaseOrders: (query? : GetPartnersParams) => 
+  getClientsPurchaseOrders: (query? : GetListParams) => 
     apiClient.get<PageResponse<ClientPartnerItem>>(PURCHASE_ORDER_ENDPOINTS.getPurchaseOrders(query)),
 
-  getSuppliersPurchaseOrders: (query? : GetPartnersParams) => 
+  getSuppliersPurchaseOrders: (query? : GetListParams) => 
     apiClient.get<PageResponse<SupplierPartnerItem>>(PURCHASE_ORDER_ENDPOINTS.getPurchaseOrders(query)),
 
   getClientPurchaseOrderById: (id: string) =>

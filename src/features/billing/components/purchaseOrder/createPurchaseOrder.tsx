@@ -20,7 +20,7 @@ export default function CreatePurchaseOrder({
   const {
     addItem,
     removeItem, updateItem, clientSearch, setClientSearch, showDropdown, setShowDropdown, canCreateInvoice, errors, selectClient, clearClient, filteredClients,
-    setCurrency, previewData, form, onSubmit,router,
+    setCurrency, previewData, form, onSubmit, router, isModalOpen, createPurchaseOrder, pdfUrl, onCloseDocumentModal
   } = useCreatePurchaseOrder({ mode, invoiceId })
 
   const { register } = form
@@ -82,11 +82,10 @@ export default function CreatePurchaseOrder({
             <button
               onClick={onSubmit}
               disabled={!canCreateInvoice}
-              className={`flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold transition ${
-                !canCreateInvoice
+              className={`flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold transition ${!canCreateInvoice
                   ? "cursor-not-allowed bg-gray-300 text-gray-500 shadow-none"
                   : "bg-blue-600 text-white shadow-md shadow-blue-200 hover:bg-blue-700"
-              }`}
+                }`}
             >
               <svg
                 className="h-4 w-4"
@@ -108,6 +107,12 @@ export default function CreatePurchaseOrder({
           </div>
         </div>
       </header>
+      {/* Modal pour la facture générée  */}
+      <DocumentPreviewModal
+        open={isModalOpen}
+        onClose={onCloseDocumentModal}
+        onCreateInvoice={createPurchaseOrder}
+        document={pdfUrl} />
 
       {/* Main */}
       <main className="flex-1 px-4 py-8 sm:px-6 lg:px-8">
@@ -140,7 +145,7 @@ export default function CreatePurchaseOrder({
                         type="date"
                         {...register("issueDate", {
                           valueAsDate: true,
-                        
+
                         })}
                         min={new Date().toISOString().split("T")[0]}
                         className={inputClass}
@@ -177,9 +182,8 @@ export default function CreatePurchaseOrder({
 
                       <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
                         <svg
-                          className={`h-4 w-4 text-slate-400 transition-transform duration-200 ${
-                            showDropdown ? "rotate-180" : ""
-                          }`}
+                          className={`h-4 w-4 text-slate-400 transition-transform duration-200 ${showDropdown ? "rotate-180" : ""
+                            }`}
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
@@ -346,7 +350,7 @@ export default function CreatePurchaseOrder({
                       <label className={labelClass}>Conditions</label>
                       <select
                         {...register("PaymentCondition", {
-                         
+
                         })}
                         className={selectClass}
                       >
