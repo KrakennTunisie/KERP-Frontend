@@ -1,12 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { v4 as uuidv4 } from "uuid";
 import { useRouter } from "next/navigation"
-import { Invoice, invoiceSchema } from "../models/invoice";
+
 import { InvoiceItem } from "../models/invoiceItem";
-import { Partner, PartnerSummary } from "../models/partner";
+import { Partner } from "../models/partner";
 import { MOCK_PARTNERS } from "../mocks/clients-mocks";
 import {
   calculateInvoiceTotals,
@@ -17,17 +16,11 @@ import {
 import { CurrencyType, currencyTypeSchema } from "../types/currency";
 import { PaymentConditionSchema } from "../types/paymentCondition";
 import defaultItem from "../mocks/invoice-items-mocks";
-import { invoiceStatusSchema } from "../types/invoiceStatus";
-import { invoiceComplianceStatusSchema } from "../types/invoiceComplianceStatus";
 import { paymentMethodSchema } from "../types/paymentMethod";
 import { exchangeRateSourceSchema } from "../types/exchangeRateSource";
-import { handleSaveAsPDF } from "../lib/buildInvoicePDF";
 import { PurchaseOrder, purchaseOrderSchema } from "../models/purchaseOrder";
 import { purchaseOrderStatusSchema } from "../types/purchaseOrderStatus";
-import { useDebounce } from "@/shared/hooks/useDebounce";
-import { partnersApi } from "../api/partners-api";
-import { appToast } from "@/shared/lib/toast";
-import { getApiErrorMessage } from "@/shared/api/handle-api-error";
+import { handleSaveAsPDF } from "../lib/buildInvoicePDF";
 
 export type InvoiceFormClientProps = {
   mode: "create" | "edit"
@@ -39,8 +32,8 @@ type UpdateableField =
   | "unityPriceEXclTax"
   | "vatRate"
   | "operationCategory";
-
-
+ 
+ 
 export function useCreatePurchaseOrder({ mode, invoiceId }: InvoiceFormClientProps) {
   const router = useRouter()
   const form = useForm<PurchaseOrder>({
@@ -53,6 +46,8 @@ export function useCreatePurchaseOrder({ mode, invoiceId }: InvoiceFormClientPro
       purchaseOrderItems: [defaultItem()],
       totalExclTax: 0,
       totalInclTax: 0,
+      vatAmount: 0,
+      PaymentCondition: PaymentConditionSchema.enum.NET_15,
       paymentMethod: paymentMethodSchema.enum.BANK_TRANSFER,
       partner: null,
       currency: currencyTypeSchema.enum.TND,
@@ -62,29 +57,32 @@ export function useCreatePurchaseOrder({ mode, invoiceId }: InvoiceFormClientPro
     },
     mode: "onChange",
   });
-
-  const { control, setValue, getValues, handleSubmit, reset ,formState: { isDirty, isValid,errors} } = form;
+ 
+  const { control, setValue, getValues, handleSubmit ,formState: { isDirty, isValid,errors} } = form;
   const { append, remove, replace } = useFieldArray({
     control,
     name: "purchaseOrderItems",
   });
-
+ 
   // UI state only
   const [clientSearch, setClientSearch] = useState("");
-  const [clients, setClients]=useState<PartnerSummary[] | []>([])
-  const [loadingClients, setLoadingClients]= useState(false)
   const [showDropdown, setShowDropdown] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const invoiceRef = useRef<HTMLDivElement>(null);
+  const [pdfUrl, setPdfUrl] = useState<File | null>(null);
   const previousCurrencyRef = useRef<CurrencyType>("TND");
   const previewData = useWatch({ control });
-
+ 
   // Validation des données obligatoire
-
+ 
 const canCreateInvoice =
- // (mode == "create" ? isDirty: true )&&
- // isValid &&
+  isDirty &&
+  isValid &&
   !!previewData.partner &&
   !!previewData.purchaseOrderItems?.length &&
   !!previewData.issueDate &&
+  !!previewData.PaymentCondition &&
   !!previewData.paymentMethod &&
   previewData.purchaseOrderItems.every(
     (item) =>
@@ -93,35 +91,17 @@ const canCreateInvoice =
       item.quantity! > 0 &&
       item.unityPriceEXclTax! >= 0 &&
       item.vatRate! >= 0
-  ); 
-
-  //Filtrage de la liste des clients lors de la recherche 
-  const debouncedSearchQuery = useDebounce(clientSearch, 2000);
-
-    const getClients = async ()=>{
-        try {
-          setLoadingClients(true);
-          const keyword =
-            debouncedSearchQuery.trim().length >= 3
-              ? debouncedSearchQuery.trim()
-              : undefined;
-
-          const response = await partnersApi.getSummaryClients({
-            keyword: keyword,
-          });
-
-          setClients(response);
-        } catch (error) {
-          appToast.error("Erreur de fetch clients: ",getApiErrorMessage(error))
-        } finally {
-          setLoadingClients(false);
-        }
-      };
-
-    useEffect(() => {
-      
-      getClients();
-    }, [debouncedSearchQuery]);
+  );
+ 
+  //Filtrage de la liste des clients lors de la recherche
+  const filteredClients = useMemo(() => {
+    return MOCK_PARTNERS.filter(
+      (p) =>
+        p.partnerType === "CLIENT" &&
+        p.name.toLowerCase().includes(clientSearch.toLowerCase())
+    );
+  }, [clientSearch]);
+ 
   //Synchronisation des items lors d'un nouveau item
   const syncItems = (newItems: InvoiceItem[]) => {
     replace(newItems);
@@ -129,48 +109,48 @@ const canCreateInvoice =
       shouldValidate: true,
       shouldDirty: true,
     });
-
+ 
   };
-
-
+ 
+ 
   // Ajout d'un card qui permet l'ajout les données d'unt item (P.U ,QT , TVA)
   const addItem = () => {
     append(defaultItem(), {
       shouldFocus: false,
     });
   };
-
-
+ 
+ 
   // Suppression d'item et la mis à jour des totaux TTC / HT /TVA  
   const removeItem = (id: string) => {
     const currentItems = getValues("purchaseOrderItems") ?? [];
-
+ 
     const index = currentItems.findIndex((item) => item.idInvoiceItem === id);
     if (index !== -1) {
       remove(index);
     }
-
+ 
     // Recalculer les totaux sans l'élément supprimé
     const remainingItems = currentItems.filter((item) => item.idInvoiceItem !== id);
     const totals = calculateInvoiceTotals(remainingItems);
-
+ 
     setValue("totalExclTax", totals.totalHT, { shouldValidate: true, shouldDirty: true });
     setValue("vatAmount", totals.totalTVA, { shouldValidate: true, shouldDirty: true });
     setValue("totalInclTax", totals.totalTTC, { shouldValidate: true, shouldDirty: true });
   };
-
-
-  // Mis à jour les données d'item (QT, P.U, TVA ) et calcul de nouveau les totaux 
+ 
+ 
+  // Mis à jour les données d'item (QT, P.U, TVA ) et calcul de nouveau les totaux
   const updateItem = (id: string, field: UpdateableField, value: string | number) => {
     const currentItems = getValues("purchaseOrderItems") ?? [];
-
+ 
     const updatedItems = currentItems.map((item) => {
       if (item.idInvoiceItem !== id) return item;
       const updatedItem = { ...item, [field]: value };
       if (field === "unityPriceEXclTax") {
         const itemWithConvertedPrice = calculUnityPrice(
           updatedItem,
-          getValues("invoiceCurrency"),
+          getValues("currency"),
           getValues("appliedExchangeRate")
         );
         return recalculate(itemWithConvertedPrice);
@@ -183,93 +163,103 @@ const canCreateInvoice =
     setValue("totalInclTax", totals.totalTTC, { shouldValidate: true, shouldDirty: true });
     syncItems(updatedItems);
   };
-
+ 
   // Sélection d'un client
-  const selectClient = (client: PartnerSummary) => {
+  const selectClient = (client: Partner) => {
     setValue("partner", client, { shouldValidate: true, shouldDirty: true, });
     setClientSearch(client.name);
     setShowDropdown(false);
   };
-
-
-  // Suppression de client selectionnée 
+ 
+ 
+  // Suppression de client selectionnée
   const clearClient = () => {
     setValue("partner", null, { shouldValidate: true, shouldDirty: true, });
     setClientSearch("");
   };
-
-
+ 
+ 
   // changement de la devise EUR -> TND et vice versa
   const setCurrency = (newCurrency: CurrencyType) => {
     const oldCurrency = previousCurrencyRef.current;
     const currentItems = getValues("purchaseOrderItems") ?? [];
     const convertedItems = currentItems.map((item) => convertItemCurrency(item, oldCurrency, newCurrency, getValues("appliedExchangeRate")));
-
+ 
     previousCurrencyRef.current = newCurrency;
-    setValue("invoiceCurrency", newCurrency, { shouldValidate: true, shouldDirty: true, });
+    setValue("currency", newCurrency, { shouldValidate: true, shouldDirty: true, });
     const totals = calculateInvoiceTotals(convertedItems);
     setValue("totalExclTax", totals.totalHT, { shouldValidate: true, shouldDirty: true });
     setValue("vatAmount", totals.totalTVA, { shouldValidate: true, shouldDirty: true });
     setValue("totalInclTax", totals.totalTTC, { shouldValidate: true, shouldDirty: true });
     syncItems(convertedItems);
   };
-
+ 
  
   // Permet la visualisation  de la facture en PDF une fois remplie
-  /* eslint-disable react-hooks/refs */
   const onSubmit = handleSubmit(
     async (data) => {
-      
+     
     },
     (errors) => {
       console.log("erreurs validation", errors);
     }
   );
-
-
+   //Fermer le document modal 
+    function onCloseDocumentModal() {
+        setIsModalOpen(false);
+        setPdfUrl(null);
+    }
+ 
  //créer facture
  function createPurchaseOrder(){
   //Appel de l'api
  
  }
-
  
-
-
+ 
+ 
+ 
   return {
     form,
     onSubmit,
-
+ 
     // Preview
     previewData,
-
+ 
     // Items
-
+ 
     addItem,
     removeItem,
     updateItem,
-
+ 
     // Client UI
     clientSearch,
     setClientSearch,
-    clients,
+    filteredClients,
     showDropdown,
     setShowDropdown,
     selectClient,
     clearClient,
     setCurrency,
-
+ 
     //data validation
-   
+
     canCreateInvoice,
     errors,
 
-    //createInvoice
+    //Document
+    invoiceRef,
+    setIsModalOpen,
+    isModalOpen,
     createPurchaseOrder,
+    onCloseDocumentModal,
+    pdfUrl,
+
     //Navigation
     router,
-
+ 
   };
-
-
+ 
+ 
 }
+ 

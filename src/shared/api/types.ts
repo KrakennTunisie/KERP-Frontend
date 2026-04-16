@@ -6,7 +6,7 @@ export type PageResponse<T> = {
   number: number;// current page 0-indexed
 };
 
-export type GetPartnersParams = {
+export type GetListParams = {
   keyword?: string;
   filter?: string;
   page?: number;

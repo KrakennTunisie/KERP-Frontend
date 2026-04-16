@@ -89,7 +89,7 @@ const invoiceObjectSchema = baseInvoiceSchema.extend({
 
 export const invoiceSchema = withDueDateValidation(
   invoiceObjectSchema.extend({
-   invoiceDocument: documentSchema, 
+   invoiceDocument: documentSchema.nullable(), 
    totalExclTaxEUR: z.number(),
    totalInclTaxEUR: z.number(),
    totalExclTaxTND: z.number(),

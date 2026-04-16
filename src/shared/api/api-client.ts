@@ -13,7 +13,7 @@ type RequestOptions = {
   signal?: AbortSignal;
 };
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "/api";
 
 async function parseResponse(response: Response) {
   const contentType = response.headers.get("content-type");
@@ -47,11 +47,10 @@ export async function apiRequest<T>(
   endpoint: string,
   options: RequestOptions = {}
 ): Promise<T> {
-  const { method = "GET", body, headers, token, signal } = options;
+  const { method , body, headers, token, signal } = options;
 
   const multipart = isFormData(body);
   const finalHeaders = normalizeHeaders(headers);
-
   if (token) {
     finalHeaders.Authorization = `Bearer ${token}`;
   }
