@@ -12,7 +12,7 @@ import { SendToTTNModal } from "../widgets/ttnConfirmationModal"
 
 export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps) {
     const {  setStatusPaiement, client, invoice, previewDocument, setPreviewDocument, sendToTTN, TtnModalOpen, setTtnModalOpen,
-        hasCreditInvoice,loading, sent, successMessage, router } = useClientInvoiceDetails({ invoiceId });
+        hasCreditInvoice,loading, sent, successMessage, router, updateStatus } = useClientInvoiceDetails({ invoiceId });
     return (
         <div className="min-h-screen bg-gray-50 font-sans">
 
@@ -128,7 +128,7 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                             }
                             <button
                                 disabled={invoice?.invoiceStatus == invoiceStatusSchema.enum.PAID}
-                                onClick={() => setStatusPaiement()}
+                                onClick={updateStatus}
                                 className={`flex items-center justify-center gap-2 py-3.5 rounded-xl border text-sm font-bold transition-all ${invoiceStatusSchema.enum.PAID
                                     ? 'bg-blue-100 border-blue-300 text-blue-700'
                                     : 'bg-blue-50 border-blue-200 text-blue-600 hover:brightness-95'

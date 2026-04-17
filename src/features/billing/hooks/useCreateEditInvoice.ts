@@ -2,6 +2,7 @@ import { useEffect,  useRef, useState } from "react";
 import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { v4 as uuidv4 } from "uuid";
 import { useRouter } from "next/navigation"
 import { Invoice, InvoiceCreate, invoiceCreateSchema } from "../models/invoice";
 import { InvoiceItem } from "../models/invoiceItem";
@@ -32,7 +33,6 @@ export type InvoiceFormClientProps = {
   invoiceId?: string
 }
 
-type InvoiceFormValues = z.infer<typeof invoiceCreateSchema>;
 type UpdateableField =
   | "description"
   | "quantity"
@@ -80,7 +80,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
     defaultValues: {
       invoiceType: "SALE",
       invoiceNumber:nextNumber?.value,
-      idInvoice: crypto.randomUUID(),
+      idInvoice: uuidv4(),
       invoiceStatus: invoiceStatusSchema.enum["DRAFT"],
       issueDate: new Date(),
       creationDate: new Date(),

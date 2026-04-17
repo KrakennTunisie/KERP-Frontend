@@ -167,10 +167,10 @@ export default function SuppliersInvoiceList() {
                                         </span>
                                     </td>
                                     <td className="px-5 py-4 text-slate-700 font-medium">
-                                        {f.totalExclTax.toLocaleString("fr-FR")} €
+                                        {f.totalExclTax!.toLocaleString("fr-FR")} €
                                     </td>
                                     <td className="px-5 py-4 text-slate-700 font-medium">
-                                        {f.totalExclTax.toLocaleString("fr-FR")} TND
+                                        {f.totalExclTax!.toLocaleString("fr-FR")} TND
                                     </td>
                                     <td className="px-5 py-4 text-slate-600">{f.issueDate.toLocaleDateString("fr-FR")}</td>
                                     <td className="px-5 py-4 text-center">

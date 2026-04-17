@@ -29,6 +29,8 @@ export const INVOICES_ENDPOINTS={
   getClientsInvoices: (query? : GetListParams)=> `/invoices/client-invoices${buildQueryString(query)}`,
   getSuppliersInvoices: (query? : GetListParams)=> `/invoices/supplier-invoices${buildQueryString(query)}`,
   clientInvoiceById: (id?: string) => `/invoices/client-invoices/${id}`,
+  clientInvoiceStatusById: (id?: string) => `/invoices/client-invoices/${id}/status`,
+
   supplierInvoiceById: (id: string) => `/invoices/supplier-invoices/${id}`,
 
   clientInvoicesById: (id: string) => `/invoices/clients/${id}`,
@@ -36,11 +38,11 @@ export const INVOICES_ENDPOINTS={
 }
 
 export const INVOICES_CREDIT_NOTE_ENDPOINTS={
-  invoiceCreditNotes: "/credit-note-invoices",
+  invoiceCreditNotes: "/credit-note-invoices/",
   nextNumber: "/credit-note-invoices/next-number",
 
   //getInvoiceCreditNotes: (query? : GetPartnersParams)=> `/credit-note-invoices/invoice/${buildQueryString(query)}`,
-  getInvoiceCreditNotes: (id : string)=> `/credit-note-invoices/invoice/${id}`,
+  getInvoiceCreditNotes: (id : string, query?:GetListParams)=> `/credit-note-invoices/invoice/${id}${buildQueryString(query)}`,
   invoiceCreditNoteById: (id?: string) => `/credit-note-invoices/${id}`,
   updateStatusInvoiceCreditNote: (id: string)=> `/credit-note-invoices/${id}/status`,
 }

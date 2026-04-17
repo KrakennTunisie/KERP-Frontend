@@ -6,7 +6,7 @@ import { Eye,  Paperclip } from "lucide-react";
 
 type DocumentItemProps = {
   label: string;
-  document?: Document | File | undefined;
+  document: Document | File | null;
   onOpen: (document: Document | File) => void;
 };
 
@@ -59,7 +59,9 @@ const Icon = meta?.icon as React.ElementType | undefined;
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap">
             <p className="text-sm font-black text-gray-900 truncate">
-               {document instanceof File ? document.name : document.fileName}
+              {document instanceof File
+                  ? document.name
+                  : document?.fileName}
             </p>
 
             <span

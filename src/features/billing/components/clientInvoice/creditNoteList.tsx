@@ -4,16 +4,15 @@ import Link from "next/link";
 import { PropsClient } from "../../hooks/useClientsInvoiveList";
 import { SendInvoiceModal } from "../widgets/sendInvoiceModal";
 import { invoiceComplianceStatusSchema } from "../../types/invoiceComplianceStatus";
-import { mockCreditNotes } from "../../mocks/credit-note-mocks";
-import { creditNoteTypeLabels } from "../../types/creditNoteType";
 import useCreditNoteList from "../../hooks/useCreditNoteList";
 
 import { DeleteInvoiceModal } from "../widgets/deleteInvoiceModal";
+import { creditNoteTypeLabels } from "../../types/creditNoteType";
 
 export default function CreditNoteList({ params }: PropsClient) {
 
     const { router, search, setSearch, open, setOpen, setDeleteOpen, deleteOpen, creditNoteRef,
-        filtre, setFiltre, deleteCreditNote } = useCreditNoteList({ params });
+        filtre, setFiltre, deleteCreditNote, creditNotes, totalElements, totalPages, idInvoice, setIdInvoice, deleteId, setDeleteId, deleteClientInvoice } = useCreditNoteList({ params });
     return (
         <div className="min-h-screen bg-gray-50 p font-sans">
             {/* TOP BAR */}
@@ -43,7 +42,7 @@ export default function CreditNoteList({ params }: PropsClient) {
                             {"Factures d'avoir"}
                         </h1>
                         <p className="text-sm text-slate-500 mt-1">
-                         {"Référence de la facture origianle :"} {params.invoiceId}
+                         {"Référence de la facture origianle :"} {creditNotes[0]?.invoice?.invoiceNumber ?? ""}
                         </p>
                     </div>
                 </div>
@@ -61,9 +60,7 @@ export default function CreditNoteList({ params }: PropsClient) {
                 open={deleteOpen}
                 onClose={() => setDeleteOpen(false)}
                 invoiceRef={creditNoteRef}
-                onConfirm={async () => {
-                    setDeleteOpen(false);
-                }} />
+                onConfirm={deleteClientInvoice} />
 
             <SendInvoiceModal
                 isOpen={open}
@@ -126,14 +123,14 @@ export default function CreditNoteList({ params }: PropsClient) {
                         </tr>
                     </thead>
                     <tbody>
-                        {mockCreditNotes.length === 0 ? (
+                        {creditNotes.length === 0 ? (
                             <tr>
                                 <td colSpan={9} className="text-center py-12 text-slate-400 text-sm">
                                     {"Aucune facture trouvée."}
                                 </td>
                             </tr>
                         ) : (
-                            mockCreditNotes.map((f) => (
+                            creditNotes.map((f) => (
                                 <tr
                                     key={1}
                                     className="border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer"
@@ -141,20 +138,24 @@ export default function CreditNoteList({ params }: PropsClient) {
                                     <td className="px-5 py-4 font-bold text-slate-800">
                                         {f.invoiceCreditNoteNumber}
                                     </td>
-                                    <td className="px-5 py-4 text-slate-700">{f.originalInvoice.invoiceNumber}</td>
+                                    <td className="px-5 py-4 text-slate-700">{f.invoice.invoiceNumber}</td>
                                     <td className="px-5 py-4">
                                         <span className={`px-3 py-1 rounded-full text-xs font-bold ${f.invoiceCreditNoteStatus !== "ALL" ? invoiceStatusColors[f.invoiceCreditNoteStatus] : ""
                                             }}`}>
-                                            {f.invoiceCreditNoteStatus}
+                                            {invoiceStatusLabels[f.invoiceCreditNoteStatus]}
                                         </span>
                                     </td>
                                     <td className="px-5 py-4 text-slate-700 font-medium">
                                         {creditNoteTypeLabels[f.motif]}
                                     </td>
                                     <td className="text-red-500 font-bold">
-                                        - {f.totalInclTax} {f.originalInvoice.invoiceCurrency}
+                                        - {f?.invoice.invoiceCurrency == "EUR" 
+                                                                            ? f.totalInclTaxEUR + " EUR"
+                                                                            : f?.invoice.invoiceCurrency =="TND" 
+                                                                                ? f.totalInclTaxTND +" TND" 
+                                                                                :f?.total} {f.invoice.invoiceCurrency}
                                     </td>
-                                    <td className="px-5 py-4 text-slate-600">{f.issueDate.toLocaleDateString("fr-FR")}</td>
+                                    <td className="px-5 py-4 text-slate-600">{f.issueDate?.toLocaleString("fr-FR")}</td>
                                     <td className="px-5 py-4 text-center">
                                         {f.invoiceCreditNoteComplianceStatus == invoiceComplianceStatusSchema.enum.TTN_ACCEPTED ? (
                                             <svg className="w-5 h-5 text-emerald-500 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -191,7 +192,7 @@ export default function CreditNoteList({ params }: PropsClient) {
                                                     invoiceComplianceStatusSchema.enum.TTN_PENDING,
                                                     invoiceComplianceStatusSchema.enum.TTN_SUBMITTED
                                                 ] as string[]).includes(f.invoiceCreditNoteComplianceStatus!)}
-                                                onClick={(e) => { setOpen(true); console.log("send", f.invoiceCreditNoteNumber); }}
+                                                onClick={(e) => { setOpen(true);  console.log("send", f.invoiceCreditNoteNumber); }}
                                                 className="p-2 rounded-xl bg-green-50 text-green-600 hover:bg-green-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                                 title="Envoyer"
                                             >
@@ -201,8 +202,8 @@ export default function CreditNoteList({ params }: PropsClient) {
                                             </button>
                                             {/* Supprimer */}
                                             <button
-                                                disabled={f.invoiceCreditNoteComplianceStatus != null}
-                                                onClick={(e) => { deleteCreditNote(f.invoiceCreditNoteNumber) }}
+                                               // disabled={/* f.invoiceCreditNoteComplianceStatus != null */}
+                                                onClick={(e) => { deleteCreditNote(f.invoiceCreditNoteNumber); setDeleteId(f.idInvoiceCreditNote) }}
                                                 className="p-2 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                                 title="Supprimer"
                                             >

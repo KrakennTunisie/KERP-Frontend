@@ -3,7 +3,7 @@ import { ApiError } from "./api-error";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 type JsonBody = Record<string, unknown> | unknown[] | null;
-type RequestBody = JsonBody | FormData | undefined;
+export type RequestBody = JsonBody | FormData | undefined;
 
 type RequestOptions = {
   method?: HttpMethod;
@@ -13,7 +13,7 @@ type RequestOptions = {
   signal?: AbortSignal;
 };
 
-const API_BASE_URL = "/api";
+const API_BASE_URL = '/api';
 
 async function parseResponse(response: Response) {
   const contentType = response.headers.get("content-type");

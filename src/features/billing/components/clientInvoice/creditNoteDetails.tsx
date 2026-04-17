@@ -9,10 +9,12 @@ import { mockInvoiceEvents } from "../../mocks/invoiceEvent-mocks";
 import { InvoiceEventLabels } from "../../types/invoiceEventType";
 import { OperationCategoryLabels } from "../../types/operationCategory";
 import { invoiceStatusSchema } from "../../types/invoiceStatus";
+import { DocumentPreviewModal } from "@/shared/components/ui/documentPreviewModal";
+import { creditNoteTypeLabels } from "../../types/creditNoteType";
 
 export default function CreditNoteDetails({params}:PropsCreditNote)
 {
-    const {  setStatusPaiement, invoice, sendToTTN, TtnModalOpen, setTtnModalOpen ,loading, sent, successMessage, router } = useCreditNoteDetails({ params });
+    const { previewDocument, setPreviewDocument,  setStatusPaiement, invoice, sendToTTN, TtnModalOpen, setTtnModalOpen ,loading, sent, successMessage, router } = useCreditNoteDetails({ params });
       return (
           <div className="min-h-screen bg-gray-50 font-sans">
   
@@ -28,12 +30,12 @@ export default function CreditNoteDetails({params}:PropsCreditNote)
                       </button>
                       <div>
                           <div className="flex items-center gap-2.5">
-                              <span className="text-[22px] font-extrabold tracking-tight text-gray-900">FAC-2025-001</span>
+                              <span className="text-[22px] font-extrabold tracking-tight text-gray-900">{invoice?.invoiceCreditNoteNumber}</span>
                               <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-wide bg-amber-50 text-amber-600 border border-amber-200">
-                                  {invoice?.invoiceStatus}
+                                  {invoice?.invoiceCreditNoteStatus}
                               </span>
                           </div>
-                          <p className="text-xs text-gray-400 mt-0.5">Emise le {invoice?.issueDate.toISOString()} · Échéance le {invoice?.dueDate.toISOString()}</p>
+                          <p className="text-xs text-gray-400 mt-0.5">Emise le {invoice?.issueDate!.toLocaleString()}</p>
                       </div>
                   </div>
               </div>
@@ -51,11 +53,11 @@ export default function CreditNoteDetails({params}:PropsCreditNote)
                                   <ShieldIcon />
                               </div>
                               <div className="flex-1">
-                                  {invoice?.invoiceComplianceStatus === "TTN_ACCEPTED" ? (
+                                  {invoice?.invoiceCreditNoteComplianceStatus === "TTN_ACCEPTED" ? (
                                       <p className="text-sm text-green-600 mt-0.5">
                                           {"Ce document est validé par l'administration fiscale."}
                                       </p>
-                                  ) : invoice?.invoiceComplianceStatus === "TTN_REJECTED" ? (
+                                  ) : invoice?.invoiceCreditNoteComplianceStatus === "TTN_REJECTED" ? (
                                       <p className="text-sm text-red-600 mt-0.5">
                                           {"Ce document est rejeté par l'administration fiscale."}
                                       </p>
@@ -66,7 +68,7 @@ export default function CreditNoteDetails({params}:PropsCreditNote)
                                   )}
                               </div>
                               {/* Bouton envoi TTN — visible seulement si pas encore envoyée */}
-                              {!invoice?.invoiceComplianceStatus && (
+                              {!invoice?.invoiceCreditNoteComplianceStatus && (
                                   <button
                                       onClick={() => { setTtnModalOpen(true) }}
                                       className="shrink-0 px-4 py-2 rounded-xl bg-red-600 text-white text-sm font-semibold hover:bg-blue transition-colors cursor-pointer inline-flex items-center gap-2" >
@@ -95,7 +97,7 @@ export default function CreditNoteDetails({params}:PropsCreditNote)
                           onConfirm={() => { sendToTTN() }}
                           loading={loading}
                           invoiceSent={sent}
-                          invoiceRef={invoice?.invoiceNumber}
+                          invoiceRef={invoice?.invoiceCreditNoteNumber}
                           successMessage={successMessage} />
   
                       {/* Actions */}
@@ -108,7 +110,9 @@ export default function CreditNoteDetails({params}:PropsCreditNote)
                                   </div>
                                   <div key="Méthode de paiement">
                                       <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">N° Facture originale</p>
-                                      <p className="text-sm font-bold text-gray-900"></p>
+                                      <p className="text-sm font-bold text-gray-900">
+                                        {invoice?.invoice.invoiceNumber}
+                                      </p>
                                   </div>
                                   <div key="Devise">
                                       <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">N° Bon du commande</p>
@@ -118,22 +122,28 @@ export default function CreditNoteDetails({params}:PropsCreditNote)
                               <div className="grid grid-cols-3 gap-3">
                                   <div key="Bon du commande">
                                       <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">{"Montant à remboursser"}</p>
-                                      <p className="text-sm font-bold text-gray-900"></p>
+                                      <p className="text-sm font-bold text-gray-900">
+                                        {invoice?.invoice.invoiceCurrency == "EUR" 
+                                                                            ? invoice.totalInclTaxEUR + " EUR"
+                                                                            : invoice?.invoice.invoiceCurrency =="TND" 
+                                                                                ? invoice.totalInclTaxTND +" TND" 
+                                                                                :invoice?.totalInclTax}
+                                      </p>
                                   </div>
                                   <div key="Méthode de paiement">
                                       <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">{"Motif de l'avoir"}</p>
-                                      <p className="text-sm font-bold text-gray-900"></p>
+                                      <p className="text-sm font-bold text-gray-900">{invoice?.motif}</p>
                                   </div>
                                   <div key="Devise">
                                       <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Devise</p>
-                                      <p className="text-sm font-semibold text-gray-700">TND</p>
+                                      <p className="text-sm font-semibold text-gray-700">{invoice?.invoice.invoiceCurrency}</p>
                                   </div>
                               </div>
                           <div className="flex justify-end ">
                               <button
-                                  disabled={invoice?.invoiceStatus == invoiceStatusSchema.enum.PAID}
+                                  disabled={invoice?.invoiceCreditNoteStatus == invoiceStatusSchema.enum.PAID}
                                   onClick={() => setStatusPaiement()}
-                                  className={`flex items-center justify-center px-4  gap-2 py-3.5 rounded-xl border text-sm font-bold transition-all ${invoice?.invoiceStatus == invoiceStatusSchema.enum.PAID
+                                  className={`flex items-center justify-center px-4  gap-2 py-3.5 rounded-xl border text-sm font-bold transition-all ${invoice?.invoiceCreditNoteStatus == invoiceStatusSchema.enum.PAID
                                       ? 'bg-red-100 border-red-300 text-red-700'
                                       : 'bg-red-50 border-red-200 text-red-600 hover:brightness-95'
                                       }`}
@@ -142,7 +152,7 @@ export default function CreditNoteDetails({params}:PropsCreditNote)
                                       <polyline points="9 11 12 14 22 4" />
                                       <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
                                   </svg>
-                                  {invoice?.invoiceStatus == invoiceStatusSchema.enum.PAID ? 'Marqué Payé ✓' : 'Marquer Payé'}
+                                  {invoice?.invoiceCreditNoteStatus == invoiceStatusSchema.enum.PAID ? 'Marqué Payé ✓' : 'Marquer Payé'}
                               </button>
                           </div>
                       </Card>
@@ -168,29 +178,37 @@ export default function CreditNoteDetails({params}:PropsCreditNote)
                                   scrollbarColor: '#CBD5E1 transparent',
                               }}
                           >
-                              {mockInvoiceItems.map((item, index) => (
+                              {invoice?.invoiceCreditNoteItems?.map((item, index) => (
                                   <div
-                                      key={item.idInvoiceItem}
+                                      key={item.idInvoiceCreditNoteItem}
                                       className={`grid grid-cols-[1fr_70px_90px_100px] gap-2 py-3.5 items-center ${index < mockInvoiceItems.length - 1 ? 'border-b border-gray-50' : ''
                                           }`}
                                   >
                                       <div>
-                                          <p className="text-sm font-semibold text-gray-900">{item.description}</p>
-                                          <p className="text-xs text-gray-400 mt-0.5">TVA 19%</p>
-                                          <p className="text-xs text-gray-400 mt-0.5">{OperationCategoryLabels[item.operationCategory]}</p>
+                                          <p className="text-sm font-semibold text-gray-900">{item.invoiceItem.description}</p>
+                                          <p className="text-xs text-gray-400 mt-0.5">{item.invoiceItem.vatRate+" %"}</p>
+                                          <p className="text-xs text-gray-400 mt-0.5">{OperationCategoryLabels[item.invoiceItem.operationCategory]}</p>
                                       </div>
                                       <p className="text-sm text-gray-700 text-right">{item.quantity}</p>
-                                      <p className="text-sm text-gray-700 text-right">{item.unityPriceEXclTax}</p>
-                                      <p className="text-sm font-bold text-gray-900 text-right">{item.itemTotalExclTax}</p>
+                                      <p className="text-sm text-gray-700 text-right">{item.invoiceItem.unityPriceEXclTax}</p>
+                                      <p className="text-sm font-bold text-gray-900 text-right">{item.invoiceItem.itemTotalExclTax}</p>
                                   </div>
                               ))}
                           </div>
   
                           <div className="mt-4 flex flex-col items-end gap-2">
                               {[
-                                  { label: 'Sous-total HT', value: '15 500 TND' },
-                                  { label: 'Total TVA', value: '2 945 TND' },
-                              ].map(({ label, value }) => (
+                                { label: 'Sous-total HT', value: invoice?.invoice.invoiceCurrency == "EUR" 
+                                                                            ? invoice.totalExclTaxEUR 
+                                                                            : invoice?.invoice.invoiceCurrency =="TND" 
+                                                                                ? invoice.totalExclTaxTND
+                                                                                :invoice?.totalInclTax},
+                                { label: 'Total TVA', value: invoice?.invoice.invoiceCurrency == "EUR" 
+                                                                            ? (invoice.totalInclTaxEUR - invoice.totalExclTaxEUR).toFixed(2)
+                                                                            : invoice?.invoice.invoiceCurrency =="TND" 
+                                                                                ? (invoice.totalInclTaxTND - invoice.totalExclTaxTND).toFixed(2)
+                                                                                :invoice?.totalInclTax},
+                            ].map(({ label, value }) => (
                                   <div key={label} className="flex justify-between w-64">
                                       <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">{label}</span>
                                       <span className="text-sm font-semibold text-gray-900">{value}</span>
@@ -199,7 +217,12 @@ export default function CreditNoteDetails({params}:PropsCreditNote)
                               <div className="w-64 h-px bg-gray-200 my-1" />
                               <div className="flex justify-between w-64 items-center">
                                   <span className="text-[10px] font-bold uppercase tracking-widest text-gray-700">Total TTC</span>
-                                  <span className="text-2xl font-extrabold text-red-600 tracking-tight">18 445 TND</span>
+                                  <span className="text-2xl font-extrabold text-red-600 tracking-tight">
+                                    {invoice?.invoice.invoiceCurrency == "EUR" 
+                                                                            ? invoice.totalInclTaxEUR + " EUR"
+                                                                            : invoice?.invoice.invoiceCurrency =="TND" 
+                                                                                ? invoice.totalInclTaxTND +" TND" 
+                                                                                :invoice?.totalInclTax}</span>
                               </div>
                           </div>
                       </Card>
@@ -221,11 +244,11 @@ export default function CreditNoteDetails({params}:PropsCreditNote)
                           </div>
   
                           <div className="bg-violet-50 rounded-xl p-4">
-                              {invoice?.invoiceComplianceStatus == "TTN_ACCEPTED" ? (
+                              {invoice?.invoiceCreditNoteComplianceStatus == "TTN_ACCEPTED" ? (
                                   <svg viewBox="0 0 200 200" className="w-full h-auto">
                                       {/* QR SVG */}
                                   </svg>
-                              ) : invoice?.invoiceComplianceStatus === "TTN_REJECTED" ? (
+                              ) : invoice?.invoiceCreditNoteComplianceStatus === "TTN_REJECTED" ? (
                                   <p className="text-sm text-red-600 text-center">
                                      {" Facture rejetée par l'administration fiscale"}
                                   </p>
@@ -237,14 +260,14 @@ export default function CreditNoteDetails({params}:PropsCreditNote)
                               )}
                           </div>
   
-                          {invoice?.invoiceComplianceStatus == "TTN_ACCEPTED" ? (
+                          {invoice?.invoiceCreditNoteComplianceStatus == "TTN_ACCEPTED" ? (
                               <>
                                   <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 text-center mt-3">
                                       ID de validation
                                   </p>
   
                                   <p className="text-sm font-bold text-violet-600 text-center mt-1 font-mono tracking-wide">
-                                      {invoice?.idInvoice ?? "ELF-XXXX"}
+                                      {invoice?.idInvoiceCreditNote ?? "ELF-XXXX"}
                                   </p>
   
                                   <div className="bg-violet-50 rounded-xl p-3 text-center mt-3">
@@ -253,7 +276,7 @@ export default function CreditNoteDetails({params}:PropsCreditNote)
                                       </p>
                                   </div>
                               </>
-                          ) : invoice?.invoiceComplianceStatus === "TTN_REJECTED" ? (
+                          ) : invoice?.invoiceCreditNoteComplianceStatus === "TTN_REJECTED" ? (
                               <p className="text-sm text-red-600 text-center mt-3">
                                   Aucun identifiant de validation (facture rejetée)
                               </p>
@@ -275,7 +298,7 @@ export default function CreditNoteDetails({params}:PropsCreditNote)
                                   scrollbarColor: '#CBD5E1 transparent',
                               }}
                           >
-                              {mockInvoiceEvents.map((event, index) => (
+                              {invoice?.invoiceCreditNoteEvents?.map((event, index) => (
                                   <div key={event.idInvoiceEvent} className="flex items-start gap-2.5 relative">
                                       {/* Ligne verticale entre les points */}
                                       {index < mockInvoiceEvents.length - 1 && (
@@ -284,10 +307,10 @@ export default function CreditNoteDetails({params}:PropsCreditNote)
                                       <div className="w-2.5 h-2.5 rounded-full bg-red-200 shrink-0 mt-1 z-10" />
                                       <div>
                                           <p className="text-sm font-semibold leading-snug text-black">
-                                              {InvoiceEventLabels[event?.invoiceEventType]}
+                                              {InvoiceEventLabels[event?.invoiceCreditNoteEventType ] ?? "créé"}
                                           </p>
                                           <p className="text-[11px] font-semibold text-gray-400 mt-0.5">
-                                              {event.eventDate.toDateString()} - {event.eventTrigger}
+                                              {event.eventDate.toLocaleString()} - {event.eventTrigger}
                                           </p>
                                           <p className="text-[11px] text-gray-400 mt-0.5">{event.description}</p>
                                       </div>
@@ -300,7 +323,7 @@ export default function CreditNoteDetails({params}:PropsCreditNote)
                       <Card>
                           <SectionLabel>{"Documents attachés"}</SectionLabel>
                           <div
-                              onClick={() => { }}
+                              onClick={() => { setPreviewDocument(invoice?.invoiceCreditNoteDocument)}}
                               className="flex items-center justify-between p-2.5 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer group">
                               <div className="flex items-center gap-2.5">
                                   <div className="w-9 h-9 rounded-lg bg-rose-50 flex items-center justify-center shrink-0">
@@ -322,6 +345,11 @@ export default function CreditNoteDetails({params}:PropsCreditNote)
   
                   </div>
               </div>
+                              <DocumentPreviewModal
+                                  open={!!previewDocument}
+                                  onClose={() => setPreviewDocument(null)}
+                                  document={previewDocument}
+                                />
           </div>
       );
 }

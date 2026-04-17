@@ -7,6 +7,7 @@ import { InvoicesAPI } from "../api/partners-api";
 import { appToast } from "@/shared/lib/toast";
 import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 import { DocumentOrFile } from "@/shared/components/ui/documentPreviewModal";
+import { invoiceStatusSchema } from "../types/invoiceStatus";
 export type InvoiceDetailsProps = {
   invoiceId: string
 }
@@ -58,11 +59,29 @@ export default function useClientInvoiceDetails ({invoiceId}:InvoiceDetailsProps
   });
 };
 
+const updateStatus = async ()=>{
+      try {
+      setLoading(true)
+      const formData = new FormData();
+        
+      formData.append("status",  invoiceStatusSchema.enum.PAID);
+      const invoice = await InvoicesAPI.updateClientInvoiceStatus(invoiceId, formData);
+      setInvoice(invoice);
+      setHasCreditInvoice(invoice?.hasInvoiceCreditNotes ?? false)
+    } catch (error) {
+      appToast.error("Erreur Fetch du client:",getApiErrorMessage(error));
+    }
+    finally{
+      setLoading(false)
+    }
+}
+
   const fetchInvoice = async () => {
     try {
       setLoading(true)
       const invoice = await InvoicesAPI.getClientInvoiceById(invoiceId);
       setInvoice(invoice);
+      setHasCreditInvoice(invoice?.hasInvoiceCreditNotes ?? false)
     } catch (error) {
       appToast.error("Erreur Fetch du client:",getApiErrorMessage(error));
     }
@@ -104,6 +123,7 @@ function sendToTTN ()
         TtnModalOpen,
         setTtnModalOpen,
         hasCreditInvoice,
+        updateStatus,
         router
     })
 }
