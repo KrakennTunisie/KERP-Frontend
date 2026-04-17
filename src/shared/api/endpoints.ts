@@ -1,12 +1,12 @@
 import { buildQueryString } from "./query-string-builder";
-import { GetPartnersParams } from "./types";
+import { GetListParams } from "./types";
 
 export const BILLING_ENDPOINTS = {
   clients: "/partners/clients",
   suppliers: "/partners/suppliers",
-  getClients: (query? : GetPartnersParams)=> `/partners/clients${buildQueryString(query)}`,
-  getClientsSummary: (query? : GetPartnersParams)=> `/partners/clients-summary${buildQueryString(query)}`,
-  getSuppliers: (query? : GetPartnersParams)=> `/partners/suppliers${buildQueryString(query)}`,
+  getClients: (query? : GetListParams)=> `/partners/clients${buildQueryString(query)}`,
+  getClientsSummary: (query? : GetListParams)=> `/partners/clients-summary${buildQueryString(query)}`,
+  getSuppliers: (query? : GetListParams)=> `/partners/suppliers${buildQueryString(query)}`,
   clientById: (id: string) => `/partners/clients/${id}`,
   supplierById: (id: string) => `/partners/suppliers/${id}`,
 
@@ -15,6 +15,10 @@ export const BILLING_ENDPOINTS = {
   clientInvoiceById: (id: string) => `/invoices/clients/${id}`,
   supplierInvoiceById: (id: string) => `/invoices/suppliers/${id}`,
 
+  purchaseOrder: "/purchase-orders",
+  getPurchaseOrders:(query? : GetListParams)=> `/purchase-orders/${buildQueryString(query)}`,
+  purchaseOrderById: (id : string) => `/purchase-orders/${id}`,
+
   uploadDocument: "/documents/upload",
 };
 
@@ -22,8 +26,8 @@ export const INVOICES_ENDPOINTS={
   clientsInvoices: "/invoices/client-invoices",
   suppliersInvoices: "/invoices/supplier-invoices",
   nextNumber: "/invoices/next-number",
-  getClientsInvoices: (query? : GetPartnersParams)=> `/invoices/client-invoices${buildQueryString(query)}`,
-  getSuppliersInvoices: (query? : GetPartnersParams)=> `/invoices/supplier-invoices${buildQueryString(query)}`,
+  getClientsInvoices: (query? : GetListParams)=> `/invoices/client-invoices${buildQueryString(query)}`,
+  getSuppliersInvoices: (query? : GetListParams)=> `/invoices/supplier-invoices${buildQueryString(query)}`,
   clientInvoiceById: (id?: string) => `/invoices/client-invoices/${id}`,
   supplierInvoiceById: (id: string) => `/invoices/supplier-invoices/${id}`,
 
@@ -36,7 +40,7 @@ export const INVOICES_CREDIT_NOTE_ENDPOINTS={
   nextNumber: "/credit-note-invoices/next-number",
 
   //getInvoiceCreditNotes: (query? : GetPartnersParams)=> `/credit-note-invoices/invoice/${buildQueryString(query)}`,
-  getInvoiceCreditNotes: (id : string, query?:GetPartnersParams)=> `/credit-note-invoices/invoice/${id}${buildQueryString(query)}`,
+  getInvoiceCreditNotes: (id : string, query?:GetListParams)=> `/credit-note-invoices/invoice/${id}${buildQueryString(query)}`,
   invoiceCreditNoteById: (id?: string) => `/credit-note-invoices/${id}`,
   updateStatusInvoiceCreditNote: (id: string)=> `/credit-note-invoices/${id}/status`,
 }
@@ -44,6 +48,6 @@ export const INVOICES_CREDIT_NOTE_ENDPOINTS={
 export const PURCHASE_ORDER_ENDPOINTS = {
   purchaseOrders: "/purchase-orders",
   nextNumber: "/purchase-orders/next-number",
-  getPurchaseOrders: (query? : GetPartnersParams)=> `/purchase-orders${buildQueryString(query)}`,
+  getPurchaseOrders: (query? : GetListParams)=> `/purchase-orders${buildQueryString(query)}`,
   purchaseOrderById: (id: string) => `/purchase-orders/${id}`, 
 }

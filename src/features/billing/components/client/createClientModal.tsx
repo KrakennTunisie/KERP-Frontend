@@ -30,7 +30,7 @@ export default function ClientCreateModal({ open, onClose, onCreated}: Props) {
           formData.append("phoneNumber", values.phoneNumber);
           formData.append("taxRegistrationNumber", values.taxRegistrationNumber);
 
-          // fichiers ⚠️ IMPORTANT
+         
           if (values.rne) formData.append("rne", values.rne);
           if (values.patente) formData.append("patente", values.patente);
           if (values.contract) formData.append("contract", values.contract);

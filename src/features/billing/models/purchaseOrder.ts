@@ -7,6 +7,7 @@ import { invoiceItemSchema } from "./invoiceItem";
 import { purchaseOrderStatusSchema } from "../types/purchaseOrderStatus";
 import { currencyTypeSchema } from "../types/currency";
 import { exchangeRateSourceSchema } from "../types/exchangeRateSource";
+import { fileSchema } from "../types/pdfSchema";
 
 
 export const purchaseOrderSchema = z.object({
@@ -25,6 +26,7 @@ export const purchaseOrderSchema = z.object({
         exchangeRateSource : exchangeRateSourceSchema,
         PaymentCondition: PaymentConditionSchema,
         partner : z.lazy(()=>partnerSchema).nullable(),
+        purchaseOrderDocument : fileSchema.nullable(),     
         purchaseOrderItems : z.array(invoiceItemSchema).nullable()
        .refine((items) => {
         if (!items) return true;
@@ -34,5 +36,22 @@ export const purchaseOrderSchema = z.object({
         message: "Les lignes de facture doivent être uniques",
         }), 
 });
+
+export const purchaseOrderDTO = z.object({
+        purchaseOrderNumber: z.string(),
+        issueDate:  z.date(),
+        creationDate: z.date().nullable(),
+        currency: currencyTypeSchema,
+        paymentMethod: paymentMethodSchema,
+        exchangeRateReferenceDate: z.date(),
+        appliedExchangeRate: z.number(),
+        exchangeRateSource : exchangeRateSourceSchema,
+        PaymentCondition: PaymentConditionSchema,
+        partner : z.string(),
+        purchaseOrderItems : z.array(invoiceItemSchema),
+        purchaseOrderDocument : fileSchema.nullable(),     
+});
+
+export type purchaseOrderDTO = z.infer<typeof purchaseOrderDTO>;
 
 export type PurchaseOrder = z.infer<typeof purchaseOrderSchema>;

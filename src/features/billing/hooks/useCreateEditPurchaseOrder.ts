@@ -1,10 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { v4 as uuidv4 } from "uuid";
 import { useRouter } from "next/navigation"
-import { Invoice, invoiceSchema } from "../models/invoice";
+
 import { InvoiceItem } from "../models/invoiceItem";
 import { Partner } from "../models/partner";
 import { MOCK_PARTNERS } from "../mocks/clients-mocks";
@@ -17,14 +16,12 @@ import {
 import { CurrencyType, currencyTypeSchema } from "../types/currency";
 import { PaymentConditionSchema } from "../types/paymentCondition";
 import defaultItem from "../mocks/invoice-items-mocks";
-import { invoiceStatusSchema } from "../types/invoiceStatus";
-import { invoiceComplianceStatusSchema } from "../types/invoiceComplianceStatus";
 import { paymentMethodSchema } from "../types/paymentMethod";
 import { exchangeRateSourceSchema } from "../types/exchangeRateSource";
-import { handleSaveAsPDF } from "../lib/buildInvoicePDF";
 import { PurchaseOrder, purchaseOrderSchema } from "../models/purchaseOrder";
 import { purchaseOrderStatusSchema } from "../types/purchaseOrderStatus";
- 
+import { handleSaveAsPDF } from "../lib/buildInvoicePDF";
+
 export type InvoiceFormClientProps = {
   mode: "create" | "edit"
   invoiceId?: string
@@ -70,6 +67,10 @@ export function useCreatePurchaseOrder({ mode, invoiceId }: InvoiceFormClientPro
   // UI state only
   const [clientSearch, setClientSearch] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const invoiceRef = useRef<HTMLDivElement>(null);
+  const [pdfUrl, setPdfUrl] = useState<File | null>(null);
   const previousCurrencyRef = useRef<CurrencyType>("TND");
   const previewData = useWatch({ control });
  
@@ -203,7 +204,11 @@ const canCreateInvoice =
       console.log("erreurs validation", errors);
     }
   );
- 
+   //Fermer le document modal 
+    function onCloseDocumentModal() {
+        setIsModalOpen(false);
+        setPdfUrl(null);
+    }
  
  //créer facture
  function createPurchaseOrder(){
@@ -238,12 +243,18 @@ const canCreateInvoice =
     setCurrency,
  
     //data validation
-   
+
     canCreateInvoice,
     errors,
- 
-    //createInvoice
+
+    //Document
+    invoiceRef,
+    setIsModalOpen,
+    isModalOpen,
     createPurchaseOrder,
+    onCloseDocumentModal,
+    pdfUrl,
+
     //Navigation
     router,
  

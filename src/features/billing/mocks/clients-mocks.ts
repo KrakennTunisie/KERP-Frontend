@@ -63,7 +63,7 @@ export const MOCK_PARTNERS: Partner[] = [
         invoices: [],
     },
        {
-        idPartner: crypto.randomUUID(),
+        idPartner: uuidv4(),
         name: "Gamma Consulting",
         email: "direction@gamma.tn",
         phoneNumber: "+21670000004",
@@ -78,7 +78,7 @@ export const MOCK_PARTNERS: Partner[] = [
         invoices: [],
     },
        {
-        idPartner: crypto.randomUUID(),
+        idPartner: uuidv4(),
         name: "Gamma Consulting",
         email: "direction@gamma.tn",
         phoneNumber: "+21670000004",
@@ -93,7 +93,7 @@ export const MOCK_PARTNERS: Partner[] = [
         invoices: [],
     },
        {
-        idPartner: crypto.randomUUID(),
+        idPartner: uuidv4(),
         name: "Gamma Consulting",
         email: "direction@gamma.tn",
         phoneNumber: "+21670000004",

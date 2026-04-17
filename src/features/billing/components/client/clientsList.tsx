@@ -84,7 +84,6 @@ useEffect(() => {
 
 
 
-
   const onUpdateRequest = (row : ClientPartnerItem)=>{
         setFormData(row)
         setShowUpdateModal(true)
