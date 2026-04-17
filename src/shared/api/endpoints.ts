@@ -29,6 +29,8 @@ export const INVOICES_ENDPOINTS={
   getClientsInvoices: (query? : GetListParams)=> `/invoices/client-invoices${buildQueryString(query)}`,
   getSuppliersInvoices: (query? : GetListParams)=> `/invoices/supplier-invoices${buildQueryString(query)}`,
   clientInvoiceById: (id?: string) => `/invoices/client-invoices/${id}`,
+  clientInvoiceStatusById: (id?: string) => `/invoices/client-invoices/${id}/status`,
+
   supplierInvoiceById: (id: string) => `/invoices/supplier-invoices/${id}`,
 
   clientInvoicesById: (id: string) => `/invoices/clients/${id}`,

@@ -1,11 +1,12 @@
 // src/features/billing/api/partners.api.ts
-import { apiClient } from "@/shared/api/api-client";
+import { apiClient, RequestBody } from "@/shared/api/api-client";
 import { BILLING_ENDPOINTS, INVOICES_CREDIT_NOTE_ENDPOINTS, INVOICES_ENDPOINTS, PURCHASE_ORDER_ENDPOINTS } from "@/shared/api/endpoints";
 import { ClientPartner, ClientPartnerItem, CreateClientPartner, CreateSupplierPartner, PartnerSummary, SupplierPartner, SupplierPartnerItem, UpdatePartner } from "../models/partner";
 import { GetListParams, PageResponse } from "@/shared/api/types";
 import { nextNumber } from "../types/nextNumber";
 import { Invoice, InvoiceCreate, InvoicePageItem } from "../models/invoice";
 import { InvoiceCreditNote, InvoiceCreditNoteCreate, InvoiceCreditNoteDetails, InvoiceCreditNotePageItem } from "../models/creditNote";
+import { UpdateInvoiceCreditNoteStatusRequest } from "../types/UpdateInvoiceCreditNoteStatusRequest";
 
 export const partnersApi = {
   getClients: (query? : GetListParams) => 
@@ -61,6 +62,9 @@ export const InvoicesAPI = {
     apiClient.post<InvoiceCreate>(INVOICES_ENDPOINTS.suppliersInvoices, payload),
 
   updateClientInvoice : (id: string, payload: FormData) => apiClient.patch<Invoice>(INVOICES_ENDPOINTS.clientsInvoices, payload),
+
+  updateClientInvoiceStatus : 
+  (id: string, payload: FormData) => apiClient.patch<Invoice>(INVOICES_ENDPOINTS.clientInvoiceStatusById(id), payload),
 
   updateSupplierInvoice : (id: string, payload: FormData) => apiClient.patch<Invoice>(INVOICES_ENDPOINTS.suppliersInvoices, payload),
 
