@@ -32,7 +32,6 @@ export type InvoiceFormClientProps = {
   invoiceId?: string
 }
 
-type InvoiceFormValues = z.infer<typeof invoiceCreateSchema>;
 type UpdateableField =
   | "description"
   | "quantity"

@@ -4,7 +4,7 @@ import { BILLING_ENDPOINTS, INVOICES_CREDIT_NOTE_ENDPOINTS, INVOICES_ENDPOINTS, 
 import { ClientPartner, ClientPartnerItem, CreateClientPartner, CreateSupplierPartner, PartnerSummary, SupplierPartner, SupplierPartnerItem, UpdatePartner } from "../models/partner";
 import { GetPartnersParams, PageResponse } from "@/shared/api/types";
 import { Invoice, InvoiceCreate, InvoicePageItem, InvoiceUpdate } from "../models/invoice";
-import { InvoiceCreditNote, InvoiceCreditNoteCreate, InvoiceCreditNotePageItem } from "../models/creditNote";
+import { InvoiceCreditNote, InvoiceCreditNoteCreate, InvoiceCreditNoteDetails, InvoiceCreditNotePageItem } from "../models/creditNote";
 import { nextNumber } from "../types/nextNumber";
 
 export const partnersApi = {
@@ -73,13 +73,13 @@ export const InvoicesAPI = {
 };
 
 export const InvoicesCreditNoteAPI = {
-  getNextInvoiceNumber :()=> apiClient.get(INVOICES_CREDIT_NOTE_ENDPOINTS.nextNumber),
+  getNextInvoiceNumber :()=> apiClient.get<nextNumber>(INVOICES_CREDIT_NOTE_ENDPOINTS.nextNumber),
 
-  getInvoiceCreditNotes: (id : string) => 
-    apiClient.get<PageResponse<InvoiceCreditNotePageItem>>(INVOICES_CREDIT_NOTE_ENDPOINTS.getInvoiceCreditNotes(id)),
+  getInvoiceCreditNotes: (id : string, query?:GetPartnersParams) => 
+    apiClient.get<PageResponse<InvoiceCreditNotePageItem>>(INVOICES_CREDIT_NOTE_ENDPOINTS.getInvoiceCreditNotes(id, query)),
 
   getCreditNoteById: (id: string) =>
-    apiClient.get<InvoiceCreditNote>(INVOICES_CREDIT_NOTE_ENDPOINTS.invoiceCreditNoteById(id)),
+    apiClient.get<InvoiceCreditNoteDetails>(INVOICES_CREDIT_NOTE_ENDPOINTS.invoiceCreditNoteById(id)),
 
   createInvoiceCreditNote: (payload: FormData) =>
     apiClient.post<InvoiceCreditNoteCreate>(INVOICES_CREDIT_NOTE_ENDPOINTS.invoiceCreditNotes, payload),

@@ -2,9 +2,9 @@ import { InvoiceItem } from '../models/invoiceItem'
 import { OperationCategoryLabels, operationCategorySchema } from '../types/operationCategory'
 import { tvaRateSchema } from '../types/tvaRate'
 import { v4 as uuidv4 } from "uuid";
-export default function defaultItem(): InvoiceItem {
+export default function defaultItem(id?: string): InvoiceItem {
   return {
-    idInvoiceItem: uuidv4() ,
+    idInvoiceItem: id ?? uuidv4() ,
     description: "",
     quantity: 0,
     unityPriceEXclTax: 0,

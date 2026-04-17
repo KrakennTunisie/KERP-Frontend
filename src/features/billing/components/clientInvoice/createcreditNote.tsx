@@ -10,11 +10,13 @@ import SummaryOriginalInvoice from '../widgets/summaryOriginalInvoice';
 import ErrorForm from '../widgets/errorForm';
 import { DocumentPreviewModal } from '@/shared/components/ui/documentPreviewModal';
 import { SendToTTNModal } from '../widgets/ttnConfirmationModal';
+import { InvoiceDetailsProps } from '../../hooks/useClientInvoiceDetails';
 
-export function CreateCreditNote() {
-    const { previewData, form, removeItem, addItem, updateItem, onSubmit, onCloseDocumentModal, createInvoice,
+export function CreateCreditNote({invoiceId}: InvoiceDetailsProps) {
+    const { previewData, form, removeItem, addItem, updateItem, onSubmit, onCloseDocumentModal, createCreditNoteInvoice,
         setItemSearchMap, setShowDropdownMap, itemSearchMap, showDropdownMap, creditNoteItemMap, setCreditNoteItemMap, filteredItems, fields,
-        canCreateInvoice, invoiceRef, isModalOpen, TtnModalOpen, setTtnModalOpen, pdfUrl, loading, successMessage, sent, sendToTTN, router, errors } = useCreateCreditNote();
+        canCreateInvoice, invoiceRef, isModalOpen, TtnModalOpen, setTtnModalOpen, pdfUrl, loading, successMessage, 
+        sent, sendToTTN, router, errors, invoice, nextNumber } = useCreateCreditNote({invoiceId});
     const { register } = form
     return (
         <div className="flex-1 flex flex-col min-h-0 bg-white">
@@ -39,7 +41,7 @@ export function CreateCreditNote() {
                     </div>
 
                     <button
-                        onClick={() => { onSubmit() }}
+                        onClick={onSubmit}
                         disabled={!canCreateInvoice}
                         className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold shadow-md transition ${!canCreateInvoice
                             ? "bg-gray-300 cursor-not-allowed text-gray-500 shadow-none"
@@ -54,7 +56,7 @@ export function CreateCreditNote() {
             <DocumentPreviewModal
                 open={isModalOpen}
                 onClose={onCloseDocumentModal}
-                onCreateInvoice={createInvoice}
+                onCreateInvoice={createCreditNoteInvoice}
                 document={pdfUrl} />
             {/* Modal pour demander au user s'il veut envoyer la Facture au TTN */}
             <SendToTTNModal
@@ -231,6 +233,7 @@ export function CreateCreditNote() {
                                                                             [index]: false,
                                                                         }));
                                                                         updateItem(field.idInvoiceItem!, {
+                                                                            idInvoiceItem: filteredItem.idInvoiceItem,
                                                                             description: filteredItem.description,
                                                                             quantity: filteredItem.quantity,
                                                                             unityPriceEXclTax: filteredItem.unityPriceEXclTax,

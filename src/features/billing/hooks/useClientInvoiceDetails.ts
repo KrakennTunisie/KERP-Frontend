@@ -63,6 +63,7 @@ export default function useClientInvoiceDetails ({invoiceId}:InvoiceDetailsProps
       setLoading(true)
       const invoice = await InvoicesAPI.getClientInvoiceById(invoiceId);
       setInvoice(invoice);
+      setHasCreditInvoice(invoice?.hasInvoiceCreditNotes ?? false)
     } catch (error) {
       appToast.error("Erreur Fetch du client:",getApiErrorMessage(error));
     }

@@ -6,8 +6,8 @@ import { Eye,  Paperclip } from "lucide-react";
 
 type DocumentItemProps = {
   label: string;
-  document?: Document | undefined;
-  onOpen: (document: Document) => void;
+  document: Document | File | null;
+  onOpen: (document: Document | File) => void;
 };
 
 
@@ -60,7 +60,9 @@ export default function DocumentItem({
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap">
             <p className="text-sm font-black text-gray-900 truncate">
-              {document.fileName}
+              {document instanceof File
+                  ? document.name
+                  : document?.fileName}
             </p>
 
             <span

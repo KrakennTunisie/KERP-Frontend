@@ -32,11 +32,11 @@ export const INVOICES_ENDPOINTS={
 }
 
 export const INVOICES_CREDIT_NOTE_ENDPOINTS={
-  invoiceCreditNotes: "/credit-note-invoices",
+  invoiceCreditNotes: "/credit-note-invoices/",
   nextNumber: "/credit-note-invoices/next-number",
 
   //getInvoiceCreditNotes: (query? : GetPartnersParams)=> `/credit-note-invoices/invoice/${buildQueryString(query)}`,
-  getInvoiceCreditNotes: (id : string)=> `/credit-note-invoices/invoice/${id}`,
+  getInvoiceCreditNotes: (id : string, query?:GetPartnersParams)=> `/credit-note-invoices/invoice/${id}${buildQueryString(query)}`,
   invoiceCreditNoteById: (id?: string) => `/credit-note-invoices/${id}`,
   updateStatusInvoiceCreditNote: (id: string)=> `/credit-note-invoices/${id}/status`,
 }

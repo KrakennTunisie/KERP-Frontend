@@ -26,8 +26,8 @@ const baseInvoiceSchema = z.object({
   exchangeRateReferenceDate: z.date(),
   appliedExchangeRate: z.number(),
   exchangeRateSource: exchangeRateSourceSchema,
-  totalExclTax: z.number(),
-  totalInclTax: z.number(),
+  totalExclTax: z.number().optional(),
+  totalInclTax: z.number().optional(),
   purchaseOrder: purchaseOrderSchema.nullable(),
   invoiceItems: z
     .array(invoiceItemSchema)
@@ -83,7 +83,7 @@ const invoiceObjectSchema = baseInvoiceSchema.extend({
   creationDate: z.date().nullable(),
   invoiceStatus: invoiceStatusSchema,
   invoiceComplianceStatus: invoiceComplianceStatusSchema.nullable(),
-  complianceQRcode: z.string(),
+  complianceQRcode: z.string().nullable(),
   partner: z.lazy(() => partnerSchema).nullable(),
 });
 
@@ -95,6 +95,7 @@ export const invoiceSchema = withDueDateValidation(
    totalExclTaxTND: z.number(),
    totalInclTaxTND: z.number(),
    invoiceEvents: z.array(z.lazy(()=> InvoiceEventSchema)).optional(),
+   hasInvoiceCreditNotes: z.boolean().nullable(),
   })
 );
 
@@ -156,6 +157,23 @@ export const invoiceUpdateSchema = withDueDateValidation(
     idInvoice: z.string()
   })
 );
+
+
+export const invoiceSummarySchema = z.object({
+  "idInvoice": z.string(),
+  "invoiceNumber": z.string(),
+  "issueDate": z.date(),
+  "invoiceType": invoiceTypeSchema,
+  "invoiceStatus": invoiceStatusSchema,
+  "invoiceComplianceStatus":invoiceComplianceStatusSchema,
+  "invoiceCurrency": currencyTypeSchema,
+  "totalExclTaxEUR": z.number(),
+  "totalInclTaxEUR": z.number(),
+  "totalExclTaxTND": z.number(),
+  "totalInclTaxTND": z.number()
+})
+
+
 
 export type Invoice = z.infer<typeof invoiceSchema>;
 export type InvoicePageItem = z.infer<typeof invoicePageItemSchema>;
