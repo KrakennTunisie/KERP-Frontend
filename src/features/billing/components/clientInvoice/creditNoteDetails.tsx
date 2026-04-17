@@ -10,6 +10,7 @@ import { InvoiceEventLabels } from "../../types/invoiceEventType";
 import { OperationCategoryLabels } from "../../types/operationCategory";
 import { invoiceStatusSchema } from "../../types/invoiceStatus";
 import { DocumentPreviewModal } from "@/shared/components/ui/documentPreviewModal";
+import { creditNoteTypeLabels } from "../../types/creditNoteType";
 
 export default function CreditNoteDetails({params}:PropsCreditNote)
 {
@@ -109,7 +110,9 @@ export default function CreditNoteDetails({params}:PropsCreditNote)
                                   </div>
                                   <div key="Méthode de paiement">
                                       <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">N° Facture originale</p>
-                                      <p className="text-sm font-bold text-gray-900"></p>
+                                      <p className="text-sm font-bold text-gray-900">
+                                        {invoice?.invoice.invoiceNumber}
+                                      </p>
                                   </div>
                                   <div key="Devise">
                                       <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">N° Bon du commande</p>
@@ -119,15 +122,21 @@ export default function CreditNoteDetails({params}:PropsCreditNote)
                               <div className="grid grid-cols-3 gap-3">
                                   <div key="Bon du commande">
                                       <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">{"Montant à remboursser"}</p>
-                                      <p className="text-sm font-bold text-gray-900"></p>
+                                      <p className="text-sm font-bold text-gray-900">
+                                        {invoice?.invoice.invoiceCurrency == "EUR" 
+                                                                            ? invoice.totalInclTaxEUR + " EUR"
+                                                                            : invoice?.invoice.invoiceCurrency =="TND" 
+                                                                                ? invoice.totalInclTaxTND +" TND" 
+                                                                                :invoice?.totalInclTax}
+                                      </p>
                                   </div>
                                   <div key="Méthode de paiement">
                                       <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">{"Motif de l'avoir"}</p>
-                                      <p className="text-sm font-bold text-gray-900"></p>
+                                      <p className="text-sm font-bold text-gray-900">{invoice?.motif}</p>
                                   </div>
                                   <div key="Devise">
                                       <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Devise</p>
-                                      <p className="text-sm font-semibold text-gray-700">TND</p>
+                                      <p className="text-sm font-semibold text-gray-700">{invoice?.invoice.invoiceCurrency}</p>
                                   </div>
                               </div>
                           <div className="flex justify-end ">
@@ -177,7 +186,7 @@ export default function CreditNoteDetails({params}:PropsCreditNote)
                                   >
                                       <div>
                                           <p className="text-sm font-semibold text-gray-900">{item.invoiceItem.description}</p>
-                                          <p className="text-xs text-gray-400 mt-0.5">{item.invoiceItem.vatRate}</p>
+                                          <p className="text-xs text-gray-400 mt-0.5">{item.invoiceItem.vatRate+" %"}</p>
                                           <p className="text-xs text-gray-400 mt-0.5">{OperationCategoryLabels[item.invoiceItem.operationCategory]}</p>
                                       </div>
                                       <p className="text-sm text-gray-700 text-right">{item.quantity}</p>
@@ -189,9 +198,17 @@ export default function CreditNoteDetails({params}:PropsCreditNote)
   
                           <div className="mt-4 flex flex-col items-end gap-2">
                               {[
-                                  { label: 'Sous-total HT', value: '15 500 TND' },
-                                  { label: 'Total TVA', value: '2 945 TND' },
-                              ].map(({ label, value }) => (
+                                { label: 'Sous-total HT', value: invoice?.invoice.invoiceCurrency == "EUR" 
+                                                                            ? invoice.totalExclTaxEUR 
+                                                                            : invoice?.invoice.invoiceCurrency =="TND" 
+                                                                                ? invoice.totalExclTaxTND
+                                                                                :invoice?.totalInclTax},
+                                { label: 'Total TVA', value: invoice?.invoice.invoiceCurrency == "EUR" 
+                                                                            ? (invoice.totalInclTaxEUR - invoice.totalExclTaxEUR).toFixed(2)
+                                                                            : invoice?.invoice.invoiceCurrency =="TND" 
+                                                                                ? (invoice.totalInclTaxTND - invoice.totalExclTaxTND).toFixed(2)
+                                                                                :invoice?.totalInclTax},
+                            ].map(({ label, value }) => (
                                   <div key={label} className="flex justify-between w-64">
                                       <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">{label}</span>
                                       <span className="text-sm font-semibold text-gray-900">{value}</span>
@@ -200,7 +217,12 @@ export default function CreditNoteDetails({params}:PropsCreditNote)
                               <div className="w-64 h-px bg-gray-200 my-1" />
                               <div className="flex justify-between w-64 items-center">
                                   <span className="text-[10px] font-bold uppercase tracking-widest text-gray-700">Total TTC</span>
-                                  <span className="text-2xl font-extrabold text-red-600 tracking-tight">{invoice?.totalInclTax}{" "}</span>
+                                  <span className="text-2xl font-extrabold text-red-600 tracking-tight">
+                                    {invoice?.invoice.invoiceCurrency == "EUR" 
+                                                                            ? invoice.totalInclTaxEUR + " EUR"
+                                                                            : invoice?.invoice.invoiceCurrency =="TND" 
+                                                                                ? invoice.totalInclTaxTND +" TND" 
+                                                                                :invoice?.totalInclTax}</span>
                               </div>
                           </div>
                       </Card>
@@ -285,7 +307,7 @@ export default function CreditNoteDetails({params}:PropsCreditNote)
                                       <div className="w-2.5 h-2.5 rounded-full bg-red-200 shrink-0 mt-1 z-10" />
                                       <div>
                                           <p className="text-sm font-semibold leading-snug text-black">
-                                              {InvoiceEventLabels[event?.invoiceEventType ] ?? "créé"}
+                                              {InvoiceEventLabels[event?.invoiceCreditNoteEventType ] ?? "créé"}
                                           </p>
                                           <p className="text-[11px] font-semibold text-gray-400 mt-0.5">
                                               {event.eventDate.toLocaleString()} - {event.eventTrigger}

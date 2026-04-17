@@ -42,7 +42,7 @@ export default function CreditNoteList({ params }: PropsClient) {
                             {"Factures d'avoir"}
                         </h1>
                         <p className="text-sm text-slate-500 mt-1">
-                         {"Référence de la facture origianle :"} {params.invoiceId}
+                         {"Référence de la facture origianle :"} {creditNotes[0]?.invoice?.invoiceNumber ?? ""}
                         </p>
                     </div>
                 </div>
@@ -142,14 +142,18 @@ export default function CreditNoteList({ params }: PropsClient) {
                                     <td className="px-5 py-4">
                                         <span className={`px-3 py-1 rounded-full text-xs font-bold ${f.invoiceCreditNoteStatus !== "ALL" ? invoiceStatusColors[f.invoiceCreditNoteStatus] : ""
                                             }}`}>
-                                            {f.invoiceCreditNoteStatus}
+                                            {invoiceStatusLabels[f.invoiceCreditNoteStatus]}
                                         </span>
                                     </td>
                                     <td className="px-5 py-4 text-slate-700 font-medium">
                                         {creditNoteTypeLabels[f.motif]}
                                     </td>
                                     <td className="text-red-500 font-bold">
-                                        - {f.total} {f.invoice.invoiceCurrency}
+                                        - {f?.invoice.invoiceCurrency == "EUR" 
+                                                                            ? f.totalInclTaxEUR + " EUR"
+                                                                            : f?.invoice.invoiceCurrency =="TND" 
+                                                                                ? f.totalInclTaxTND +" TND" 
+                                                                                :f?.total} {f.invoice.invoiceCurrency}
                                     </td>
                                     <td className="px-5 py-4 text-slate-600">{f.issueDate?.toLocaleString("fr-FR")}</td>
                                     <td className="px-5 py-4 text-center">

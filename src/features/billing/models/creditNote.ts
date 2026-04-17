@@ -7,7 +7,7 @@ import { invoiceComplianceStatusSchema } from "../types/invoiceComplianceStatus"
 import { fileSchema } from "../types/pdfSchema";
 import { uuid4 } from "node_modules/zod/v4/core/regexes.cjs";
 import { _uuidv4 } from "node_modules/zod/v4/core/api.cjs";
-import { InvoiceEventSchema } from "./invoiceEvent";
+import { InvoiceCreditNoteEventSchema, InvoiceEventSchema } from "./invoiceEvent";
 import { documentSchema } from "./document";
 
 const baseInvoiceCreditNoteItemSchema= z.object({
@@ -34,9 +34,13 @@ const detailsInvoiceCreditNoteItemSchema = z.object({
   totalExclTax: z.number(),
   totalInclTax: z.number(),
   vatAmount: z.number(),
-  invoice: invoiceSchema,
-  invoiceCreditNoteEvents: z.array(InvoiceEventSchema).nullable(),
+  invoice: invoiceSummarySchema,
+  invoiceCreditNoteEvents: z.array(InvoiceCreditNoteEventSchema).nullable(),
   invoiceCreditNoteDocument: documentSchema,
+  totalExclTaxEUR: z.number(),
+  totalInclTaxEUR: z.number(),
+  totalExclTaxTND: z.number(),
+  totalInclTaxTND: z.number()
 })
 
 /**
@@ -106,6 +110,10 @@ export const invoiceCreditNotePageItemSchema = z.object({
   invoiceCreditNoteComplianceStatus: invoiceComplianceStatusSchema.nullable(),
   motif: CreditNoteTypeSchema,
   total: z.number(),
+  totalExclTaxEUR: z.number(),
+  totalInclTaxEUR: z.number(),
+  totalExclTaxTND: z.number(),
+  totalInclTaxTND: z.number(),
   invoice: invoiceSummarySchema
 });
 

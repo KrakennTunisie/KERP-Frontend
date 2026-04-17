@@ -160,17 +160,17 @@ export const invoiceUpdateSchema = withDueDateValidation(
 
 
 export const invoiceSummarySchema = z.object({
-  "idInvoice": z.string(),
-  "invoiceNumber": z.string(),
-  "issueDate": z.date(),
-  "invoiceType": invoiceTypeSchema,
-  "invoiceStatus": invoiceStatusSchema,
-  "invoiceComplianceStatus":invoiceComplianceStatusSchema,
-  "invoiceCurrency": currencyTypeSchema,
-  "totalExclTaxEUR": z.number(),
-  "totalInclTaxEUR": z.number(),
-  "totalExclTaxTND": z.number(),
-  "totalInclTaxTND": z.number()
+  idInvoice: z.string(),
+  invoiceNumber: z.string(),
+  issueDate: z.date(),
+  invoiceType: invoiceTypeSchema,
+  invoiceStatus: invoiceStatusSchema,
+  invoiceComplianceStatus:invoiceComplianceStatusSchema,
+  invoiceCurrency: currencyTypeSchema,
+  totalExclTaxEUR: z.number(),
+  totalInclTaxEUR: z.number(),
+  totalExclTaxTND: z.number(),
+  totalInclTaxTND: z.number()
 })
 
 
