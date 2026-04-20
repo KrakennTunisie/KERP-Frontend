@@ -1,11 +1,12 @@
 // src/features/billing/api/partners.api.ts
-import { apiClient } from "@/shared/api/api-client";
+import { apiClient, RequestBody } from "@/shared/api/api-client";
 import { BILLING_ENDPOINTS, INVOICES_CREDIT_NOTE_ENDPOINTS, INVOICES_ENDPOINTS, PURCHASE_ORDER_ENDPOINTS } from "@/shared/api/endpoints";
 import { ClientPartner, ClientPartnerItem, CreateClientPartner, CreateSupplierPartner, PartnerSummary, SupplierPartner, SupplierPartnerItem, UpdatePartner } from "../models/partner";
 import { GetListParams, PageResponse } from "@/shared/api/types";
 import { nextNumber } from "../types/nextNumber";
 import { Invoice, InvoiceCreate, InvoicePageItem } from "../models/invoice";
-import { InvoiceCreditNote, InvoiceCreditNoteCreate, InvoiceCreditNotePageItem } from "../models/creditNote";
+import { InvoiceCreditNote, InvoiceCreditNoteCreate, InvoiceCreditNoteDetails, InvoiceCreditNotePageItem } from "../models/creditNote";
+import { UpdateInvoiceCreditNoteStatusRequest } from "../types/UpdateInvoiceCreditNoteStatusRequest";
 
 export const partnersApi = {
   getClients: (query? : GetListParams) => 
@@ -62,6 +63,9 @@ export const InvoicesAPI = {
 
   updateClientInvoice : (id: string, payload: FormData) => apiClient.patch<Invoice>(INVOICES_ENDPOINTS.clientsInvoices, payload),
 
+  updateClientInvoiceStatus : 
+  (id: string, payload: FormData) => apiClient.patch<Invoice>(INVOICES_ENDPOINTS.clientInvoiceStatusById(id), payload),
+
   updateSupplierInvoice : (id: string, payload: FormData) => apiClient.patch<Invoice>(INVOICES_ENDPOINTS.suppliersInvoices, payload),
 
   deleteClientInvoice: (id: string) =>
@@ -72,13 +76,13 @@ export const InvoicesAPI = {
 };
 
 export const InvoicesCreditNoteAPI = {
-  getNextInvoiceNumber :()=> apiClient.get(INVOICES_CREDIT_NOTE_ENDPOINTS.nextNumber),
+  getNextInvoiceNumber :()=> apiClient.get<nextNumber>(INVOICES_CREDIT_NOTE_ENDPOINTS.nextNumber),
 
-  getInvoiceCreditNotes: (id : string) => 
-    apiClient.get<PageResponse<InvoiceCreditNotePageItem>>(INVOICES_CREDIT_NOTE_ENDPOINTS.getInvoiceCreditNotes(id)),
+  getInvoiceCreditNotes: (id : string, query?:GetListParams) => 
+    apiClient.get<PageResponse<InvoiceCreditNotePageItem>>(INVOICES_CREDIT_NOTE_ENDPOINTS.getInvoiceCreditNotes(id, query)),
 
   getCreditNoteById: (id: string) =>
-    apiClient.get<InvoiceCreditNote>(INVOICES_CREDIT_NOTE_ENDPOINTS.invoiceCreditNoteById(id)),
+    apiClient.get<InvoiceCreditNoteDetails>(INVOICES_CREDIT_NOTE_ENDPOINTS.invoiceCreditNoteById(id)),
 
   createInvoiceCreditNote: (payload: FormData) =>
     apiClient.post<InvoiceCreditNoteCreate>(INVOICES_CREDIT_NOTE_ENDPOINTS.invoiceCreditNotes, payload),

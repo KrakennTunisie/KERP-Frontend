@@ -15,8 +15,7 @@ type PartnerInfoCardProps = {
   typeLabel: string;
 };
 
-
-type PreviewDocument = Document | File| null;
+type PreviewDocument = Document | File | null;
 
 export default function PartnerInfoCard({
   partner,
@@ -74,19 +73,19 @@ export default function PartnerInfoCard({
           <div className="space-y-4">
             <DocumentItem
               label="RNE"
-              document={partner.rne ?? undefined}
+              document={partner.rne ?? null}
               onOpen={setPreviewDocument}
             />
 
             <DocumentItem
               label="Contrat"
-              document={partner.contract ?? undefined}
+              document={partner.contract ?? null}
               onOpen={setPreviewDocument}
             />
 
             <DocumentItem
               label="Patente"
-              document={partner.patente ?? undefined}
+              document={partner.patente ?? null}
               onOpen={setPreviewDocument}
             />
           </div>

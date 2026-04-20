@@ -121,7 +121,7 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
                             : []),
                         ...(isCredit ? [
                               {label: "Paiement",value: data?.originalInvoice?.paymentCondition? PaymentConditionLabels[data.originalInvoice.paymentCondition]: "—",},
-                            { label: "Mode", value:data?.originalInvoice!.paymentMethod ? paymentMethodLabels[data.originalInvoice.paymentMethod] : "—" }] :
+                            { label: "Mode", value:data?.originalInvoice?.paymentMethod ? paymentMethodLabels[data.originalInvoice.paymentMethod] : "—" }] :
                             [{ label: "Paiement", value: PaymentConditionLabels[data!.paymentCondition!] ?? "—" },
                             { label: "Mode", value: paymentMethodLabels[data!.paymentMethod!] ?? "—" },])
 

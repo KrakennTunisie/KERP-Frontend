@@ -2,7 +2,7 @@ import { FileImage, FileText, Paperclip } from "lucide-react";
 import getDocumentType from "./getDocumentType";
 import { Document } from "@/features/billing/models/document";
 
-export default function getDocumentMeta(document: Document) {
+export default function getDocumentMeta(document: Document | File) {
   const documentType = getDocumentType(document);
 
   switch (documentType) {
