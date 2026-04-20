@@ -1,7 +1,7 @@
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react";
-import { InvoiceStatus } from "../types/invoiceStatus";
-import { InvoicePageItem } from "../models/invoice";
+import { InvoiceStatus, invoiceStatusSchema } from "../types/invoiceStatus";
+import { InvoicePageItem, invoiceSchema } from "../models/invoice";
 import { InvoicesAPI } from "../api/partners-api";
 import { useDebounce } from "@/shared/hooks/useDebounce";
 import { appToast } from "@/shared/lib/toast";
@@ -53,7 +53,7 @@ export function useClientInvoiceList () {
 
           const response = await InvoicesAPI.getClientsInvoices({
             keyword: keyword,
-            filter: filtre?.toString(),
+            filter: filtre?.toString() === invoiceStatusSchema.enum.ALL ? "" : filtre?.toString(),
             page: currentPage - 1,
           });
 
