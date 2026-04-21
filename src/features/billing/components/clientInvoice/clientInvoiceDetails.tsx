@@ -4,7 +4,7 @@ import { DocumentPreviewModal } from "@/shared/components/ui/documentPreviewModa
 import useClientInvoiceDetails, { InvoiceDetailsProps } from "../../hooks/useClientInvoiceDetails"
 import { mockInvoiceItems } from "../../mocks/invoice-items-mocks"
 import { InvoiceEventLabels } from "../../types/invoiceEventType"
-import { invoiceStatusSchema } from "../../types/invoiceStatus"
+import { invoiceStatusLabels, invoiceStatusSchema } from "../../types/invoiceStatus"
 import Card from "../widgets/card"
 import { SectionLabel } from "../widgets/sectionLabel"
 import ShieldIcon from "../widgets/shieldIcon"
@@ -28,9 +28,11 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                     </button>
                     <div>
                         <div className="flex items-center gap-2.5">
-                            <span className="text-[22px] font-extrabold tracking-tight text-gray-900">FAC-2025-001</span>
+                            <span className="text-[22px] font-extrabold tracking-tight text-gray-900">{invoice?.invoiceNumber}</span>
                             <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-wide bg-amber-50 text-amber-600 border border-amber-200">
-                                {invoice?.invoiceStatus}
+                                    {invoice?.invoiceStatus
+                                    ? invoiceStatusLabels[invoice.invoiceStatus]
+                                    : '-'}                            
                             </span>
                         </div>
                         <p className="text-xs text-gray-400 mt-0.5">Emise le {invoice?.issueDate.toLocaleString()} · Échéance le {invoice?.dueDate.toLocaleString()}</p>
@@ -105,8 +107,8 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                             {hasCreditInvoice ?
                              <button
                                 onClick={() => router.push(`/billing/invoices/clients/${invoiceId}/credit-note`)}
-                                disabled={invoice?.invoiceStatus == "PAID"}
-                                className="flex items-center justify-center gap-2 py-3.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-600 text-sm font-bold hover:brightness-95 transition-all">
+                                disabled={invoice?.invoiceStatus == invoiceStatusSchema.enum.PAID || invoice?.invoiceStatus == invoiceStatusSchema.enum.DRAFT }
+                                className="flex items-center justify-center gap-2 py-3.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-600 text-sm font-bold hover:brightness-95 transition-all disabled:cursor-not-allowed">
                                 <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                                     <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
                                     <polyline points="14 2 14 8 20 8" />
@@ -116,8 +118,8 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                             </button> :
                             <button
                                 onClick={() => router.push(`/billing/invoices/clients/${invoiceId}/credit-note/create`)}
-                                disabled={invoice?.invoiceStatus == "PAID"}
-                                className="flex items-center justify-center gap-2 py-3.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-600 text-sm font-bold hover:brightness-95 transition-all">
+                                disabled={invoice?.invoiceStatus == invoiceStatusSchema.enum.PAID || invoice?.invoiceStatus == invoiceStatusSchema.enum.DRAFT}
+                                className="flex items-center justify-center gap-2 py-3.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-600 text-sm font-bold hover:brightness-95 transition-all disabled:cursor-not-allowed">
                                 <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                                     <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
                                     <polyline points="14 2 14 8 20 8" />

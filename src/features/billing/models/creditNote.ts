@@ -28,7 +28,7 @@ const detailsInvoiceCreditNoteItemSchema = z.object({
   sentToTTNDate: z.date().nullable(),
   sentToclientDate: z.date().nullable(),
   creationDate: z.date().nullable(),
-  invoiceCreditNoteStatus: invoiceStatusSchema,
+  invoiceCreditNoteStatus: invoiceStatusSchema.nonoptional(),
   invoiceCreditNoteComplianceStatus: invoiceComplianceStatusSchema.nullable(),
   QRCode: z.string(),
   totalExclTax: z.number(),

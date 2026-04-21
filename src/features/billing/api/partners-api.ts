@@ -1,12 +1,13 @@
 // src/features/billing/api/partners.api.ts
 import { apiClient, RequestBody } from "@/shared/api/api-client";
-import { BILLING_ENDPOINTS, INVOICES_CREDIT_NOTE_ENDPOINTS, INVOICES_ENDPOINTS, PURCHASE_ORDER_ENDPOINTS } from "@/shared/api/endpoints";
+import { BILLING_ENDPOINTS, EXCHANGE_RATE_ENDPOINTS, INVOICES_CREDIT_NOTE_ENDPOINTS, INVOICES_ENDPOINTS, PURCHASE_ORDER_ENDPOINTS } from "@/shared/api/endpoints";
 import { ClientPartner, ClientPartnerItem, CreateClientPartner, CreateSupplierPartner, PartnerSummary, SupplierPartner, SupplierPartnerItem, UpdatePartner } from "../models/partner";
-import { GetListParams, PageResponse } from "@/shared/api/types";
+import { ExchangeRateParams,  GetListParams, PageResponse } from "@/shared/api/types";
 import { nextNumber } from "../types/nextNumber";
 import { Invoice, InvoiceCreate, InvoicePageItem } from "../models/invoice";
 import { InvoiceCreditNote, InvoiceCreditNoteCreate, InvoiceCreditNoteDetails, InvoiceCreditNotePageItem } from "../models/creditNote";
 import { UpdateInvoiceCreditNoteStatusRequest } from "../types/UpdateInvoiceCreditNoteStatusRequest";
+import { ExchangeRate } from "../types/exchangeRate";
 
 export const partnersApi = {
   getClients: (query? : GetListParams) => 
@@ -89,6 +90,9 @@ export const InvoicesCreditNoteAPI = {
 
   deleteInvoiceCreditNote: (id: string) =>
     apiClient.delete<void>(INVOICES_CREDIT_NOTE_ENDPOINTS.invoiceCreditNoteById(id)),
+
+  updateInvoiceCreditNoteStatus : 
+  (id: string, payload: FormData) => apiClient.patch<InvoiceCreditNoteDetails>(INVOICES_CREDIT_NOTE_ENDPOINTS.updateStatusInvoiceCreditNote(id), payload),
 };
 
 export const PurchaseOrderAPI = {
@@ -116,4 +120,11 @@ export const PurchaseOrderAPI = {
 
   deletePurchaseOrder: (id: string) =>
     apiClient.delete<void>(PURCHASE_ORDER_ENDPOINTS.purchaseOrderById(id)),
+};
+
+export const ExchangeRateAPI = {
+
+  getExchangeRate: (query? : ExchangeRateParams) => 
+    apiClient.get<ExchangeRate>(EXCHANGE_RATE_ENDPOINTS.getExchangeRate(query)),
+
 };

@@ -10,6 +10,7 @@ export const invoiceStatusSchema = z.enum([
   "CANCELLED",
   "REFUNDED",
   "NOT_REFUNDED",
+  "IN_PROGRESS"
 ]);
 
 export type InvoiceStatus = z.infer<typeof invoiceStatusSchema>;
@@ -26,6 +27,7 @@ export const invoiceStatusLabels: Record<InvoiceStatus, string> = {
   CANCELLED: "ANNULÉE",
   REFUNDED: "REMBOURSÉE",
   NOT_REFUNDED: "NON REMBOURSÉE",
+  IN_PROGRESS: "En cours",
 };
 
 /* ================================
@@ -42,5 +44,6 @@ export const invoiceStatusColors: Record<
   CANCELLED: "bg-red-100 text-red-700 border border-red-200",
   REFUNDED: "bg-emerald-100 text-emerald-700 border border-emerald-200",
   NOT_REFUNDED: "bg-red-100 text-red-700 border border-red-200",
+  IN_PROGRESS: "bg-indigo-100 text-indigo-700 border border-indigo-200",
 };
 
