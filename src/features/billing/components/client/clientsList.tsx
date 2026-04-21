@@ -91,7 +91,7 @@ useEffect(() => {
 
 
   return (
-    <div className="flex-1 flex flex-col min-h-0 bg-gray-50/30">
+    <div className="min-h-screen flex-1 flex flex-col min-h-0 bg-gray-50">
       {/* Header */}
       <header className="bg-white border-b border-gray-100 px-8 py-8">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-6">

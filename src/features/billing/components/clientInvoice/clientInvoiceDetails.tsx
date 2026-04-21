@@ -9,6 +9,7 @@ import Card from "../widgets/card"
 import { SectionLabel } from "../widgets/sectionLabel"
 import ShieldIcon from "../widgets/shieldIcon"
 import { SendToTTNModal } from "../widgets/ttnConfirmationModal"
+import { paymentMethodLabels } from "../../types/paymentMethod"
 
 export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps) {
     const {  setStatusPaiement, client, invoice, previewDocument, setPreviewDocument, sendToTTN, TtnModalOpen, setTtnModalOpen,
@@ -177,13 +178,14 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                             <SectionLabel>Détails administratifs</SectionLabel>
                             <div className="grid grid-cols-2 gap-3">
 
+                               {invoice?.purchaseOrder &&
                                 <div key="Bon du commande">
                                     <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Bon du commande</p>
-                                    <p className="text-sm font-bold text-gray-900"></p>
-                                </div>
+                                    <p className="text-sm font-bold text-gray-900">{invoice.purchaseOrder.idPurchaseOrder}</p>
+                                </div>}
                                 <div key="Méthode de paiement">
                                     <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Méthode de paiement</p>
-                                    <p className="text-sm font-bold text-gray-900">{invoice?.paymentMethod}</p>
+                                    <p className="text-sm font-bold text-gray-900">{invoice?.paymentMethod ? paymentMethodLabels[invoice.paymentMethod] : '-'}</p>
                                 </div>
                                 <div key="Devise">
                                     <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Devise</p>
