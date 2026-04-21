@@ -115,9 +115,9 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
                         ...(isCredit
                             ? [{ label: "Réf. facture", value: data.originalInvoice?.invoiceNumber ?? "—" }]
                             : []),
-                        { label: "Date d'émission", value: data.issueDate?.toLocaleDateString() },
+                        { label: "Date d'émission", value: data.issueDate ? new Date(data.issueDate).toLocaleDateString("fr-FR") : "-"},
                         ...(!isCredit
-                            ? [{ label: "Échéance", value: data.dueDate?.toLocaleDateString() }]
+                            ? [{ label: "Échéance", value: data.dueDate ? new Date(data.dueDate).toLocaleDateString("fr-FR") : "-" }]
                             : []),
                         ...(isCredit ? [
                               {label: "Paiement",value: data?.originalInvoice?.paymentCondition? PaymentConditionLabels[data.originalInvoice.paymentCondition]: "—",},

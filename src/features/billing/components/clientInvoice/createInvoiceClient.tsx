@@ -13,12 +13,13 @@ import { DocumentPreviewModal } from "@/shared/components/ui/documentPreviewModa
 import ErrorForm from "../widgets/errorForm"
 import { SendToTTNModal } from "../widgets/ttnConfirmationModal"
 import { mockPurchaseOrders } from "../../mocks/purchase-order-mocks"
+import { Controller } from "react-hook-form"
 
 export default function CreateInvoiceClient({ mode,
     invoiceId, }: InvoiceFormClientProps) {
-    const { addItem, removeItem, updateItem, clientSearch, setClientSearch, showDropdown, setShowDropdown, invoiceRef, pdfUrl, canCreateInvoice, errors,TtnModalOpen,setTtnModalOpen,sent,successMessage,
-        linkedToPO,selectedPO, handleSelectPO,setLinkedToPO, handleTogglePO,selectClient, clearClient, updateInvoice, clients, setCurrency, previewData, form, onSubmit, isModalOpen, router, calculateDueDate, onCloseDocumentModal,createInvoice,sendToTTN,loading
-    } = useCreateInvoice({ mode, invoiceId })    
+    const { addItem, removeItem, updateItem, clientSearch, setClientSearch, showDropdown, setShowDropdown, invoiceRef, pdfUrl, canCreateInvoice, errors, TtnModalOpen, setTtnModalOpen, sent, successMessage,
+        linkedToPO, selectedPO, handleSelectPO, setLinkedToPO, handleTogglePO, selectClient, clearClient, updateInvoice, clients, setCurrency, previewData, form, onSubmit, isModalOpen, router, calculateDueDate, onCloseDocumentModal, createInvoice, sendToTTN, loading
+    } = useCreateInvoice({ mode, invoiceId })
 
     const { register } = form
 
@@ -70,7 +71,7 @@ export default function CreateInvoiceClient({ mode,
             <DocumentPreviewModal
                 open={isModalOpen}
                 onClose={onCloseDocumentModal}
-                onCreateInvoice={mode=="create"? createInvoice: updateInvoice}
+                onCreateInvoice={mode == "create" ? createInvoice : updateInvoice}
                 document={pdfUrl} />
             {/* Modal pour demander au user s'il veut envoyer la Facture au TTN */}
             <SendToTTNModal
@@ -114,20 +115,21 @@ export default function CreateInvoiceClient({ mode,
                                     <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
                                         Émission
                                     </label>
-                                    <input
-                                        type="date"
-                                        {...register("issueDate")}
-                                        value={
-                                            form.watch("issueDate")
-                                                ? new Date(form.watch("issueDate")).toISOString().split("T")[0]
-                                                : ""
-                                        }
-                                        onChange={(e) => {
-                                            form.setValue("issueDate", new Date(e.target.value));
-                                            calculateDueDate();
-                                        }}
-                                        min={new Date().toISOString().split("T")[0]}
-                                        className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
+                                    <Controller
+                                        control={form.control}
+                                        name="issueDate"
+                                        render={({ field }) => (
+                                            <input
+                                                type="date"
+                                                value={field.value ? new Date(field.value).toISOString().split("T")[0] : ""}
+                                                onChange={(e) => {
+                                                    field.onChange(new Date(e.target.value)); // ← Date object
+                                                    calculateDueDate();
+                                                }}
+                                                min={new Date().toISOString().split("T")[0]}
+                                                className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
+                                            />
+                                        )}
                                     />
                                 </div>
 
@@ -245,8 +247,8 @@ export default function CreateInvoiceClient({ mode,
                                     </svg>
                                 </div>
                                 {showDropdown && clients.length > 0 && (
-                                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-20 max-h-48 overflow-y-auto">                                        
-                                    {clients.map((client) => (
+                                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-20 max-h-48 overflow-y-auto">
+                                        {clients.map((client) => (
                                             <button
                                                 key={client.idPartner}
                                                 type="button"
