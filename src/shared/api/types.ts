@@ -11,3 +11,14 @@ export type GetListParams = {
   filter?: string;
   page?: number;
 };
+
+
+export type ExchangeRateParams = {
+  fromCurrency: string,
+  toCurrency : string,
+}
+
+export const defaultExchangeRateParams: ExchangeRateParams = {
+  fromCurrency: "TND",
+  toCurrency: "EUR",
+};

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Partner } from "../models/partner";
 import { InvoiceItem } from "../models/invoiceItem";
 import { Invoice } from "../models/invoice";
-import { invoiceStatusSchema } from "../types/invoiceStatus";
+import { InvoiceStatus, invoiceStatusSchema } from "../types/invoiceStatus";
 import { InvoicesCreditNoteAPI } from "../api/partners-api";
 import { InvoiceCreditNote, InvoiceCreditNoteDetails } from "../models/creditNote";
 import { appToast } from "@/shared/lib/toast";
@@ -40,6 +40,22 @@ export default function useCreditNoteDetails({ params }: PropsCreditNote) {
       setLoading(false)
     }
   };
+
+  const updateStatus = async (status : InvoiceStatus)=>{
+        try {
+        setLoading(true)
+        const formData = new FormData();
+          
+        formData.append("status",  status);
+        const invoice = await InvoicesCreditNoteAPI.updateInvoiceCreditNoteStatus(creditNoteId, formData);
+        setInvoice(invoice);
+      } catch (error) {
+        appToast.error("Erreur Fetch du client:",getApiErrorMessage(error));
+      }
+      finally{
+        setLoading(false)
+      }
+  }
 
 
   useEffect(() => {
@@ -82,6 +98,7 @@ export default function useCreditNoteDetails({ params }: PropsCreditNote) {
         router,
         sendToTTN,
         setStatusPaiement,
+        updateStatus,
 previewDocument, setPreviewDocument,
     })
 }

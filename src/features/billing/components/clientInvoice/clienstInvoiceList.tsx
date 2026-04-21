@@ -114,7 +114,7 @@ export default function ClientsInvoiceList() {
                     </div>
                     <div className="flex gap-2">
                         {invoiceStatusSchema.options
-                        .filter(f => f !== invoiceStatusSchema.enum.REFUNDED && f !== invoiceStatusSchema.enum.NOT_REFUNDED)
+                        .filter(f => f !== invoiceStatusSchema.enum.REFUNDED && f !== invoiceStatusSchema.enum.NOT_REFUNDED && f!== invoiceStatusSchema.enum.IN_PROGRESS)
                         .map((f) => (
                             <button
                                 key={f}
@@ -164,9 +164,9 @@ export default function ClientsInvoiceList() {
                                 </td>
                             </tr>
                         ) : (
-                            clientsInvoices.map((f) => (
+                            clientsInvoices.map((f, index) => (
                                 <tr
-                                    key={1}
+                                    key={index}
                                     className="border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer"
                                 >
                                     <td className="px-5 py-4 font-bold text-slate-800">

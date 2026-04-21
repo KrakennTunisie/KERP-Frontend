@@ -133,7 +133,7 @@ export default function CreditNoteList({ params }: PropsClient) {
                             creditNotes.map((f) => (
                                 <tr
                                     key={1}
-                                    className="border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer"
+                                    className="border-b border-slate-50 hover:bg-slate-50 transition-colors"
                                 >
                                     <td className="px-5 py-4 font-bold text-slate-800">
                                         {f.invoiceCreditNoteNumber}
@@ -193,7 +193,7 @@ export default function CreditNoteList({ params }: PropsClient) {
                                                     invoiceComplianceStatusSchema.enum.TTN_SUBMITTED
                                                 ] as string[]).includes(f.invoiceCreditNoteComplianceStatus!)}
                                                 onClick={(e) => { setOpen(true);  console.log("send", f.invoiceCreditNoteNumber); }}
-                                                className="p-2 rounded-xl bg-green-50 text-green-600 hover:bg-green-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                className="p-2 rounded-xl bg-green-50 text-green-600 hover:bg-green-100 transition-colors  cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                                                 title="Envoyer"
                                             >
                                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -204,7 +204,7 @@ export default function CreditNoteList({ params }: PropsClient) {
                                             <button
                                                // disabled={/* f.invoiceCreditNoteComplianceStatus != null */}
                                                 onClick={(e) => { deleteCreditNote(f.invoiceCreditNoteNumber); setDeleteId(f.idInvoiceCreditNote) }}
-                                                className="p-2 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                className="p-2 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 transition-colors disabled:opacity-50  cursor-pointer disabled:cursor-not-allowed"
                                                 title="Supprimer"
                                             >
                                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
