@@ -49,9 +49,8 @@ export const mockPurchaseOrders: PurchaseOrder[] = [
     idPurchaseOrder: "PO-2024-003",
     purchaseOrderNumber: "BC-2024-0044",
     issueDate: new Date("2024-05-20"),
-
-    Status: purchaseOrderStatusSchema.enum.CLOSED,
-    currency: "DOLLAR",
+    Status: "CLOTURÉ",
+    currency: "USD",
     totalExclTax: 25000.00,
     totalInclTax: 29750.00,
     vatAmount: 4750.00,

@@ -1,13 +1,16 @@
 'use client';
 
 import StatClientInvoiceCard from "@/shared/components/ui/statClientInvoiceCard";
-import { invoiceStatusColors, invoiceStatusLabels, invoiceStatusSchema } from "../../types/invoiceStatus";
+import {  getClientInvoiceAllowedNextStatuses, invoiceStatusColors, invoiceStatusLabels, invoiceStatusSchema } from "../../types/invoiceStatus";
 import Link from "next/link";
 import { useClientInvoiceList } from "../../hooks/useClientsInvoiveList";
 import { SendInvoiceModal } from "../widgets/sendInvoiceModal";
 import { invoiceComplianceStatusSchema } from "../../types/invoiceComplianceStatus";
 import { DeleteInvoiceModal } from "../widgets/deleteInvoiceModal";
 import PageLoader from "@/shared/components/ui/pageLoader";
+import { ChevronLeft, ChevronRight, ColumnsSettingsIcon, LucideSettings, Settings, Settings2, Settings2Icon } from "lucide-react";
+import { formatDateLong } from "@/shared/utils/formatDate";
+import { UpdateInvoiceStatusModal } from "../widgets/updateStatusModal";
 
 export default function ClientsInvoiceList() {
 
@@ -18,9 +21,15 @@ export default function ClientsInvoiceList() {
         totalElements,
         totalPages,
         deleteLoading,
-        deleteId,
-        setDeleteId,
+        invoiceId,
+        setInvoiceId,
         deleteClientInvoice,
+        setUpdateOpen,
+        updateOpen,
+        updateLoading,
+        updateStatus,
+        selectedInvoice, setSelectedInvoice,
+        nextStatus, setNextStatus,
         loading } = useClientInvoiceList();
     return (
         <div className="min-h-screen bg-gray-50 p-8 font-sans">
@@ -114,7 +123,7 @@ export default function ClientsInvoiceList() {
                     </div>
                     <div className="flex gap-2">
                         {invoiceStatusSchema.options
-                        .filter(f => f !== invoiceStatusSchema.enum.REFUNDED && f !== invoiceStatusSchema.enum.NOT_REFUNDED)
+                        .filter(f => f !== invoiceStatusSchema.enum.REFUNDED && f !== invoiceStatusSchema.enum.NOT_REFUNDED && f!== invoiceStatusSchema.enum.IN_PROGRESS)
                         .map((f) => (
                             <button
                                 key={f}
@@ -164,9 +173,9 @@ export default function ClientsInvoiceList() {
                                 </td>
                             </tr>
                         ) : (
-                            clientsInvoices.map((f) => (
+                            clientsInvoices.map((f, index) => (
                                 <tr
-                                    key={1}
+                                    key={index}
                                     className="border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer"
                                 >
                                     <td className="px-5 py-4 font-bold text-slate-800">
@@ -184,11 +193,11 @@ export default function ClientsInvoiceList() {
                                             ? f.totalExclTaxEUR?.toLocaleString("fr-FR")+" €"
                                             : f.invoiceCurrency=="TND"
                                                 ? f.totalInclTaxTND.toLocaleString("fr-FR")+" TND"
-                                                : f.totalInclTaxTND+" $"} 
+                                                : f.totalInclTaxUSD+" $"} 
                                     </td>
 
                                     <td className="px-5 py-4 text-slate-700">{f.appliedExchangeRate}</td>
-                                    <td className="px-5 py-4 text-slate-600">{f.dueDate?.toLocaleString()}</td>
+                                    <td className="px-5 py-4 text-slate-600">{formatDateLong(f?.dueDate)}</td>
                                     <td className="px-5 py-4 text-center">
                                         {f.invoiceComplianceStatus == invoiceComplianceStatusSchema.enum.TTN_ACCEPTED ? (
                                             <svg className="w-5 h-5 text-emerald-500 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -217,8 +226,9 @@ export default function ClientsInvoiceList() {
 
                                             {/* Modifier */}
                                             <button
+                                                disabled={getClientInvoiceAllowedNextStatuses(f.invoiceStatus).length === 0}
                                                 onClick={(e) => { e.stopPropagation(); console.log("edit", f.idInvoice); router.push(`/billing/invoices/clients/${f.idInvoice}/edit`); }}
-                                                className="p-2 rounded-xl bg-amber-50 text-amber-600 hover:bg-amber-100 transition-colors"
+                                                className="p-2 rounded-xl bg-amber-50 text-amber-600 hover:bg-amber-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                                 title="Modifier"
                                             >
                                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -226,15 +236,15 @@ export default function ClientsInvoiceList() {
                                                 </svg>
                                             </button>
                                             <button
-                                                disabled={([
-                                                    invoiceComplianceStatusSchema.enum.RECEIVED,
-                                                    invoiceComplianceStatusSchema.enum.COMPLETED,
-                                                    invoiceComplianceStatusSchema.enum.SIGNING_PENDING,
-                                                    invoiceComplianceStatusSchema.enum.SIGNING_SUCCEEDED,
-                                                    invoiceComplianceStatusSchema.enum.TTN_ACCEPTED,
-                                                    //invoiceComplianceStatusSchema.enum.TTN_PENDING,
-                                                    invoiceComplianceStatusSchema.enum.TTN_SUBMITTED
-                                                ]as string[]).includes(f.invoiceComplianceStatus!)}
+                                                onClick={(e) => {setSelectedInvoice(f); setInvoiceId(f.idInvoice); setUpdateOpen(true)}}
+                                                disabled={getClientInvoiceAllowedNextStatuses(f.invoiceStatus).length === 0}
+                                                className="p-2 rounded-xl bg-violet-50 text-violet-600 hover:bg-violet-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                title="Mettre à jour le statut"
+                                                >
+                                                <Settings className="w-4 h-4"/>
+                                            </button>
+                                            <button
+                                                disabled={getClientInvoiceAllowedNextStatuses(f.invoiceStatus).length === 0}
                                                 onClick={() => { setOpen(true); console.log("send", f.idInvoice); }}
                                                 className="p-2 rounded-xl bg-green-50 text-green-600 hover:bg-green-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                                 title="Envoyer"
@@ -246,8 +256,8 @@ export default function ClientsInvoiceList() {
 
                                             {/* Supprimer */}
                                             <button
-                                               // disabled={f.invoiceComplianceStatus != null}
-                                                onClick={(e) => { setDeleteOpen(true); setInvoiceRef(f.invoiceNumber); setDeleteId(f.idInvoice); console.log("delete", f.idInvoice); }}
+                                                disabled={getClientInvoiceAllowedNextStatuses(f.invoiceStatus).length === 0}
+                                                onClick={(e) => { setDeleteOpen(true); setInvoiceRef(f.invoiceNumber); setInvoiceId(f.idInvoice); console.log("delete", f.idInvoice); }}
                                                 className="p-2 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                                 title="Supprimer"
                                             >
@@ -264,7 +274,69 @@ export default function ClientsInvoiceList() {
                     </tbody>
                 </table>
             </div>
+            { totalPages > 0 && (
+                <div className="px-8 py-8 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                    <button
+                    onClick={() => setCurrentPage(currentPage - 1)}
+                    disabled={currentPage === 1 || loading}
+                    className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-xl hover:bg-gray-50 disabled:opacity-30 transition-all shadow-sm"
+                    >
+                    <ChevronLeft className="w-4 h-4 text-gray-900" />
+                    </button>
 
+                    <div className="flex items-center gap-1">
+                    {Array.from({ length: totalPages }).map((_, i) => {
+                        const page = i + 1;
+
+                        return (
+                        <button
+                            key={page}
+                            onClick={() => setCurrentPage(page)}
+                            disabled={loading}
+                            className={`w-10 h-10 rounded-xl font-black text-xs transition-all ${
+                            currentPage === page
+                                ? "bg-gray-900 text-white shadow-lg"
+                                : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50"
+                            } disabled:opacity-50`}
+                        >
+                            {page}
+                        </button>
+                        );
+                    })}
+                    </div>
+
+                    <button
+                    onClick={() => setCurrentPage(currentPage + 1)}
+                    disabled={currentPage === totalPages || loading}
+                    className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-xl hover:bg-gray-50 disabled:opacity-30 transition-all shadow-sm"
+                    >
+                    <ChevronRight className="w-4 h-4 text-gray-900" />
+                    </button>
+                </div>
+
+                {totalElements > 0 && (
+                    <p className="text-xs font-bold text-gray-500">
+                    {totalElements +" Facture"}
+                    </p>
+                )}
+                </div>
+            )}
+                <UpdateInvoiceStatusModal
+                open={updateOpen}
+                onClose={()=> setUpdateOpen(false)}
+                onConfirm={updateStatus}
+                invoiceNumber={selectedInvoice?.invoiceNumber}
+                currentStatus={selectedInvoice?.invoiceStatus}
+                nextStatus={nextStatus}
+                onNextStatusChange={setNextStatus}
+                allowedStatuses={
+                    selectedInvoice
+                    ? getClientInvoiceAllowedNextStatuses(selectedInvoice.invoiceStatus)
+                    : []
+                }
+                isSubmitting={updateLoading}
+                />
         </div>
 
     );

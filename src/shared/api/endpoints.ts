@@ -1,5 +1,5 @@
 import { buildQueryString } from "./query-string-builder";
-import { GetListParams } from "./types";
+import {  ExchangeRateParams, GetListParams } from "./types";
 
 export const BILLING_ENDPOINTS = {
   clients: "/partners/clients",
@@ -52,4 +52,10 @@ export const PURCHASE_ORDER_ENDPOINTS = {
   nextNumber: "/purchase-orders/next-number",
   getPurchaseOrders: (query? : GetListParams)=> `/purchase-orders/${buildQueryString(query)}`,
   purchaseOrderById: (id?: string) => `/purchase-orders/${id}`, 
+}
+
+export const EXCHANGE_RATE_ENDPOINTS = {
+  exchangeRate: "/exchange-rate/content",
+  getExchangeRate: (query? : ExchangeRateParams)=> `/exchange-rate/content${buildQueryString(query)}`,
+
 }

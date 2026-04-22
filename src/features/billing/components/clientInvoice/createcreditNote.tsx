@@ -45,7 +45,7 @@ export function CreateCreditNote({invoiceId}: InvoiceDetailsProps) {
                         disabled={!canCreateInvoice}
                         className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold shadow-md transition ${!canCreateInvoice
                             ? "bg-gray-300 cursor-not-allowed text-gray-500 shadow-none"
-                            : "bg-red-600 hover:bg-red-700 text-white shadow-red-200"
+                            : "bg-red-600 hover:bg-red-700 text-white shadow-red-200 cursor-pointer"
                             }`}>
                         <ShieldCheck className="w-4 h-4" />
                         {"Créer & Envoyer à TTN"}

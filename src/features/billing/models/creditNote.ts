@@ -21,7 +21,7 @@ const detailsInvoiceCreditNoteItemSchema = z.object({
   sentToTTNDate: z.date().nullable(),
   sentToclientDate: z.date().nullable(),
   creationDate: z.date().nullable(),
-  invoiceCreditNoteStatus: invoiceStatusSchema,
+  invoiceCreditNoteStatus: invoiceStatusSchema.nonoptional(),
   invoiceCreditNoteComplianceStatus: invoiceComplianceStatusSchema.nullable(),
   QRCode: z.string(),
   totalExclTax: z.number(),
@@ -33,7 +33,9 @@ const detailsInvoiceCreditNoteItemSchema = z.object({
   totalExclTaxEUR: z.number(),
   totalInclTaxEUR: z.number(),
   totalExclTaxTND: z.number(),
-  totalInclTaxTND: z.number()
+  totalInclTaxTND: z.number(),  
+  totalExclTaxUSD: z.number(),
+  totalInclTaxUSD: z.number(),
 })
 
 /**

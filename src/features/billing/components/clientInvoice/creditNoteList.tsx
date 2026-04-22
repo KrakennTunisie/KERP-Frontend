@@ -8,11 +8,14 @@ import useCreditNoteList from "../../hooks/useCreditNoteList";
 
 import { DeleteInvoiceModal } from "../widgets/deleteInvoiceModal";
 import { creditNoteTypeLabels } from "../../types/creditNoteType";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { formatDateLong } from "@/shared/utils/formatDate";
 
 export default function CreditNoteList({ params }: PropsClient) {
 
     const { router, search, setSearch, open, setOpen, setDeleteOpen, deleteOpen, creditNoteRef,
-        filtre, setFiltre, deleteCreditNote, creditNotes, totalElements, totalPages, idInvoice, setIdInvoice, deleteId, setDeleteId, deleteClientInvoice } = useCreditNoteList({ params });
+        filtre, setFiltre, deleteCreditNote, creditNotes, totalElements, totalPages, idInvoice, setIdInvoice, deleteId, setDeleteId, deleteClientInvoice,  currentPage,
+     setCurrentPage, loading,} = useCreditNoteList({ params });
     return (
         <div className="min-h-screen bg-gray-50 p font-sans">
             {/* TOP BAR */}
@@ -133,7 +136,7 @@ export default function CreditNoteList({ params }: PropsClient) {
                             creditNotes.map((f) => (
                                 <tr
                                     key={1}
-                                    className="border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer"
+                                    className="border-b border-slate-50 hover:bg-slate-50 transition-colors"
                                 >
                                     <td className="px-5 py-4 font-bold text-slate-800">
                                         {f.invoiceCreditNoteNumber}
@@ -150,12 +153,12 @@ export default function CreditNoteList({ params }: PropsClient) {
                                     </td>
                                     <td className="text-red-500 font-bold">
                                         - {f?.invoice.invoiceCurrency == "EUR" 
-                                                                            ? f.totalInclTaxEUR + " EUR"
+                                                                            ? f.totalInclTaxEUR 
                                                                             : f?.invoice.invoiceCurrency =="TND" 
-                                                                                ? f.totalInclTaxTND +" TND" 
+                                                                                ? f.totalInclTaxTND  
                                                                                 :f?.total} {f.invoice.invoiceCurrency}
                                     </td>
-                                    <td className="px-5 py-4 text-slate-600">{f.issueDate?.toLocaleString("fr-FR")}</td>
+                                    <td className="px-5 py-4 text-slate-600">{formatDateLong(f.issueDate)}</td>
                                     <td className="px-5 py-4 text-center">
                                         {f.invoiceCreditNoteComplianceStatus == invoiceComplianceStatusSchema.enum.TTN_ACCEPTED ? (
                                             <svg className="w-5 h-5 text-emerald-500 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -193,7 +196,7 @@ export default function CreditNoteList({ params }: PropsClient) {
                                                     invoiceComplianceStatusSchema.enum.TTN_SUBMITTED
                                                 ] as string[]).includes(f.invoiceCreditNoteComplianceStatus!)}
                                                 onClick={(e) => { setOpen(true);  console.log("send", f.invoiceCreditNoteNumber); }}
-                                                className="p-2 rounded-xl bg-green-50 text-green-600 hover:bg-green-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                className="p-2 rounded-xl bg-green-50 text-green-600 hover:bg-green-100 transition-colors  cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                                                 title="Envoyer"
                                             >
                                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -204,7 +207,7 @@ export default function CreditNoteList({ params }: PropsClient) {
                                             <button
                                                // disabled={/* f.invoiceCreditNoteComplianceStatus != null */}
                                                 onClick={(e) => { deleteCreditNote(f.invoiceCreditNoteNumber); setDeleteId(f.idInvoiceCreditNote) }}
-                                                className="p-2 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                className="p-2 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 transition-colors disabled:opacity-50  cursor-pointer disabled:cursor-not-allowed"
                                                 title="Supprimer"
                                             >
                                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -220,6 +223,54 @@ export default function CreditNoteList({ params }: PropsClient) {
                     </tbody>
                 </table>
             </div>
+                        { totalPages > 0 && (
+                            <div className="px-8 py-8 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <button
+                                onClick={() => setCurrentPage(currentPage - 1)}
+                                disabled={currentPage === 1 || loading}
+                                className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-xl hover:bg-gray-50 disabled:opacity-30 transition-all shadow-sm"
+                                >
+                                <ChevronLeft className="w-4 h-4 text-gray-900" />
+                                </button>
+            
+                                <div className="flex items-center gap-1">
+                                {Array.from({ length: totalPages }).map((_, i) => {
+                                    const page = i + 1;
+            
+                                    return (
+                                    <button
+                                        key={page}
+                                        onClick={() => setCurrentPage(page)}
+                                        disabled={loading}
+                                        className={`w-10 h-10 rounded-xl font-black text-xs transition-all ${
+                                        currentPage === page
+                                            ? "bg-gray-900 text-white shadow-lg"
+                                            : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50"
+                                        } disabled:opacity-50`}
+                                    >
+                                        {page}
+                                    </button>
+                                    );
+                                })}
+                                </div>
+            
+                                <button
+                                onClick={() => setCurrentPage(currentPage + 1)}
+                                disabled={currentPage === totalPages || loading}
+                                className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-xl hover:bg-gray-50 disabled:opacity-30 transition-all shadow-sm"
+                                >
+                                <ChevronRight className="w-4 h-4 text-gray-900" />
+                                </button>
+                            </div>
+            
+                            {totalElements > 0 && (
+                                <p className="text-xs font-bold text-gray-500">
+                                {totalElements +" Facture"}
+                                </p>
+                            )}
+                            </div>
+                        )}
         </div>
         </div>
 

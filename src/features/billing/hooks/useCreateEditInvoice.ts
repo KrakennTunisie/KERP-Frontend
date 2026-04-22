@@ -23,10 +23,12 @@ import { exchangeRateSourceSchema } from "../types/exchangeRateSource";
 import { handleSaveAsPDF } from "../lib/buildInvoicePDF";
 import { appToast } from "@/shared/lib/toast";
 import { getApiErrorMessage } from "@/shared/api/handle-api-error";
-import { InvoicesAPI, partnersApi } from "../api/partners-api";
+import { ExchangeRateAPI, InvoicesAPI, partnersApi } from "../api/partners-api";
 import { useDebounce } from "@/shared/hooks/useDebounce";
 import { nextNumber } from "../types/nextNumber";
 import { PurchaseOrder } from "../models/purchaseOrder";
+import { ExchangeRate } from "../types/exchangeRate";
+import { defaultExchangeRateParams } from "@/shared/api/types";
 
 export type InvoiceFormClientProps = {
   mode: "create" | "edit"
@@ -42,10 +44,11 @@ type UpdateableField =
 
 
 export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
-  const [nextNumber, setNextNumber] = useState<nextNumber>()
-  const [invoice, setInvoice] = useState<Invoice>()
-  const fetchClientInvoice = async () => {
-    try {
+  const [nextNumber, setNextNumber]=useState<nextNumber>()
+  const [exchangeRate, setExchangeRate]=useState<ExchangeRate>()
+  const [invoice, setInvoice]=useState<Invoice>()
+  const fetchClientInvoice = async()=>{
+        try {
       setLoading(true)
       const invoice = await InvoicesAPI.getClientInvoiceById(invoiceId);
       setInvoice(invoice);
@@ -71,7 +74,8 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
       appToast.error("Erreur de fetch clients: ", getApiErrorMessage(error))
     }
   }
-  useEffect(() => {
+
+  useEffect(()=>{
     fetchNextNumber()
   }, [])
   const router = useRouter()
@@ -95,8 +99,8 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
       paymentMethod: paymentMethodSchema.enum.BANK_TRANSFER,
       partner: null,
       purchaseOrder: null,
-      invoiceCurrency: currencyTypeSchema.enum.TND,
-      appliedExchangeRate: 4,
+      invoiceCurrency:currencyTypeSchema.enum.TND,
+      appliedExchangeRate: 3,
       exchangeRateReferenceDate: new Date(),
       exchangeRateSource: exchangeRateSourceSchema.enum.EXTERNAL_API,
       complianceQRcode: "",
@@ -173,6 +177,58 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
     if (mode == "edit") {
     }
   }, [nextNumber]);
+
+
+    const fetchExchangeRate = async(toCurrency: string)=>{
+      try{
+        if(mode == "create"){
+
+           if (!toCurrency || toCurrency === "TND") {
+            form.setValue("appliedExchangeRate", 1, {
+              shouldValidate: true,
+              shouldDirty: false,
+            });
+            return;
+          }
+
+        const response = await ExchangeRateAPI.getExchangeRate({
+          fromCurrency: "TND",
+          toCurrency: toCurrency,
+        });
+        console.log("response: exchangeRate", response)
+        setExchangeRate(response);
+        }
+      }
+      catch(error: any){
+        appToast.error("Erreur de fetch de taux de change: ",getApiErrorMessage(error))
+      }
+    }
+
+  const selectedCurrency = form.watch("invoiceCurrency");
+
+  useEffect(() => {
+  if (mode !== "create") return;
+  fetchExchangeRate(selectedCurrency);
+}, [selectedCurrency,  mode]);
+
+useEffect(() => {
+  if (mode !== "create") return;
+
+  if (selectedCurrency === "TND") {
+    form.setValue("appliedExchangeRate", 1, {
+      shouldValidate: true,
+      shouldDirty: false,
+    });
+    return;
+  }
+
+  if (exchangeRate?.quote) {
+    form.setValue("appliedExchangeRate", exchangeRate.quote, {
+      shouldValidate: true,
+      shouldDirty: false,
+    });
+  }
+}, [exchangeRate, selectedCurrency, mode]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [TtnModalOpen, setTtnModalOpen] = useState(false);

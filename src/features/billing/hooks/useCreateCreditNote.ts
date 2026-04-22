@@ -141,7 +141,7 @@ export default function useCreateCreditNote({ invoiceId }: InvoiceDetailsProps) 
     // Validation des données 
     const canCreateInvoice =
         isDirty &&
-        // isValid &&
+        isValid &&
         !!previewData.motif &&
         !!previewData.creditNoteItems?.length &&
         !!previewData.issueDate &&
