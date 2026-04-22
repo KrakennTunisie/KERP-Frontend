@@ -50,7 +50,9 @@ export const MOCK_INVOICES: Invoice[] = [
     totalInclTaxEUR: 0,
     totalExclTaxTND: 0,
     totalInclTaxTND: 0,
-    hasInvoiceCreditNotes: null
+    hasInvoiceCreditNotes: null,
+    totalExclTaxUSD: 0,
+    totalInclTaxUSD: 0
   },
   {
     idInvoice: "550e84001",
@@ -82,7 +84,9 @@ export const MOCK_INVOICES: Invoice[] = [
     totalInclTaxEUR: 0,
     totalExclTaxTND: 0,
     totalInclTaxTND: 0,
-    hasInvoiceCreditNotes: null
+    hasInvoiceCreditNotes: null,
+    totalExclTaxUSD: 0,
+    totalInclTaxUSD: 0
   },
   {
     idInvoice: "550e84002",
@@ -113,6 +117,8 @@ export const MOCK_INVOICES: Invoice[] = [
     totalInclTaxEUR: 0,
     totalExclTaxTND: 0,
     totalInclTaxTND: 0,
-    hasInvoiceCreditNotes: null
+    hasInvoiceCreditNotes: null,
+    totalExclTaxUSD: 0,
+    totalInclTaxUSD: 0
   },
 ];

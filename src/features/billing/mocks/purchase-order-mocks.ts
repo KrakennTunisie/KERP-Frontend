@@ -50,7 +50,7 @@ export const mockPurchaseOrders: PurchaseOrder[] = [
     issueDate: new Date("2024-05-20"),
     creationDate: null,
     Status: "CLOTURÉ",
-    currency: "DOLLAR",
+    currency: "USD",
     totalExclTax: 25000.00,
     totalInclTax: 29750.00,
     vatAmount: 4750.00,
