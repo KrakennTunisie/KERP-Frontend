@@ -119,7 +119,7 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                             </button> :
                             <button
                                 onClick={() => router.push(`/billing/invoices/clients/${invoiceId}/credit-note/create`)}
-                                disabled={getClientInvoiceAllowedNextStatuses(invoice?.invoiceStatus!).length === 0 || invoice?.invoiceStatus === invoiceStatusSchema.enum.DRAFT}
+                                disabled={invoice?.invoiceStatus ===invoiceStatusSchema.enum.PAID || invoice?.invoiceStatus === invoiceStatusSchema.enum.DRAFT}
                                 className="flex items-center justify-center gap-2 py-3.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-600 text-sm font-bold hover:brightness-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
                                 <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                                     <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
@@ -130,7 +130,7 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                             </button>
                             }
                             <button
-                                disabled={getClientInvoiceAllowedNextStatuses(invoice?.invoiceStatus!).includes(invoiceStatusSchema.enum.PAID)===false}
+                                disabled={invoice?.invoiceStatus ===invoiceStatusSchema.enum.PAID || invoice?.invoiceStatus ===invoiceStatusSchema.enum.DRAFT}
                                 onClick={updateStatus}
                                 className={`flex items-center justify-center gap-2 py-3.5 rounded-xl border text-sm font-bold transition-all bg-blue-100 border-blue-300 hover:brightness-95 text-blue-700 disabled:opacity-50 disabled:cursor-not-allowed`}
                             >
