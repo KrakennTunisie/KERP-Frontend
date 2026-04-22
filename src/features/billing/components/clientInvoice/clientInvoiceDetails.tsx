@@ -4,12 +4,13 @@ import { DocumentPreviewModal } from "@/shared/components/ui/documentPreviewModa
 import useClientInvoiceDetails, { InvoiceDetailsProps } from "../../hooks/useClientInvoiceDetails"
 import { mockInvoiceItems } from "../../mocks/invoice-items-mocks"
 import { InvoiceEventLabels } from "../../types/invoiceEventType"
-import { invoiceStatusLabels, invoiceStatusSchema } from "../../types/invoiceStatus"
+import { getClientInvoiceAllowedNextStatuses, invoiceStatusLabels, invoiceStatusSchema } from "../../types/invoiceStatus"
 import Card from "../widgets/card"
 import { SectionLabel } from "../widgets/sectionLabel"
 import ShieldIcon from "../widgets/shieldIcon"
 import { SendToTTNModal } from "../widgets/ttnConfirmationModal"
 import { paymentMethodLabels } from "../../types/paymentMethod"
+import { formatDateLong } from "@/shared/utils/formatDate"
 
 export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps) {
     const {  setStatusPaiement, client, invoice, previewDocument, setPreviewDocument, sendToTTN, TtnModalOpen, setTtnModalOpen,
@@ -36,7 +37,7 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                                     : '-'}                            
                             </span>
                         </div>
-                        <p className="text-xs text-gray-400 mt-0.5">Emise le {invoice?.issueDate.toLocaleString()} · Échéance le {invoice?.dueDate.toLocaleString()}</p>
+                        <p className="text-xs text-gray-400 mt-0.5">Emise le {formatDateLong(invoice?.issueDate)} · Échéance le {formatDateLong(invoice?.dueDate)}</p>
                     </div>
                 </div>
             </div>
@@ -108,8 +109,7 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                             {hasCreditInvoice ?
                              <button
                                 onClick={() => router.push(`/billing/invoices/clients/${invoiceId}/credit-note`)}
-                                disabled={invoice?.invoiceStatus == invoiceStatusSchema.enum.PAID || invoice?.invoiceStatus == invoiceStatusSchema.enum.DRAFT }
-                                className="flex items-center justify-center gap-2 py-3.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-600 text-sm font-bold hover:brightness-95 transition-all disabled:cursor-not-allowed">
+                                className="flex items-center justify-center gap-2 py-3.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-600 text-sm font-bold hover:brightness-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
                                 <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                                     <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
                                     <polyline points="14 2 14 8 20 8" />
@@ -119,8 +119,8 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                             </button> :
                             <button
                                 onClick={() => router.push(`/billing/invoices/clients/${invoiceId}/credit-note/create`)}
-                                disabled={invoice?.invoiceStatus == invoiceStatusSchema.enum.PAID || invoice?.invoiceStatus == invoiceStatusSchema.enum.DRAFT}
-                                className="flex items-center justify-center gap-2 py-3.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-600 text-sm font-bold hover:brightness-95 transition-all disabled:cursor-not-allowed">
+                                disabled={invoice?.invoiceStatus ===invoiceStatusSchema.enum.PAID || invoice?.invoiceStatus === invoiceStatusSchema.enum.DRAFT}
+                                className="flex items-center justify-center gap-2 py-3.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-600 text-sm font-bold hover:brightness-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
                                 <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                                     <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
                                     <polyline points="14 2 14 8 20 8" />
@@ -130,12 +130,9 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                             </button>
                             }
                             <button
-                                disabled={invoice?.invoiceStatus == invoiceStatusSchema.enum.PAID}
+                                disabled={invoice?.invoiceStatus ===invoiceStatusSchema.enum.PAID || invoice?.invoiceStatus ===invoiceStatusSchema.enum.DRAFT}
                                 onClick={updateStatus}
-                                className={`flex items-center justify-center gap-2 py-3.5 rounded-xl border text-sm font-bold transition-all ${invoiceStatusSchema.enum.PAID
-                                    ? 'bg-blue-100 border-blue-300 text-blue-700'
-                                    : 'bg-blue-50 border-blue-200 text-blue-600 hover:brightness-95'
-                                    }`}
+                                className={`flex items-center justify-center gap-2 py-3.5 rounded-xl border text-sm font-bold transition-all bg-blue-100 border-blue-300 hover:brightness-95 text-blue-700 disabled:opacity-50 disabled:cursor-not-allowed`}
                             >
                                 <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                                     <polyline points="9 11 12 14 22 4" />
@@ -241,12 +238,15 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                                                                             ? invoice.totalExclTaxEUR 
                                                                             : invoice?.invoiceCurrency =="TND" 
                                                                                 ? invoice.totalExclTaxTND
-                                                                                :invoice?.totalInclTax},
+                                                                                :invoice?.totalExclTaxUSD},
                                 { label: 'Total TVA', value: invoice?.invoiceCurrency == "EUR" 
                                                                             ? (invoice.totalInclTaxEUR - invoice.totalExclTaxEUR).toFixed(2)
                                                                             : invoice?.invoiceCurrency =="TND" 
                                                                                 ? (invoice.totalInclTaxTND - invoice.totalExclTaxTND).toFixed(2)
-                                                                                :invoice?.totalInclTax},
+                                                                                :
+                                                                                 invoice?.invoiceCurrency =="USD" 
+                                                                                 ? (invoice?.totalInclTaxUSD - invoice?.totalExclTaxUSD).toFixed(2)
+                                                                                 :0},
                             ].map(({ label, value }) => (
                                 <div key={label} className="flex justify-between w-64">
                                     <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">{label}</span>
@@ -261,7 +261,7 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                                                                             ? invoice.totalInclTaxEUR + " EUR"
                                                                             : invoice?.invoiceCurrency =="TND" 
                                                                                 ? invoice.totalInclTaxTND +" TND" 
-                                                                                :invoice?.totalInclTax}
+                                                                                :invoice?.totalInclTaxUSD +" USD"}
                                                                             </span>
                             </div>
                         </div>
@@ -350,7 +350,7 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                                             {InvoiceEventLabels[event.invoiceEventType]}
                                         </p>
                                         <p className="text-[11px] font-semibold text-gray-400 mt-0.5">
-                                            {event.eventDate.toLocaleString()} - {event.eventTrigger}
+                                            {formatDateLong(event.eventDate)} - {event.eventTrigger}
                                         </p>
                                         <p className="text-[11px] text-gray-400 mt-0.5">{event.description}</p>
                                     </div>

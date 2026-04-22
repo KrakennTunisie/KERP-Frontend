@@ -75,22 +75,8 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
     }
   }
 
-    const fetchExchangeRate = async()=>{
-    try{
-      if(mode == "create"){
-
-      const response = await ExchangeRateAPI.getExchangeRate(defaultExchangeRateParams);
-      console.log("response: exchangeRate", response)
-      setExchangeRate(response);
-      }
-    }
-    catch(error: any){
-      appToast.error("Erreur de fetch de taux de change: ",getApiErrorMessage(error))
-    }
-  }
   useEffect(()=>{
     fetchNextNumber()
-    fetchExchangeRate()
   },[])
   const router = useRouter()
   const form = useForm<InvoiceCreate>({
@@ -192,15 +178,57 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
   }
 }, [nextNumber]);
 
+
+    const fetchExchangeRate = async(toCurrency: string)=>{
+      try{
+        if(mode == "create"){
+
+           if (!toCurrency || toCurrency === "TND") {
+            form.setValue("appliedExchangeRate", 1, {
+              shouldValidate: true,
+              shouldDirty: false,
+            });
+            return;
+          }
+
+        const response = await ExchangeRateAPI.getExchangeRate({
+          fromCurrency: "TND",
+          toCurrency: toCurrency,
+        });
+        console.log("response: exchangeRate", response)
+        setExchangeRate(response);
+        }
+      }
+      catch(error: any){
+        appToast.error("Erreur de fetch de taux de change: ",getApiErrorMessage(error))
+      }
+    }
+
+  const selectedCurrency = form.watch("invoiceCurrency");
+
   useEffect(() => {
-  if (exchangeRate?.quote && mode=="create") {
+  if (mode !== "create") return;
+  fetchExchangeRate(selectedCurrency);
+}, [selectedCurrency,  mode]);
+
+useEffect(() => {
+  if (mode !== "create") return;
+
+  if (selectedCurrency === "TND") {
+    form.setValue("appliedExchangeRate", 1, {
+      shouldValidate: true,
+      shouldDirty: false,
+    });
+    return;
+  }
+
+  if (exchangeRate?.quote) {
     form.setValue("appliedExchangeRate", exchangeRate.quote, {
       shouldValidate: true,
       shouldDirty: false,
     });
-
   }
-}, [exchangeRate]);
+}, [exchangeRate, selectedCurrency, mode]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [TtnModalOpen, setTtnModalOpen] = useState(false);
@@ -538,7 +566,7 @@ async function createInvoice() {
     formData.append("issueDate", values.issueDate.toISOString());
     formData.append("dueDate", values.dueDate.toISOString());
 
-    formData.append("invoiceStatus",invoiceStatusSchema.enum.TO_COLLECT)
+    formData.append("invoiceStatus",values.invoiceStatus)
 
     formData.append("invoiceType", values.invoiceType);
     formData.append("invoiceCurrency", values.invoiceCurrency);

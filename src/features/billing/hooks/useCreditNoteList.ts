@@ -80,6 +80,8 @@ const [search, setSearch] = useState("");
       
       fetchClientsInvoices();
     }, [invoiceRef, debouncedSearchQuery, currentPage, filtre]);
+
+    
     
      const router = useRouter()
     return {
@@ -97,6 +99,8 @@ const [search, setSearch] = useState("");
      creditNoteRef,
      deleteCreditNote,
      creditNotes,
+     currentPage,
+     setCurrentPage,
      totalElements,
      totalPages,
      idInvoice,

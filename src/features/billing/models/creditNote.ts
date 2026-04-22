@@ -40,7 +40,9 @@ const detailsInvoiceCreditNoteItemSchema = z.object({
   totalExclTaxEUR: z.number(),
   totalInclTaxEUR: z.number(),
   totalExclTaxTND: z.number(),
-  totalInclTaxTND: z.number()
+  totalInclTaxTND: z.number(),  
+  totalExclTaxUSD: z.number(),
+  totalInclTaxUSD: z.number(),
 })
 
 /**

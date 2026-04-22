@@ -47,3 +47,56 @@ export const invoiceStatusColors: Record<
   IN_PROGRESS: "bg-indigo-100 text-indigo-700 border border-indigo-200",
 };
 
+export const CLIENT_INVOICES_STATUS_PASSAGE_POLICY: Record<InvoiceStatus, InvoiceStatus[]> = {
+  DRAFT: [ "TO_COLLECT", "CANCELLED"],
+  TO_PAY: [],
+  TO_COLLECT: ["PAID", "CANCELLED"],
+  PAID: [],
+  CANCELLED: [],
+  ALL: [],
+  REFUNDED: [],
+  NOT_REFUNDED: [],
+  IN_PROGRESS: ["PAID"]
+};
+
+export const SUPPLIER_STATUS_PASSAGE_POLICY: Record<InvoiceStatus, InvoiceStatus[]> = {
+  DRAFT: ["TO_PAY", "CANCELLED"],
+  TO_PAY: ["PAID", "CANCELLED"],
+  TO_COLLECT: [],
+  PAID: [],
+  CANCELLED: [],
+  ALL: [],
+  REFUNDED: [],
+  NOT_REFUNDED: [],
+  IN_PROGRESS: ["PAID"]
+};
+
+export const CREDIT_NOTE_STATUS_PASSAGE_POLICY: Record<InvoiceStatus, InvoiceStatus[]> = {
+  DRAFT: [ "CANCELLED", "IN_PROGRESS"],
+  TO_PAY: [],
+  TO_COLLECT: [],
+  PAID: [],
+  CANCELLED: [],
+  ALL: [],
+  REFUNDED: [],
+  NOT_REFUNDED: [],
+  IN_PROGRESS: ["REFUNDED","NOT_REFUNDED"]
+};
+
+export const getClientInvoiceAllowedNextStatuses = (
+  currentStatus: InvoiceStatus
+): InvoiceStatus[] => {
+  return CLIENT_INVOICES_STATUS_PASSAGE_POLICY[currentStatus] ?? [];
+};
+
+export const getCreditNoteAllowedNextStatuses = (
+  currentStatus: InvoiceStatus
+): InvoiceStatus[] => {
+  return CREDIT_NOTE_STATUS_PASSAGE_POLICY[currentStatus] ?? [];
+};
+
+export const getSupplierInvoiceAllowedNextStatuses = (
+  currentStatus: InvoiceStatus
+): InvoiceStatus[] => {
+  return SUPPLIER_STATUS_PASSAGE_POLICY[currentStatus] ?? [];
+};
