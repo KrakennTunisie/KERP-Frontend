@@ -212,7 +212,7 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
                         <div className="flex justify-between text-sm">
                             <span className="text-slate-500 font-medium">Total TVA</span>
                             <span className="font-bold text-slate-800">
-                                {data.totalInclTax?.toFixed(2)} 
+                                {data?.totalInclTax && data?.totalExclTax && (data?.totalInclTax - data?.totalExclTax ).toFixed(2)} 
                                 {isCredit ? data.originalInvoice?.invoiceCurrency : data.invoiceCurrency}
                             </span>
                         </div>

@@ -10,6 +10,8 @@ import { InvoiceEventLabels } from "../../types/invoiceEventType";
 import { OperationCategoryLabels } from "../../types/operationCategory";
 import { invoiceStatusLabels, invoiceStatusSchema } from "../../types/invoiceStatus";
 import { DocumentPreviewModal } from "@/shared/components/ui/documentPreviewModal";
+import { creditNoteTypeLabels } from "../../types/creditNoteType";
+import { formatDateLong } from "@/shared/utils/formatDate";
 
 export default function CreditNoteDetails({params}:PropsCreditNote)
 {
@@ -36,7 +38,7 @@ export default function CreditNoteDetails({params}:PropsCreditNote)
                                     : '-'}
                               </span>
                           </div>
-                          <p className="text-xs text-gray-400 mt-0.5">Emise le {invoice?.issueDate!.toLocaleString()}</p>
+                          <p className="text-xs text-gray-400 mt-0.5">Emise le {formatDateLong(invoice?.issueDate)}</p>
                       </div>
                   </div>
               </div>
@@ -128,12 +130,15 @@ export default function CreditNoteDetails({params}:PropsCreditNote)
                                                                             ? invoice.totalInclTaxEUR + " EUR"
                                                                             : invoice?.invoice.invoiceCurrency =="TND" 
                                                                                 ? invoice.totalInclTaxTND +" TND" 
-                                                                                :invoice?.totalInclTax}
+                                                                                :invoice?.totalInclTaxUSD}
                                       </p>
                                   </div>
                                   <div key="Méthode de paiement">
                                       <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">{"Motif de l'avoir"}</p>
-                                      <p className="text-sm font-bold text-gray-900">{invoice?.motif}</p>
+                                      <p className="text-sm font-bold text-gray-900">{
+                                        invoice?.motif
+                                            ? creditNoteTypeLabels[invoice?.motif]
+                                            : "-"}</p>
                                   </div>
                                   <div key="Devise">
                                       <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Devise</p>
@@ -234,12 +239,15 @@ export default function CreditNoteDetails({params}:PropsCreditNote)
                                                                             ? invoice.totalExclTaxEUR 
                                                                             : invoice?.invoice.invoiceCurrency =="TND" 
                                                                                 ? invoice.totalExclTaxTND
-                                                                                :invoice?.totalInclTax},
+                                                                                :invoice?.totalExclTaxUSD},
                                 { label: 'Total TVA', value: invoice?.invoice.invoiceCurrency == "EUR" 
                                                                             ? (invoice.totalInclTaxEUR - invoice.totalExclTaxEUR).toFixed(2)
                                                                             : invoice?.invoice.invoiceCurrency =="TND" 
                                                                                 ? (invoice.totalInclTaxTND - invoice.totalExclTaxTND).toFixed(2)
-                                                                                :invoice?.totalInclTax},
+                                                                                :
+                                                                                 invoice?.invoice.invoiceCurrency =="USD" 
+                                                                                 ? (invoice?.totalInclTaxUSD - invoice?.totalExclTaxUSD).toFixed(2)
+                                                                                 :0},
                             ].map(({ label, value }) => (
                                   <div key={label} className="flex justify-between w-64">
                                       <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">{label}</span>
@@ -254,7 +262,7 @@ export default function CreditNoteDetails({params}:PropsCreditNote)
                                                                             ? invoice.totalInclTaxEUR + " EUR"
                                                                             : invoice?.invoice.invoiceCurrency =="TND" 
                                                                                 ? invoice.totalInclTaxTND +" TND" 
-                                                                                :invoice?.totalInclTax}</span>
+                                                                                :invoice?.totalInclTaxUSD +" USD"}</span>
                               </div>
                           </div>
                       </Card>
@@ -342,7 +350,7 @@ export default function CreditNoteDetails({params}:PropsCreditNote)
                                               {InvoiceEventLabels[event?.invoiceCreditNoteEventType ] ?? "créé"}
                                           </p>
                                           <p className="text-[11px] font-semibold text-gray-400 mt-0.5">
-                                              {event.eventDate.toLocaleString()} - {event.eventTrigger}
+                                              {formatDateLong(event.eventDate)} - {event.eventTrigger}
                                           </p>
                                           <p className="text-[11px] text-gray-400 mt-0.5">{event.description}</p>
                                       </div>

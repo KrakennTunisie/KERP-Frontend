@@ -16,24 +16,27 @@ export function useClientInvoiceList () {
     const [filtre, setFiltre] = useState<InvoiceStatus>();
     const [loading, setLoading]= useState(false)
     const [deleteLoading, setDeleteLoading]= useState(false)
-    const [deleteId, setDeleteId]= useState("")
+    const [updateLoading, setUpdateLoading]= useState(false)
+    const [invoiceId, setInvoiceId]= useState("")
     const [open, setOpen] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
+    const [updateOpen, setUpdateOpen] = useState(false);
     const [invoiceRef ,setInvoiceRef] = useState("");
     const [clientsInvoices, setClientsInvoices] = useState<InvoicePageItem[] | []>([])
     const [totalPages, setTotalPages] = useState(1);
     const [totalElements, setTotalElements] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
-    
+    const [selectedInvoice, setSelectedInvoice]= useState<InvoicePageItem|null>(null)
+    const [nextStatus, setNextStatus]=useState("")
     const router = useRouter()
     const debouncedSearchQuery = useDebounce(search, 2000);
     
     const deleteClientInvoice = async ()=>{
         try {
           setDeleteLoading(true);
-          await InvoicesAPI.deleteClientInvoice(deleteId);
+          await InvoicesAPI.deleteClientInvoice(invoiceId);
           appToast.success('Facture supprimée avec succès.')
-          setDeleteId("")
+          setInvoiceId("")
           setDeleteOpen(false)
           await fetchClientsInvoices()
         } catch (error) {
@@ -68,14 +71,33 @@ export function useClientInvoiceList () {
       };
 
 
-useEffect(() => {
-  setCurrentPage(1);
-}, [debouncedSearchQuery]);
+    useEffect(() => {
+      setCurrentPage(1);
+    }, [debouncedSearchQuery]);
 
-useEffect(() => {
-  
-  fetchClientsInvoices();
-}, [debouncedSearchQuery, currentPage, filtre]);
+    useEffect(() => {
+      
+      fetchClientsInvoices();
+    }, [debouncedSearchQuery, currentPage, filtre]);
+
+    const updateStatus = async ()=>{
+          try {
+          setLoading(true)
+          const formData = new FormData();
+            
+          formData.append("status",  nextStatus);
+          await InvoicesAPI.updateClientInvoiceStatus(invoiceId, formData);
+          appToast.success('Statut mise à jour avec succès avec succès.')
+          setUpdateOpen(false)
+          await fetchClientsInvoices()
+        } catch (error) {
+          appToast.error("Erreur Fetch du client:",getApiErrorMessage(error));
+        }
+        finally{
+          setLoading(false)
+          setInvoiceId("")
+        }
+    }
 
     return {
      router,
@@ -85,6 +107,8 @@ useEffect(() => {
      setOpen,
      deleteOpen,
      setDeleteOpen,
+     updateOpen,
+     setUpdateOpen,
      setInvoiceRef,
      invoiceRef,
      filtre,
@@ -95,9 +119,13 @@ useEffect(() => {
      totalElements,
      totalPages,
      deleteClientInvoice,
-     deleteId,
-     setDeleteId,
+     invoiceId,
+     setInvoiceId,
      deleteLoading,
-     loading
+     updateStatus,
+     updateLoading,
+     loading,
+     nextStatus, setNextStatus,
+     selectedInvoice, setSelectedInvoice
     }
 }
