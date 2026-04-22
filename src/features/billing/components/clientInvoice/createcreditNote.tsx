@@ -57,7 +57,9 @@ export function CreateCreditNote({invoiceId}: InvoiceDetailsProps) {
                 open={isModalOpen}
                 onClose={onCloseDocumentModal}
                 onCreateInvoice={createCreditNoteInvoice}
-                document={pdfUrl} />
+                document={pdfUrl}
+                type='Facture'
+                 />
             {/* Modal pour demander au user s'il veut envoyer la Facture au TTN */}
             <SendToTTNModal
                 open={TtnModalOpen}
@@ -154,14 +156,14 @@ export function CreateCreditNote({invoiceId}: InvoiceDetailsProps) {
 
                                     <div className="flex flex-col gap-3 mt-3">
                                         {fields.map((field, index) => (
-                                            <div key={field.idInvoiceItem} className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex flex-col gap-3">
+                                            <div key={field.idCreditNoteItem} className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex flex-col gap-3">
 
                                                 <div className="flex items-center justify-between">
                                                     <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                                                         {"Sélectionner un produit"}
                                                     </label>
                                                     <button
-                                                        onClick={() => removeItem(field.idInvoiceItem)}
+                                                        onClick={() => removeItem(field.idCreditNoteItem)}
                                                         className="text-slate-300 hover:text-red-400 transition"
                                                     >
                                                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -171,7 +173,7 @@ export function CreateCreditNote({invoiceId}: InvoiceDetailsProps) {
                                                 </div>
 
                                                 {/* Dropdown */}
-                                                <div className="relative" key={field.idInvoiceItem}>
+                                                <div className="relative" key={field.idCreditNoteItem}>
                                                     <input
                                                         type="text"
                                                         readOnly
@@ -232,13 +234,14 @@ export function CreateCreditNote({invoiceId}: InvoiceDetailsProps) {
                                                                             ...prev,
                                                                             [index]: false,
                                                                         }));
-                                                                        updateItem(field.idInvoiceItem!, {
-                                                                            idInvoiceItem: filteredItem.idInvoiceItem,
+                                                                        updateItem(field.idCreditNoteItem!, {
+                                                                            idCreditNoteItem: field.idCreditNoteItem!,
                                                                             description: filteredItem.description,
                                                                             quantity: filteredItem.quantity,
                                                                             unityPriceEXclTax: filteredItem.unityPriceEXclTax,
                                                                             vatRate: filteredItem.vatRate,
                                                                             operationCategory: filteredItem.operationCategory,
+                                                                            originalItem:filteredItem.idInvoiceItem
                                                                         });
                                                                     }}
                                                                     className="w-full text-left px-4 py-3 hover:bg-blue-50 transition border-b border-slate-50 last:border-0"
@@ -273,7 +276,7 @@ export function CreateCreditNote({invoiceId}: InvoiceDetailsProps) {
                                                                         },
                                                                     }));
 
-                                                                    updateItem(field.idInvoiceItem!, { quantity: val });
+                                                                    updateItem(field.idCreditNoteItem!, { quantity: val });
                                                                 }}
                                                                 className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 text-center focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
                                                             />
@@ -296,7 +299,7 @@ export function CreateCreditNote({invoiceId}: InvoiceDetailsProps) {
                                                                         },
                                                                     }));
 
-                                                                    updateItem(field.idInvoiceItem!, { unityPriceEXclTax: val });
+                                                                    updateItem(field.idCreditNoteItem!, { unityPriceEXclTax: val });
                                                                 }}
                                                                 className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 text-center focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
                                                             />
@@ -319,7 +322,7 @@ export function CreateCreditNote({invoiceId}: InvoiceDetailsProps) {
                                                                         },
                                                                     }));
 
-                                                                    updateItem(field.idInvoiceItem!, { vatRate: val });
+                                                                    updateItem(field.idCreditNoteItem!, { vatRate: val });
                                                                 }}
                                                                 className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 text-center focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
                                                             >
@@ -335,8 +338,8 @@ export function CreateCreditNote({invoiceId}: InvoiceDetailsProps) {
                                             </div>
                                         ))}
                                     </div>
-                                    {errors.invoiceItems?.message && (
-                                        <ErrorForm error={errors.invoiceItems?.message} />)}
+                                    {errors.creditNoteItems?.message && (
+                                        <ErrorForm error={errors.creditNoteItems?.message} />)}
                                 </section>
                             </div>
                         </div>

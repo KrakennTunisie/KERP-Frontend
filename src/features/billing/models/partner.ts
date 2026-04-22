@@ -3,7 +3,7 @@ import {  partnerTypeSchema } from "../types/partnerType";
 import {  invoiceSchema } from "./invoice";
 import { fileSchema } from "../types/pdfSchema";
 
-
+import type { Invoice } from "./invoice";
 
 export const partnerSchema = z.object({
   idPartner: z.uuid(),
@@ -20,8 +20,7 @@ export const partnerSchema = z.object({
   patente: fileSchema.nullable() ,
 
   partnerType: partnerTypeSchema,
-
-  invoices: z.array(z.lazy((): any => invoiceSchema)).optional(),
+  invoices: z.array(z.lazy(() => z.any())).optional(),
 });
 
 export const createPartnerSchema = z.object({
@@ -40,7 +39,9 @@ export const createPartnerSchema = z.object({
   patente: fileSchema ,
 });
 
-export type Partner = z.infer<typeof partnerSchema>;
+export type Partner = z.infer<typeof partnerSchema> & {
+  invoices?: Invoice[];
+};
 
 export const clientPartnerSchema = partnerSchema.extend({
   partnerType: z.literal("CLIENT"),

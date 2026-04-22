@@ -14,9 +14,7 @@ export const invoiceStatusSchema = z.enum([
 
 export type InvoiceStatus = z.infer<typeof invoiceStatusSchema>;
 
-/* ================================
-   2. LABELS (UI - FRENCH)
-================================ */
+
 export const invoiceStatusLabels: Record<InvoiceStatus, string> = {
   ALL: "TOUTES",
   DRAFT: "BROUILLON",
@@ -28,9 +26,6 @@ export const invoiceStatusLabels: Record<InvoiceStatus, string> = {
   NOT_REFUNDED: "NON REMBOURSÉE",
 };
 
-/* ================================
-   3. COLORS (UI)
-================================ */
 export const invoiceStatusColors: Record<
   Exclude<InvoiceStatus, "ALL">,
   string

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { invoiceItemSchema } from "./invoiceItem";
+import { baseInvoiceCreditNoteItemSchema, creditNoteItemSchema, invoiceItemSchema } from "./invoiceItem";
 import { Invoice, invoiceSchema, invoiceSummarySchema } from "./invoice";
 import { CreditNoteTypeSchema } from "../types/creditNoteType";
 import { invoiceStatusSchema } from "../types/invoiceStatus";
@@ -9,13 +9,6 @@ import { uuid4 } from "node_modules/zod/v4/core/regexes.cjs";
 import { _uuidv4 } from "node_modules/zod/v4/core/api.cjs";
 import { InvoiceCreditNoteEventSchema, InvoiceEventSchema } from "./invoiceEvent";
 import { documentSchema } from "./document";
-
-const baseInvoiceCreditNoteItemSchema= z.object({
-    idInvoiceCreditNoteItem: z.string(),
-    invoiceCreditNote: z.string().nullable(),
-    invoiceItem: invoiceItemSchema,
-    quantity: z.number()
-})
 
 const detailsInvoiceCreditNoteItemSchema = z.object({
   invoiceCreditNoteNumber: z.string(),
@@ -52,7 +45,7 @@ const baseInvoiceCreditNoteSchema = z.object({
   motif: CreditNoteTypeSchema,
   description: z.string().nullable(),
   invoiceCreditNoteDocument: fileSchema.nullable(),
-  invoiceItems: z.array(invoiceItemSchema).nullable(),
+  creditNoteItems: z.array(creditNoteItemSchema).nullable(),
   total: z.number(),
 });
 
@@ -79,7 +72,7 @@ export const invoiceCreditNoteSchema = baseInvoiceCreditNoteSchema.extend({
  * invoiceCreditNoteDocument, invoiceItems
  */
 export const invoiceCreditNoteCreateSchema = z.object({
-  originalInvoice: z.any() ,
+  originalInvoice: z.any(),
   invoiceCreditNoteNumber: z.string(),
   motif: CreditNoteTypeSchema,
   description: z.string().nullable(),
@@ -93,7 +86,7 @@ export const invoiceCreditNoteCreateSchema = z.object({
   totalInclTax: z.number(),
   vatAmount: z.number(),
   invoiceCreditNoteDocument: fileSchema.nullable(),
-  invoiceItems: z.array(invoiceItemSchema).nullable(),
+  creditNoteItems: z.array(creditNoteItemSchema).nullable(),
   issueDate: z.date(),
 });
 

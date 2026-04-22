@@ -7,6 +7,7 @@ import { nextNumber } from "../types/nextNumber";
 import { Invoice, InvoiceCreate, InvoicePageItem } from "../models/invoice";
 import { InvoiceCreditNote, InvoiceCreditNoteCreate, InvoiceCreditNoteDetails, InvoiceCreditNotePageItem } from "../models/creditNote";
 import { UpdateInvoiceCreditNoteStatusRequest } from "../types/UpdateInvoiceCreditNoteStatusRequest";
+import { PurchaseOrder, PurchaseOrderCreate, PurchaseOrderDetails, PurchaseOrderPageItem, purchaseOrderPageItemSchema, PurchaseOrderUpdate } from "../models/purchaseOrder";
 
 export const partnersApi = {
   getClients: (query? : GetListParams) => 
@@ -92,24 +93,24 @@ export const InvoicesCreditNoteAPI = {
 };
 
 export const PurchaseOrderAPI = {
-  getNextInvoiceNumber :()=> apiClient.get(PURCHASE_ORDER_ENDPOINTS.nextNumber),
+  getNextPurchaseOrderNumber :()=> apiClient.get<nextNumber>(PURCHASE_ORDER_ENDPOINTS.nextNumber),
 
   getClientsPurchaseOrders: (query? : GetListParams) => 
-    apiClient.get<PageResponse<ClientPartnerItem>>(PURCHASE_ORDER_ENDPOINTS.getPurchaseOrders(query)),
+    apiClient.get<PageResponse<PurchaseOrderPageItem>>(PURCHASE_ORDER_ENDPOINTS.getPurchaseOrders(query)),
 
   getSuppliersPurchaseOrders: (query? : GetListParams) => 
-    apiClient.get<PageResponse<SupplierPartnerItem>>(PURCHASE_ORDER_ENDPOINTS.getPurchaseOrders(query)),
+    apiClient.get<PageResponse<PurchaseOrder>>(PURCHASE_ORDER_ENDPOINTS.getPurchaseOrders(query)),
 
-  getClientPurchaseOrderById: (id: string) =>
-    apiClient.get<ClientPartner>(PURCHASE_ORDER_ENDPOINTS.purchaseOrderById(id)),
+  getClientPurchaseOrderById: (id?: string) =>
+    apiClient.get<PurchaseOrderDetails>(PURCHASE_ORDER_ENDPOINTS.purchaseOrderById(id)),
 
   getSupplierPurchaseOrderById: (id: string) =>
-    apiClient.get<SupplierPartner>(PURCHASE_ORDER_ENDPOINTS.purchaseOrderById(id)),
+    apiClient.get<PurchaseOrder>(PURCHASE_ORDER_ENDPOINTS.purchaseOrderById(id)),
 
   createClientPurchaseOrder: (payload: FormData) =>
-    apiClient.post<CreateClientPartner>(PURCHASE_ORDER_ENDPOINTS.purchaseOrders, payload),
+    apiClient.post<PurchaseOrderCreate>(PURCHASE_ORDER_ENDPOINTS.purchaseOrders, payload),
 
-  updateClientPurchaseOrder : (id: string, payload: UpdatePartner) => apiClient.patch<UpdatePartner>(PURCHASE_ORDER_ENDPOINTS.purchaseOrderById(id), payload),
+  updateClientPurchaseOrder : (id: string, payload: FormData) => apiClient.patch<PurchaseOrderUpdate>(PURCHASE_ORDER_ENDPOINTS.purchaseOrders, payload),
 
   deleteClientPurchaseOrder: (id: string) =>
     apiClient.delete<void>(PURCHASE_ORDER_ENDPOINTS.purchaseOrderById(id)),

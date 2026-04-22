@@ -1,6 +1,6 @@
 import {  z } from "zod";
 import { partnerSchema, partnerSummarySchema } from "./partner";
-import { purchaseOrderSchema } from "./purchaseOrder";
+import { basePurchaseOrderSchema } from "./purchaseOrder";
 import { invoiceItemSchema } from "./invoiceItem";
 import { invoiceTypeSchema } from "../types/invoiceType";
 import { invoiceStatusSchema } from "../types/invoiceStatus";
@@ -28,7 +28,7 @@ const baseInvoiceSchema = z.object({
   exchangeRateSource: exchangeRateSourceSchema,
   totalExclTax: z.number().optional(),
   totalInclTax: z.number().optional(),
-  purchaseOrder: purchaseOrderSchema.nullable(),
+  purchaseOrder: basePurchaseOrderSchema.nullable(),
   invoiceItems: z
     .array(invoiceItemSchema)
     .nullable()

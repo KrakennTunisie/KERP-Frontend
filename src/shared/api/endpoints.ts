@@ -48,8 +48,8 @@ export const INVOICES_CREDIT_NOTE_ENDPOINTS={
 }
 
 export const PURCHASE_ORDER_ENDPOINTS = {
-  purchaseOrders: "/purchase-orders",
+  purchaseOrders: "/purchase-orders/",
   nextNumber: "/purchase-orders/next-number",
-  getPurchaseOrders: (query? : GetListParams)=> `/purchase-orders${buildQueryString(query)}`,
-  purchaseOrderById: (id: string) => `/purchase-orders/${id}`, 
+  getPurchaseOrders: (query? : GetListParams)=> `/purchase-orders/${buildQueryString(query)}`,
+  purchaseOrderById: (id?: string) => `/purchase-orders/${id}`, 
 }
