@@ -1,12 +1,10 @@
 'use client';
 
 import StatClientInvoiceCard from "@/shared/components/ui/statClientInvoiceCard";
-import { useMemo, useState } from "react";
-import { Invoice } from "../../models/invoice";
-import { MOCK_INVOICES } from "../../mocks/invoice-mocks";
-import { InvoiceStatus, invoiceStatusColors, invoiceStatusLabels, invoiceStatusSchema } from "../../types/invoiceStatus";
-import { CategoriesFacturesFournisseur, categoriesFacturesFournisseurSchema } from "../../types/invoiceSupplierCategory";
 import useSupplierInvoiceList from "../../hooks/useSupplierInvoiceList";
+import { MOCK_INVOICES } from "../../mocks/invoice-mocks";
+import { invoiceStatusColors, invoiceStatusLabels, invoiceStatusSchema } from "../../types/invoiceStatus";
+import { categoriesFacturesFournisseurSchema } from "../../types/invoiceSupplierCategory";
 
 
 export default function SuppliersInvoiceList() {

@@ -1,34 +1,32 @@
-import { useEffect,  useRef, useState } from "react";
-import { useForm, useFieldArray, useWatch } from "react-hook-form";
+import { getApiErrorMessage } from "@/shared/api/handle-api-error";
+import { useDebounce } from "@/shared/hooks/useDebounce";
+import { appToast } from "@/shared/lib/toast";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { useFieldArray, useForm } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
-import { useRouter } from "next/navigation"
-import { Invoice, InvoiceCreate, invoiceCreateSchema } from "../models/invoice";
-import { InvoiceItem } from "../models/invoiceItem";
-import {  PartnerSummary } from "../models/partner";
+import { ExchangeRateAPI, InvoicesAPI, partnersApi } from "../api/partners-api";
+import { handleSaveAsPDF } from "../lib/buildInvoicePDF";
 import {
   calculateInvoiceTotals,
   calculUnityPrice,
   convertItemCurrency,
   recalculate,
 } from "../lib/invoiceCalculation";
-import { CurrencyType, currencyTypeSchema } from "../types/currency";
-import { PaymentConditionSchema } from "../types/paymentCondition";
 import defaultItem from "../mocks/invoice-items-mocks";
-import { invoiceStatusSchema } from "../types/invoiceStatus";
-import { invoiceComplianceStatusSchema } from "../types/invoiceComplianceStatus";
-import { paymentMethodSchema } from "../types/paymentMethod";
-import { exchangeRateSourceSchema } from "../types/exchangeRateSource";
-import { handleSaveAsPDF } from "../lib/buildInvoicePDF";
-import { appToast } from "@/shared/lib/toast";
-import { getApiErrorMessage } from "@/shared/api/handle-api-error";
-import { ExchangeRateAPI, InvoicesAPI, partnersApi } from "../api/partners-api";
-import { useDebounce } from "@/shared/hooks/useDebounce";
-import { nextNumber } from "../types/nextNumber";
+import { Invoice, InvoiceCreate, invoiceCreateSchema } from "../models/invoice";
+import { InvoiceItem } from "../models/invoiceItem";
+import { PartnerSummary } from "../models/partner";
 import { PurchaseOrder } from "../models/purchaseOrder";
+import { CurrencyType, currencyTypeSchema } from "../types/currency";
 import { ExchangeRate } from "../types/exchangeRate";
-import { defaultExchangeRateParams } from "@/shared/api/types";
+import { exchangeRateSourceSchema } from "../types/exchangeRateSource";
+import { invoiceComplianceStatusSchema } from "../types/invoiceComplianceStatus";
+import { invoiceStatusSchema } from "../types/invoiceStatus";
+import { nextNumber } from "../types/nextNumber";
+import { PaymentConditionSchema } from "../types/paymentCondition";
+import { paymentMethodSchema } from "../types/paymentMethod";
 
 export type InvoiceFormClientProps = {
   mode: "create" | "edit"
@@ -490,6 +488,7 @@ async function createInvoice() {
   }
 
   try {
+    setLoading(true)
     const formData = new FormData();
 
     formData.append("invoiceNumber", values.invoiceNumber);
@@ -539,6 +538,9 @@ async function createInvoice() {
     const message = getApiErrorMessage(e);
     appToast.error("Échec de création, veuillez réessayer.", message);
   }
+    finally{
+    setLoading(false)
+  }
 }
 
  const updateInvoice = async ()=>{
@@ -558,6 +560,7 @@ async function createInvoice() {
   }
 
   try {
+    setLoading(true)
     const formData = new FormData();
 
     formData.append("idInvoice", values.idInvoice);
@@ -610,6 +613,9 @@ async function createInvoice() {
   } catch (e: unknown) {
     const message = getApiErrorMessage(e);
     appToast.error("Échec de création, veuillez réessayer.", message);
+  }
+  finally{
+    setLoading(false)
   }
   
 }

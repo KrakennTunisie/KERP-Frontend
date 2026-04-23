@@ -1,19 +1,19 @@
 "use client"
 
 import { DocumentPreviewModal } from "@/shared/components/ui/documentPreviewModal"
+import { formatDateLong } from "@/shared/utils/formatDate"
 import useClientInvoiceDetails, { InvoiceDetailsProps } from "../../hooks/useClientInvoiceDetails"
 import { mockInvoiceItems } from "../../mocks/invoice-items-mocks"
 import { InvoiceEventLabels } from "../../types/invoiceEventType"
-import { getClientInvoiceAllowedNextStatuses, invoiceStatusLabels, invoiceStatusSchema } from "../../types/invoiceStatus"
+import { invoiceStatusLabels, invoiceStatusSchema } from "../../types/invoiceStatus"
+import { paymentMethodLabels } from "../../types/paymentMethod"
 import Card from "../widgets/card"
 import { SectionLabel } from "../widgets/sectionLabel"
 import ShieldIcon from "../widgets/shieldIcon"
 import { SendToTTNModal } from "../widgets/ttnConfirmationModal"
-import { paymentMethodLabels } from "../../types/paymentMethod"
-import { formatDateLong } from "@/shared/utils/formatDate"
 
 export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps) {
-    const {  setStatusPaiement, client, invoice, previewDocument, setPreviewDocument, sendToTTN, TtnModalOpen, setTtnModalOpen,
+    const {   client, invoice, previewDocument, setPreviewDocument, sendToTTN, TtnModalOpen, setTtnModalOpen,
         hasCreditInvoice,loading, sent, successMessage, router, updateStatus } = useClientInvoiceDetails({ invoiceId });
     return (
         <div className="min-h-screen bg-gray-50 font-sans">

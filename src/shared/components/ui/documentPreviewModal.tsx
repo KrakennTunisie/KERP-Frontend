@@ -1,13 +1,11 @@
 "use client";
 
-import { z } from "zod";
-import { useEffect, useRef } from "react";
-import getDocumentType from "@/shared/utils/getDocumentType";
-import { Modal } from "./modal";
-import { FileText, Download, ExternalLink, File as FileIcon } from "lucide-react";
 import { Document as BillingDocument } from "@/features/billing/models/document";
+import getDocumentType from "@/shared/utils/getDocumentType";
+import { Download, ExternalLink, File as FileIcon, FileText } from "lucide-react";
+import { useEffect, useRef } from "react";
 import { FileSchema } from "../../../features/billing/types/pdfSchema";
-import { useCreateInvoice } from "@/features/billing/hooks/useCreateEditInvoice";
+import { Modal } from "./modal";
 
 
 export type DocumentOrFile = BillingDocument| FileSchema | null | undefined;
@@ -80,7 +78,7 @@ export function DocumentPreviewModal({
         onClick={() => {
          onCreateInvoice()
         }}
-        className="px-5 py-3 rounded-2xl bg-blue-600 text-white font-black hover:bg-blue inline-flex items-center gap-2"
+        className="px-5 py-3 rounded-2xl bg-blue-600 text-white font-black hover:bg-blue inline-flex items-center gap-2 disabled:opacity-50"
       >
         Créer la facture
       </button>
@@ -88,6 +86,7 @@ export function DocumentPreviewModal({
       <a
         href={url ?? undefined}
         download={fileName ?? true}
+        aria-disabled={loading}
         className="px-5 py-3 rounded-2xl bg-blue-600 text-white font-black hover:bg-blue inline-flex items-center gap-2"
       >
         <Download className="w-4 h-4" />
@@ -101,7 +100,7 @@ export function DocumentPreviewModal({
     <Modal
       open={open}
       onClose={handleClose}
-      title={"Prévisualisation du facture : "+ fileName  }
+      title={"Prévisualisation du document : "+ fileName  }
       footer={footer}
     >
       <div className="w-full">

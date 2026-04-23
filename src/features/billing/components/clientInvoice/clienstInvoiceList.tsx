@@ -1,15 +1,15 @@
 'use client';
 
+import PageLoader from "@/shared/components/ui/pageLoader";
 import StatClientInvoiceCard from "@/shared/components/ui/statClientInvoiceCard";
-import {  getClientInvoiceAllowedNextStatuses, invoiceStatusColors, invoiceStatusLabels, invoiceStatusSchema } from "../../types/invoiceStatus";
+import { formatDateLong } from "@/shared/utils/formatDate";
+import { ChevronLeft, ChevronRight, Settings } from "lucide-react";
 import Link from "next/link";
 import { useClientInvoiceList } from "../../hooks/useClientsInvoiveList";
-import { SendInvoiceModal } from "../widgets/sendInvoiceModal";
 import { invoiceComplianceStatusSchema } from "../../types/invoiceComplianceStatus";
+import { getClientInvoiceAllowedNextStatuses, invoiceStatusColors, invoiceStatusLabels, invoiceStatusSchema } from "../../types/invoiceStatus";
 import { DeleteInvoiceModal } from "../widgets/deleteInvoiceModal";
-import PageLoader from "@/shared/components/ui/pageLoader";
-import { ChevronLeft, ChevronRight, ColumnsSettingsIcon, LucideSettings, Settings, Settings2, Settings2Icon } from "lucide-react";
-import { formatDateLong } from "@/shared/utils/formatDate";
+import { SendInvoiceModal } from "../widgets/sendInvoiceModal";
 import { UpdateInvoiceStatusModal } from "../widgets/updateStatusModal";
 
 export default function ClientsInvoiceList() {

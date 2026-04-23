@@ -1,7 +1,6 @@
-import { InvoiceItem } from '../models/invoiceItem'
-import { OperationCategoryLabels, operationCategorySchema } from '../types/operationCategory'
-import { tvaRateSchema } from '../types/tvaRate'
 import { v4 as uuidv4 } from "uuid";
+import { InvoiceItem } from '../models/invoiceItem';
+import { operationCategorySchema } from '../types/operationCategory';
 export default function defaultItem(id?: string): InvoiceItem {
   return {
     idInvoiceItem: id ?? uuidv4() ,

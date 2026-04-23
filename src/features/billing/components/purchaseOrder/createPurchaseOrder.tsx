@@ -1,17 +1,16 @@
 "use client"
 
-import { tvaRateSchema } from "../../types/tvaRate"
-import { paymentMethodLabels, paymentMethodSchema } from "../../types/paymentMethod"
-import { SectionTitle } from "../widgets/sectionTitle"
-import { InvoiceFormClientProps, useCreateInvoice } from "../../hooks/useCreateEditInvoice"
-import { OperationCategoryLabels, operationCategorySchema } from "../../types/operationCategory"
-import { invoiceTypeSchema } from "../../types/invoiceType"
-import { CurrencyType, currencyTypeSchema } from "../../types/currency"
-import { PaymentConditionLabels, PaymentConditionSchema } from "../../types/paymentCondition"
 import { DocumentPreviewModal } from "@/shared/components/ui/documentPreviewModal"
-import ErrorForm from "../widgets/errorForm"
-import { SendToTTNModal } from "../widgets/ttnConfirmationModal"
+import { InvoiceFormClientProps } from "../../hooks/useCreateEditInvoice"
 import { useCreatePurchaseOrder } from "../../hooks/useCreateEditPurchaseOrder"
+import { CurrencyType, currencyTypeSchema } from "../../types/currency"
+import { invoiceTypeSchema } from "../../types/invoiceType"
+import { OperationCategoryLabels, operationCategorySchema } from "../../types/operationCategory"
+import { PaymentConditionLabels, PaymentConditionSchema } from "../../types/paymentCondition"
+import { paymentMethodLabels, paymentMethodSchema } from "../../types/paymentMethod"
+import { tvaRateSchema } from "../../types/tvaRate"
+import ErrorForm from "../widgets/errorForm"
+import { SectionTitle } from "../widgets/sectionTitle"
 
 export default function CreatePurchaseOrder({
   mode,

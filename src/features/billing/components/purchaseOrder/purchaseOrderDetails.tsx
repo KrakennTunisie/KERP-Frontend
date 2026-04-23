@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
+import { InvoiceItem } from "../../models/invoiceItem";
+import { Partner } from "../../models/partner";
 import Card from "../widgets/card";
 import { SectionLabel } from "../widgets/sectionLabel";
-import { Partner } from "../../models/partner";
-import { InvoiceItem } from "../../models/invoiceItem";
 
 
 type ModalProps = {

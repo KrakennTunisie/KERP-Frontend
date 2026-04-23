@@ -1,26 +1,25 @@
-import { useFieldArray, useForm, useWatch } from "react-hook-form";
-import { invoiceCreditNoteCreateSchema, invoiceCreditNoteSchema } from "../models/creditNote";
+import { getApiErrorMessage } from "@/shared/api/handle-api-error";
+import { appToast } from "@/shared/lib/toast";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
+import { InvoicesAPI, InvoicesCreditNoteAPI } from "../api/partners-api";
+import { handleSaveAsPDF } from "../lib/buildInvoicePDF";
 import {
     calculateInvoiceTotals,
     calculUnityPrice,
     recalculate,
 } from "../lib/invoiceCalculation";
-import { InvoiceItem} from "../models/invoiceItem";
-import {  useEffect, useMemo, useRef, useState } from "react";
+import defaultItem from "../mocks/invoice-items-mocks";
+import { invoiceCreditNoteCreateSchema } from "../models/creditNote";
+import { Invoice } from "../models/invoice";
+import { InvoiceItem } from "../models/invoiceItem";
 import { CreditNoteTypeSchema } from "../types/creditNoteType";
-import { useRouter } from "next/navigation";
-import defaultItem, { mockInvoiceItems } from "../mocks/invoice-items-mocks";
-import { handleSaveAsPDF } from "../lib/buildInvoicePDF";
-import { MOCK_INVOICES } from "../mocks/invoice-mocks";
 import { invoiceComplianceStatusSchema } from "../types/invoiceComplianceStatus";
 import { invoiceStatusSchema } from "../types/invoiceStatus";
-import { InvoicesAPI, InvoicesCreditNoteAPI } from "../api/partners-api";
-import { appToast } from "@/shared/lib/toast";
-import { getApiErrorMessage } from "@/shared/api/handle-api-error";
-import { Invoice } from "../models/invoice";
 import { nextNumber } from "../types/nextNumber";
 
 type creditNoteFormValues = z.infer<typeof invoiceCreditNoteCreateSchema>;

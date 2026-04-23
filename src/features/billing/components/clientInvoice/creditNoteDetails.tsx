@@ -15,7 +15,7 @@ import { formatDateLong } from "@/shared/utils/formatDate";
 
 export default function CreditNoteDetails({params}:PropsCreditNote)
 {
-    const { updateStatus, previewDocument, setPreviewDocument,  setStatusPaiement, invoice, sendToTTN, TtnModalOpen, setTtnModalOpen ,loading, sent, successMessage, router } = useCreditNoteDetails({ params });
+    const { updateStatus, previewDocument, setPreviewDocument, invoice, sendToTTN, TtnModalOpen, setTtnModalOpen ,loading, sent, successMessage, router } = useCreditNoteDetails({ params });
       return (
           <div className="min-h-screen bg-gray-50 font-sans">
   
