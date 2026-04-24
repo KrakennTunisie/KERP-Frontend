@@ -73,7 +73,9 @@ export default function CreateInvoiceClient({ mode,
                 onClose={onCloseDocumentModal}
                 onCreateInvoice={mode == "create" ? createInvoice : updateInvoice}
                 document={pdfUrl}
-                loading={loading} />
+                loading={loading}
+                type="Facture"
+                 />
             {/* Modal pour demander au user s'il veut envoyer la Facture au TTN */}
             <SendToTTNModal
                 open={TtnModalOpen}

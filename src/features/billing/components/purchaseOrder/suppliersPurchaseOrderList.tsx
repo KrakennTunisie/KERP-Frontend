@@ -42,6 +42,7 @@ export default function SuppliersPurchaseOrderList() {
                 <PurchaseOrderModalContent
                     client={MOCK_PARTNERS[1]}
                     items={mockInvoiceItems}
+                    purchaseOrderId=""
                     onClose={() => setOpen(false)}
                 />
             </PurchaseOrderModal>
@@ -113,9 +114,9 @@ export default function SuppliersPurchaseOrderList() {
                                     </td>
                                     <td className="px-5 py-4 text-slate-700">SYSLAB</td>
                                     <td className="px-5 py-4">
-                                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${f.Status !== "TOUTES" ? purchaseOrderStatusColors[f.Status] : ""
+                                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${f.purchaseOrderStatus !== "ALL" ? purchaseOrderStatusColors[f.purchaseOrderStatus] : ""
                                             }}`}>
-                                            {f.Status}
+                                            {f.purchaseOrderStatus}
                                         </span>
                                     </td>
                                     <td className="px-5 py-4 text-slate-700 font-medium">
@@ -138,7 +139,7 @@ export default function SuppliersPurchaseOrderList() {
 
                                             {/* Supprimer */}
                                             <button
-                                                disabled={f.Status != purchaseOrderStatusSchema.enum.BROULLION}
+                                                disabled={f.purchaseOrderStatus != purchaseOrderStatusSchema.enum.DRAFT}
                                                 onClick={(e) => { setDeleteOpen(true); setInvoiceRef(f.idPurchaseOrder); console.log("delete", f.idPurchaseOrder); }}
                                                 className="p-2 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                                 title="Supprimer"

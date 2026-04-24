@@ -30,6 +30,8 @@ export const INVOICES_ENDPOINTS={
   getSuppliersInvoices: (query? : GetListParams)=> `/invoices/supplier-invoices${buildQueryString(query)}`,
   clientInvoiceById: (id?: string) => `/invoices/client-invoices/${id}`,
   clientInvoiceStatusById: (id?: string) => `/invoices/client-invoices/${id}/status`,
+  clientInvoiceStats: (id?: string) => `/invoices/client-invoices/stats/${id}`,
+  supplierInvoiceStats: (id?: string) => `/invoices/supplier-invoices/stats/${id}`,
 
   supplierInvoiceById: (id: string) => `/invoices/supplier-invoices/${id}`,
 
@@ -48,10 +50,10 @@ export const INVOICES_CREDIT_NOTE_ENDPOINTS={
 }
 
 export const PURCHASE_ORDER_ENDPOINTS = {
-  purchaseOrders: "/purchase-orders",
+  purchaseOrders: "/purchase-orders/",
   nextNumber: "/purchase-orders/next-number",
-  getPurchaseOrders: (query? : GetListParams)=> `/purchase-orders${buildQueryString(query)}`,
-  purchaseOrderById: (id: string) => `/purchase-orders/${id}`, 
+  getPurchaseOrders: (query? : GetListParams)=> `/purchase-orders/${buildQueryString(query)}`,
+  purchaseOrderById: (id?: string) => `/purchase-orders/${id}`, 
 }
 
 export const EXCHANGE_RATE_ENDPOINTS = {

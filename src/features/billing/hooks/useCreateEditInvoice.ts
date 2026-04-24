@@ -1,13 +1,14 @@
 import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 import { useDebounce } from "@/shared/hooks/useDebounce";
 import { appToast } from "@/shared/lib/toast";
+import { useEffect, useRef, useState } from "react";
+import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
 import { ExchangeRateAPI, InvoicesAPI, partnersApi } from "../api/partners-api";
 import { handleSaveAsPDF } from "../lib/buildInvoicePDF";
+import { BaseItem, InvoiceItem } from "../models/invoiceItem";
 import {
   calculateInvoiceTotals,
   calculUnityPrice,
@@ -16,7 +17,6 @@ import {
 } from "../lib/invoiceCalculation";
 import defaultItem from "../mocks/invoice-items-mocks";
 import { Invoice, InvoiceCreate, invoiceCreateSchema } from "../models/invoice";
-import { InvoiceItem } from "../models/invoiceItem";
 import { PartnerSummary } from "../models/partner";
 import { PurchaseOrder } from "../models/purchaseOrder";
 import { CurrencyType, currencyTypeSchema } from "../types/currency";
@@ -51,48 +51,48 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
       const invoice = await InvoicesAPI.getClientInvoiceById(invoiceId);
       setInvoice(invoice);
     } catch (error) {
-      appToast.error("Erreur Fetch du client:",getApiErrorMessage(error));
+      appToast.error("Erreur Fetch du client:", getApiErrorMessage(error));
     }
-    finally{
+    finally {
       setLoading(false)
     }
   }
-  const fetchNextNumber = async()=>{
-    try{
-      if(mode == "create"){
+  const fetchNextNumber = async () => {
+    try {
+      if (mode == "create") {
 
-      const response = await InvoicesAPI.getNextInvoiceNumber();
-      setNextNumber(response);
+        const response = await InvoicesAPI.getNextInvoiceNumber();
+        setNextNumber(response);
       }
-      else{
+      else {
         await fetchClientInvoice()
       }
     }
-    catch(error: any){
-      appToast.error("Erreur de fetch clients: ",getApiErrorMessage(error))
+    catch (error: any) {
+      appToast.error("Erreur de fetch clients: ", getApiErrorMessage(error))
     }
   }
 
   useEffect(()=>{
     fetchNextNumber()
-  },[])
+  }, [])
   const router = useRouter()
   const form = useForm<InvoiceCreate>({
     resolver: zodResolver(invoiceCreateSchema),
     defaultValues: {
       invoiceType: "SALE",
-      invoiceNumber:nextNumber?.value,
+      invoiceNumber: nextNumber?.value,
       idInvoice: uuidv4(),
       invoiceStatus: invoiceStatusSchema.enum["DRAFT"],
       issueDate: new Date(),
       creationDate: new Date(),
       sentToclientDate: null,
       sentToTTNDate: null,
-      dueDate:new Date(new Date().setDate(new Date().getDate() + 15)) ,
+      dueDate: new Date(new Date().setDate(new Date().getDate() + 15)),
       invoiceItems: [defaultItem()],
-      totalExclTax:0,
+      totalExclTax: 0,
       totalInclTax: 0,
-      vatRate:0,
+      vatRate: 0,
       paymentCondition: PaymentConditionSchema.enum.NET_15,
       paymentMethod: paymentMethodSchema.enum.BANK_TRANSFER,
       partner: null,
@@ -104,77 +104,77 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
       complianceQRcode: "",
       invoiceComplianceStatus: invoiceComplianceStatusSchema.enum.RECEIVED,
       invoiceDocument: null,
-      vatAmount:0,
+      vatAmount: 0,
     },
     mode: "onChange",
   });
 
-  const { control, setValue, getValues, handleSubmit, reset ,formState: { isDirty, isValid,errors} } = form;
+  const { control, setValue, getValues, handleSubmit, reset, formState: { isDirty, isValid, errors } } = form;
   const { append, remove, replace } = useFieldArray({
     control,
     name: "invoiceItems",
   });
 
   useEffect(() => {
-  if (mode === "edit" && invoice) {
-    reset({
-      idInvoice: invoice.idInvoice,
-      invoiceType: invoice.invoiceType,
-      invoiceNumber: invoice.invoiceNumber,
-      issueDate: new Date(invoice.issueDate),
-      dueDate: new Date(invoice.dueDate),
-      
-      creationDate: new Date(),
-      sentToclientDate: null,
-      sentToTTNDate: null,
-      totalExclTax: invoice.invoiceCurrency== "EUR" 
-                        ? invoice.totalExclTaxEUR 
-                        : invoice.invoiceCurrency== "TND" 
-                            ? invoice.totalExclTaxTND
-                            : invoice.totalExclTax,
-      totalInclTax: invoice.invoiceCurrency== "EUR" 
-                        ? invoice.totalInclTaxEUR 
-                        : invoice.invoiceCurrency== "TND" 
-                            ? invoice.totalInclTaxTND
-                            : invoice.totalInclTax,
-      invoiceItems:
-        invoice.invoiceItems && invoice.invoiceItems.length > 0
-          ? invoice.invoiceItems
-          : [defaultItem()],
-      vatRate: invoice.vatRate ?? 0,
-      paymentCondition:
-        invoice.paymentCondition ?? PaymentConditionSchema.enum.NET_15,
-      paymentMethod:
-        invoice.paymentMethod ?? paymentMethodSchema.enum.BANK_TRANSFER,
-      partner: invoice.partner ?? null,
-      purchaseOrder: invoice.purchaseOrder?.idPurchaseOrder ?? null,
-      invoiceCurrency: invoice.invoiceCurrency ?? currencyTypeSchema.enum.TND,
-      appliedExchangeRate: invoice.appliedExchangeRate ?? 4,
-      exchangeRateReferenceDate: invoice.exchangeRateReferenceDate
-        ? new Date(invoice.exchangeRateReferenceDate)
-        : new Date(),
-      exchangeRateSource:
-        invoice.exchangeRateSource ??
-        exchangeRateSourceSchema.enum.EXTERNAL_API,
-      vatAmount:0,
-      invoiceDocument: null,
-      complianceQRcode: "",
-      invoiceComplianceStatus: invoice.invoiceComplianceStatus,
-      invoiceStatus:invoice.invoiceStatus,
-    });
-  }
-}, [mode, invoice, reset]);
+    if (mode === "edit" && invoice) {
+      reset({
+        idInvoice: invoice.idInvoice,
+        invoiceType: invoice.invoiceType,
+        invoiceNumber: invoice.invoiceNumber,
+        issueDate: new Date(invoice.issueDate),
+        dueDate: new Date(invoice.dueDate),
+
+        creationDate: new Date(),
+        sentToclientDate: null,
+        sentToTTNDate: null,
+        totalExclTax: invoice.invoiceCurrency == "EUR"
+          ? invoice.totalExclTaxEUR
+          : invoice.invoiceCurrency == "TND"
+            ? invoice.totalExclTaxTND
+            : invoice.totalExclTax,
+        totalInclTax: invoice.invoiceCurrency == "EUR"
+          ? invoice.totalInclTaxEUR
+          : invoice.invoiceCurrency == "TND"
+            ? invoice.totalInclTaxTND
+            : invoice.totalInclTax,
+        invoiceItems:
+          invoice.invoiceItems && invoice.invoiceItems.length > 0
+            ? invoice.invoiceItems
+            : [defaultItem()],
+        vatRate: invoice.vatRate ?? 0,
+        paymentCondition:
+          invoice.paymentCondition ?? PaymentConditionSchema.enum.NET_15,
+        paymentMethod:
+          invoice.paymentMethod ?? paymentMethodSchema.enum.BANK_TRANSFER,
+        partner: invoice.partner ?? null,
+        purchaseOrder: invoice.purchaseOrder?.idPurchaseOrder ?? null,
+        invoiceCurrency: invoice.invoiceCurrency ?? currencyTypeSchema.enum.TND,
+        appliedExchangeRate: invoice.appliedExchangeRate ?? 4,
+        exchangeRateReferenceDate: invoice.exchangeRateReferenceDate
+          ? new Date(invoice.exchangeRateReferenceDate)
+          : new Date(),
+        exchangeRateSource:
+          invoice.exchangeRateSource ??
+          exchangeRateSourceSchema.enum.EXTERNAL_API,
+        vatAmount: 0,
+        invoiceDocument: null,
+        complianceQRcode: "",
+        invoiceComplianceStatus: invoice.invoiceComplianceStatus,
+        invoiceStatus: invoice.invoiceStatus,
+      });
+    }
+  }, [mode, invoice, reset]);
 
   useEffect(() => {
-  if (nextNumber?.value) {
-    form.setValue("invoiceNumber", nextNumber.value, {
-      shouldValidate: true,
-      shouldDirty: false,
-    });
-  }
-  if(mode=="edit"){
-  }
-}, [nextNumber]);
+    if (nextNumber?.value) {
+      form.setValue("invoiceNumber", nextNumber.value, {
+        shouldValidate: true,
+        shouldDirty: false,
+      });
+    }
+    if (mode == "edit") {
+    }
+  }, [nextNumber]);
 
 
     const fetchExchangeRate = async(toCurrency: string)=>{
@@ -234,80 +234,77 @@ useEffect(() => {
   const [sent, setSent] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const invoiceRef = useRef<HTMLDivElement>(null);
-  const [pdfUrl, setPdfUrl] = useState< File | null>(null);
+  const [pdfUrl, setPdfUrl] = useState<File | null>(null);
 
-  
+
   const [linkedToPO, setLinkedToPO] = useState(false);
   const [selectedPO, setSelectedPO] = useState<PurchaseOrder | null>(null);
 
   // UI state only
   const [clientSearch, setClientSearch] = useState("");
-  const [clients, setClients]=useState<PartnerSummary[] | []>([])
-  const [loadingClients, setLoadingClients]= useState(false)
+  const [clients, setClients] = useState<PartnerSummary[] | []>([])
+  const [loadingClients, setLoadingClients] = useState(false)
   const [showDropdown, setShowDropdown] = useState(false);
   const previousCurrencyRef = useRef<CurrencyType>("TND");
- // const previewData = useWatch({ control });
- const previewData = getValues();
+  // const previewData = useWatch({ control });
+  const previewData = getValues();
   // Validation des données obligatoire
 
-const canCreateInvoice =
-  (mode == "create" ? isDirty: true )&&
-   isValid &&
-  !!previewData.partner &&
-  !!previewData.invoiceItems?.length &&
-  !!previewData.dueDate &&
-  !!previewData.issueDate &&
-  !!previewData.paymentCondition &&
-  !!previewData.paymentMethod &&
-  previewData.invoiceItems.every(
-    (item) =>
-      item.description?.trim() &&
-      item.operationCategory?.trim() &&
-      item.quantity! > 0 &&
-      item.unityPriceEXclTax! >= 0 &&
-      item.vatRate! >= 0
-  ); 
-
-
+  const canCreateInvoice =
+    (mode == "create" ? isDirty : true) &&
+    isValid &&
+    !!previewData.partner &&
+    !!previewData.invoiceItems?.length &&
+    !!previewData.dueDate &&
+    !!previewData.issueDate &&
+    !!previewData.paymentCondition &&
+    !!previewData.paymentMethod &&
+    previewData.invoiceItems.every(
+      (item) =>
+        item.description?.trim() &&
+        item.operationCategory?.trim() &&
+        item.quantity! > 0 &&
+        item.unityPriceEXclTax! >= 0 &&
+        item.vatRate! >= 0
+    );
 
 
 
   //Filtrage de la liste des clients lors de la recherche 
   const debouncedSearchQuery = useDebounce(clientSearch, 2000);
 
-    const getClients = async ()=>{
-        try {
-          setLoadingClients(true);
-          const keyword =
-            debouncedSearchQuery.trim().length >= 3
-              ? debouncedSearchQuery.trim()
-              : undefined;
+  const getClients = async () => {
+    try {
+      setLoadingClients(true);
+      const keyword =
+        debouncedSearchQuery.trim().length >= 3
+          ? debouncedSearchQuery.trim()
+          : undefined;
 
-          const response = await partnersApi.getSummaryClients({
-            keyword: keyword,
-          });
+      const response = await partnersApi.getSummaryClients({
+        keyword: keyword,
+      });
 
-          setClients(response);
-        } catch (error) {
-          appToast.error("Erreur de fetch clients: ",getApiErrorMessage(error))
-        } finally {
-          setLoadingClients(false);
-        }
-      };
+      setClients(response);
+    } catch (error) {
+      appToast.error("Erreur de fetch clients: ", getApiErrorMessage(error))
+    } finally {
+      setLoadingClients(false);
+    }
+  };
 
-    useEffect(() => {
-      
-      getClients();
-    }, [debouncedSearchQuery]);
+  useEffect(() => {
+
+    getClients();
+  }, [debouncedSearchQuery]);
   //Synchronisation des items lors d'un nouveau item
-  const syncItems = (newItems: InvoiceItem[]) => {
-    replace(newItems);
-    setValue("invoiceItems", newItems, {
+ const syncItems = (newItems: BaseItem[]) => {
+    replace(newItems as any);
+    setValue("invoiceItems", newItems as any, {
       shouldValidate: true,
       shouldDirty: true,
     });
-
-  };
+};
 
 
   // Ajout d'un card qui permet l'ajout les données d'unt item (P.U ,QT , TVA)
@@ -394,28 +391,28 @@ const canCreateInvoice =
   };
 
   // calcule de la date d'échance lors la saisie de condition de paiement 
-  
-  const calculateDueDate = (): Date => {
-   const date = new Date(getValues("issueDate"));
-   console.log(date)
-  switch (getValues("paymentCondition")) {
-    case PaymentConditionSchema.enum.NET_15: date.setDate(date.getDate() + 15); break;
-    case  PaymentConditionSchema.enum.NET_30: date.setDate(date.getDate() + 30); break;
-    case  PaymentConditionSchema.enum.NET_45: date.setDate(date.getDate() + 45); break;
-    case "IMMEDIATE": break;
-  }
-   setValue("dueDate", date, { shouldValidate: true });
-  return date;
-};
 
-// Recupération les données d'un bon de commande lorsque la facture est liée à un bon de commande 
+  const calculateDueDate = (): Date => {
+    const date = new Date(getValues("issueDate"));
+    console.log(date)
+    switch (getValues("paymentCondition")) {
+      case PaymentConditionSchema.enum.NET_15: date.setDate(date.getDate() + 15); break;
+      case PaymentConditionSchema.enum.NET_30: date.setDate(date.getDate() + 30); break;
+      case PaymentConditionSchema.enum.NET_45: date.setDate(date.getDate() + 45); break;
+      case "IMMEDIATE": break;
+    }
+    setValue("dueDate", date, { shouldValidate: true });
+    return date;
+  };
+
+  // Recupération les données d'un bon de commande lorsque la facture est liée à un bon de commande 
   function handleSelectPO(po: PurchaseOrder) {
     setSelectedPO(po);
     // Pré-remplir les champs du form
     console.log(po.issueDate.toLocaleDateString)
-    form.setValue("issueDate",  new Date(po.issueDate).toISOString().split("T")[0] as unknown as Date);
-    form.setValue("issueDate",po.issueDate, { shouldValidate: true, shouldDirty: true,});
-    form.setValue("paymentCondition", po.PaymentCondition);
+    form.setValue("issueDate", new Date(po.issueDate).toISOString().split("T")[0] as unknown as Date);
+    form.setValue("issueDate", po.issueDate, { shouldValidate: true, shouldDirty: true, });
+    form.setValue("paymentCondition", po.paymentCondition);
     form.setValue("paymentMethod", po.paymentMethod);
     calculateDueDate()
     form.setValue("invoiceCurrency", po.currency);
@@ -429,7 +426,7 @@ const canCreateInvoice =
     po?.purchaseOrderItems!.forEach(() => addItem());
   }
 
-    function handleTogglePO(checked: boolean) {
+  function handleTogglePO(checked: boolean) {
     setLinkedToPO(checked);
     if (!checked) {
       setSelectedPO(null);
@@ -450,9 +447,9 @@ const canCreateInvoice =
   /* eslint-disable react-hooks/refs */
   const onSubmit = handleSubmit(
     async () => {
-                  const element = invoiceRef.current;
+      const element = invoiceRef.current;
 
-            if (!element) return;
+      if (!element) return;
       const file = await handleSaveAsPDF(element, getValues("invoiceNumber"));
       if (file) {
         setValue("invoiceDocument", file, { shouldValidate: true, shouldDirty: true });
@@ -466,15 +463,14 @@ const canCreateInvoice =
   );
 
   //fermer le document modal 
-  function onCloseDocumentModal()
-  {
-  setIsModalOpen(false);
-  setPdfUrl(null);
+  function onCloseDocumentModal() {
+    setIsModalOpen(false);
+    setPdfUrl(null);
   }
 
-async function createInvoice() {
-  const values = getValues();
-  const documentFile = values.invoiceDocument ?? pdfUrl;
+  async function createInvoice() {
+    const values = getValues();
+    const documentFile = values.invoiceDocument ?? pdfUrl;
 
   console.log("values: ", values)
   if (!documentFile) {
@@ -487,149 +483,146 @@ async function createInvoice() {
     return;
   }
 
-  try {
-    setLoading(true)
-    const formData = new FormData();
-
-    formData.append("invoiceNumber", values.invoiceNumber);
-    formData.append("issueDate", values.issueDate.toISOString());
-    formData.append("dueDate", values.dueDate.toISOString());
-
-    formData.append("invoiceType", values.invoiceType);
-    formData.append("invoiceCurrency", values.invoiceCurrency);
-    formData.append("vatRate", String(values.vatRate));
-    formData.append("paymentMethod", values.paymentMethod);
-    formData.append("paymentCondition", values.paymentCondition);
-
-    formData.append(
-      "exchangeRateReferenceDate",values.exchangeRateReferenceDate.toISOString()
-    );
-    formData.append(
-      "appliedExchangeRate",
-      String(values.appliedExchangeRate)
-    );
-    formData.append("exchangeRateSource", values.exchangeRateSource);
-
-    formData.append("partner",values.partner.idPartner);
-
-    if (values.purchaseOrder) {
-      formData.append("purchaseOrder", values.purchaseOrder);
-    }
-
-     if (values.invoiceItems?.length) {
-      formData.append("invoiceItemsList", JSON.stringify(values.invoiceItems));
-    } 
-
-    formData.append("invoiceDocument", documentFile);
-
-    for (const pair of formData.entries()) {
-      console.log(pair[0], pair[1]);
-    }
     
-    const createdInvoice = await InvoicesAPI.createClientInvoice(formData);
+    try {
+          setLoading(true)
 
-    if (createdInvoice) {
-      appToast.success("Facture créée avec succès");
-      setIsModalOpen(false);
-      setSuccessMessage("La facture a été créée avec succès.");
-      setTtnModalOpen(true);
+      const formData = new FormData();
+
+      formData.append("invoiceNumber", values.invoiceNumber);
+      formData.append("issueDate", values.issueDate.toISOString());
+      formData.append("dueDate", values.dueDate.toISOString());
+
+      formData.append("invoiceType", values.invoiceType);
+      formData.append("invoiceCurrency", values.invoiceCurrency);
+      formData.append("vatRate", String(values.vatRate));
+      formData.append("paymentMethod", values.paymentMethod);
+      formData.append("paymentCondition", values.paymentCondition);
+
+      formData.append(
+        "exchangeRateReferenceDate", values.exchangeRateReferenceDate.toISOString()
+      );
+      formData.append(
+        "appliedExchangeRate",
+        String(values.appliedExchangeRate)
+      );
+      formData.append("exchangeRateSource", values.exchangeRateSource);
+
+      formData.append("partner", values.partner.idPartner);
+
+      if (values.purchaseOrder) {
+        formData.append("purchaseOrder", values.purchaseOrder);
+      }
+
+      if (values.invoiceItems?.length) {
+        formData.append("invoiceItemsList", JSON.stringify(values.invoiceItems));
+      }
+
+      formData.append("invoiceDocument", documentFile);
+
+      for (const pair of formData.entries()) {
+        console.log(pair[0], pair[1]);
+      }
+
+      const createdInvoice = await InvoicesAPI.createClientInvoice(formData);
+
+      if (createdInvoice) {
+        appToast.success("Facture créée avec succès");
+        setIsModalOpen(false);
+        setSuccessMessage("La facture a été créée avec succès.");
+        setTtnModalOpen(true);
+      }
+    } catch (e: unknown) {
+      const message = getApiErrorMessage(e);
+      appToast.error("Échec de création, veuillez réessayer.", message);
     }
-  } catch (e: unknown) {
-    const message = getApiErrorMessage(e);
-    appToast.error("Échec de création, veuillez réessayer.", message);
-  }
-    finally{
+        finally{
     setLoading(false)
   }
-}
-
- const updateInvoice = async ()=>{
-  
-  const values = getValues();
-  const documentFile = values.invoiceDocument ?? pdfUrl;
-
-  console.log("values: ", values)
-  if (!documentFile) {
-    appToast.error("Erreur de création", "Le document PDF est vide.");
-    return;
   }
 
-  if (!values.partner) {
-    appToast.error("Erreur de création", "Aucun client sélectionné.");
-    return;
-  }
+  const updateInvoice = async () => {
 
-  try {
-    setLoading(true)
-    const formData = new FormData();
+    const values = getValues();
+    const documentFile = values.invoiceDocument ?? pdfUrl;
 
-    formData.append("idInvoice", values.idInvoice);
-
-    formData.append("invoiceNumber", values.invoiceNumber);
-    formData.append("issueDate", values.issueDate.toISOString());
-    formData.append("dueDate", values.dueDate.toISOString());
-
-    formData.append("invoiceStatus",values.invoiceStatus)
-
-    formData.append("invoiceType", values.invoiceType);
-    formData.append("invoiceCurrency", values.invoiceCurrency);
-    formData.append("vatRate", String(values.vatRate));
-    formData.append("paymentMethod", values.paymentMethod);
-    formData.append("paymentCondition", values.paymentCondition);
-
-    formData.append(
-      "exchangeRateReferenceDate",values.exchangeRateReferenceDate.toISOString()
-    );
-    formData.append(
-      "appliedExchangeRate",
-      String(values.appliedExchangeRate)
-    );
-    formData.append("exchangeRateSource", values.exchangeRateSource);
-
-    formData.append("partner",values.partner.idPartner);
-
-    if (values.purchaseOrder) {
-      formData.append("purchaseOrder", values.purchaseOrder);
+    console.log("values: ", values)
+    if (!documentFile) {
+      appToast.error("Erreur de création", "Le document PDF est vide.");
+      return;
     }
 
-     if (values.invoiceItems?.length) {
-
-      formData.append("invoiceItemsList", JSON.stringify(values.invoiceItems));
-    } 
-
-    formData.append("invoiceDocument", documentFile);
-
-    for (const pair of formData.entries()) {
-      console.log(pair[0], pair[1]);
+    if (!values.partner) {
+      appToast.error("Erreur de création", "Aucun client sélectionné.");
+      return;
     }
-    const createdInvoice = await InvoicesAPI.updateClientInvoice(values.idInvoice,formData);
 
-    if (createdInvoice) {
-      appToast.success("Facture mise à jour avec succès");
-      setIsModalOpen(false);
-      setSuccessMessage("La facture a été mise à jour avec succès.");
-      setTtnModalOpen(true);
+    try {
+      const formData = new FormData();
+
+      formData.append("idInvoice", values.idInvoice);
+
+      formData.append("invoiceNumber", values.invoiceNumber);
+      formData.append("issueDate", values.issueDate.toISOString());
+      formData.append("dueDate", values.dueDate.toISOString());
+
+      formData.append("invoiceStatus", invoiceStatusSchema.enum.TO_COLLECT)
+
+      formData.append("invoiceType", values.invoiceType);
+      formData.append("invoiceCurrency", values.invoiceCurrency);
+      formData.append("vatRate", String(values.vatRate));
+      formData.append("paymentMethod", values.paymentMethod);
+      formData.append("paymentCondition", values.paymentCondition);
+
+      formData.append(
+        "exchangeRateReferenceDate", values.exchangeRateReferenceDate.toISOString()
+      );
+      formData.append(
+        "appliedExchangeRate",
+        String(values.appliedExchangeRate)
+      );
+      formData.append("exchangeRateSource", values.exchangeRateSource);
+
+      formData.append("partner", values.partner.idPartner);
+
+      if (values.purchaseOrder) {
+        formData.append("purchaseOrder", values.purchaseOrder);
+      }
+
+      if (values.invoiceItems?.length) {
+
+        formData.append("invoiceItemsList", JSON.stringify(values.invoiceItems));
+      }
+
+      formData.append("invoiceDocument", documentFile);
+
+      for (const pair of formData.entries()) {
+        console.log(pair[0], pair[1]);
+      }
+      const createdInvoice = await InvoicesAPI.updateClientInvoice(values.idInvoice, formData);
+
+      if (createdInvoice) {
+        appToast.success("Facture mise à jour avec succès");
+        setIsModalOpen(false);
+        setSuccessMessage("La facture a été mise à jour avec succès.");
+        setTtnModalOpen(true);
+      }
+    } catch (e: unknown) {
+      const message = getApiErrorMessage(e);
+      appToast.error("Échec de création, veuillez réessayer.", message);
     }
-  } catch (e: unknown) {
-    const message = getApiErrorMessage(e);
-    appToast.error("Échec de création, veuillez réessayer.", message);
-  }
-  finally{
-    setLoading(false)
-  }
-  
-}
 
- // Envoyer la facture au TTN 
- function sendToTTN ()
- {
-  setLoading(true);
-  setTimeout(() => {
-    setLoading(false)
-    setSuccessMessage("La facture a été envoyée avec succès au TTN.")
-    setSent(true)
-  }, 10000);
- }
+  }
+
+  // Envoyer la facture au TTN 
+  function sendToTTN() {
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false)
+      setSuccessMessage("La facture a été envoyée avec succès au TTN.")
+      setSent(true)
+    }, 10000);
+  }
 
 
   return {
@@ -655,7 +648,7 @@ async function createInvoice() {
     clearClient,
     setCurrency,
 
-    
+
     setTtnModalOpen,
     TtnModalOpen,
     isModalOpen,
@@ -666,16 +659,16 @@ async function createInvoice() {
     onCloseDocumentModal,
     invoiceRef,
     pdfUrl,
-  
+
     linkedToPO,
     setLinkedToPO,
     selectedPO,
     handleSelectPO,
     handleTogglePO,
- 
+
 
     //data validation
-   
+
     canCreateInvoice,
     errors,
 

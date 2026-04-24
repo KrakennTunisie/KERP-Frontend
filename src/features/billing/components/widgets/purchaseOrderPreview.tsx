@@ -1,33 +1,14 @@
-import { forwardRef } from "react";
-import { DeepPartial } from "react-hook-form";
-import { z } from "zod";
-import { invoiceCreditNoteSchema } from "../../models/creditNote";
-import { InvoiceCreate, invoiceSchema } from "../../models/invoice";
-import { creditNoteTypeLabels } from "../../types/creditNoteType";
-import { invoiceTypeLabels } from "../../types/invoiceType";
+import { paymentMethodLabels } from "../../types/paymentMethod";
 import { OperationCategoryLabels } from "../../types/operationCategory";
 import { PaymentConditionLabels } from "../../types/paymentCondition";
-import { paymentMethodLabels } from "../../types/paymentMethod";
+import { forwardRef } from "react";
+import { PurchaseOrder } from "../../models/purchaseOrder";
 
-
-export type InvoiceData = DeepPartial<z.infer<typeof invoiceSchema>>;
-export type CreditNoteData =DeepPartial< z.infer<typeof invoiceCreditNoteSchema>>;
-type InvoicePreviewProps = {
-    data: InvoiceCreate | CreditNoteData;
-};
-function isCreditNote(data: InvoiceCreate | CreditNoteData): data is CreditNoteData {
-    return "invoiceCreditNoteNumber" in data;
-}
-const getItemId = (item: any): string => {
-    if (item && 'idInvoiceItem' in item) return item.idInvoiceItem;
-    if (item && 'idCreditNoteItem' in item) return item.idCreditNoteItem;
-    return crypto.randomUUID();
+type PurchaseOrderPreviewProps = {
+    data: PurchaseOrder;
 };
 
-const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }, ref) => {
-    const isCredit = isCreditNote(data);
-    const partner = (isCreditNote(data) ? data.originalInvoice?.partner : data.partner);
-
+const PurchaseOrderPreview = forwardRef<HTMLDivElement, PurchaseOrderPreviewProps>(({ data }, ref) => {
     return (
         <div ref={ref} className="flex-1 p-6  bg-white">
             <div className="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden max-w-[820px] mx-auto">
@@ -59,15 +40,11 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
                         </div>
                         <div className="text-right">
                             <p className="text-4xl font-black text-slate-900 tracking-tight uppercase">
-                                {isCredit ? "FACTURE D'AVOIR" : invoiceTypeLabels[data.invoiceType!]}
+                                Bon commande
                             </p>
                             <div className="mt-2 inline-flex items-center px-4 py-1.5 rounded-lg bg-blue-50 border border-blue-200">
                                 <span className="text-sm font-bold text-blue-700">
-                                    {"invoiceNumber" in data
-                                        ? `N° ${data.invoiceNumber}`
-                                        : "invoiceCreditNoteNumber" in data ? `N° ${data.invoiceCreditNoteNumber}`
-                                            : ""
-                                    }
+                                    {`N° ${data.purchaseOrderNumber}`}
                                 </span>
                             </div>
                         </div>
@@ -101,11 +78,11 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">
                                 Destinataire
                             </p>
-                            {partner ? (
+                            {data.partner ? (
                                 <>
-                                    <p className="text-base font-bold text-slate-900">{partner.name}</p>
-                                    <p className="text-sm text-slate-500 mt-0.5">{partner.address}</p>
-                                    <p className="text-sm font-bold text-black mt-2">{partner.email}</p>
+                                    <p className="text-base font-bold text-slate-900">{data.partner.name}</p>
+                                    <p className="text-sm text-slate-500 mt-0.5">{data.partner.address}</p>
+                                    <p className="text-sm font-bold text-black mt-2">{data.partner.email}</p>
                                 </>
                             ) : (
                                 <p className="text-sm text-slate-400 italic">Aucun client sélectionné</p>
@@ -117,18 +94,11 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
                 {/* Meta info bar */}
                 <div className="mx-8 mb-6 grid grid-cols-4 divide-x divide-slate-100 border border-slate-100 rounded-2xl overflow-hidden">
                     {[
-                        ...(isCredit
-                            ? [{ label: "Réf. facture", value: data.originalInvoice?.invoiceNumber ?? "—" }]
-                            : []),
-                        { label: "Date d'émission", value: data.issueDate ? new Date(data.issueDate).toLocaleDateString("fr-FR") : "-" },
-                        ...(!isCredit
-                            ? [{ label: "Échéance", value: data.dueDate ? new Date(data.dueDate).toLocaleDateString("fr-FR") : "-" }]
-                            : []),
-                        ...(isCredit ? [
-                            { label: "Paiement", value: data?.originalInvoice?.paymentCondition ? PaymentConditionLabels[data.originalInvoice.paymentCondition] : "—", },
-                            { label: "Mode", value: data?.originalInvoice?.paymentMethod ? paymentMethodLabels[data.originalInvoice.paymentMethod] : "—" }] :
-                            [{ label: "Paiement", value: PaymentConditionLabels[data!.paymentCondition!] ?? "—" },
-                            { label: "Mode", value: paymentMethodLabels[data!.paymentMethod!] ?? "—" },])
+
+                        { label: "Date de livraison", value: data.issueDate ? new Date(data.issueDate).toLocaleDateString("fr-FR") : "-" },
+
+                        { label: "Paiement", value: PaymentConditionLabels[data.paymentCondition] ?? "—" },
+                        { label: "Mode", value: paymentMethodLabels[data!.paymentMethod!] ?? "—" },
 
                     ].map(({ label, value }) => (
                         <div key={label} className="px-4 py-3">
@@ -152,43 +122,30 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
                             </tr>
                         </thead>
                         <tbody>
-                            {(() => {
-                                const items = isCredit
-                                    ? (data as CreditNoteData).creditNoteItems
-                                    : (data as InvoiceCreate).invoiceItems;
-
-                                if (!items || items.length === 0) {
-                                    return (
-                                        <tr>
-                                            <td colSpan={4} className="text-center text-slate-400 italic py-8">
-                                                Aucun service ajouté
-                                            </td>
-                                        </tr>
-                                    );
-                                }
-
-                                return items.map((item) => (
-                                    <tr key={getItemId(item)} className="border-b border-slate-50">
+                            {data.purchaseOrderItems!.length === 0 ? (
+                                <tr>
+                                    <td colSpan={4} className="text-center text-slate-400 italic py-8">
+                                        Aucun service ajouté
+                                    </td>
+                                </tr>
+                            ) : (
+                                data.purchaseOrderItems?.map((item) => (
+                                    <tr key={item!.idPurchaseOrderItem} className="border-b border-slate-50">
                                         <td className="py-4">
                                             <p className="text-sm font-bold text-slate-800">
-                                                {item?.description || "—"}
+                                                {item!.description || "—"}
                                             </p>
-                                            {isCredit && (
-                                                <p className="text-xs text-slate-400 mt-0.5">
-                                                    {" Motif de l'avoir : "}{creditNoteTypeLabels[(data as CreditNoteData).motif!] ?? "—"}
-                                                </p>
-                                            )}
-                                            <p className="text-xs text-slate-400 mt-0.5">TVA appliquée : {item?.vatRate}%</p>
-                                            <p className="text-xs text-slate-400 mt-0.5">Catégorie : {item?.operationCategory ? OperationCategoryLabels[item.operationCategory]:"_"}</p>
+                                            <p className="text-xs text-slate-400 mt-0.5">TVA appliquée : {item!.vatRate}%</p>
+                                            <p className="text-xs text-slate-400 mt-0.5">Catégorie : {OperationCategoryLabels[item!.operationCategory!]}</p>
                                         </td>
-                                        <td className="text-right text-sm text-slate-600 py-4">{item?.quantity}</td>
-                                        <td className="text-right text-sm text-slate-600 py-4">{item?.unityPriceEXclTax?.toFixed(2)}</td>
+                                        <td className="text-right text-sm text-slate-600 py-4">{item!.quantity}</td>
+                                        <td className="text-right text-sm text-slate-600 py-4">{item!.unityPriceEXclTax!.toFixed(2)}</td>
                                         <td className="text-right text-sm font-bold text-slate-800 py-4">
-                                            {item?.itemTotalExclTax?.toFixed(2)}
+                                            {item!.itemTotalExclTax!.toFixed(2)}
                                         </td>
                                     </tr>
-                                ));
-                            })()}
+                                ))
+                            )}
                         </tbody>
                     </table>
                 </div>
@@ -219,14 +176,14 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
                         <div className="flex justify-between text-sm">
                             <span className="text-slate-500 font-medium">Total HT</span>
                             <span className="font-bold text-slate-800">{data.totalExclTax?.toFixed(2)}
-                                {isCredit ? data.originalInvoice?.invoiceCurrency : data.invoiceCurrency}
+                                {data.currency}
                             </span>
                         </div>
                         <div className="flex justify-between text-sm">
                             <span className="text-slate-500 font-medium">Total TVA</span>
                             <span className="font-bold text-slate-800">
-                                {data?.totalInclTax && data?.totalExclTax && (data?.totalInclTax - data?.totalExclTax ).toFixed(2)} 
-                                {isCredit ? data.originalInvoice?.invoiceCurrency : data.invoiceCurrency}
+                                {data.totalInclTax?.toFixed(2)}
+
                             </span>
                         </div>
                         <div className="h-px bg-slate-900 my-1" />
@@ -235,7 +192,7 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
                             <span className="text-3xl font-black text-slate-700">
                                 {data.totalInclTax?.toFixed(2)}{" "}
                                 <span className="text-lg">
-                                    {isCredit ? data.originalInvoice?.invoiceCurrency : data.invoiceCurrency}
+                                    {data.currency}
                                 </span>
                             </span>
                         </div>
@@ -245,6 +202,6 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
         </div>
     )
 });
-InvoicePreview.displayName = "InvoicePreview";
+PurchaseOrderPreview.displayName = "PurchaseOrderPreview";
 
-export default InvoicePreview;
+export default PurchaseOrderPreview;

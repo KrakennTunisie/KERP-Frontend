@@ -1,5 +1,5 @@
 import {  z } from "zod";
-const MAX_FILE_SIZE = 15 * 1024 * 1024; // 5MB
+const MAX_FILE_SIZE = 25 * 1024 * 1024; // 5MB
 
 const ACCEPTED_TYPES = [
   "application/pdf",

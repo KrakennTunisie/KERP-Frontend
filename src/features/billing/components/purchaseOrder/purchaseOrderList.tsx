@@ -2,17 +2,17 @@
 
 import Link from "next/link";
 import { DeleteInvoiceModal } from "../widgets/deleteInvoiceModal";
-import { mockPurchaseOrders } from "../../mocks/purchase-order-mocks";
-import { purchaseOrderStatusColors, purchaseOrderStatusSchema } from "../../types/purchaseOrderStatus";
+import { purchaseOrderStatusColors, purchaseOrderStatusLabels, purchaseOrderStatusSchema } from "../../types/purchaseOrderStatus";
 import { usePurchaseOrderList } from "../../hooks/usePurchaseOrderList";
 import PurchaseOrderModal, { PurchaseOrderModalContent } from "./purchaseOrderDetails";
 import { MOCK_PARTNERS } from "../../mocks/clients-mocks";
 import { mockInvoiceItems } from "../../mocks/invoice-items-mocks";
+import { Settings } from "lucide-react";
 
 export default function PurchaseOrderList() {
 
-    const { router, search, setSearch, deleteOpen, setDeleteOpen,
-        filtre, setFiltre, invoiceRef, setInvoiceRef, open, setOpen } = usePurchaseOrderList();
+    const { router, search, setSearch, deleteOpen, setDeleteOpen,purchaseOrders,totalElements,totalPages,deletePurchaseOrder,setIdPurchaseOrder,idPurchaseOrder
+        ,filtre, setFiltre, invoiceRef, setInvoiceRef, open, setOpen } = usePurchaseOrderList();
     return (
         <div className="min-h-screen bg-gray-50 p-8 font-sans">
             {/* Header */}
@@ -39,15 +39,17 @@ export default function PurchaseOrderList() {
                 onClose={() => setDeleteOpen(false)}
                 invoiceRef={invoiceRef}
                 onConfirm={async () => {
+                    deletePurchaseOrder(idPurchaseOrder);
                     setDeleteOpen(false);
                 }} />
             <PurchaseOrderModal
                 open={open}
-                title="Bon de Commande #INV-2024-0089"
+                title={`Bon de commande ${invoiceRef}`}
                 onClose={() => setOpen(false)}>
                 <PurchaseOrderModalContent
                     client={MOCK_PARTNERS[1]}
                     items={mockInvoiceItems}
+                    purchaseOrderId={idPurchaseOrder}
                     onClose={() => setOpen(false)}
                 />
             </PurchaseOrderModal>
@@ -80,7 +82,7 @@ export default function PurchaseOrderList() {
                                         : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
                                         }`}
                                 >
-                                    {f}
+                                    { purchaseOrderStatusLabels[f]}
                                 </button>
                             ))}
                     </div>
@@ -102,14 +104,14 @@ export default function PurchaseOrderList() {
                         </tr>
                     </thead>
                     <tbody>
-                        {mockPurchaseOrders.length === 0 ? (
+                        {purchaseOrders.length === 0 ? (
                             <tr>
                                 <td colSpan={9} className="text-center py-12 text-slate-400 text-sm">
                                     Aucune facture trouvée.
                                 </td>
                             </tr>
                         ) : (
-                            mockPurchaseOrders.map((f) => (
+                            purchaseOrders.map((f) => (
                                 <tr
                                     key={1}
                                     className="border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer"
@@ -117,22 +119,22 @@ export default function PurchaseOrderList() {
                                     <td className="px-5 py-4 font-bold text-slate-800">
                                         {f.purchaseOrderNumber}
                                     </td>
-                                    <td className="px-5 py-4 text-slate-700">SYSLAB</td>
+                                    <td className="px-5 py-4 text-slate-700">{f.partner.name}</td>
                                     <td className="px-5 py-4">
-                                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${f.Status !== "TOUTES" ? purchaseOrderStatusColors[f.Status] : ""
+                                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${f.purchaseOrderStatus !== "ALL" ? purchaseOrderStatusColors[f.purchaseOrderStatus] : ""
                                             }}`}>
-                                            {f.Status}
+                                            {purchaseOrderStatusLabels[f.purchaseOrderStatus]}
                                         </span>
                                     </td>
                                     <td className="px-5 py-4 text-slate-700 font-medium">
-                                        {f.totalInclTax} €
+                                        {f.totalInclTaxTND} {f.currency}
                                     </td>
                                     <td className="px-5 py-4">
                                         <div className="flex items-center gap-2">
 
                                             {/* Voir */}
                                             <button
-                                                onClick={(e) => { e.stopPropagation(); setOpen(true) }}
+                                                onClick={(e) => { e.stopPropagation(); setOpen(true) ; setIdPurchaseOrder(f.idPurchaseOrder);setInvoiceRef(f.purchaseOrderNumber) }}
                                                 className="p-2 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
                                                 title="Voir"
                                             >
@@ -152,10 +154,19 @@ export default function PurchaseOrderList() {
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931zm0 0L19.5 7.125" />
                                                 </svg>
                                             </button>
+                                            {/* Modifier status */}
+                                            <button
+                                                onClick={(e) => {}}
+                                               /// disabled={getAllowedNextStatuses(f.invoiceStatus as InvoiceStatus).length === 0}
+                                                className="p-2 rounded-xl bg-violet-50 text-violet-600 hover:bg-violet-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                title="Mettre à jour le statut"
+                                                >
+                                                <Settings className="w-4 h-4"/>
+                                            </button>
                                             {/* Supprimer */}
                                             <button
-                                                disabled={f.Status != purchaseOrderStatusSchema.enum.BROULLION}
-                                                onClick={(e) => { setDeleteOpen(true); setInvoiceRef(f.idPurchaseOrder); console.log("delete", f.idPurchaseOrder); }}
+                                                disabled={f.purchaseOrderStatus != purchaseOrderStatusSchema.enum.DRAFT}
+                                                onClick={(e) => { setDeleteOpen(true); setInvoiceRef(f.purchaseOrderNumber);setIdPurchaseOrder(f.idPurchaseOrder); console.log("delete", f.idPurchaseOrder); }}
                                                 className="p-2 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                                 title="Supprimer"
                                             >

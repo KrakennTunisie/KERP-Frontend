@@ -5,8 +5,11 @@ import { ExchangeRateParams, GetListParams, PageResponse } from "@/shared/api/ty
 import { InvoiceCreditNoteCreate, InvoiceCreditNoteDetails, InvoiceCreditNotePageItem } from "../models/creditNote";
 import { Invoice, InvoiceCreate, InvoicePageItem } from "../models/invoice";
 import { ClientPartner, ClientPartnerItem, CreateClientPartner, CreateSupplierPartner, PartnerSummary, SupplierPartner, SupplierPartnerItem, UpdatePartner } from "../models/partner";
+import { UpdateInvoiceCreditNoteStatusRequest } from "../types/UpdateInvoiceCreditNoteStatusRequest";
+import { PurchaseOrder, PurchaseOrderCreate, PurchaseOrderDetails, PurchaseOrderPageItem, purchaseOrderPageItemSchema, PurchaseOrderUpdate } from "../models/purchaseOrder";
 import { ExchangeRate } from "../types/exchangeRate";
 import { nextNumber } from "../types/nextNumber";
+import { PartnerInvoiceStats } from "../types/partnersStats";
 
 export const partnersApi = {
   getClients: (query? : GetListParams) => 
@@ -55,6 +58,12 @@ export const InvoicesAPI = {
   getSupplierInvoiceById: (id: string) =>
     apiClient.get<Invoice>(INVOICES_ENDPOINTS.supplierInvoiceById(id)),
 
+  getClientInvoiceStats: (id: string) =>
+    apiClient.get<PartnerInvoiceStats>(INVOICES_ENDPOINTS.clientInvoiceStats(id)),
+
+  getSupplierInvoiceStats: (id: string) =>
+    apiClient.get<PartnerInvoiceStats>(INVOICES_ENDPOINTS.supplierInvoiceStats(id)),
+
   createClientInvoice: (payload: FormData) =>
     apiClient.post<InvoiceCreate>(INVOICES_ENDPOINTS.clientsInvoices, payload),
 
@@ -95,24 +104,24 @@ export const InvoicesCreditNoteAPI = {
 };
 
 export const PurchaseOrderAPI = {
-  getNextInvoiceNumber :()=> apiClient.get(PURCHASE_ORDER_ENDPOINTS.nextNumber),
+  getNextPurchaseOrderNumber :()=> apiClient.get<nextNumber>(PURCHASE_ORDER_ENDPOINTS.nextNumber),
 
   getClientsPurchaseOrders: (query? : GetListParams) => 
-    apiClient.get<PageResponse<ClientPartnerItem>>(PURCHASE_ORDER_ENDPOINTS.getPurchaseOrders(query)),
+    apiClient.get<PageResponse<PurchaseOrderPageItem>>(PURCHASE_ORDER_ENDPOINTS.getPurchaseOrders(query)),
 
   getSuppliersPurchaseOrders: (query? : GetListParams) => 
-    apiClient.get<PageResponse<SupplierPartnerItem>>(PURCHASE_ORDER_ENDPOINTS.getPurchaseOrders(query)),
+    apiClient.get<PageResponse<PurchaseOrder>>(PURCHASE_ORDER_ENDPOINTS.getPurchaseOrders(query)),
 
-  getClientPurchaseOrderById: (id: string) =>
-    apiClient.get<ClientPartner>(PURCHASE_ORDER_ENDPOINTS.purchaseOrderById(id)),
+  getClientPurchaseOrderById: (id?: string) =>
+    apiClient.get<PurchaseOrderDetails>(PURCHASE_ORDER_ENDPOINTS.purchaseOrderById(id)),
 
   getSupplierPurchaseOrderById: (id: string) =>
-    apiClient.get<SupplierPartner>(PURCHASE_ORDER_ENDPOINTS.purchaseOrderById(id)),
+    apiClient.get<PurchaseOrder>(PURCHASE_ORDER_ENDPOINTS.purchaseOrderById(id)),
 
   createClientPurchaseOrder: (payload: FormData) =>
-    apiClient.post<CreateClientPartner>(PURCHASE_ORDER_ENDPOINTS.purchaseOrders, payload),
+    apiClient.post<PurchaseOrderCreate>(PURCHASE_ORDER_ENDPOINTS.purchaseOrders, payload),
 
-  updateClientPurchaseOrder : (id: string, payload: UpdatePartner) => apiClient.patch<UpdatePartner>(PURCHASE_ORDER_ENDPOINTS.purchaseOrderById(id), payload),
+  updateClientPurchaseOrder : (id: string, payload: FormData) => apiClient.patch<PurchaseOrderUpdate>(PURCHASE_ORDER_ENDPOINTS.purchaseOrders, payload),
 
   deleteClientPurchaseOrder: (id: string) =>
     apiClient.delete<void>(PURCHASE_ORDER_ENDPOINTS.purchaseOrderById(id)),

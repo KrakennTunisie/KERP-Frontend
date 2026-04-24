@@ -8,7 +8,7 @@ import { FileSchema } from "../../../features/billing/types/pdfSchema";
 import { Modal } from "./modal";
 
 
-export type DocumentOrFile = BillingDocument| FileSchema | null | undefined;
+export type DocumentOrFile = BillingDocument | FileSchema | null | undefined;
 
 const isFile = (doc: DocumentOrFile): doc is File => doc instanceof File;
 
@@ -18,6 +18,7 @@ type DocumentPreviewModalProps = {
   document: DocumentOrFile;
   onCreateInvoice?: () => void;
   loading?: boolean,
+  type?: string
 };
 
 export function DocumentPreviewModal({
@@ -25,10 +26,11 @@ export function DocumentPreviewModal({
   onClose,
   document,
   onCreateInvoice,
-  loading
+  loading,
+  type
 }: DocumentPreviewModalProps) {
   const objectUrlRef = useRef<string | null>(null);
-   /* eslint-disable react-hooks/refs */
+  /* eslint-disable react-hooks/refs */
   const { url, fileName } = (() => {
     if (!document) return { url: null, fileName: null };
     if (isFile(document)) {
@@ -41,7 +43,7 @@ export function DocumentPreviewModal({
 
   const documentType = getDocumentType(document);
 
-  
+
 
   useEffect(() => {
     return () => {
@@ -62,8 +64,8 @@ export function DocumentPreviewModal({
 
   const footer = (
     <>
-      
-       <a href={url ?? undefined}
+
+      <a href={url ?? undefined}
         target="_blank"
         rel="noreferrer"
         className="px-5 py-3 rounded-2xl border border-gray-200 font-black text-black hover:bg-gray-50 inline-flex items-center gap-2"
@@ -72,27 +74,30 @@ export function DocumentPreviewModal({
         Ouvrir
       </a>
 
-     {isFile(document)  && onCreateInvoice ? (
-      <button
-       disabled={loading}
-        onClick={() => {
-         onCreateInvoice()
-        }}
-        className="px-5 py-3 rounded-2xl bg-blue-600 text-white font-black hover:bg-blue inline-flex items-center gap-2 disabled:opacity-50"
-      >
-        Créer la facture
-      </button>
-    ) : (
-      <a
-        href={url ?? undefined}
-        download={fileName ?? true}
-        aria-disabled={loading}
-        className="px-5 py-3 rounded-2xl bg-blue-600 text-white font-black hover:bg-blue inline-flex items-center gap-2"
-      >
-        <Download className="w-4 h-4" />
-        Télécharger
-      </a>
-    )}
+      {isFile(document) && onCreateInvoice ? (
+        <button
+          disabled={loading}
+          onClick={() => {
+            onCreateInvoice()
+          }}
+          className="px-5 py-3 rounded-2xl bg-blue-600 text-white font-black hover:bg-blue inline-flex items-center gap-2 disabled:opacity-50"
+        >
+          {type === "Facture"
+            ? "Créer la facture"
+            : type === "Avoir"
+              ? "Créer la facture d'avoir"
+              : "Créer le bon de commande"}
+        </button>
+      ) : (
+        <a
+          href={url ?? undefined}
+          download={fileName ?? true}
+          className="px-5 py-3 rounded-2xl bg-blue-600 text-white font-black hover:bg-blue inline-flex items-center gap-2"
+        >
+          <Download className="w-4 h-4" />
+          Télécharger
+        </a>
+      )}
     </>
   );
 

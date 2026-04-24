@@ -16,17 +16,18 @@ import {
 import defaultItem from "../mocks/invoice-items-mocks";
 import { invoiceCreditNoteCreateSchema } from "../models/creditNote";
 import { Invoice } from "../models/invoice";
-import { InvoiceItem } from "../models/invoiceItem";
+import { BaseItem, CreditNoteItem, InvoiceItem, defaultCreditNoteItem } from "../models/invoiceItem";
 import { CreditNoteTypeSchema } from "../types/creditNoteType";
+import { MOCK_INVOICES } from "../mocks/invoice-mocks";
 import { invoiceComplianceStatusSchema } from "../types/invoiceComplianceStatus";
 import { invoiceStatusSchema } from "../types/invoiceStatus";
 import { nextNumber } from "../types/nextNumber";
 
 type creditNoteFormValues = z.infer<typeof invoiceCreditNoteCreateSchema>;
 export type InvoiceDetailsProps = {
-  invoiceId: string
+    invoiceId: string
 }
-export default function useCreateCreditNote({invoiceId}: InvoiceDetailsProps) {
+export default function useCreateCreditNote({ invoiceId }: InvoiceDetailsProps) {
     const router = useRouter();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [TtnModalOpen, setTtnModalOpen] = useState(false);
@@ -38,22 +39,22 @@ export default function useCreateCreditNote({invoiceId}: InvoiceDetailsProps) {
     const [itemSearchMap, setItemSearchMap] = useState<Record<number, string>>({});
     const [showDropdownMap, setShowDropdownMap] = useState<Record<number, boolean>>({});
     const [creditNoteItemMap, setCreditNoteItemMap] = useState<Record<number, any>>({});
-    const [invoice , setInvoice]=useState<Invoice>();
-    const [nextNumber, setNextNumber]=useState<nextNumber>()
-    
-      const fetchNextNumber = async()=>{
-            try{
+    const [invoice, setInvoice] = useState<Invoice>();
+    const [nextNumber, setNextNumber] = useState<nextNumber>()
+
+    const fetchNextNumber = async () => {
+        try {
 
             const response = await InvoicesCreditNoteAPI.getNextInvoiceNumber();
             setNextNumber(response);
-            }
-            catch(error: any){
-            appToast.error("Erreur de fetch clients: ",getApiErrorMessage(error))
-            }
         }
-        useEffect(()=>{
-            fetchNextNumber()
-        },[])
+        catch (error: any) {
+            appToast.error("Erreur de fetch clients: ", getApiErrorMessage(error))
+        }
+    }
+    useEffect(() => {
+        fetchNextNumber()
+    }, [])
 
     //Initialisation du formulaire
     const form = useForm<creditNoteFormValues>({
@@ -65,7 +66,7 @@ export default function useCreateCreditNote({invoiceId}: InvoiceDetailsProps) {
             sentToclientDate: null,
             sentToTTNDate: null,
             motif: CreditNoteTypeSchema.enum["Quality Issue"],
-            invoiceItems: [defaultItem()],
+            creditNoteItems: [defaultCreditNoteItem()],
             QRCode: " ",
             description: "description de facture d'avoir",
             invoiceCreditNoteComplianceStatus: invoiceComplianceStatusSchema.enum.TTN_ACCEPTED,
@@ -78,33 +79,33 @@ export default function useCreateCreditNote({invoiceId}: InvoiceDetailsProps) {
         },
         mode: "onChange",
     });
-    const { control, setValue, getValues,reset, handleSubmit, formState: { isDirty, isValid, errors } } = form;
+    const { control, setValue, getValues, reset, handleSubmit, formState: { isDirty, isValid, errors } } = form;
     const { fields, append, remove, } = useFieldArray({
         control,
-        name: "invoiceItems",
+        name: "creditNoteItems",
         keyName: "fieldId",
     });
     const previewData = useWatch({ control });
-  useEffect(() => {
-  if (nextNumber?.value) {
-    form.setValue("invoiceCreditNoteNumber", nextNumber.value, {
-      shouldValidate: true,
-      shouldDirty: false,
-    });
-  }
-}, [nextNumber]);
+    useEffect(() => {
+        if (nextNumber?.value) {
+            form.setValue("invoiceCreditNoteNumber", nextNumber.value, {
+                shouldValidate: true,
+                shouldDirty: false,
+            });
+        }
+    }, [nextNumber]);
 
 
 
-  useEffect(() => {
-    reset({
-      invoiceCreditNoteNumber: nextNumber?.value,
+    useEffect(() => {
+        reset({
+            invoiceCreditNoteNumber: nextNumber?.value,
             issueDate: new Date(),
             creationDate: new Date(),
             sentToclientDate: null,
             sentToTTNDate: null,
             motif: CreditNoteTypeSchema.enum["Quality Issue"],
-            invoiceItems: [defaultItem()],
+            creditNoteItems: [defaultCreditNoteItem()],
             QRCode: " ",
             description: "description de facture d'avoir",
             invoiceCreditNoteComplianceStatus: invoiceComplianceStatusSchema.enum.TTN_ACCEPTED,
@@ -114,28 +115,28 @@ export default function useCreateCreditNote({invoiceId}: InvoiceDetailsProps) {
             totalInclTax: 0,
             vatAmount: 0,
             originalInvoice: invoice
-    });
-}, [ invoice, reset]);
+        });
+    }, [invoice, reset]);
 
 
-  const fetchInvoice = async () => {
-    try {
-      setLoading(true)
-      const invoice = await InvoicesAPI.getClientInvoiceById(invoiceId);
-      setInvoice(invoice);
-    } catch (error) {
-      appToast.error("Erreur Fetch du client:",getApiErrorMessage(error));
-    }
-    finally{
-      setLoading(false)
-    }
-  };
+    const fetchInvoice = async () => {
+        try {
+            setLoading(true)
+            const invoice = await InvoicesAPI.getClientInvoiceById(invoiceId);
+            setInvoice(invoice);
+        } catch (error) {
+            appToast.error("Erreur Fetch du client:", getApiErrorMessage(error));
+        }
+        finally {
+            setLoading(false)
+        }
+    };
 
 
-  useEffect(() => {
-  fetchInvoice();
+    useEffect(() => {
+        fetchInvoice();
 
-}, [invoiceId]);
+    }, [invoiceId]);
 
 
     // Validation des données 
@@ -143,9 +144,9 @@ export default function useCreateCreditNote({invoiceId}: InvoiceDetailsProps) {
         isDirty &&
         isValid &&
         !!previewData.motif &&
-        !!previewData.invoiceItems?.length &&
+        !!previewData.creditNoteItems?.length &&
         !!previewData.issueDate &&
-        previewData.invoiceItems.every(
+        previewData.creditNoteItems.every(
             (item) =>
                 item.description?.trim() &&
                 item.quantity! > 0 &&
@@ -165,16 +166,27 @@ export default function useCreateCreditNote({invoiceId}: InvoiceDetailsProps) {
     }, [invoice, creditNoteItemMap]);
 
     // Synchronisation des items avec invoicePreview
-    const syncItems = (newItems: InvoiceItem[]) => {
-        setValue("invoiceItems", newItems, { shouldValidate: true, shouldDirty: true, });
-        calculateInvoiceTotals(getValues("invoiceItems")!);
+    const syncItems = (newItems: BaseItem[]) => {
+
+        const mappedItems: CreditNoteItem[] = newItems.map(item => ({
+            ...item,
+            idCreditNoteItem: (item as CreditNoteItem).idCreditNoteItem ?? uuidv4(),
+            originalItem: (item as CreditNoteItem).originalItem,
+        }));
+        console.log(mappedItems.at(0)?.originalItem)
+        setValue("creditNoteItems", mappedItems, {
+            shouldValidate: true,
+            shouldDirty: true,
+        });
+
+        calculateInvoiceTotals(getValues("creditNoteItems")!);
     };
 
     // L'ajout d'une carte pour une prestation
     const addItem = () => {
         const newIndex = fields.length;
 
-        append(defaultItem(), { shouldFocus: false });
+        append(defaultCreditNoteItem(), { shouldFocus: false });
         setItemSearchMap((prev) => ({
             ...prev,
             [newIndex]: "",
@@ -193,15 +205,15 @@ export default function useCreateCreditNote({invoiceId}: InvoiceDetailsProps) {
 
     // Suppression d'item et la mis à jour des totaux TTC / HT /TVA  
     const removeItem = (id: string) => {
-        const currentItems = getValues("invoiceItems") ?? [];
+        const currentItems = getValues("creditNoteItems") ?? [];
 
-        const index = currentItems.findIndex((item) => item.idInvoiceItem === id);
+        const index = currentItems.findIndex((item) => item.idCreditNoteItem === id);
         if (index !== -1) {
             remove(index);
         }
 
         // Recalculer les totaux sans l'élément supprimé
-        const remainingItems = currentItems.filter((item) => item.idInvoiceItem !== id);
+        const remainingItems = currentItems.filter((item) => item.idCreditNoteItem !== id);
         const totals = calculateInvoiceTotals(remainingItems);
 
         setValue("totalExclTax", totals.totalHT, { shouldValidate: true, shouldDirty: true });
@@ -211,34 +223,37 @@ export default function useCreateCreditNote({invoiceId}: InvoiceDetailsProps) {
 
 
     // Mis à jour les données d'item (QT, P.U, TVA ) et calcul de nouveau les totaux 
-    const updateItem = (id: string, patch: Partial<InvoiceItem>) => {
-        const currentItems = getValues("invoiceItems") ?? [];
+    const updateItem = (id: string, patch: Partial<CreditNoteItem>) => {
+        const currentItems = getValues("creditNoteItems") ?? [];
 
         const updatedItems = currentItems.map((item) => {
-            if (item.idInvoiceItem !== id) return item;
+            if (item.idCreditNoteItem !== id) return item;
 
             let updatedItem = {
                 ...item,
                 ...patch,
             };
 
-            updatedItem = calculUnityPrice(
-                updatedItem,
-                getValues("originalInvoice.invoiceCurrency"),
-                getValues("originalInvoice.appliedExchangeRate")
-            );
-
+            updatedItem = {
+                ...calculUnityPrice(
+                    updatedItem,
+                    getValues("originalInvoice.invoiceCurrency"),
+                    getValues("originalInvoice.appliedExchangeRate")
+                ),
+                idCreditNoteItem: updatedItem.idCreditNoteItem,
+                originalItem: updatedItem.originalItem,
+            } as CreditNoteItem;
             console.log(updatedItem)
             return recalculate(updatedItem);
         });
 
         const totals = calculateInvoiceTotals(updatedItems);
 
-        setValue("invoiceItems", updatedItems, { shouldValidate: true, shouldDirty: true });
+        setValue("creditNoteItems", updatedItems as CreditNoteItem[], { shouldValidate: true, shouldDirty: true });
         setValue("totalExclTax", totals.totalHT, { shouldValidate: true, shouldDirty: true });
         setValue("vatAmount", totals.totalTVA, { shouldValidate: true, shouldDirty: true });
         setValue("totalInclTax", totals.totalTTC, { shouldValidate: true, shouldDirty: true });
-        
+
         syncItems(updatedItems);
     };
 
@@ -269,52 +284,56 @@ export default function useCreateCreditNote({invoiceId}: InvoiceDetailsProps) {
 
     //Insertion de la facture au niveau de la BD 
     async function createCreditNoteInvoice() {
-         const values = getValues();
-          const documentFile = values.invoiceCreditNoteDocument ?? pdfUrl;
-        
-          console.log("values: ", values)
-          if (!documentFile) {
+        const values = getValues();
+        const documentFile = values.invoiceCreditNoteDocument ?? pdfUrl;
+
+        console.log("values: ", values)
+        if (!documentFile) {
             appToast.error("Erreur de création", "Le document PDF est vide.");
             return;
-          }
-        
-          if (!values.originalInvoice) {
+        }
+
+        if (!values.originalInvoice) {
             appToast.error("Erreur de création", "Aucune facture sélectionné.");
             return;
-          }
-        
-          try {
+        }
+
+        try {
             const formData = new FormData();
-        
+
             formData.append("invoiceCreditNoteNumber", values.invoiceCreditNoteNumber);
             formData.append("issueDate", values.issueDate.toISOString());
             formData.append("motif", values.motif);
             formData.append("description", values.description!);
             formData.append("originalInvoiceId", values.originalInvoice.idInvoice);
 
-        
-             if (values.invoiceItems?.length) {
-              formData.append("invoiceCreditNoteItemsList", JSON.stringify(values.invoiceItems));
-            } 
-        
+
+            if (values.creditNoteItems?.length) {
+                const simplifiedItems = values.creditNoteItems.map((item) => ({
+                    idInvoiceItem: item.originalItem,
+                    quantity: item.quantity,
+                }));
+                formData.append("invoiceCreditNoteItemsList", JSON.stringify(simplifiedItems));
+            }
+
             formData.append("invoiceDocument", documentFile);
-        
+
             for (const pair of formData.entries()) {
-              console.log(pair[0], pair[1]);
+                console.log(pair[0], pair[1]);
             }
-            
+
             const createdInvoice = await InvoicesCreditNoteAPI.createInvoiceCreditNote(formData);
-        
+
             if (createdInvoice) {
-              appToast.success("Facture d'avoir créée avec succès");
-              setIsModalOpen(false);
-              setSuccessMessage("La facture d'avoir a été créée avec succès.");
-              setTtnModalOpen(true);
+                appToast.success("Facture d'avoir créée avec succès");
+                setIsModalOpen(false);
+                setSuccessMessage("La facture d'avoir a été créée avec succès.");
+                setTtnModalOpen(true);
             }
-          } catch (e: unknown) {
+        } catch (e: unknown) {
             const message = getApiErrorMessage(e);
             appToast.error("Échec de création, veuillez réessayer.", message);
-          }
+        }
 
     }
 

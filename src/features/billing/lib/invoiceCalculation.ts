@@ -1,4 +1,4 @@
-import { InvoiceItem } from "../models/invoiceItem"
+import { BaseItem, InvoiceItem } from "../models/invoiceItem"
 import { CurrencyType } from "../types/currency";
 
 
@@ -8,8 +8,8 @@ function round2(value: number): number {
 
 // calcul de HT et TVA Et TTC d'un item 
 export function recalculate(
-  item: InvoiceItem,
-): InvoiceItem {
+  item: BaseItem,
+): BaseItem {
 
   const totalExclTax = round2(item.quantity * item.unityPriceEXclTax);
   const taxAmount    = round2(totalExclTax * (item.vatRate / 100));
@@ -27,11 +27,11 @@ export function recalculate(
 
 // Conversion de la devise
 export function convertItemCurrency(
-  item: InvoiceItem,
+  item: BaseItem,
   fromCurrency: CurrencyType,
   toCurrency: CurrencyType,
   exchangeRate: number
-): InvoiceItem {
+): BaseItem {
   if (fromCurrency === toCurrency) {
     return recalculate(item);
   }
@@ -48,7 +48,7 @@ export function convertItemCurrency(
 }
 
 // calcul les totaux TTC HT de tous les items
-export function calculateInvoiceTotals(items: InvoiceItem[] = []) {
+export function calculateInvoiceTotals(items: BaseItem[] = []) {
   const totalHT = items.reduce(
     (acc, item) => acc + (item.itemTotalExclTax ?? 0),
     0
@@ -72,10 +72,10 @@ export function calculateInvoiceTotals(items: InvoiceItem[] = []) {
 }
 // calcule le prix unitaire d'un item
 export function calculUnityPrice(
-  item: InvoiceItem,
+  item: BaseItem,
   currency: CurrencyType,
   exchangeRate: number
-): InvoiceItem {
+): BaseItem {
   return {
     ...item,
     unityPriceEXclTax: currency === "TND"

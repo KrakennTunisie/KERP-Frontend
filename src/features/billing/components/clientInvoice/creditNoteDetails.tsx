@@ -224,7 +224,7 @@ export default function CreditNoteDetails({params}:PropsCreditNote)
                                       <div>
                                           <p className="text-sm font-semibold text-gray-900">{item.invoiceItem.description}</p>
                                           <p className="text-xs text-gray-400 mt-0.5">{item.invoiceItem.vatRate+" %"}</p>
-                                          <p className="text-xs text-gray-400 mt-0.5">{OperationCategoryLabels[item.invoiceItem.operationCategory]}</p>
+                                          <p className="text-xs text-gray-400 mt-0.5">{OperationCategoryLabels[item.invoiceItem.operationCategory!]}</p>
                                       </div>
                                       <p className="text-sm text-gray-700 text-right">{item.quantity}</p>
                                       <p className="text-sm text-gray-700 text-right">{item.invoiceItem.unityPriceEXclTax}</p>

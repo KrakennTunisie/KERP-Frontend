@@ -5,7 +5,7 @@ export function SectionTitle({
 }: {
   number: string;
   label: string;
-  invoiceType: string;
+  invoiceType ?: string;
 }) {
   return (
     <div className="flex items-center gap-3">
