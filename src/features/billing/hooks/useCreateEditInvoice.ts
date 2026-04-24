@@ -535,7 +535,10 @@ const [selectedPO, setSelectedPO] = useState<PurchaseOrderDetails | null>(null);
       formData.append("invoiceNumber", values.invoiceNumber);
       formData.append("issueDate", values.issueDate.toISOString());
       formData.append("dueDate", values.dueDate.toISOString());
-      formData.append("purchaseOrder",selectedPO?.idPurchaseOrder!)
+      if(selectedPO)
+      {
+      formData.append("purchaseOrder",selectedPO?.idPurchaseOrder)
+      }
       formData.append("invoiceType", values.invoiceType);
       formData.append("invoiceCurrency", values.invoiceCurrency);
       formData.append("vatRate", String(values.vatRate));

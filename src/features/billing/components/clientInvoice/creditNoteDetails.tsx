@@ -131,7 +131,7 @@ export default function CreditNoteDetails({ params }: PropsCreditNote) {
                                     </p>
                                 </div>
                                 <div className="bg-gray-50 dark:bg-neutral-800 rounded-lg p-3">
-                                    <p className="text-[11px] font-medium tracking-wide uppercase text-gray-400 mb-1">Motif de l'avoir</p>
+                                    <p className="text-[11px] font-medium tracking-wide uppercase text-gray-400 mb-1">{"Motif de l'avoir"}</p>
                                     <p className="text-sm font-medium text-gray-900 dark:text-white">
                                         {invoice?.motif ? creditNoteTypeLabels[invoice.motif] : "—"}
                                     </p>
