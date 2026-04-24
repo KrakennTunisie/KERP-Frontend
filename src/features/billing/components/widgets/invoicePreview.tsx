@@ -11,7 +11,7 @@ import { paymentMethodLabels } from "../../types/paymentMethod";
 
 
 export type InvoiceData = DeepPartial<z.infer<typeof invoiceSchema>>;
-export type CreditNoteData =DeepPartial< z.infer<typeof invoiceCreditNoteSchema>>;
+export type CreditNoteData = DeepPartial<z.infer<typeof invoiceCreditNoteSchema>>;
 type InvoicePreviewProps = {
     data: InvoiceCreate | CreditNoteData;
 };
@@ -61,14 +61,28 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
                             <p className="text-4xl font-black text-slate-900 tracking-tight uppercase">
                                 {isCredit ? "FACTURE D'AVOIR" : invoiceTypeLabels[data.invoiceType!]}
                             </p>
-                            <div className="mt-2 inline-flex items-center px-4 py-1.5 rounded-lg bg-blue-50 border border-blue-200">
-                                <span className="text-sm font-bold text-blue-700">
-                                    {"invoiceNumber" in data
-                                        ? `N° ${data.invoiceNumber}`
-                                        : "invoiceCreditNoteNumber" in data ? `N° ${data.invoiceCreditNoteNumber}`
-                                            : ""
-                                    }
-                                </span>
+                            <div className="mt-2 inline-flex flex-col items-end gap-1">
+                                <div className="inline-flex items-center px-4 py-1.5 rounded-lg bg-blue-50 border border-blue-200">
+                                    <span className="text-sm font-bold text-blue-700">
+                                        {"invoiceNumber" in data
+                                            ? `N° ${data.invoiceNumber}`
+                                            : "invoiceCreditNoteNumber" in data
+                                                ? `N° ${data.invoiceCreditNoteNumber}`
+                                                : ""
+                                        }
+                                    </span>
+                                </div>
+                                {(("purchaseOrder" in data && data.purchaseOrder) &&
+                                    
+                                        <div className="inline-flex items-center px-4 py-1.5 rounded-lg bg-blue-50 border border-blue-200">
+                                            <span className="text-sm font-bold text-blue-700">
+                                                {"purchaseOrder" in data && data.purchaseOrder
+                                                    ? `N° ${data.purchaseOrder}`
+                                                   : ""
+                                                }
+                                            </span>
+                                        </div>
+                                    )}
                             </div>
                         </div>
                     </div>
@@ -179,7 +193,7 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
                                                 </p>
                                             )}
                                             <p className="text-xs text-slate-400 mt-0.5">TVA appliquée : {item?.vatRate}%</p>
-                                            <p className="text-xs text-slate-400 mt-0.5">Catégorie : {item?.operationCategory ? OperationCategoryLabels[item.operationCategory]:"_"}</p>
+                                            <p className="text-xs text-slate-400 mt-0.5">Catégorie : {item?.operationCategory ? OperationCategoryLabels[item.operationCategory] : "_"}</p>
                                         </td>
                                         <td className="text-right text-sm text-slate-600 py-4">{item?.quantity}</td>
                                         <td className="text-right text-sm text-slate-600 py-4">{item?.unityPriceEXclTax?.toFixed(2)}</td>
@@ -225,7 +239,7 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
                         <div className="flex justify-between text-sm">
                             <span className="text-slate-500 font-medium">Total TVA</span>
                             <span className="font-bold text-slate-800">
-                                {data?.totalInclTax && data?.totalExclTax && (data?.totalInclTax - data?.totalExclTax ).toFixed(2)} 
+                                {data?.totalInclTax && data?.totalExclTax && (data?.totalInclTax - data?.totalExclTax).toFixed(2)}
                                 {isCredit ? data.originalInvoice?.invoiceCurrency : data.invoiceCurrency}
                             </span>
                         </div>

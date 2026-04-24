@@ -6,9 +6,11 @@ import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
-import { ExchangeRateAPI, InvoicesAPI, partnersApi } from "../api/partners-api";
+import { ExchangeRateAPI, InvoicesAPI, partnersApi, PurchaseOrderAPI } from "../api/partners-api";
 import { handleSaveAsPDF } from "../lib/buildInvoicePDF";
-import { BaseItem, InvoiceItem } from "../models/invoiceItem";
+import { Invoice, InvoiceCreate, invoiceCreateSchema } from "../models/invoice";
+import { BaseItem, InvoiceItem, PurchaseOrderItem } from "../models/invoiceItem";
+import { PartnerSummary } from "../models/partner";
 import {
   calculateInvoiceTotals,
   calculUnityPrice,
@@ -16,10 +18,8 @@ import {
   recalculate,
 } from "../lib/invoiceCalculation";
 import defaultItem from "../mocks/invoice-items-mocks";
-import { Invoice, InvoiceCreate, invoiceCreateSchema } from "../models/invoice";
-import { PartnerSummary } from "../models/partner";
-import { PurchaseOrder } from "../models/purchaseOrder";
 import { CurrencyType, currencyTypeSchema } from "../types/currency";
+import { PurchaseOrder, PurchaseOrderDetails, PurchaseOrderSummary } from "../models/purchaseOrder";
 import { ExchangeRate } from "../types/exchangeRate";
 import { exchangeRateSourceSchema } from "../types/exchangeRateSource";
 import { invoiceComplianceStatusSchema } from "../types/invoiceComplianceStatus";
@@ -42,11 +42,11 @@ type UpdateableField =
 
 
 export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
-  const [nextNumber, setNextNumber]=useState<nextNumber>()
-  const [exchangeRate, setExchangeRate]=useState<ExchangeRate>()
-  const [invoice, setInvoice]=useState<Invoice>()
-  const fetchClientInvoice = async()=>{
-        try {
+  const [nextNumber, setNextNumber] = useState<nextNumber>()
+  const [exchangeRate, setExchangeRate] = useState<ExchangeRate>()
+  const [invoice, setInvoice] = useState<Invoice>()
+  const fetchClientInvoice = async () => {
+    try {
       setLoading(true)
       const invoice = await InvoicesAPI.getClientInvoiceById(invoiceId);
       setInvoice(invoice);
@@ -73,7 +73,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
     }
   }
 
-  useEffect(()=>{
+  useEffect(() => {
     fetchNextNumber()
   }, [])
   const router = useRouter()
@@ -97,7 +97,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
       paymentMethod: paymentMethodSchema.enum.BANK_TRANSFER,
       partner: null,
       purchaseOrder: null,
-      invoiceCurrency:currencyTypeSchema.enum.TND,
+      invoiceCurrency: currencyTypeSchema.enum.TND,
       appliedExchangeRate: 3,
       exchangeRateReferenceDate: new Date(),
       exchangeRateSource: exchangeRateSourceSchema.enum.EXTERNAL_API,
@@ -147,7 +147,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
         paymentMethod:
           invoice.paymentMethod ?? paymentMethodSchema.enum.BANK_TRANSFER,
         partner: invoice.partner ?? null,
-        purchaseOrder: invoice.purchaseOrder?.idPurchaseOrder ?? null,
+        purchaseOrder: invoice.purchaseOrder?.idPurchaseOrder ?? "",
         invoiceCurrency: invoice.invoiceCurrency ?? currencyTypeSchema.enum.TND,
         appliedExchangeRate: invoice.appliedExchangeRate ?? 4,
         exchangeRateReferenceDate: invoice.exchangeRateReferenceDate
@@ -177,17 +177,17 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
   }, [nextNumber]);
 
 
-    const fetchExchangeRate = async(toCurrency: string)=>{
-      try{
-        if(mode == "create"){
+  const fetchExchangeRate = async (toCurrency: string) => {
+    try {
+      if (mode == "create") {
 
-           if (!toCurrency || toCurrency === "TND") {
-            form.setValue("appliedExchangeRate", 1, {
-              shouldValidate: true,
-              shouldDirty: false,
-            });
-            return;
-          }
+        if (!toCurrency || toCurrency === "TND") {
+          form.setValue("appliedExchangeRate", 1, {
+            shouldValidate: true,
+            shouldDirty: false,
+          });
+          return;
+        }
 
         const response = await ExchangeRateAPI.getExchangeRate({
           fromCurrency: "TND",
@@ -195,42 +195,44 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
         });
         console.log("response: exchangeRate", response)
         setExchangeRate(response);
-        }
-      }
-      catch(error: any){
-        appToast.error("Erreur de fetch de taux de change: ",getApiErrorMessage(error))
       }
     }
+    catch (error: any) {
+      appToast.error("Erreur de fetch de taux de change: ", getApiErrorMessage(error))
+    }
+  }
 
   const selectedCurrency = form.watch("invoiceCurrency");
 
   useEffect(() => {
-  if (mode !== "create") return;
-  fetchExchangeRate(selectedCurrency);
-}, [selectedCurrency,  mode]);
+    if (mode !== "create") return;
+    fetchExchangeRate(selectedCurrency);
+  }, [selectedCurrency, mode]);
 
-useEffect(() => {
-  if (mode !== "create") return;
+  useEffect(() => {
+    if (mode !== "create") return;
+    fetchPurchaseOrderSummary()
 
-  if (selectedCurrency === "TND") {
-    form.setValue("appliedExchangeRate", 1, {
-      shouldValidate: true,
-      shouldDirty: false,
-    });
-    return;
-  }
+    if (selectedCurrency === "TND") {
+      form.setValue("appliedExchangeRate", 1, {
+        shouldValidate: true,
+        shouldDirty: false,
+      });
+      return;
+    }
 
-  if (exchangeRate?.quote) {
-    form.setValue("appliedExchangeRate", exchangeRate.quote, {
-      shouldValidate: true,
-      shouldDirty: false,
-    });
-  }
-}, [exchangeRate, selectedCurrency, mode]);
+    if (exchangeRate?.quote) {
+      form.setValue("appliedExchangeRate", exchangeRate.quote, {
+        shouldValidate: true,
+        shouldDirty: false,
+      });
+    }
+  }, [exchangeRate, selectedCurrency, mode]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [TtnModalOpen, setTtnModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [loadingTTN, setLoadingTTN] = useState(false);
   const [sent, setSent] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const invoiceRef = useRef<HTMLDivElement>(null);
@@ -238,7 +240,8 @@ useEffect(() => {
 
 
   const [linkedToPO, setLinkedToPO] = useState(false);
-  const [selectedPO, setSelectedPO] = useState<PurchaseOrder | null>(null);
+const [selectedPO, setSelectedPO] = useState<PurchaseOrderDetails | null>(null);
+  const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrderSummary[] | []>([])
 
   // UI state only
   const [clientSearch, setClientSearch] = useState("");
@@ -294,17 +297,28 @@ useEffect(() => {
   };
 
   useEffect(() => {
-
     getClients();
   }, [debouncedSearchQuery]);
+
+
   //Synchronisation des items lors d'un nouveau item
- const syncItems = (newItems: BaseItem[]) => {
-    replace(newItems as any);
-    setValue("invoiceItems", newItems as any, {
+  const syncItems = (newItems: BaseItem[]) => {
+    const mappedItems: InvoiceItem[] = newItems.map(({
+      idPurchaseOrderItem,
+      purchaseOrder,
+      ...rest
+    }: any) => ({
+      ...rest,
+      idInvoiceItem: (rest as InvoiceItem).idInvoiceItem ?? uuidv4(),
+      invoice: (rest as InvoiceItem).invoice ?? null,
+    }));
+
+    replace(mappedItems);
+    setValue("invoiceItems", mappedItems, {
       shouldValidate: true,
       shouldDirty: true,
     });
-};
+  };
 
 
   // Ajout d'un card qui permet l'ajout les données d'unt item (P.U ,QT , TVA)
@@ -318,7 +332,8 @@ useEffect(() => {
   // Suppression d'item et la mis à jour des totaux TTC / HT /TVA  
   const removeItem = (id: string) => {
     const currentItems = getValues("invoiceItems") ?? [];
-
+    console.log(currentItems)
+    console.log(id);
     const index = currentItems.findIndex((item) => item.idInvoiceItem === id);
     if (index !== -1) {
       remove(index);
@@ -391,7 +406,6 @@ useEffect(() => {
   };
 
   // calcule de la date d'échance lors la saisie de condition de paiement 
-
   const calculateDueDate = (): Date => {
     const date = new Date(getValues("issueDate"));
     console.log(date)
@@ -405,31 +419,61 @@ useEffect(() => {
     return date;
   };
 
+  // récupérer la liste des bons de commande disponible en cours de livraison ou bien broullion 
+  const fetchPurchaseOrderSummary = async () => {
+    try {
+      setLoading(true)
+
+      const purchaseorders = await PurchaseOrderAPI.getPurchaseOrderSummary();
+      setPurchaseOrders(purchaseorders);
+
+    } catch (error) {
+      appToast.error("Erreur Fetch du client:", getApiErrorMessage(error));
+    }
+  }
+  // récupérer un bon de commande séléctionnée
+  const fetchPurchaseOrder = async (idPurchaseOrder: string) => {
+    try {
+      setLoading(true)
+      const purchaseOrder = await PurchaseOrderAPI.getClientPurchaseOrderById(idPurchaseOrder);
+      return purchaseOrder;
+    } catch (error) {
+      appToast.error("Erreur Fetch du client:", getApiErrorMessage(error));
+    }
+    finally {
+      setLoading(false)
+    }
+  };
+
   // Recupération les données d'un bon de commande lorsque la facture est liée à un bon de commande 
-  function handleSelectPO(po: PurchaseOrder) {
+  async function handleSelectPO(idPurchaseOrder: string) {
+    console.log(idPurchaseOrder)
+    const po = await fetchPurchaseOrder(idPurchaseOrder);
+    if (!po) return;
     setSelectedPO(po);
-    // Pré-remplir les champs du form
-    console.log(po.issueDate.toLocaleDateString)
-    form.setValue("issueDate", new Date(po.issueDate).toISOString().split("T")[0] as unknown as Date);
-    form.setValue("issueDate", po.issueDate, { shouldValidate: true, shouldDirty: true, });
-    form.setValue("paymentCondition", po.paymentCondition);
-    form.setValue("paymentMethod", po.paymentMethod);
+    form.setValue("issueDate", new Date(po!.issueDate));
+    console.log(po!.paymentCondition);
+    form.setValue("paymentCondition", po!.paymentCondition);
+    form.setValue("paymentMethod", po!.paymentMethod);
     calculateDueDate()
-    form.setValue("invoiceCurrency", po.currency);
-    po?.partner && selectClient(po.partner);
-    const totals = calculateInvoiceTotals(po.purchaseOrderItems!);
+    form.setValue("invoiceCurrency", po!.currency);
+    po?.partner && selectClient(po?.partner);
+    const totals = calculateInvoiceTotals(po!.purchaseOrderItems!);
     setValue("totalExclTax", totals.totalHT, { shouldValidate: true, shouldDirty: true });
     setValue("vatAmount", totals.totalTVA, { shouldValidate: true, shouldDirty: true });
     setValue("totalInclTax", totals.totalTTC, { shouldValidate: true, shouldDirty: true });
-    syncItems(po.purchaseOrderItems!)
-    // pré-remplir les items
-    po?.purchaseOrderItems!.forEach(() => addItem());
+    setValue("purchaseOrder",po.reference);
+    console.log(po!.purchaseOrderItems);
+    syncItems(po!.purchaseOrderItems!)
+
   }
 
+  // désélectionnée un bon de commande
   function handleTogglePO(checked: boolean) {
     setLinkedToPO(checked);
     if (!checked) {
       setSelectedPO(null);
+     
       clearClient();
       setValue("invoiceItems", [defaultItem()], { shouldValidate: true, shouldDirty: true, });
       setValue("issueDate", new Date(), { shouldValidate: true, shouldDirty: true, });
@@ -439,7 +483,7 @@ useEffect(() => {
       setValue("totalExclTax", 0, { shouldValidate: true, shouldDirty: true });
       setValue("vatAmount", 0, { shouldValidate: true, shouldDirty: true });
       setValue("totalInclTax", 0, { shouldValidate: true, shouldDirty: true });
-      // reset les champs si besoin
+      setValue("purchaseOrder",null);
     }
   }
 
@@ -492,7 +536,10 @@ useEffect(() => {
       formData.append("invoiceNumber", values.invoiceNumber);
       formData.append("issueDate", values.issueDate.toISOString());
       formData.append("dueDate", values.dueDate.toISOString());
-
+      if(selectedPO)
+      {
+      formData.append("purchaseOrder",selectedPO?.idPurchaseOrder)
+      }
       formData.append("invoiceType", values.invoiceType);
       formData.append("invoiceCurrency", values.invoiceCurrency);
       formData.append("vatRate", String(values.vatRate));
@@ -509,10 +556,6 @@ useEffect(() => {
       formData.append("exchangeRateSource", values.exchangeRateSource);
 
       formData.append("partner", values.partner.idPartner);
-
-      if (values.purchaseOrder) {
-        formData.append("purchaseOrder", values.purchaseOrder);
-      }
 
       if (values.invoiceItems?.length) {
         formData.append("invoiceItemsList", JSON.stringify(values.invoiceItems));
@@ -585,8 +628,8 @@ useEffect(() => {
 
       formData.append("partner", values.partner.idPartner);
 
-      if (values.purchaseOrder) {
-        formData.append("purchaseOrder", values.purchaseOrder);
+      if (selectedPO) {
+        formData.append("purchaseOrder", selectedPO.idPurchaseOrder);
       }
 
       if (values.invoiceItems?.length) {
@@ -616,9 +659,9 @@ useEffect(() => {
 
   // Envoyer la facture au TTN 
   function sendToTTN() {
-    setLoading(true);
+    setLoadingTTN(true);
     setTimeout(() => {
-      setLoading(false)
+      setLoadingTTN(false)
       setSuccessMessage("La facture a été envoyée avec succès au TTN.")
       setSent(true)
     }, 10000);
@@ -654,6 +697,7 @@ useEffect(() => {
     isModalOpen,
     sendToTTN,
     sent,
+    loadingTTN,
     successMessage,
     loading,
     onCloseDocumentModal,
@@ -666,6 +710,7 @@ useEffect(() => {
     handleSelectPO,
     handleTogglePO,
 
+    purchaseOrders,
 
     //data validation
 

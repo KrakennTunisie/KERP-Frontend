@@ -16,6 +16,7 @@ export function usePurchaseOrderList() {
   const [filtre, setFiltre] = useState<purchaseOrderStatus>();
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [loading, setLoading] = useState(false)
+  const [updateLoading, setUpdateLoading]= useState(false)
   const [invoiceRef, setInvoiceRef] = useState("");
   const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrderPageItem[] | []>([])
   const [open, setOpen] = useState(false);
@@ -24,6 +25,9 @@ export function usePurchaseOrderList() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalElements, setTotalElements] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
+  const [updateOpen, setUpdateOpen] = useState(false);
+  const [nextStatus, setNextStatus]=useState("")
+  const [selectedPurchaseOrder, setSelectedPurchaseOrder]= useState<PurchaseOrderPageItem|null>(null)
   const debouncedSearchQuery = useDebounce(search, 2000);
   async function deletePurchaseOrder(idPurchaseOrder: string) {
     try {
@@ -73,6 +77,25 @@ export function usePurchaseOrderList() {
     fetchClientsPurchaseOrders();
   }, [invoiceRef, debouncedSearchQuery, currentPage, filtre]);
 
+  const updateStatus = async ()=>{
+            try {
+            setLoading(true)
+            const formData = new FormData();
+            formData.append("status",  nextStatus);
+            console.log(idPurchaseOrder)
+            await PurchaseOrderAPI.updatePurchaseOrderStatus(idPurchaseOrder, formData);
+            appToast.success('Statut mise à jour avec succès avec succès.')
+            setUpdateOpen(false)
+            await fetchClientsPurchaseOrders()
+          } catch (error) {
+            appToast.error("Erreur Fetch du client:",getApiErrorMessage(error));
+          }
+          finally{
+            setLoading(false)
+            setIdPurchaseOrder("")
+          }
+  }
+
 
   const router = useRouter()
   return {
@@ -92,7 +115,16 @@ export function usePurchaseOrderList() {
     setIdPurchaseOrder,
     idPurchaseOrder,
     open,
-    setOpen
+    setOpen,
+    updateOpen,
+    setUpdateOpen,
+    selectedPurchaseOrder,
+    setSelectedPurchaseOrder,
+    nextStatus,
+    setNextStatus,
+    updateLoading,
+    setUpdateLoading,
+    updateStatus
   }
 }
 

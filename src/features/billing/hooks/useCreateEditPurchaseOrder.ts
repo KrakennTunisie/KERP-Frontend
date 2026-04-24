@@ -423,7 +423,7 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
         formData.append("purchaseOrderStatus", purchaseOrderStatusSchema.enum.IN_DELIVERY)
   
         formData.append("purchaseCurrency", values.currency);
-        formData.append("vatRate", String(values.vatAmount));
+        formData.append("vatRate", String(0));
         formData.append("paymentMethod", values.paymentMethod);
         formData.append("paymentCondition", values.paymentCondition);
   

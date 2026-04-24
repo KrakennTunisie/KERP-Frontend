@@ -1,4 +1,5 @@
 import { PurchaseOrder } from "../models/purchaseOrder";
+import { purchaseOrderStatusSchema } from "../types/purchaseOrderStatus";
 import { MOCK_PARTNERS } from "./clients-mocks";
 import { mockInvoiceItems } from "./invoice-items-mocks";
 
@@ -6,7 +7,8 @@ export const mockPurchaseOrder: PurchaseOrder = {
   idPurchaseOrder: "PO-2024-001",
   purchaseOrderNumber: "BC-2024-0042",
   issueDate: new Date("2024-06-15"),
-  purchaseOrderStatus: "IN_DELIVERY",
+
+  purchaseOrderStatus: purchaseOrderStatusSchema.enum.IN_DELIVERY,
   currency: "EUR",
   totalExclTax: 15000.00,
   totalInclTax: 18150.00,
@@ -28,7 +30,8 @@ export const mockPurchaseOrders: PurchaseOrder[] = [
     idPurchaseOrder: "PO-2024-002",
     purchaseOrderNumber: "BC-2024-0043",
     issueDate: new Date("2024-07-01"),
-    purchaseOrderStatus: "DRAFT",
+   
+    purchaseOrderStatus: purchaseOrderStatusSchema.enum.DRAFT,
     currency: "TND",
     totalExclTax: 8000.00,
     totalInclTax: 9520.00,

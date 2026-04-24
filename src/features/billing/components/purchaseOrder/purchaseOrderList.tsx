@@ -2,17 +2,18 @@
 
 import Link from "next/link";
 import { DeleteInvoiceModal } from "../widgets/deleteInvoiceModal";
-import { purchaseOrderStatusColors, purchaseOrderStatusLabels, purchaseOrderStatusSchema } from "../../types/purchaseOrderStatus";
+import { getClientPurchaseOrderAllowedNextStatuses, purchaseOrderStatusColors, purchaseOrderStatusLabels, purchaseOrderStatusSchema } from "../../types/purchaseOrderStatus";
 import { usePurchaseOrderList } from "../../hooks/usePurchaseOrderList";
 import PurchaseOrderModal, { PurchaseOrderModalContent } from "./purchaseOrderDetails";
 import { MOCK_PARTNERS } from "../../mocks/clients-mocks";
 import { mockInvoiceItems } from "../../mocks/invoice-items-mocks";
 import { Settings } from "lucide-react";
+import { UpdateInvoiceStatusModal } from "../widgets/updateStatusModal";
 
 export default function PurchaseOrderList() {
 
-    const { router, search, setSearch, deleteOpen, setDeleteOpen,purchaseOrders,totalElements,totalPages,deletePurchaseOrder,setIdPurchaseOrder,idPurchaseOrder
-        ,filtre, setFiltre, invoiceRef, setInvoiceRef, open, setOpen } = usePurchaseOrderList();
+    const { router, search, setSearch, deleteOpen, setDeleteOpen, purchaseOrders, totalElements, totalPages, deletePurchaseOrder, setIdPurchaseOrder, idPurchaseOrder,updateLoading,setNextStatus,setUpdateLoading,nextStatus
+        , filtre, setFiltre, invoiceRef, setInvoiceRef, open, setOpen,updateOpen,setUpdateOpen,selectedPurchaseOrder,setSelectedPurchaseOrder,updateStatus } = usePurchaseOrderList();
     return (
         <div className="min-h-screen bg-gray-50 p-8 font-sans">
             {/* Header */}
@@ -53,6 +54,22 @@ export default function PurchaseOrderList() {
                     onClose={() => setOpen(false)}
                 />
             </PurchaseOrderModal>
+            <UpdateInvoiceStatusModal
+                open={updateOpen}
+                onClose={() => setUpdateOpen(false)}
+                onConfirm={updateStatus}
+                invoiceNumber={selectedPurchaseOrder?.purchaseOrderNumber}
+                currentStatus={selectedPurchaseOrder?.purchaseOrderStatus}
+                nextStatus={nextStatus}
+                type="purchaseOrder"
+                onNextStatusChange={setNextStatus}
+                allowedStatuses={
+                    selectedPurchaseOrder
+                        ? getClientPurchaseOrderAllowedNextStatuses(selectedPurchaseOrder.purchaseOrderStatus)
+                        : []
+                }
+                isSubmitting={updateLoading}
+            />
 
             {/* Table card */}
             <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
@@ -82,7 +99,7 @@ export default function PurchaseOrderList() {
                                         : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
                                         }`}
                                 >
-                                    { purchaseOrderStatusLabels[f]}
+                                    {purchaseOrderStatusLabels[f]}
                                 </button>
                             ))}
                     </div>
@@ -134,7 +151,7 @@ export default function PurchaseOrderList() {
 
                                             {/* Voir */}
                                             <button
-                                                onClick={(e) => { e.stopPropagation(); setOpen(true) ; setIdPurchaseOrder(f.idPurchaseOrder);setInvoiceRef(f.purchaseOrderNumber) }}
+                                                onClick={(e) => { e.stopPropagation(); setOpen(true); setIdPurchaseOrder(f.idPurchaseOrder); setInvoiceRef(f.purchaseOrderNumber) }}
                                                 className="p-2 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
                                                 title="Voir"
                                             >
@@ -156,17 +173,17 @@ export default function PurchaseOrderList() {
                                             </button>
                                             {/* Modifier status */}
                                             <button
-                                                onClick={(e) => {}}
-                                               /// disabled={getAllowedNextStatuses(f.invoiceStatus as InvoiceStatus).length === 0}
+                                                onClick={(e) => { setSelectedPurchaseOrder(f); setIdPurchaseOrder(f.idPurchaseOrder); setUpdateOpen(true)}}
+                                                disabled={getClientPurchaseOrderAllowedNextStatuses(f.purchaseOrderStatus).length === 0}
                                                 className="p-2 rounded-xl bg-violet-50 text-violet-600 hover:bg-violet-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                                 title="Mettre à jour le statut"
-                                                >
-                                                <Settings className="w-4 h-4"/>
+                                            >
+                                                <Settings className="w-4 h-4" />
                                             </button>
                                             {/* Supprimer */}
                                             <button
                                                 disabled={f.purchaseOrderStatus != purchaseOrderStatusSchema.enum.DRAFT}
-                                                onClick={(e) => { setDeleteOpen(true); setInvoiceRef(f.purchaseOrderNumber);setIdPurchaseOrder(f.idPurchaseOrder); console.log("delete", f.idPurchaseOrder); }}
+                                                onClick={(e) => { setDeleteOpen(true); setInvoiceRef(f.purchaseOrderNumber); setIdPurchaseOrder(f.idPurchaseOrder); console.log("delete", f.idPurchaseOrder); }}
                                                 className="p-2 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                                 title="Supprimer"
                                             >

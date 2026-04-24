@@ -1,16 +1,17 @@
 "use client"
 
 import { DocumentPreviewModal } from "@/shared/components/ui/documentPreviewModal"
-import { formatDateLong } from "@/shared/utils/formatDate"
 import useClientInvoiceDetails, { InvoiceDetailsProps } from "../../hooks/useClientInvoiceDetails"
 import { mockInvoiceItems } from "../../mocks/invoice-items-mocks"
 import { InvoiceEventLabels } from "../../types/invoiceEventType"
 import { invoiceStatusLabels, invoiceStatusSchema } from "../../types/invoiceStatus"
-import { paymentMethodLabels } from "../../types/paymentMethod"
 import Card from "../widgets/card"
 import { SectionLabel } from "../widgets/sectionLabel"
 import ShieldIcon from "../widgets/shieldIcon"
 import { SendToTTNModal } from "../widgets/ttnConfirmationModal"
+import { paymentMethodLabels } from "../../types/paymentMethod"
+import { formatDateLong } from "@/shared/utils/formatDate"
+import { OperationCategoryLabels } from "../../types/operationCategory"
 
 export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps) {
     const {   client, invoice, previewDocument, setPreviewDocument, sendToTTN, TtnModalOpen, setTtnModalOpen,
@@ -180,7 +181,7 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                                {invoice?.purchaseOrder &&
                                 <div key="Bon du commande">
                                     <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Bon du commande</p>
-                                    <p className="text-sm font-bold text-gray-900">{invoice.purchaseOrder.idPurchaseOrder}</p>
+                                    <p className="text-sm font-bold text-gray-900">{invoice.purchaseOrder.purchaseOrderNumber}</p>
                                 </div>}
                                 <div key="Méthode de paiement">
                                     <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Méthode de paiement</p>
@@ -224,6 +225,7 @@ export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps)
                                     <div>
                                         <p className="text-sm font-semibold text-gray-900">{item.description}</p>
                                         <p className="text-xs text-gray-400 mt-0.5">{item.vatRate + '%'}</p>
+                                         <p className="text-xs text-gray-400 mt-0.5">{OperationCategoryLabels[item.operationCategory]}</p>
                                     </div>
                                     <p className="text-sm text-gray-700 text-right">{item.quantity}</p>
                                     <p className="text-sm text-gray-700 text-right">{item.unityPriceEXclTax}</p>

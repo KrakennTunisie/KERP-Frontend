@@ -51,7 +51,7 @@ export type  baseInvoiceCreditNote =z.infer<typeof baseInvoiceCreditNoteItemSche
 
 // models/invoiceItem.ts
 export const defaultInvoiceItem = (): InvoiceItem => ({
-    idInvoiceItem: uuidv4(),
+    idInvoiceItem: "0",
     description: "",
     quantity: 1,
     unityPriceEXclTax: 0,

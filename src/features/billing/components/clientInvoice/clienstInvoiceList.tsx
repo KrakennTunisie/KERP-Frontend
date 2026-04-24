@@ -328,6 +328,7 @@ export default function ClientsInvoiceList() {
                 onConfirm={updateStatus}
                 invoiceNumber={selectedInvoice?.invoiceNumber}
                 currentStatus={selectedInvoice?.invoiceStatus}
+                type="invoice"
                 nextStatus={nextStatus}
                 onNextStatusChange={setNextStatus}
                 allowedStatuses={
