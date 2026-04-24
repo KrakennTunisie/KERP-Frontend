@@ -55,6 +55,14 @@ export const purchaseOrderUpdateDTO = z.object({
     purchaseOrderDocument: fileSchema.nullable(),
 });
 
+export const purchaseOrderSummaryDTO = z.object({
+    idPurchaseOrder: z.string(),
+    purchaseOrderNumber: z.string(),
+    issueDate: z.date(),
+    purchaseOrderStatus: purchaseOrderStatusSchema,
+    currency: currencyTypeSchema,
+})
+
 export const purchaseOrderPageItemSchema = z.object({
     idPurchaseOrder: z.string(),
     purchaseOrderNumber: z.string(),
@@ -97,3 +105,4 @@ export type PurchaseOrderCreate = z.infer<typeof purchaseOrderCreateDTO>;
 export type PurchaseOrderUpdate = z.infer<typeof purchaseOrderUpdateDTO>;
 export type PurchaseOrderPageItem = z.infer<typeof purchaseOrderPageItemSchema>;
 export type PurchaseOrderDetails = z.infer<typeof purchaseOrderDetailsSchema>;
+export type PurchaseOrderSummary = z.infer<typeof purchaseOrderSummaryDTO>;

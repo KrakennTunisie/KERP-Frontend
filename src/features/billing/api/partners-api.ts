@@ -7,7 +7,7 @@ import { nextNumber } from "../types/nextNumber";
 import { Invoice, InvoiceCreate, InvoicePageItem } from "../models/invoice";
 import { InvoiceCreditNote, InvoiceCreditNoteCreate, InvoiceCreditNoteDetails, InvoiceCreditNotePageItem } from "../models/creditNote";
 import { UpdateInvoiceCreditNoteStatusRequest } from "../types/UpdateInvoiceCreditNoteStatusRequest";
-import { PurchaseOrder, PurchaseOrderCreate, PurchaseOrderDetails, PurchaseOrderPageItem, purchaseOrderPageItemSchema, PurchaseOrderUpdate } from "../models/purchaseOrder";
+import { PurchaseOrder, PurchaseOrderCreate, PurchaseOrderDetails, PurchaseOrderPageItem, purchaseOrderPageItemSchema, PurchaseOrderSummary, PurchaseOrderUpdate } from "../models/purchaseOrder";
 import { ExchangeRate } from "../types/exchangeRate";
 
 export const partnersApi = {
@@ -105,6 +105,8 @@ export const PurchaseOrderAPI = {
   getSuppliersPurchaseOrders: (query? : GetListParams) => 
     apiClient.get<PageResponse<PurchaseOrder>>(PURCHASE_ORDER_ENDPOINTS.getPurchaseOrders(query)),
 
+  getPurchaseOrderSummary :() => apiClient.get<PurchaseOrderSummary[]>(PURCHASE_ORDER_ENDPOINTS.summary),
+
   getClientPurchaseOrderById: (id?: string) =>
     apiClient.get<PurchaseOrderDetails>(PURCHASE_ORDER_ENDPOINTS.purchaseOrderById(id)),
 
@@ -115,6 +117,9 @@ export const PurchaseOrderAPI = {
     apiClient.post<PurchaseOrderCreate>(PURCHASE_ORDER_ENDPOINTS.purchaseOrders, payload),
 
   updateClientPurchaseOrder : (id: string, payload: FormData) => apiClient.patch<PurchaseOrderUpdate>(PURCHASE_ORDER_ENDPOINTS.purchaseOrders, payload),
+
+  updatePurchaseOrderStatus : 
+  (id: string, payload: FormData) => apiClient.patch<PurchaseOrderDetails>(PURCHASE_ORDER_ENDPOINTS.updateStatusPurchaseOrder(id), payload),
 
   deleteClientPurchaseOrder: (id: string) =>
     apiClient.delete<void>(PURCHASE_ORDER_ENDPOINTS.purchaseOrderById(id)),

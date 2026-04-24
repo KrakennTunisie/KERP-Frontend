@@ -20,10 +20,6 @@ export function SendToTTNModal({
     invoiceSent,
     successMessage
 }: SendToTTNModalProps) {
-    const handleConfirm = async () => {
-        await onConfirm();
-    };
-
     const footer = (
         <>
             {/* Cancel */}
@@ -41,7 +37,7 @@ export function SendToTTNModal({
 
             {/* Confirm */}
             <button
-                onClick={handleConfirm}
+                onClick={onConfirm}
                 disabled={loading || invoiceSent}
                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semiboldhover:bg-blue-700 transition-colors
             disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer ">

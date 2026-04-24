@@ -31,4 +31,15 @@ export const purchaseOrderStatusColors: Record<
   CANCELLED: "bg-red-100 text-red-700 border border-red-200",
   CLOSED: "bg-emerald-100 text-emerald-700 border border-emerald-200",
 };
-
+export const CLIENT_PURCHASEORDER_STATUS_PASSAGE_POLICY: Record<purchaseOrderStatus, purchaseOrderStatus[]> = {
+  DRAFT: ["IN_DELIVERY","CANCELLED"],
+  IN_DELIVERY :["CANCELLED","CLOSED"],
+  CANCELLED: [],
+  ALL: [],
+  CLOSED: [],
+};
+export const getClientPurchaseOrderAllowedNextStatuses = (
+  currentStatus: purchaseOrderStatus
+): purchaseOrderStatus[] => {
+  return CLIENT_PURCHASEORDER_STATUS_PASSAGE_POLICY[currentStatus] ?? [];
+};

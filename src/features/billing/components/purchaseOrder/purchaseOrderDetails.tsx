@@ -248,7 +248,7 @@ export function PurchaseOrderModalContent({
                 <p className="text-sm font-semibold text-gray-900">
                   {item.description}
                 </p>
-                <p className="text-xs text-gray-400 mt-0.5">TVA 19%</p>
+                <p className="text-xs text-gray-400 mt-0.5">TVA {item.vatRate}%</p>
               </div>
               <p className="text-sm text-gray-700 text-right">{item.quantity}</p>
               <p className="text-sm text-gray-700 text-right">
