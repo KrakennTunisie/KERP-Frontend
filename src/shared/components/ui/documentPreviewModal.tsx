@@ -76,7 +76,7 @@ export function DocumentPreviewModal({
 
       {isFile(document) && onCreateInvoice ? (
         <button
-          disabled={loading}
+      
           onClick={() => {
             onCreateInvoice()
           }}

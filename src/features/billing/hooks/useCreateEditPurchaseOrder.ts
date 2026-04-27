@@ -26,6 +26,7 @@ import { partnersApi, PurchaseOrderAPI } from "../api/partners-api";
 import { appToast } from "@/shared/lib/toast";
 import { useDebounce } from "@/shared/hooks/useDebounce";
 import { getApiErrorMessage } from "@/shared/api/handle-api-error";
+import { purchaseOrderTypeSchema } from "../types/PurchaseOrderType";
 
 export type PropsPurchaseOrder = {
   params: {
@@ -55,6 +56,7 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
       purchaseOrderNumber: nextNumber?.value,
       idPurchaseOrder: uuidv4(),
       purchaseOrderStatus: purchaseOrderStatusSchema.enum.DRAFT,
+      purchaseOrderType: purchaseOrderTypeSchema.enum.SALE,
       issueDate: new Date(),
       purchaseOrderItems: [defaultPurchaseOrderItem()],
       totalExclTax: 0,
@@ -154,7 +156,9 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
           exchangeRateSourceSchema.enum.EXTERNAL_API,
         purchaseOrderDocument: null,
         purchaseOrderStatus: purchaseOrder.purchaseOrderStatus,
+        purchaseOrderType : purchaseOrder.purchaseOrderType
       });
+      console.log(purchaseOrder)
     }
   }, [mode, purchaseOrder, reset]);
 
@@ -363,6 +367,7 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
       formData.append("purchaseOrderNumber", values.purchaseOrderNumber);
       formData.append("issueDate", values.issueDate.toISOString());
       formData.append("purchaseOrderStatus", values.purchaseOrderStatus);
+      formData.append("purchaseOrderType", values.purchaseOrderType)
       formData.append("purchaseCurrency", values.currency);
       formData.append("vatRate", String(0));
       formData.append("paymentMethod", values.paymentMethod);
@@ -421,7 +426,7 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
         formData.append("issueDate", values.issueDate.toISOString());
   
         formData.append("purchaseOrderStatus", purchaseOrderStatusSchema.enum.IN_DELIVERY)
-  
+        formData.append("purchaseOrderType", values.purchaseOrderType)
         formData.append("purchaseCurrency", values.currency);
         formData.append("vatRate", String(0));
         formData.append("paymentMethod", values.paymentMethod);

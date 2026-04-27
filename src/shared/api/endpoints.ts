@@ -56,6 +56,12 @@ export const PURCHASE_ORDER_ENDPOINTS = {
   getPurchaseOrders: (query? : GetListParams)=> `/purchase-orders/${buildQueryString(query)}`,
   purchaseOrderById: (id?: string) => `/purchase-orders/${id}`, 
   updateStatusPurchaseOrder: (id: string)=> `/purchase-orders/${id}/status`,
+
+  supplierPurchaseOrders: "/purchase-orders/supplier",
+  supplierSummary:"/purchase-orders/supplier/summary",
+  getSupplierPurchaseOrders: (query? : GetListParams)=> `/purchase-orders/supplier${buildQueryString(query)}`,
+  supplierPurchaseOrderById: (id: string) => `/purchase-orders/supplier/${id}`, 
+  supplierupdateStatusPurchaseOrder: (id: string)=> `/purchase-orders/supplier/${id}/status`,
 }
 
 export const EXCHANGE_RATE_ENDPOINTS = {

@@ -1,5 +1,6 @@
 import { PurchaseOrder } from "../models/purchaseOrder";
 import { purchaseOrderStatusSchema } from "../types/purchaseOrderStatus";
+import { purchaseOrderTypeSchema } from "../types/PurchaseOrderType";
 import { MOCK_PARTNERS } from "./clients-mocks";
 import { mockInvoiceItems } from "./invoice-items-mocks";
 
@@ -7,7 +8,7 @@ export const mockPurchaseOrder: PurchaseOrder = {
   idPurchaseOrder: "PO-2024-001",
   purchaseOrderNumber: "BC-2024-0042",
   issueDate: new Date("2024-06-15"),
-
+  purchaseOrderType: purchaseOrderTypeSchema.enum.SALE,
   purchaseOrderStatus: purchaseOrderStatusSchema.enum.IN_DELIVERY,
   currency: "EUR",
   totalExclTax: 15000.00,
@@ -30,7 +31,7 @@ export const mockPurchaseOrders: PurchaseOrder[] = [
     idPurchaseOrder: "PO-2024-002",
     purchaseOrderNumber: "BC-2024-0043",
     issueDate: new Date("2024-07-01"),
-   
+     purchaseOrderType: purchaseOrderTypeSchema.enum.SALE,
     purchaseOrderStatus: purchaseOrderStatusSchema.enum.DRAFT,
     currency: "TND",
     totalExclTax: 8000.00,
@@ -50,6 +51,7 @@ export const mockPurchaseOrders: PurchaseOrder[] = [
     purchaseOrderNumber: "BC-2024-0044",
     issueDate: new Date("2024-05-20"),
     purchaseOrderStatus: "CLOSED",
+    purchaseOrderType: purchaseOrderTypeSchema.enum.SALE,
     currency: "USD",
     totalExclTax: 25000.00,
     totalInclTax: 29750.00,

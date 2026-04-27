@@ -8,6 +8,7 @@ import { currencyTypeSchema } from "../types/currency";
 import { exchangeRateSourceSchema } from "../types/exchangeRateSource";
 import { fileSchema } from "../types/pdfSchema";
 import { documentSchema } from "./document";
+import { purchaseOrderTypeSchema } from "../types/PurchaseOrderType";
 
 
 // champs de base partagés
@@ -15,6 +16,7 @@ const purchaseOrderBaseFields = {
     purchaseOrderNumber: z.string(),
     issueDate: z.date(),
     purchaseOrderStatus: purchaseOrderStatusSchema,
+    purchaseOrderType: purchaseOrderTypeSchema,
     currency: currencyTypeSchema,
     vatAmount: z.number(),
     paymentMethod: paymentMethodSchema,
@@ -68,7 +70,7 @@ export const purchaseOrderPageItemSchema = z.object({
     purchaseOrderNumber: z.string(),
     issueDate: z.date(),
     purchaseOrderStatus: purchaseOrderStatusSchema,
-    currency: currencyTypeSchema,
+    purchaseCurrency: currencyTypeSchema,
     vatRate: z.number(),
     appliedExchangeRate: z.number(),
     totalExclTaxEUR: z.number(),
@@ -83,6 +85,7 @@ export const purchaseOrderDetailsSchema = z.object({
     reference: z.string(),
     issueDate: z.date(),
     purchaseOrderStatus: purchaseOrderStatusSchema,
+    purchaseOrderType :purchaseOrderTypeSchema,
     currency: currencyTypeSchema,
     vatRate: z.number(),
     totalExclTaxEUR: z.number(),

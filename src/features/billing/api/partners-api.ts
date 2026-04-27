@@ -110,29 +110,42 @@ export const PurchaseOrderAPI = {
     apiClient.get<PageResponse<PurchaseOrderPageItem>>(PURCHASE_ORDER_ENDPOINTS.getPurchaseOrders(query)),
 
   getSuppliersPurchaseOrders: (query? : GetListParams) => 
-    apiClient.get<PageResponse<PurchaseOrder>>(PURCHASE_ORDER_ENDPOINTS.getPurchaseOrders(query)),
+    apiClient.get<PageResponse<PurchaseOrderPageItem>>(PURCHASE_ORDER_ENDPOINTS.getSupplierPurchaseOrders(query)),
 
   getPurchaseOrderSummary :() => apiClient.get<PurchaseOrderSummary[]>(PURCHASE_ORDER_ENDPOINTS.summary),
+
+  getSupplierPurchaseOrderSummary :() => apiClient.get<PurchaseOrderSummary[]>(PURCHASE_ORDER_ENDPOINTS.supplierSummary),
 
   getClientPurchaseOrderById: (id?: string) =>
     apiClient.get<PurchaseOrderDetails>(PURCHASE_ORDER_ENDPOINTS.purchaseOrderById(id)),
 
   getSupplierPurchaseOrderById: (id: string) =>
-    apiClient.get<PurchaseOrder>(PURCHASE_ORDER_ENDPOINTS.purchaseOrderById(id)),
+    apiClient.get<PurchaseOrderDetails>(PURCHASE_ORDER_ENDPOINTS.supplierPurchaseOrderById(id)),
 
   createClientPurchaseOrder: (payload: FormData) =>
     apiClient.post<PurchaseOrderCreate>(PURCHASE_ORDER_ENDPOINTS.purchaseOrders, payload),
+
+  createSupplierPurchaseOrder: (payload: FormData) =>
+    apiClient.post<PurchaseOrderCreate>(PURCHASE_ORDER_ENDPOINTS.supplierPurchaseOrders, payload),
 
   updateClientPurchaseOrder : (id: string, payload: FormData) => apiClient.patch<PurchaseOrderUpdate>(PURCHASE_ORDER_ENDPOINTS.purchaseOrders, payload),
 
   updatePurchaseOrderStatus : 
   (id: string, payload: FormData) => apiClient.patch<PurchaseOrderDetails>(PURCHASE_ORDER_ENDPOINTS.updateStatusPurchaseOrder(id), payload),
 
+  updateSupplierPurchaseOrderStatus : 
+  (id: string, payload: FormData) => apiClient.patch<PurchaseOrderDetails>(PURCHASE_ORDER_ENDPOINTS.supplierupdateStatusPurchaseOrder(id), payload),
+
   deleteClientPurchaseOrder: (id: string) =>
     apiClient.delete<void>(PURCHASE_ORDER_ENDPOINTS.purchaseOrderById(id)),
 
-  deletePurchaseOrder: (id: string) =>
-    apiClient.delete<void>(PURCHASE_ORDER_ENDPOINTS.purchaseOrderById(id)),
+  deleteSupplierPurchaseOrder: (id: string) =>
+    apiClient.delete<void>(PURCHASE_ORDER_ENDPOINTS.supplierPurchaseOrderById(id)),
+
+
+ 
+
+
 };
 
 export const ExchangeRateAPI = {

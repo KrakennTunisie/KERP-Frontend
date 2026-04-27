@@ -144,7 +144,7 @@ export default function PurchaseOrderList() {
                                         </span>
                                     </td>
                                     <td className="px-5 py-4 text-slate-700 font-medium">
-                                        {f.totalInclTaxTND} {f.currency}
+                                        {f.totalInclTaxTND} {f.purchaseCurrency}
                                     </td>
                                     <td className="px-5 py-4">
                                         <div className="flex items-center gap-2">
