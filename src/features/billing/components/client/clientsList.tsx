@@ -75,7 +75,7 @@ const cities = useMemo(() => Array.from(new Set(clients.map((c) => c.country))),
 
 useEffect(() => {
   setCurrentPage(1);
-}, [clients,debouncedSearchQuery, filterCity]);
+}, [debouncedSearchQuery, filterCity]);
 
 useEffect(() => {
 

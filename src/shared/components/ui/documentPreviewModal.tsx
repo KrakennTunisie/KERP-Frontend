@@ -91,6 +91,7 @@ export function DocumentPreviewModal({
       ) : (
         <a
           href={url ?? undefined}
+          target="_blank"
           download={fileName ?? true}
           className="px-5 py-3 rounded-2xl bg-blue-600 text-white font-black hover:bg-blue inline-flex items-center gap-2"
         >

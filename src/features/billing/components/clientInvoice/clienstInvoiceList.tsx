@@ -30,7 +30,7 @@ export default function ClientsInvoiceList() {
         updateStatus,
         selectedInvoice, setSelectedInvoice,
         nextStatus, setNextStatus,
-        loading } = useClientInvoiceList();
+        loading, clientInvoiceStats } = useClientInvoiceList();
     return (
         <div className="min-h-screen bg-gray-50 p-8 font-sans">
             <SendInvoiceModal
@@ -65,8 +65,8 @@ export default function ClientsInvoiceList() {
                         </svg>
                     }
                     label="Total Année 2026"
-                    eur={0}
-                    tnd={0}
+                    eur={clientInvoiceStats.totalAmountEUR}
+                    tnd={clientInvoiceStats.totalAmountTND}
                     sub="Payé + À Encaisser"
                     variant="blue"
                 />
@@ -78,9 +78,9 @@ export default function ClientsInvoiceList() {
                         </svg>
                     }
                     label="À Encaisser 2026"
-                    eur={0}
-                    tnd={0}
-                    sub={`${0} factures`}
+                    eur={clientInvoiceStats.pendingAmountEUR}
+                    tnd={clientInvoiceStats.pendingAmountTND}
+                    sub={`${clientInvoiceStats.pendingInvoices} factures`}
                     variant="amber"
                 />
                 <StatClientInvoiceCard
@@ -91,9 +91,9 @@ export default function ClientsInvoiceList() {
                         </svg>
                     }
                     label="Mois en Cours"
-                    eur={0}
-                    tnd={0}
-                    sub={`${0} factures`}
+                    eur={clientInvoiceStats.pendingAmountEUR}
+                    tnd={clientInvoiceStats.pendingAmountTND}
+                    sub={`${clientInvoiceStats.pendingInvoices} factures`}
                     variant="emerald"
                 />
                 <DeleteInvoiceModal

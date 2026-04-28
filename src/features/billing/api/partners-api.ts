@@ -1,6 +1,6 @@
 // src/features/billing/api/partners.api.ts
 import { apiClient } from "@/shared/api/api-client";
-import { BILLING_ENDPOINTS, EXCHANGE_RATE_ENDPOINTS, INVOICES_CREDIT_NOTE_ENDPOINTS, INVOICES_ENDPOINTS, PURCHASE_ORDER_ENDPOINTS } from "@/shared/api/endpoints";
+import { BILLING_ENDPOINTS, DASHBOARD_ENDPOINTS, EXCHANGE_RATE_ENDPOINTS, INVOICES_CREDIT_NOTE_ENDPOINTS, INVOICES_ENDPOINTS, PURCHASE_ORDER_ENDPOINTS } from "@/shared/api/endpoints";
 import { ExchangeRateParams, GetListParams, PageResponse } from "@/shared/api/types";
 import { InvoiceCreditNoteCreate, InvoiceCreditNoteDetails, InvoiceCreditNotePageItem } from "../models/creditNote";
 import { Invoice, InvoiceCreate, InvoicePageItem } from "../models/invoice";
@@ -10,6 +10,7 @@ import { PurchaseOrder, PurchaseOrderCreate, PurchaseOrderDetails, PurchaseOrder
 import { ExchangeRate } from "../types/exchangeRate";
 import { nextNumber } from "../types/nextNumber";
 import { PartnerInvoiceStats } from "../types/partnersStats";
+import { ClientInvoiceDashboardStats } from "../types/clientDashboardStats";
 
 export const partnersApi = {
   getClients: (query? : GetListParams) => 
@@ -60,6 +61,9 @@ export const InvoicesAPI = {
 
   getClientInvoiceStats: (id: string) =>
     apiClient.get<PartnerInvoiceStats>(INVOICES_ENDPOINTS.clientInvoiceStats(id)),
+
+  getAllClientInvoiceStats: () =>
+    apiClient.get<PartnerInvoiceStats>(INVOICES_ENDPOINTS.allClientInvoicesStats),
 
   getSupplierInvoiceStats: (id: string) =>
     apiClient.get<PartnerInvoiceStats>(INVOICES_ENDPOINTS.supplierInvoiceStats(id)),
@@ -141,3 +145,7 @@ export const ExchangeRateAPI = {
     apiClient.get<ExchangeRate>(EXCHANGE_RATE_ENDPOINTS.getExchangeRate(query)),
 
 };
+
+export const DashboardAPI = {
+  clientDashbordStats: ()=> apiClient.get<ClientInvoiceDashboardStats[]>(DASHBOARD_ENDPOINTS.statsClientsInvoices)
+}

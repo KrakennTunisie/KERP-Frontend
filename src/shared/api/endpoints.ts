@@ -1,3 +1,4 @@
+import dashboard from "@/app/(app)/dashboard/page";
 import { buildQueryString } from "./query-string-builder";
 import {  ExchangeRateParams, GetListParams } from "./types";
 
@@ -30,6 +31,7 @@ export const INVOICES_ENDPOINTS={
   getSuppliersInvoices: (query? : GetListParams)=> `/invoices/supplier-invoices${buildQueryString(query)}`,
   clientInvoiceById: (id?: string) => `/invoices/client-invoices/${id}`,
   clientInvoiceStatusById: (id?: string) => `/invoices/client-invoices/${id}/status`,
+  allClientInvoicesStats : '/invoices/client-invoices/stats',
   clientInvoiceStats: (id?: string) => `/invoices/client-invoices/stats/${id}`,
   supplierInvoiceStats: (id?: string) => `/invoices/supplier-invoices/stats/${id}`,
 
@@ -62,4 +64,9 @@ export const EXCHANGE_RATE_ENDPOINTS = {
   exchangeRate: "/exchange-rate/content",
   getExchangeRate: (query? : ExchangeRateParams)=> `/exchange-rate/content${buildQueryString(query)}`,
 
+}
+
+export const DASHBOARD_ENDPOINTS={
+  dashboard : '/dashboard',
+  statsClientsInvoices: '/dashboard/clients-invoices'
 }

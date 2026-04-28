@@ -47,9 +47,12 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
   const [invoice, setInvoice] = useState<Invoice>()
   const fetchClientInvoice = async () => {
     try {
-      setLoading(true)
+      if(mode == "edit"){
+
+     // setLoading(true)
       const invoice = await InvoicesAPI.getClientInvoiceById(invoiceId);
       setInvoice(invoice);
+      }
     } catch (error) {
       appToast.error("Erreur Fetch du client:", getApiErrorMessage(error));
     }
@@ -422,7 +425,7 @@ const [selectedPO, setSelectedPO] = useState<PurchaseOrderDetails | null>(null);
   // récupérer la liste des bons de commande disponible en cours de livraison ou bien broullion 
   const fetchPurchaseOrderSummary = async () => {
     try {
-      setLoading(true)
+    //  setLoading(true)
 
       const purchaseorders = await PurchaseOrderAPI.getPurchaseOrderSummary();
       setPurchaseOrders(purchaseorders);
@@ -434,14 +437,14 @@ const [selectedPO, setSelectedPO] = useState<PurchaseOrderDetails | null>(null);
   // récupérer un bon de commande séléctionnée
   const fetchPurchaseOrder = async (idPurchaseOrder: string) => {
     try {
-      setLoading(true)
+   //   setLoading(true)
       const purchaseOrder = await PurchaseOrderAPI.getClientPurchaseOrderById(idPurchaseOrder);
       return purchaseOrder;
     } catch (error) {
       appToast.error("Erreur Fetch du client:", getApiErrorMessage(error));
     }
     finally {
-      setLoading(false)
+   //   setLoading(false)
     }
   };
 
