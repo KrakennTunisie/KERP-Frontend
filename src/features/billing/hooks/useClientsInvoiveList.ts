@@ -1,11 +1,12 @@
-import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react";
-import { InvoiceStatus, invoiceStatusSchema } from "../types/invoiceStatus";
-import { InvoicePageItem, invoiceSchema } from "../models/invoice";
-import { InvoicesAPI } from "../api/partners-api";
+import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 import { useDebounce } from "@/shared/hooks/useDebounce";
 import { appToast } from "@/shared/lib/toast";
-import { getApiErrorMessage } from "@/shared/api/handle-api-error";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { InvoicesAPI } from "../api/partners-api";
+import { InvoicePageItem } from "../models/invoice";
+import { InvoiceStatus, invoiceStatusSchema } from "../types/invoiceStatus";
+import { PartnerInvoiceStats } from "../types/partnersStats";
 export type PropsClient = {
   params: {
     invoiceId: string
@@ -30,7 +31,41 @@ export function useClientInvoiceList () {
     const [nextStatus, setNextStatus]=useState("")
     const router = useRouter()
     const debouncedSearchQuery = useDebounce(search, 2000);
+      const [clientInvoiceStats, setClientInvoiceStats]=useState<PartnerInvoiceStats>({
+      totalAmountTND: 0,
+      totalAmountEUR: 0,
+      totalAmountUSD: 0,
     
+      totalInvoices: 0,
+      paidInvoices: 0,
+      pendingInvoices: 0,
+    
+      pendingAmountTND: 0,
+      pendingAmountEUR: 0,
+      pendingAmountUSD: 0,
+    
+      averageInvoiceTND: 0,
+      averageInvoiceEUR: 0,
+      averageInvoiceUSD: 0,
+      })
+      //const [loading, setLoading] = useState<boolean>();
+      const fetchClientInvoicesStats = async () => {
+        try {
+          //setLoading(true)
+          const clientStats = await InvoicesAPI.getAllClientInvoiceStats()
+          setClientInvoiceStats(clientStats);
+        } catch (error) {
+          appToast.error("Erreur Fetch du client:",getApiErrorMessage(error));
+        }
+        finally{
+        //  setLoading(false)
+        }
+      };
+    
+      useEffect(() => {
+    
+      fetchClientInvoicesStats();
+    }, []);
     const deleteClientInvoice = async ()=>{
         try {
           setDeleteLoading(true);
@@ -126,6 +161,7 @@ export function useClientInvoiceList () {
      updateLoading,
      loading,
      nextStatus, setNextStatus,
-     selectedInvoice, setSelectedInvoice
+     selectedInvoice, setSelectedInvoice,
+     clientInvoiceStats
     }
 }

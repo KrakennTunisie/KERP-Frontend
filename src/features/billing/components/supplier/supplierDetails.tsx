@@ -8,11 +8,29 @@ import { partnersApi } from "../../api/partners-api";
 import { appToast } from "@/shared/lib/toast";
 import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 import PageLoader from "@/shared/components/ui/pageLoader";
+import { PartnerInvoiceStats } from "../../types/partnersStats";
 
 export default function SupplierDetails(){
   const params = useParams();
 
   const supplierId = params?.supplierId as string;
+    const [supplierInvoiceStats, setSupplierInvoiceStats]=useState<PartnerInvoiceStats>({
+    totalAmountTND: 0,
+    totalAmountEUR: 0,
+    totalAmountUSD: 0,
+  
+    totalInvoices: 0,
+    paidInvoices: 0,
+    pendingInvoices: 0,
+  
+    pendingAmountTND: 0,
+    pendingAmountEUR: 0,
+    pendingAmountUSD: 0,
+  
+    averageInvoiceTND: 0,
+    averageInvoiceEUR: 0,
+    averageInvoiceUSD: 0,
+    })
 
   const [supplier, setSupplier] = useState<SupplierPartner>();
   const [loading, setLoading] = useState<boolean>(true);
@@ -55,6 +73,7 @@ if(supplier==null){
 
             <PartnerDetails
                 partner={supplier}
+                partnerStats={supplierInvoiceStats}
             />
         )
 

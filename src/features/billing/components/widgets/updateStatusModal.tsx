@@ -2,6 +2,7 @@
 
 import { Modal } from "@/shared/components/ui/modal";
 import { InvoiceStatus, invoiceStatusLabels } from "../../types/invoiceStatus";
+import { purchaseOrderStatus, purchaseOrderStatusLabels } from "../../types/purchaseOrderStatus";
 
 
 type UpdateInvoiceStatusModalProps = {
@@ -9,10 +10,11 @@ type UpdateInvoiceStatusModalProps = {
   onClose: () => void;
   onConfirm: () => void;
   invoiceNumber?: string;
-  currentStatus?: InvoiceStatus;
-  nextStatus: string | "";
+  currentStatus?: InvoiceStatus | purchaseOrderStatus;
+  nextStatus: string | " ";
+  type: string
   onNextStatusChange: (status: InvoiceStatus) => void;
-  allowedStatuses: InvoiceStatus[];
+  allowedStatuses: InvoiceStatus[] | purchaseOrderStatus[];
   isSubmitting?: boolean;
 };
 
@@ -24,10 +26,12 @@ export function UpdateInvoiceStatusModal({
   invoiceNumber,
   currentStatus,
   nextStatus,
+  type,
   onNextStatusChange,
   allowedStatuses,
   isSubmitting = false,
 }: UpdateInvoiceStatusModalProps) {
+
   return (
     <Modal
       open={open}
@@ -47,7 +51,7 @@ export function UpdateInvoiceStatusModal({
             type="button"
             onClick={onConfirm}
             disabled={!nextStatus || isSubmitting}
-            className="px-4 py-2 rounded-xl bg-black text-white hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            className="px-4 py-2 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 cursor-pointer"
           >
             {isSubmitting ? "Mise à jour..." : "Confirmer"}
           </button>
@@ -66,7 +70,9 @@ export function UpdateInvoiceStatusModal({
           <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
             <p className="text-sm text-gray-500 mb-1">Statut actuel</p>
             <p className="text-base font-bold text-gray-900">
-              {currentStatus ? invoiceStatusLabels[currentStatus] : "-"}
+              {type === "invoice" && currentStatus
+                ? invoiceStatusLabels[currentStatus as InvoiceStatus]
+                : purchaseOrderStatusLabels[currentStatus as purchaseOrderStatus]}
             </p>
           </div>
         </div>
@@ -88,7 +94,9 @@ export function UpdateInvoiceStatusModal({
             <option value="">Sélectionner un statut</option>
             {allowedStatuses.map((status) => (
               <option key={status} value={status}>
-                {invoiceStatusLabels[status]}
+                {type === "invoice" && nextStatus
+                  ? invoiceStatusLabels[status as InvoiceStatus]
+                  : purchaseOrderStatusLabels[status as purchaseOrderStatus]}
               </option>
             ))}
           </select>

@@ -16,20 +16,25 @@ import PartnerInfoCard from "./partnerInfoCard";
 import PartnerInvoicesCard from "./partnerInvoices";
 import { ClientPartner,  SupplierPartner } from "../../models/partner";
 import { Invoice } from "../../models/invoice";
+import { useEffect, useState } from "react";
+import { PartnerInvoiceStats } from "../../types/partnersStats";
 
 type PartnerDetailsProps = {
   partner: ClientPartner | SupplierPartner;
+  partnerStats: PartnerInvoiceStats
 };
-export default function PartnerDetails({ partner }: PartnerDetailsProps) {
+export default function PartnerDetails({ partner, partnerStats }: PartnerDetailsProps) {
   const isSupplier = partner.partnerType === "SUPPLIER";
 
-  const totalInvoices = partner?.invoices?.length;
-  const totalAmount = partner?.invoices?.reduce((sum, inv) => sum + inv.amount, 0);
-  const paidInvoices = partner?.invoices?.filter((inv) => inv.status ===  "paid").length;
-  const pendingAmount = partner?.invoices?.filter((inv: Partial<Invoice>) => inv.invoiceStatus !== "PAID")
-    .reduce((sum: number, inv: Partial<Invoice>) => sum + (inv?.totalInclTax || 0), 0)
-  const averageInvoice = totalInvoices? totalInvoices > 0 ? totalAmount / totalInvoices : 0 : undefined;
+  const getSupplierInvoiceStats = async ()=>{
 
+  }
+
+
+
+  useEffect(()=>{
+
+  },[])
   const pageConfig = {
     title: isSupplier ? "Fournisseur" : "Client",
     backHref: isSupplier ? "/billing/suppliers" : "/billing/clients",
@@ -77,7 +82,7 @@ export default function PartnerDetails({ partner }: PartnerDetailsProps) {
                 title={pageConfig.totalLabel}
                 value={
                     <p className="text-3xl font-black text-gray-900 tracking-tighter">
-                    {totalAmount?.toLocaleString()}{" "}
+                    {partnerStats.totalAmountTND + " "}
                     <span className="text-sm text-gray-600">TND</span>
                     </p>
                 }
@@ -90,7 +95,7 @@ export default function PartnerDetails({ partner }: PartnerDetailsProps) {
                 title="Factures"
                 value={
                     <p className="text-3xl font-black text-gray-900 tracking-tighter">
-                    {totalInvoices}
+                    {partnerStats.totalInvoices}
                     </p>
                 }
                 icon={FileText}
@@ -98,7 +103,7 @@ export default function PartnerDetails({ partner }: PartnerDetailsProps) {
                 iconClassName="text-emerald-600"
                 footer={
                     <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-tighter">
-                    {paidInvoices} Payées
+                    {partnerStats.paidInvoices} Payées
                     </p>
                 }
             />
@@ -109,7 +114,7 @@ export default function PartnerDetails({ partner }: PartnerDetailsProps) {
                 title={isSupplier ? "À Payer" : "À Encaisser"}
                 value={
                     <p className="text-3xl font-black text-gray-900 tracking-tighter">
-                        {totalInvoices}
+                        {partnerStats.pendingInvoices}
                     </p>
                 }
                 icon={Clock}
@@ -117,7 +122,7 @@ export default function PartnerDetails({ partner }: PartnerDetailsProps) {
                 iconClassName="text-amber-600"
                 footer={
                     <p className="text-[10px] font-bold text-amber-600 uppercase tracking-tighter">
-                        {pendingAmount?.toLocaleString()}
+                        {partnerStats.pendingAmountTND+ " "}
                         <span className="text-sm text-gray-600">TND</span>
                     </p>
                     
@@ -128,7 +133,7 @@ export default function PartnerDetails({ partner }: PartnerDetailsProps) {
                 title="Montant Moyen"
                 value={
                     <p className="text-3xl font-black text-gray-900 tracking-tighter">
-                        {averageInvoice?.toLocaleString()}
+                        {partnerStats.averageInvoiceTND}
                     </p>
                 }
                 icon={Euro}
@@ -136,7 +141,7 @@ export default function PartnerDetails({ partner }: PartnerDetailsProps) {
                 iconClassName="text-purple-600"
                 footer={
                     <p className="text-[10px] font-bold text-purple-600 uppercase tracking-tighter">
-                        {averageInvoice?.toLocaleString()}{" "}
+                        {partnerStats.averageInvoiceTND+" "}
                         <span className="text-sm text-gray-600">TND</span>
 
                     </p>

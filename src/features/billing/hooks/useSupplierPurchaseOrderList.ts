@@ -11,7 +11,7 @@ export type PropsClient = {
     invoiceId: string
   }
 }
-export function usePurchaseOrderList() {
+export function useSupplierPurchaseOrderList() {
   const [search, setSearch] = useState("");
   const [filtre, setFiltre] = useState<purchaseOrderStatus>();
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -31,8 +31,9 @@ export function usePurchaseOrderList() {
   const debouncedSearchQuery = useDebounce(search, 2000);
   async function deletePurchaseOrder(idPurchaseOrder: string) {
     try {
+        console.log("hi,lkl",idPurchaseOrder)
       setDeleteLoading(true);
-      await PurchaseOrderAPI.deleteClientPurchaseOrder(idPurchaseOrder);
+      await PurchaseOrderAPI.deleteSupplierPurchaseOrder(idPurchaseOrder);
       appToast.success('Bon de commande supprimée avec succès.')
       setDeleteOpen(false)
       await fetchClientsPurchaseOrders()
@@ -41,7 +42,6 @@ export function usePurchaseOrderList() {
     } finally {
       setDeleteLoading(false);
     }
-    //setPurchaseOrder(idPurchaseOrder);
   }
   const fetchClientsPurchaseOrders = async () => {
     try {
@@ -51,7 +51,7 @@ export function usePurchaseOrderList() {
           ? debouncedSearchQuery.trim()
           : undefined;
 
-      const response = await PurchaseOrderAPI.getClientsPurchaseOrders({
+      const response = await PurchaseOrderAPI.getSuppliersPurchaseOrders({
         keyword: keyword,
         filter: filtre?.toString() === purchaseOrderStatusSchema.enum.ALL ? "" : filtre?.toString(),
         page: currentPage - 1,
@@ -83,7 +83,7 @@ export function usePurchaseOrderList() {
             const formData = new FormData();
             formData.append("status",  nextStatus);
             console.log(idPurchaseOrder)
-            await PurchaseOrderAPI.updatePurchaseOrderStatus(idPurchaseOrder, formData);
+            await PurchaseOrderAPI.updateSupplierPurchaseOrderStatus(idPurchaseOrder, formData);
             appToast.success('Statut mise à jour avec succès avec succès.')
             setUpdateOpen(false)
             await fetchClientsPurchaseOrders()

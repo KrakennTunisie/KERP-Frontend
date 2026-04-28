@@ -81,6 +81,7 @@ const updateStatus = async ()=>{
       setLoading(true)
       const invoice = await InvoicesAPI.getClientInvoiceById(invoiceId);
       setInvoice(invoice);
+      console.log(invoice);
       setHasCreditInvoice(invoice?.hasInvoiceCreditNotes ?? false)
     } catch (error) {
       appToast.error("Erreur Fetch du client:",getApiErrorMessage(error));

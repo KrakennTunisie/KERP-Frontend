@@ -10,6 +10,7 @@ import { paymentMethodLabels } from "../../types/paymentMethod";
 import { currencyTypeSchema } from "../../types/currency";
 import { PaymentConditionLabels } from "../../types/paymentCondition";
 import { DocumentPreviewModal } from "@/shared/components/ui/documentPreviewModal";
+import useSupplierPurchaseOrderDetails from "../../hooks/useSupplierPurchaseOrderDetails";
 
 
 type ModalProps = {
@@ -20,7 +21,7 @@ type ModalProps = {
   footer?: React.ReactNode;
 };
 
-export default function PurchaseOrderModal({ open, title, onClose, children, footer }: ModalProps) {
+export default function SupplierPurchaseOrderModal({ open, title, onClose, children, footer }: ModalProps) {
   if (!open) return null;
 
   return (
@@ -49,18 +50,14 @@ export default function PurchaseOrderModal({ open, title, onClose, children, foo
 }
 
 
-export function PurchaseOrderModalContent({
-  client,
-  items,
+export function SupplierPurchaseOrderModalContent({
   purchaseOrderId,
   onClose,
 }: {
-  client: Partner;
-  items: InvoiceItem[];
   purchaseOrderId: string
   onClose: () => void;
 }) {
-  const { router, purchaseOrder, purchaseOrderItems, successMessage, setPreviewDocument, previewDocument } = usePurchaseOrderDetails({ purchaseOrderId })
+  const { router, purchaseOrder, purchaseOrderItems, successMessage, setPreviewDocument, previewDocument } = useSupplierPurchaseOrderDetails({ purchaseOrderId })
   return (
     <div className="flex flex-col gap-4 max-h-[70vh] overflow-y-auto pr-1">
       {/* Client + Admin */}
@@ -241,7 +238,7 @@ export function PurchaseOrderModalContent({
           {purchaseOrder?.purchaseOrderItems!.map((item, index) => (
             <div
               key={item.idPurchaseOrderItem}
-              className={`grid grid-cols-[1fr_70px_90px_100px] gap-2 py-3.5 items-center ${index < items.length - 1 ? "border-b border-gray-50" : ""
+              className={`grid grid-cols-[1fr_70px_90px_100px] gap-2 py-3.5 items-center ${index < purchaseOrder?.purchaseOrderItems!.length - 1 ? "border-b border-gray-50" : ""
                 }`}
             >
               <div>

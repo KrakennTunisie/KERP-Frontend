@@ -14,11 +14,12 @@ import ErrorForm from "../widgets/errorForm"
 import { SendToTTNModal } from "../widgets/ttnConfirmationModal"
 import { mockPurchaseOrders } from "../../mocks/purchase-order-mocks"
 import { Controller } from "react-hook-form"
+import { purchaseOrderStatusLabels } from "../../types/purchaseOrderStatus"
 
 export default function CreateInvoiceClient({ mode,
     invoiceId, }: InvoiceFormClientProps) {
-    const { addItem, removeItem, updateItem, clientSearch, setClientSearch, showDropdown, setShowDropdown, invoiceRef, pdfUrl, canCreateInvoice, errors, TtnModalOpen, setTtnModalOpen, sent, successMessage,
-        linkedToPO, selectedPO, handleSelectPO, setLinkedToPO, handleTogglePO, selectClient, clearClient, updateInvoice, clients, setCurrency, previewData, form, onSubmit, isModalOpen, router, calculateDueDate, onCloseDocumentModal, createInvoice, sendToTTN, loading
+    const { addItem, removeItem, updateItem, clientSearch, setClientSearch, showDropdown, setShowDropdown, invoiceRef, pdfUrl, canCreateInvoice, errors, TtnModalOpen, setTtnModalOpen, sent, successMessage,purchaseOrders,
+        linkedToPO, selectedPO, handleSelectPO, loadingTTN, handleTogglePO, selectClient, clearClient, updateInvoice, clients, setCurrency, previewData, form, onSubmit, isModalOpen, router, calculateDueDate, onCloseDocumentModal, createInvoice, sendToTTN, loading
     } = useCreateInvoice({ mode, invoiceId })
 
     const { register } = form
@@ -72,13 +73,16 @@ export default function CreateInvoiceClient({ mode,
                 open={isModalOpen}
                 onClose={onCloseDocumentModal}
                 onCreateInvoice={mode == "create" ? createInvoice : updateInvoice}
-                document={pdfUrl} />
+                document={pdfUrl}
+                loading={loading}
+                type="Facture"
+                 />
             {/* Modal pour demander au user s'il veut envoyer la Facture au TTN */}
             <SendToTTNModal
                 open={TtnModalOpen}
                 onClose={() => setTtnModalOpen(false)}
                 onConfirm={() => { sendToTTN() }}
-                loading={loading}
+                loading={loadingTTN}
                 invoiceSent={sent}
                 invoiceRef={previewData.invoiceNumber}
                 successMessage={successMessage} />
@@ -135,7 +139,7 @@ export default function CreateInvoiceClient({ mode,
 
                             </div>
                             {/* ── Toggle bon de commande ── */}
-                            <div className="pt-3 border-t border-slate-100">
+                            { mode == "create" ?( <div className="pt-3 border-t border-slate-100">
                                 <div className="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3">
                                     {/* Texte à gauche */}
                                     <div className="flex-1 min-w-0">
@@ -166,15 +170,15 @@ export default function CreateInvoiceClient({ mode,
                                         </label>
                                         <select
                                             onChange={(e) => {
-                                                const po = mockPurchaseOrders.find((p) => p.idPurchaseOrder === e.target.value);
-                                                if (po) handleSelectPO(po);
+                                                const po = purchaseOrders.find((p) => p.idPurchaseOrder === e.target.value);
+                                                if (po) handleSelectPO(po.idPurchaseOrder);
                                             }}
                                             className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
                                         >
                                             <option value="">-- Choisir une commande --</option>
-                                            {mockPurchaseOrders.map((po) => (
+                                            {purchaseOrders.map((po) => (
                                                 <option key={po.idPurchaseOrder} value={po.idPurchaseOrder}>
-                                                    {po.purchaseOrderNumber} — {po.partner?.name}
+                                                    {po.purchaseOrderNumber} — {purchaseOrderStatusLabels[po.purchaseOrderStatus]}
                                                 </option>
                                             ))}
                                         </select>
@@ -199,7 +203,7 @@ export default function CreateInvoiceClient({ mode,
 
                                                 <div className="flex-1 min-w-0">
                                                     <p className="text-sm font-semibold text-blue-700 truncate">
-                                                        {selectedPO.purchaseOrderNumber}
+                                                        {selectedPO.reference}
                                                     </p>
                                                     <p className="text-xs text-blue-500 mt-0.5 truncate">
                                                         {selectedPO.partner?.name}
@@ -213,8 +217,8 @@ export default function CreateInvoiceClient({ mode,
                                         )}
                                     </div>
                                 )}
-                            </div>
-                        </div>
+                            </div>): <div> </div>}
+                        </div> 
                     </section>
 
                     {/* Section 02 — Client */}
@@ -227,7 +231,7 @@ export default function CreateInvoiceClient({ mode,
                             <div className="relative">
                                 <input
                                     type="text"
-                                    //readOnly={linkedToPO && !!selectedPO}
+                                    disabled={linkedToPO && !!selectedPO}
                                     placeholder="Rechercher un client..."
                                     value={clientSearch}
                                     onChange={(e) => { setClientSearch(e.target.value); setShowDropdown(true) }}
@@ -272,6 +276,7 @@ export default function CreateInvoiceClient({ mode,
                                         <button
                                             type="button"
                                             onClick={clearClient}
+                                             disabled={linkedToPO && !!selectedPO}
                                             className="text-slate-300 hover:text-red-400 transition"
                                         >
                                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -313,6 +318,7 @@ export default function CreateInvoiceClient({ mode,
                                     <select
                                         {...register("invoiceCurrency")}
                                         onChange={(e) => setCurrency(e.target.value as CurrencyType)}
+                                         disabled={linkedToPO && !!selectedPO}
                                         className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
                                     >
                                         {currencyTypeSchema.options.map((currency) => (
@@ -341,6 +347,7 @@ export default function CreateInvoiceClient({ mode,
                         <div className="flex items-center justify-between">
                             <SectionTitle number="04" label="SERVICES" invoiceType={invoiceTypeSchema.enum.SALE} />
                             <button
+                                disabled={linkedToPO && !!selectedPO}
                                 onClick={addItem}
                                 className="w-8 h-8 rounded-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center shadow-md shadow-blue-200 transition"
                             >
@@ -403,7 +410,6 @@ export default function CreateInvoiceClient({ mode,
                                             </label>
                                             <input
                                                 type="number"
-                                                readOnly={linkedToPO && !!selectedPO}
                                                 min={1}
                                                 value={item.quantity}
                                                 onChange={(e) => updateItem(item.idInvoiceItem!, "quantity", parseFloat(e.target.value) || 0)}

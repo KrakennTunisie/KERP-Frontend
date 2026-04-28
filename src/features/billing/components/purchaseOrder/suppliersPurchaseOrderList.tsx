@@ -2,37 +2,36 @@
 
 import Link from "next/link";
 import { DeleteInvoiceModal } from "../widgets/deleteInvoiceModal";
+import { mockPurchaseOrders } from "../../mocks/purchase-order-mocks";
 import { getClientPurchaseOrderAllowedNextStatuses, purchaseOrderStatusColors, purchaseOrderStatusLabels, purchaseOrderStatusSchema } from "../../types/purchaseOrderStatus";
 import { usePurchaseOrderList } from "../../hooks/usePurchaseOrderList";
 import PurchaseOrderModal, { PurchaseOrderModalContent } from "./purchaseOrderDetails";
 import { MOCK_PARTNERS } from "../../mocks/clients-mocks";
 import { mockInvoiceItems } from "../../mocks/invoice-items-mocks";
-import { Settings } from "lucide-react";
+import { useSupplierPurchaseOrderList } from "../../hooks/useSupplierPurchaseOrderList";
+import { currencyTypeSchema } from "../../types/currency";
 import { UpdateInvoiceStatusModal } from "../widgets/updateStatusModal";
+import { Settings } from "lucide-react";
+import SupplierPurchaseOrderModal, { SupplierPurchaseOrderModalContent } from "./supplierPurchaseOrderDetails";
 
-export default function PurchaseOrderList() {
+export default function SuppliersPurchaseOrderList() {
 
-    const { router, search, setSearch, deleteOpen, setDeleteOpen, purchaseOrders, totalElements, totalPages, deletePurchaseOrder, setIdPurchaseOrder, idPurchaseOrder,updateLoading,setNextStatus,setUpdateLoading,nextStatus
-        , filtre, setFiltre, invoiceRef, setInvoiceRef, open, setOpen,updateOpen,setUpdateOpen,selectedPurchaseOrder,setSelectedPurchaseOrder,updateStatus } = usePurchaseOrderList();
+    const { router, search, setSearch, deleteOpen, setDeleteOpen, purchaseOrders, selectedPurchaseOrder, idPurchaseOrder, setUpdateOpen, updateLoading, updateOpen, setIdPurchaseOrder
+        , updateStatus, nextStatus, setNextStatus, setSelectedPurchaseOrder,deletePurchaseOrder,
+        filtre, setFiltre, invoiceRef, setInvoiceRef, open, setOpen } = useSupplierPurchaseOrderList();
     return (
         <div className="min-h-screen bg-gray-50 p-8 font-sans">
             {/* Header */}
             <div className="flex items-start justify-between mb-8">
                 <div>
                     <h1 className="text-3xl font-black text-slate-900 tracking-tight">
-                        Commande Clients
+                        Commande Fournisseurs
                     </h1>
                     <p className="text-sm text-slate-500 mt-1">
                         Gestion des Bons de commande
                     </p>
                 </div>
-                <Link
-                    href="/billing/purchaseOrder/create"
-                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 transition-colors text-white font-bold px-6 py-3 rounded-xl shadow-md text-sm"
-                >
-                    <span className="text-lg leading-none">+</span>
-                    Nouvelle Commande
-                </Link>
+
             </div>
 
             <DeleteInvoiceModal
@@ -40,20 +39,18 @@ export default function PurchaseOrderList() {
                 onClose={() => setDeleteOpen(false)}
                 invoiceRef={invoiceRef}
                 onConfirm={async () => {
-                    deletePurchaseOrder(idPurchaseOrder);
+                    deletePurchaseOrder(idPurchaseOrder)
                     setDeleteOpen(false);
                 }} />
-            <PurchaseOrderModal
+            <SupplierPurchaseOrderModal
                 open={open}
                 title={`Bon de commande ${invoiceRef}`}
                 onClose={() => setOpen(false)}>
-                <PurchaseOrderModalContent
-                    client={MOCK_PARTNERS[1]}
-                    items={mockInvoiceItems}
+                <SupplierPurchaseOrderModalContent
                     purchaseOrderId={idPurchaseOrder}
                     onClose={() => setOpen(false)}
                 />
-            </PurchaseOrderModal>
+            </SupplierPurchaseOrderModal>
             <UpdateInvoiceStatusModal
                 open={updateOpen}
                 onClose={() => setUpdateOpen(false)}
@@ -144,14 +141,14 @@ export default function PurchaseOrderList() {
                                         </span>
                                     </td>
                                     <td className="px-5 py-4 text-slate-700 font-medium">
-                                        {f.totalInclTaxTND} {f.purchaseCurrency}
+                                        {f.purchaseCurrency == currencyTypeSchema.enum.EUR ? f.totalInclTaxEUR : f.totalInclTaxTND} {f.purchaseCurrency}
                                     </td>
                                     <td className="px-5 py-4">
                                         <div className="flex items-center gap-2">
 
                                             {/* Voir */}
                                             <button
-                                                onClick={(e) => { e.stopPropagation(); setOpen(true); setIdPurchaseOrder(f.idPurchaseOrder); setInvoiceRef(f.purchaseOrderNumber) }}
+                                                onClick={(e) => { e.stopPropagation(); setOpen(true) ;setIdPurchaseOrder(f.idPurchaseOrder)}}
                                                 className="p-2 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
                                                 title="Voir"
                                             >
@@ -160,20 +157,9 @@ export default function PurchaseOrderList() {
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
                                                 </svg>
                                             </button>
-
-                                            {/* Modifier */}
-                                            <button
-                                                onClick={(e) => { e.stopPropagation(); console.log("edit", f.idPurchaseOrder); router.push(`/billing/purchaseOrder/${f.idPurchaseOrder}/edit`); }}
-                                                className="p-2 rounded-xl bg-amber-50 text-amber-600 hover:bg-amber-100 transition-colors"
-                                                title="Modifier"
-                                            >
-                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931zm0 0L19.5 7.125" />
-                                                </svg>
-                                            </button>
                                             {/* Modifier status */}
                                             <button
-                                                onClick={(e) => { setSelectedPurchaseOrder(f); setIdPurchaseOrder(f.idPurchaseOrder); setUpdateOpen(true)}}
+                                                onClick={(e) => { setSelectedPurchaseOrder(f); setIdPurchaseOrder(f.idPurchaseOrder); setUpdateOpen(true) }}
                                                 disabled={getClientPurchaseOrderAllowedNextStatuses(f.purchaseOrderStatus).length === 0}
                                                 className="p-2 rounded-xl bg-violet-50 text-violet-600 hover:bg-violet-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                                 title="Mettre à jour le statut"
@@ -183,7 +169,7 @@ export default function PurchaseOrderList() {
                                             {/* Supprimer */}
                                             <button
                                                 disabled={f.purchaseOrderStatus != purchaseOrderStatusSchema.enum.DRAFT}
-                                                onClick={(e) => { setDeleteOpen(true); setInvoiceRef(f.purchaseOrderNumber); setIdPurchaseOrder(f.idPurchaseOrder); console.log("delete", f.idPurchaseOrder); }}
+                                                onClick={(e) => { setDeleteOpen(true); setInvoiceRef(f.idPurchaseOrder); setIdPurchaseOrder(f.idPurchaseOrder); console.log("delete", f.idPurchaseOrder); }}
                                                 className="p-2 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                                 title="Supprimer"
                                             >

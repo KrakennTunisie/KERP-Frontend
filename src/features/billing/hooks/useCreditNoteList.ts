@@ -21,9 +21,9 @@ const [search, setSearch] = useState("");
     const [deleteId, setDeleteId]= useState("")
     const [deleteLoading, setDeleteLoading]= useState(false)
     const [idInvoice,setIdInvoice]=useState("")
-        const [totalPages, setTotalPages] = useState(1);
-        const [totalElements, setTotalElements] = useState(0);
-        const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalElements, setTotalElements] = useState(0);
+    const [currentPage, setCurrentPage] = useState(1);
     function deleteCreditNote(idCreditNote:string)
     {
       setDeleteOpen(true);

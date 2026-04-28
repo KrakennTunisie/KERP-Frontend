@@ -1,3 +1,4 @@
+import dashboard from "@/app/(app)/dashboard/page";
 import { buildQueryString } from "./query-string-builder";
 import {  ExchangeRateParams, GetListParams } from "./types";
 
@@ -30,6 +31,9 @@ export const INVOICES_ENDPOINTS={
   getSuppliersInvoices: (query? : GetListParams)=> `/invoices/supplier-invoices${buildQueryString(query)}`,
   clientInvoiceById: (id?: string) => `/invoices/client-invoices/${id}`,
   clientInvoiceStatusById: (id?: string) => `/invoices/client-invoices/${id}/status`,
+  allClientInvoicesStats : '/invoices/client-invoices/stats',
+  clientInvoiceStats: (id?: string) => `/invoices/client-invoices/stats/${id}`,
+  supplierInvoiceStats: (id?: string) => `/invoices/supplier-invoices/stats/${id}`,
 
   supplierInvoiceById: (id: string) => `/invoices/supplier-invoices/${id}`,
 
@@ -48,14 +52,27 @@ export const INVOICES_CREDIT_NOTE_ENDPOINTS={
 }
 
 export const PURCHASE_ORDER_ENDPOINTS = {
-  purchaseOrders: "/purchase-orders",
+  purchaseOrders: "/purchase-orders/",
   nextNumber: "/purchase-orders/next-number",
-  getPurchaseOrders: (query? : GetListParams)=> `/purchase-orders${buildQueryString(query)}`,
-  purchaseOrderById: (id: string) => `/purchase-orders/${id}`, 
+  summary:"/purchase-orders/summary",
+  getPurchaseOrders: (query? : GetListParams)=> `/purchase-orders/${buildQueryString(query)}`,
+  purchaseOrderById: (id?: string) => `/purchase-orders/${id}`, 
+  updateStatusPurchaseOrder: (id: string)=> `/purchase-orders/${id}/status`,
+
+  supplierPurchaseOrders: "/purchase-orders/supplier",
+  supplierSummary:"/purchase-orders/supplier/summary",
+  getSupplierPurchaseOrders: (query? : GetListParams)=> `/purchase-orders/supplier${buildQueryString(query)}`,
+  supplierPurchaseOrderById: (id: string) => `/purchase-orders/supplier/${id}`, 
+  supplierupdateStatusPurchaseOrder: (id: string)=> `/purchase-orders/supplier/${id}/status`,
 }
 
 export const EXCHANGE_RATE_ENDPOINTS = {
   exchangeRate: "/exchange-rate/content",
   getExchangeRate: (query? : ExchangeRateParams)=> `/exchange-rate/content${buildQueryString(query)}`,
 
+}
+
+export const DASHBOARD_ENDPOINTS={
+  dashboard : '/dashboard',
+  statsClientsInvoices: '/dashboard/clients-invoices'
 }

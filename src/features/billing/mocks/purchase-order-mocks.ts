@@ -1,4 +1,6 @@
 import { PurchaseOrder } from "../models/purchaseOrder";
+import { purchaseOrderStatusSchema } from "../types/purchaseOrderStatus";
+import { purchaseOrderTypeSchema } from "../types/PurchaseOrderType";
 import { MOCK_PARTNERS } from "./clients-mocks";
 import { mockInvoiceItems } from "./invoice-items-mocks";
 
@@ -6,8 +8,8 @@ export const mockPurchaseOrder: PurchaseOrder = {
   idPurchaseOrder: "PO-2024-001",
   purchaseOrderNumber: "BC-2024-0042",
   issueDate: new Date("2024-06-15"),
-  creationDate: new Date("2024-03-01"),
-  Status: "EN COURS DE LIVRAISON",
+  purchaseOrderType: purchaseOrderTypeSchema.enum.SALE,
+  purchaseOrderStatus: purchaseOrderStatusSchema.enum.IN_DELIVERY,
   currency: "EUR",
   totalExclTax: 15000.00,
   totalInclTax: 18150.00,
@@ -16,9 +18,9 @@ export const mockPurchaseOrder: PurchaseOrder = {
   exchangeRateReferenceDate: new Date("2024-03-01"),
   appliedExchangeRate: 1.0,
   exchangeRateSource: "EXTERNAL_API",
-  PaymentCondition: "NET_30",
+  paymentCondition: "NET_30",
   partner: MOCK_PARTNERS[0],
-  purchaseOrderItems: mockInvoiceItems,
+  purchaseOrderItems: null,
   purchaseOrderDocument: null
 };
 
@@ -29,8 +31,8 @@ export const mockPurchaseOrders: PurchaseOrder[] = [
     idPurchaseOrder: "PO-2024-002",
     purchaseOrderNumber: "BC-2024-0043",
     issueDate: new Date("2024-07-01"),
-    creationDate: new Date("2024-03-10"),
-    Status: "BROULLION",
+     purchaseOrderType: purchaseOrderTypeSchema.enum.SALE,
+    purchaseOrderStatus: purchaseOrderStatusSchema.enum.DRAFT,
     currency: "TND",
     totalExclTax: 8000.00,
     totalInclTax: 9520.00,
@@ -39,7 +41,7 @@ export const mockPurchaseOrders: PurchaseOrder[] = [
     exchangeRateReferenceDate: new Date("2024-03-10"),
     appliedExchangeRate: 3.35,
     exchangeRateSource: "EXTERNAL_API",
-    PaymentCondition: "NET_15",
+    paymentCondition: "NET_15",
     partner: null,
     purchaseOrderItems: null,
     purchaseOrderDocument: null
@@ -48,8 +50,8 @@ export const mockPurchaseOrders: PurchaseOrder[] = [
     idPurchaseOrder: "PO-2024-003",
     purchaseOrderNumber: "BC-2024-0044",
     issueDate: new Date("2024-05-20"),
-    creationDate: null,
-    Status: "CLOTURÉ",
+    purchaseOrderStatus: "CLOSED",
+    purchaseOrderType: purchaseOrderTypeSchema.enum.SALE,
     currency: "USD",
     totalExclTax: 25000.00,
     totalInclTax: 29750.00,
@@ -58,7 +60,7 @@ export const mockPurchaseOrders: PurchaseOrder[] = [
     exchangeRateReferenceDate: new Date("2024-03-15"),
     appliedExchangeRate: 3.12,
     exchangeRateSource: "EXTERNAL_API",
-    PaymentCondition: "IMMEDIATE",
+    paymentCondition: "IMMEDIATE",
     partner: null,
     purchaseOrderItems: [],
     purchaseOrderDocument: null

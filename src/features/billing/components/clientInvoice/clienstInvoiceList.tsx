@@ -1,15 +1,15 @@
 'use client';
 
+import PageLoader from "@/shared/components/ui/pageLoader";
 import StatClientInvoiceCard from "@/shared/components/ui/statClientInvoiceCard";
-import {  getClientInvoiceAllowedNextStatuses, invoiceStatusColors, invoiceStatusLabels, invoiceStatusSchema } from "../../types/invoiceStatus";
+import { formatDateLong } from "@/shared/utils/formatDate";
+import { ChevronLeft, ChevronRight, Settings } from "lucide-react";
 import Link from "next/link";
 import { useClientInvoiceList } from "../../hooks/useClientsInvoiveList";
-import { SendInvoiceModal } from "../widgets/sendInvoiceModal";
 import { invoiceComplianceStatusSchema } from "../../types/invoiceComplianceStatus";
+import { getClientInvoiceAllowedNextStatuses, invoiceStatusColors, invoiceStatusLabels, invoiceStatusSchema } from "../../types/invoiceStatus";
 import { DeleteInvoiceModal } from "../widgets/deleteInvoiceModal";
-import PageLoader from "@/shared/components/ui/pageLoader";
-import { ChevronLeft, ChevronRight, ColumnsSettingsIcon, LucideSettings, Settings, Settings2, Settings2Icon } from "lucide-react";
-import { formatDateLong } from "@/shared/utils/formatDate";
+import { SendInvoiceModal } from "../widgets/sendInvoiceModal";
 import { UpdateInvoiceStatusModal } from "../widgets/updateStatusModal";
 
 export default function ClientsInvoiceList() {
@@ -30,7 +30,7 @@ export default function ClientsInvoiceList() {
         updateStatus,
         selectedInvoice, setSelectedInvoice,
         nextStatus, setNextStatus,
-        loading } = useClientInvoiceList();
+        loading, clientInvoiceStats } = useClientInvoiceList();
     return (
         <div className="min-h-screen bg-gray-50 p-8 font-sans">
             <SendInvoiceModal
@@ -65,8 +65,8 @@ export default function ClientsInvoiceList() {
                         </svg>
                     }
                     label="Total Année 2026"
-                    eur={0}
-                    tnd={0}
+                    eur={clientInvoiceStats.totalAmountEUR}
+                    tnd={clientInvoiceStats.totalAmountTND}
                     sub="Payé + À Encaisser"
                     variant="blue"
                 />
@@ -78,9 +78,9 @@ export default function ClientsInvoiceList() {
                         </svg>
                     }
                     label="À Encaisser 2026"
-                    eur={0}
-                    tnd={0}
-                    sub={`${0} factures`}
+                    eur={clientInvoiceStats.pendingAmountEUR}
+                    tnd={clientInvoiceStats.pendingAmountTND}
+                    sub={`${clientInvoiceStats.pendingInvoices} factures`}
                     variant="amber"
                 />
                 <StatClientInvoiceCard
@@ -91,9 +91,9 @@ export default function ClientsInvoiceList() {
                         </svg>
                     }
                     label="Mois en Cours"
-                    eur={0}
-                    tnd={0}
-                    sub={`${0} factures`}
+                    eur={clientInvoiceStats.pendingAmountEUR}
+                    tnd={clientInvoiceStats.pendingAmountTND}
+                    sub={`${clientInvoiceStats.pendingInvoices} factures`}
                     variant="emerald"
                 />
                 <DeleteInvoiceModal
@@ -328,6 +328,7 @@ export default function ClientsInvoiceList() {
                 onConfirm={updateStatus}
                 invoiceNumber={selectedInvoice?.invoiceNumber}
                 currentStatus={selectedInvoice?.invoiceStatus}
+                type="invoice"
                 nextStatus={nextStatus}
                 onNextStatusChange={setNextStatus}
                 allowedStatuses={

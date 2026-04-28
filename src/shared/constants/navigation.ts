@@ -42,7 +42,8 @@ export const NAVIGATION_ITEMS = [
           { title: "Fournisseurs", href: "/billing/suppliers" },
           { title: "Factures Clients", href: "/billing/invoices/clients" },
           { title: "Factures Fournisseurs", href: "/billing/invoices/suppliers" },
-          { title: "Bons des commandes", href: "/billing/purchaseOrder" },
+          { title: "Bons des commandes clients", href: "/billing/purchaseOrder/clients" },
+          { title: "Bons des commandes Fournisseurs", href: "/billing/purchaseOrder/suppliers" },
         ],
       },
       {
