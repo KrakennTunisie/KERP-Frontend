@@ -612,7 +612,7 @@ const [selectedPO, setSelectedPO] = useState<PurchaseOrderDetails | null>(null);
       formData.append("issueDate", values.issueDate.toISOString());
       formData.append("dueDate", values.dueDate.toISOString());
 
-      formData.append("invoiceStatus", invoiceStatusSchema.enum.TO_COLLECT)
+      formData.append("invoiceStatus", values.invoiceStatus)
 
       formData.append("invoiceType", values.invoiceType);
       formData.append("invoiceCurrency", values.invoiceCurrency);
