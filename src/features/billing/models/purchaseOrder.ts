@@ -102,6 +102,26 @@ export const purchaseOrderDetailsSchema = z.object({
     purchaseOrderItems: z.array(purchaseOrderItemSchema).nullable(),
 });
 
+
+export const SupplierExpenseStatsSchema = z.object({
+  id: z.string(),
+  supplier: z.string(),
+  category: z.string(),
+  amountEUR: z.number(),
+  amountTND: z.number(),
+  month: z.number().int().min(1).max(12),
+});
+
+
+export const CategoryAmountSchema = z.object({
+  category: z.string(),
+  montant: z.number(),
+});
+
+export type CategoryAmount = z.infer<typeof CategoryAmountSchema>;
+
+export type SupplierExpenseStats = z.infer<typeof SupplierExpenseStatsSchema>;
+
 // types
 export type PurchaseOrder = z.infer<typeof basePurchaseOrderSchema>;
 export type PurchaseOrderCreate = z.infer<typeof purchaseOrderCreateDTO>;

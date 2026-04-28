@@ -32,6 +32,7 @@ import { ClientInvoiceDashboardStats } from "../../types/clientDashboardStats";
 import { DashboardAPI } from "../../api/partners-api";
 import { appToast } from "@/shared/lib/toast";
 import { getApiErrorMessage } from "@/shared/api/handle-api-error";
+import { CategoryAmount, SupplierExpenseStats } from "../../models/purchaseOrder";
 
 export function BillingDashboard() {
   const currentYear = new Date().getFullYear();
@@ -71,7 +72,7 @@ export function BillingDashboard() {
     { id: "10", client: "Startup Hub", amountEUR: 7000, amountTND: 23450, month: 5, conformite: true },
   ]; */
 
-  const supplierInvoices = [
+  const supplierInvoices : SupplierExpenseStats[] = [
     { id: "1", supplier: "Office Supply Pro SA", category: "Fournitures", amountEUR: 1500, amountTND: 5025, month: 1 },
     { id: "2", supplier: "Tech Hardware Ltd", category: "Matériel informatique", amountEUR: 5000, amountTND: 16750, month: 2 },
     { id: "3", supplier: "Services Cloud SARL", category: "Services", amountEUR: 800, amountTND: 2680, month: 2 },
@@ -276,9 +277,11 @@ const clientsByMonth = months.map((month) => ({
                       cx="50%"
                       cy="50%"
                       outerRadius={100}
-                      label={(entry) =>
-                        `${entry.category}: ${entry.montant.toLocaleString()}€`
-                      }
+                      label={(entry) => {
+                          const payload = entry.payload as { category: string; montant: number };
+
+                          return `${payload.category}: ${payload.montant.toLocaleString()}€`;
+                        }}
                     >
                       {categoriesGroupedYear.map((_, index) => (
                         <Cell key={index} fill={COLORS[index % COLORS.length]} />
