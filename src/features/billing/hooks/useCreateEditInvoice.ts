@@ -78,6 +78,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
 
   useEffect(() => {
     fetchNextNumber()
+    fetchPurchaseOrderSummary()
   }, [])
   const router = useRouter()
   const form = useForm<InvoiceCreate>({
@@ -214,7 +215,6 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
 
   useEffect(() => {
     if (mode !== "create") return;
-    fetchPurchaseOrderSummary()
 
     if (selectedCurrency === "TND") {
       form.setValue("appliedExchangeRate", 1, {
@@ -459,13 +459,13 @@ const [selectedPO, setSelectedPO] = useState<PurchaseOrderDetails | null>(null);
     form.setValue("paymentCondition", po!.paymentCondition);
     form.setValue("paymentMethod", po!.paymentMethod);
     calculateDueDate()
-    form.setValue("invoiceCurrency", po!.currency);
+    form.setValue("invoiceCurrency", po!.purchaseCurrency);
     po?.partner && selectClient(po?.partner);
     const totals = calculateInvoiceTotals(po!.purchaseOrderItems!);
     setValue("totalExclTax", totals.totalHT, { shouldValidate: true, shouldDirty: true });
     setValue("vatAmount", totals.totalTVA, { shouldValidate: true, shouldDirty: true });
     setValue("totalInclTax", totals.totalTTC, { shouldValidate: true, shouldDirty: true });
-    setValue("purchaseOrder",po.reference);
+    setValue("purchaseOrder",po.purchaseOrderNumber);
     console.log(po!.purchaseOrderItems);
     syncItems(po!.purchaseOrderItems!)
 

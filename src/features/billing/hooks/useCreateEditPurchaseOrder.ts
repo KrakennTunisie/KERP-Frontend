@@ -22,11 +22,12 @@ import { PurchaseOrder, basePurchaseOrderSchema, PurchaseOrderDetails } from "..
 import { purchaseOrderStatusSchema } from "../types/purchaseOrderStatus";
 import { handleSaveAsPDF } from "../lib/buildInvoicePDF";
 import { nextNumber } from "../types/nextNumber";
-import { partnersApi, PurchaseOrderAPI } from "../api/partners-api";
+import { ExchangeRateAPI, partnersApi, PurchaseOrderAPI } from "../api/partners-api";
 import { appToast } from "@/shared/lib/toast";
 import { useDebounce } from "@/shared/hooks/useDebounce";
 import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 import { purchaseOrderTypeSchema } from "../types/PurchaseOrderType";
+import { ExchangeRate } from "../types/exchangeRate";
 
 export type PropsPurchaseOrder = {
   params: {
@@ -47,6 +48,7 @@ type UpdateableField =
 
 export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderFormClientProps) {
   const [nextNumber, setNextNumber] = useState<nextNumber>()
+  const [exchangeRate, setExchangeRate] = useState<ExchangeRate>()
   const [purchaseOrder, setPurchaseOrder] = useState<PurchaseOrderDetails>()
   const [loading, setLoading] = useState(false);
   const router = useRouter()
@@ -112,6 +114,7 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
   useEffect(() => {
     fetchNextNumber()
   }, [])
+
   useEffect(() => {
     if (nextNumber?.value) {
       form.setValue("purchaseOrderNumber", nextNumber.value, {
@@ -121,18 +124,74 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
     }
   }, [nextNumber]);
 
+
+
+  const fetchExchangeRate = async (toCurrency: string) => {
+    try {
+      if (mode == "create") {
+
+        if (!toCurrency || toCurrency === "TND") {
+          form.setValue("appliedExchangeRate", 1, {
+            shouldValidate: true,
+            shouldDirty: false,
+          });
+          return;
+        }
+
+        const response = await ExchangeRateAPI.getExchangeRate({
+          fromCurrency: "TND",
+          toCurrency: toCurrency,
+        });
+        console.log("response: exchangeRate", response)
+        setExchangeRate(response);
+      }
+    }
+    catch (error: any) {
+      appToast.error("Erreur de fetch de taux de change: ", getApiErrorMessage(error))
+    }
+  }
+
+  const selectedCurrency = form.watch("currency");
+
+  useEffect(() => {
+    if (mode !== "create") return;
+    fetchExchangeRate(selectedCurrency);
+  }, [selectedCurrency, mode]);
+
+
+    useEffect(() => {
+      if (mode !== "create") return;
+  
+      if (selectedCurrency === "TND") {
+        form.setValue("appliedExchangeRate", 1, {
+          shouldValidate: true,
+          shouldDirty: false,
+        });
+        return;
+      }
+  
+      if (exchangeRate?.quote) {
+        form.setValue("appliedExchangeRate", exchangeRate.quote, {
+          shouldValidate: true,
+          shouldDirty: false,
+        });
+      }
+    }, [exchangeRate, selectedCurrency, mode]);
+
+
+
   useEffect(() => {
     if (mode === "edit" && purchaseOrder) {
       console.log("Status reçu:", purchaseOrder?.purchaseOrderStatus);
       reset({
         idPurchaseOrder: purchaseOrder.idPurchaseOrder,
-        purchaseOrderNumber: purchaseOrder.reference,
+        purchaseOrderNumber: purchaseOrder.purchaseOrderNumber,
         issueDate: new Date(purchaseOrder.issueDate),
-        totalExclTax: purchaseOrder.currency === currencyTypeSchema.enum.EUR
+        totalExclTax: purchaseOrder.purchaseCurrency === currencyTypeSchema.enum.EUR
           ? purchaseOrder.totalExclTaxEUR
           : purchaseOrder.totalExclTaxTND,
 
-        totalInclTax: purchaseOrder.currency === currencyTypeSchema.enum.EUR
+        totalInclTax: purchaseOrder.purchaseCurrency === currencyTypeSchema.enum.EUR
           ? purchaseOrder.totalInclTaxEUR
           : purchaseOrder.totalInclTaxTND,
 
@@ -146,7 +205,7 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
         paymentMethod:
           purchaseOrder.paymentMethod ?? paymentMethodSchema.enum.BANK_TRANSFER,
         partner: purchaseOrder.partner ?? null,
-        currency: purchaseOrder.currency ?? currencyTypeSchema.enum.TND,
+        currency: purchaseOrder.purchaseCurrency ?? currencyTypeSchema.enum.TND,
         appliedExchangeRate: purchaseOrder.appliedExchangeRate ?? 4,
         exchangeRateReferenceDate: purchaseOrder.exchangeRateReferenceDate
           ? new Date(purchaseOrder.exchangeRateReferenceDate)
@@ -505,6 +564,8 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
     createPurchaseOrder,
     onCloseDocumentModal,
     pdfUrl,
+
+    exchangeRate,
 
     // update
 

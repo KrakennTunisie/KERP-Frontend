@@ -203,7 +203,7 @@ export default function CreateInvoiceClient({ mode,
 
                                                 <div className="flex-1 min-w-0">
                                                     <p className="text-sm font-semibold text-blue-700 truncate">
-                                                        {selectedPO.reference}
+                                                        {selectedPO.purchaseOrderNumber}
                                                     </p>
                                                     <p className="text-xs text-blue-500 mt-0.5 truncate">
                                                         {selectedPO.partner?.name}
@@ -211,7 +211,7 @@ export default function CreateInvoiceClient({ mode,
                                                 </div>
 
                                                 <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wide bg-blue-100 px-2.5 py-1 rounded-full">
-                                                    {selectedPO.currency}
+                                                    {selectedPO.purchaseCurrency}
                                                 </span>
                                             </div>
                                         )}

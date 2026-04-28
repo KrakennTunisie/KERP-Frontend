@@ -143,7 +143,7 @@ export function SupplierPurchaseOrderModalContent({
               <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">
                 Référence
               </p>
-              <p className="text-sm font-bold text-gray-900">{purchaseOrder?.reference ?? "—"}</p>
+              <p className="text-sm font-bold text-gray-900">{purchaseOrder?.purchaseOrderNumber ?? "—"}</p>
             </div>
 
             <div className="bg-gray-50 rounded-xl p-3">
@@ -159,7 +159,7 @@ export function SupplierPurchaseOrderModalContent({
               <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">
                 Devise
               </p>
-              <p className="text-sm font-semibold text-gray-700">{purchaseOrder?.currency ?? "—"}</p>
+              <p className="text-sm font-semibold text-gray-700">{purchaseOrder?.purchaseCurrency ?? "—"}</p>
             </div>
 
             <div className="bg-gray-50 rounded-xl p-3">
@@ -261,7 +261,7 @@ export function SupplierPurchaseOrderModalContent({
         {/* Totals */}
         <div className="mt-4 flex flex-col items-end gap-2">
           {[
-            { label: "Sous-total HT", value: purchaseOrder?.currency == currencyTypeSchema.enum.TND ? purchaseOrder?.totalExclTaxTND : purchaseOrder?.totalExclTaxEUR },
+            { label: "Sous-total HT", value: purchaseOrder?.purchaseCurrency == currencyTypeSchema.enum.TND ? purchaseOrder?.totalExclTaxTND : purchaseOrder?.totalExclTaxEUR },
             { label: "Total TVA", value: purchaseOrder?.vatRate },
           ].map(({ label, value }) => (
             <div key={label} className="flex justify-between w-64">
@@ -277,7 +277,7 @@ export function SupplierPurchaseOrderModalContent({
               Total TTC
             </span>
             <span className="text-2xl font-extrabold text-blue-600 tracking-tight">
-              {purchaseOrder?.currency == currencyTypeSchema.enum.TND ? purchaseOrder?.totalInclTaxTND : purchaseOrder?.totalInclTaxEUR} {purchaseOrder?.currency}
+              {purchaseOrder?.purchaseCurrency == currencyTypeSchema.enum.TND ? purchaseOrder?.totalInclTaxTND : purchaseOrder?.totalInclTaxEUR} {purchaseOrder?.purchaseCurrency}
             </span>
           </div>
         </div>
