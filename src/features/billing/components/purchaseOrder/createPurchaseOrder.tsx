@@ -24,7 +24,7 @@ export default function CreatePurchaseOrder({
   const {
     addItem,
     removeItem, updateItem, clientSearch, setClientSearch, showDropdown, setShowDropdown, canCreatePurchaseOrder, errors, selectClient, clearClient, clients,
-    setCurrency, previewData, form, onSubmit, router, isModalOpen, createPurchaseOrder, pdfUrl, onCloseDocumentModal, purchaseOrderRef,updatePurchaseOrder
+    setCurrency, exchangeRate, previewData, form, onSubmit, router, isModalOpen, createPurchaseOrder, pdfUrl, onCloseDocumentModal, purchaseOrderRef,updatePurchaseOrder
   } = useCreatePurchaseOrder({ mode, purchaseOrderId })
 
   const { register } = form

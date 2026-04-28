@@ -11,14 +11,19 @@ import { mockInvoiceItems } from "../../mocks/invoice-items-mocks";
 import { useSupplierPurchaseOrderList } from "../../hooks/useSupplierPurchaseOrderList";
 import { currencyTypeSchema } from "../../types/currency";
 import { UpdateInvoiceStatusModal } from "../widgets/updateStatusModal";
-import { Settings } from "lucide-react";
+import { ChevronLeft, ChevronRight, Settings } from "lucide-react";
 import SupplierPurchaseOrderModal, { SupplierPurchaseOrderModalContent } from "./supplierPurchaseOrderDetails";
 
 export default function SuppliersPurchaseOrderList() {
 
     const { router, search, setSearch, deleteOpen, setDeleteOpen, purchaseOrders, selectedPurchaseOrder, idPurchaseOrder, setUpdateOpen, updateLoading, updateOpen, setIdPurchaseOrder
         , updateStatus, nextStatus, setNextStatus, setSelectedPurchaseOrder,deletePurchaseOrder,
-        filtre, setFiltre, invoiceRef, setInvoiceRef, open, setOpen } = useSupplierPurchaseOrderList();
+        filtre, setFiltre, invoiceRef, setInvoiceRef, open, setOpen,
+        setCurrentPage,
+    currentPage,
+    totalElements,
+    totalPages,
+    loading } = useSupplierPurchaseOrderList();
     return (
         <div className="min-h-screen bg-gray-50 p-8 font-sans">
             {/* Header */}
@@ -185,6 +190,54 @@ export default function SuppliersPurchaseOrderList() {
                         )}
                     </tbody>
                 </table>
+            { totalPages > 0 && (
+                <div className="px-8 py-8 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                    <button
+                    onClick={() => setCurrentPage(currentPage - 1)}
+                    disabled={currentPage === 1 || loading}
+                    className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-xl hover:bg-gray-50 disabled:opacity-30 transition-all shadow-sm"
+                    >
+                    <ChevronLeft className="w-4 h-4 text-gray-900" />
+                    </button>
+
+                    <div className="flex items-center gap-1">
+                    {Array.from({ length: totalPages }).map((_, i) => {
+                        const page = i + 1;
+
+                        return (
+                        <button
+                            key={page}
+                            onClick={() => setCurrentPage(page)}
+                            disabled={loading}
+                            className={`w-10 h-10 rounded-xl font-black text-xs transition-all ${
+                            currentPage === page
+                                ? "bg-gray-900 text-white shadow-lg"
+                                : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50"
+                            } disabled:opacity-50`}
+                        >
+                            {page}
+                        </button>
+                        );
+                    })}
+                    </div>
+
+                    <button
+                    onClick={() => setCurrentPage(currentPage + 1)}
+                    disabled={currentPage === totalPages || loading}
+                    className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-xl hover:bg-gray-50 disabled:opacity-30 transition-all shadow-sm"
+                    >
+                    <ChevronRight className="w-4 h-4 text-gray-900" />
+                    </button>
+                </div>
+
+                {totalElements > 0 && (
+                    <p className="text-xs font-bold text-gray-500">
+                    {totalElements +" Facture"}
+                    </p>
+                )}
+                </div>
+            )}
             </div>
         </div>
 
