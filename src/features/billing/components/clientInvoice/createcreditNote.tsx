@@ -15,8 +15,8 @@ import { InvoiceDetailsProps } from '../../hooks/useClientInvoiceDetails';
 export function CreateCreditNote({invoiceId}: InvoiceDetailsProps) {
     const { previewData, form, removeItem, addItem, updateItem, onSubmit, onCloseDocumentModal, createCreditNoteInvoice,
         setItemSearchMap, setShowDropdownMap, itemSearchMap, showDropdownMap, creditNoteItemMap, setCreditNoteItemMap, filteredItems, fields,
-        canCreateInvoice, invoiceRef, isModalOpen, TtnModalOpen, setTtnModalOpen, pdfUrl, loading, successMessage, 
-        sent, sendToTTN, router, errors, invoice, nextNumber } = useCreateCreditNote({invoiceId});
+        canCreateInvoice, invoiceRef, isModalOpen, TtnModalOpen, setTtnModalOpen, pdfUrl, loadingForm, loadingInvoice, loadingTTN, successMessage, 
+        sent, sendToTTN, router, errors } = useCreateCreditNote({invoiceId});
     const { register } = form
     return (
         <div className="flex-1 flex flex-col min-h-0 bg-white">
@@ -58,6 +58,7 @@ export function CreateCreditNote({invoiceId}: InvoiceDetailsProps) {
                 onClose={onCloseDocumentModal}
                 onCreateInvoice={createCreditNoteInvoice}
                 document={pdfUrl}
+                loading={loadingForm}
                 type='Facture'
                  />
             {/* Modal pour demander au user s'il veut envoyer la Facture au TTN */}
@@ -65,7 +66,7 @@ export function CreateCreditNote({invoiceId}: InvoiceDetailsProps) {
                 open={TtnModalOpen}
                 onClose={() => setTtnModalOpen(false)}
                 onConfirm={() => { sendToTTN() }}
-                loading={loading}
+                loading={loadingTTN}
                 invoiceSent={sent}
                 invoiceRef={previewData.invoiceCreditNoteNumber}
                 successMessage={successMessage} />

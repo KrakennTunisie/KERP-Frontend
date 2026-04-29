@@ -1,43 +1,88 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { X, Download, Send, Mail } from "lucide-react";
-import { Invoice } from "../../models/invoice";
-import { MOCK_INVOICES } from "../../mocks/invoice-mocks";
+import {  InvoicePageItem } from "../../models/invoice";
+import { InvoicesAPI } from "../../api/partners-api";
+import { appToast } from "@/shared/lib/toast";
+import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 
 
 interface SendInvoiceModalProps {
-  invoice?: Invoice;
+  invoice: InvoicePageItem | null;
   isOpen: boolean;
   onClose: () => void;
-  onSend: (data: { to: string; subject: string; message: string }) => void;
 }
 
+
+
+
 export function SendInvoiceModal({
-  invoice = MOCK_INVOICES[0],
+  invoice,
   isOpen,
   onClose,
-  onSend,
 }: SendInvoiceModalProps) {
-  
-  const [to, setTo] = useState(invoice.partner?.email ?? " ");
-  const [subject, setSubject] = useState(`Facture ${invoice.invoiceNumber}`);
-  const [message, setMessage] = useState(
-    `Bonjour ${invoice.invoiceNumber},\n\nVeuillez trouver ci-joint la facture ${invoice.invoiceNumber} pour un montant de ${invoice.totalInclTax}${invoice.totalInclTax ? ` (${invoice.totalInclTax})` : ""}.\n\nCordialement,\n[Votre Nom]`
-  );
+const formatAmount = () => {
+  if (!invoice) return "";
+
+  switch (invoice.invoiceCurrency) {
+    case "EUR":
+      return `${invoice.totalInclTaxEUR?.toLocaleString("fr-FR")} €`;
+    case "TND":
+      return `${invoice.totalInclTaxTND?.toLocaleString("fr-FR")} TND`;
+    case "USD":
+      return `${invoice.totalInclTaxUSD?.toLocaleString("fr-FR")} $`;
+    default:
+      return "";
+  }
+};
+
+  const [to, setTo] = useState("");
+  const [subject, setSubject] = useState("");
+  const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [hoverCancel, setHoverCancel] = useState(false);
   const [hoverSend, setHoverSend] = useState(false);
 
+  useEffect(()=>{
+    const defaultMessage = invoice
+      ? `Bonjour ${invoice.partner.name},
+
+    Veuillez trouver ci-joint la facture ${invoice.invoiceNumber} pour un montant de ${formatAmount()}.
+
+    Cordialement,`
+    :"";
+    setMessage(defaultMessage)
+    setTo(invoice?.partner.email ?? "")
+    setSubject(`Facture ${invoice?.invoiceNumber}`)
+  },[invoice?.idInvoice])
+
   if (!isOpen) return null;
 
   const handleSend = async () => {
+    try {
+
     setSending(true);
-    await new Promise((r) => setTimeout(r, 1200));
-    onSend({ to, subject, message });
+    if(invoice!==null){
+      await InvoicesAPI.sendEmailWithInvoice(invoice?.idInvoice,{
+              toEmail: to,
+              subject: subject, 
+              body: message
+            });
+
+      appToast.success("Facture envoyé avec succès.");
+      onClose();
+    }
+     
+    } catch (error) {
+    appToast.error("Erreur d'envoi : ", getApiErrorMessage(error));
+
+    }
+    finally{
     setSending(false);
-    onClose();
+    }
+
   };
 
   const font = "'Segoe UI', system-ui, sans-serif";
@@ -117,7 +162,7 @@ export function SendInvoiceModal({
                 Envoyer la facture
               </p>
               <p style={{ color: "rgba(255,255,255,0.72)", fontSize: 12, margin: "2px 0 0", textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                À {invoice.partner!.name}
+                À {invoice?.partner!.name}
               </p>
             </div>
           </div>
@@ -169,7 +214,7 @@ export function SendInvoiceModal({
                 FACTURE
               </span>
               <span style={{ fontSize: 19, fontWeight: 800, color: "#0f2848", letterSpacing: "-0.02em" }}>
-                {invoice.invoiceNumber}
+                {invoice?.invoiceNumber}
               </span>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 4, alignItems: "flex-end" }}>
@@ -177,7 +222,7 @@ export function SendInvoiceModal({
                 MONTANT
               </span>
               <span style={{ fontSize: 19, fontWeight: 800, color: "#1e3a8a", letterSpacing: "-0.02em" }}>
-                {invoice.totalInclTax} {invoice.invoiceCurrency}
+                {formatAmount()}
               </span>
             </div>
           </div>

@@ -34,9 +34,9 @@ export default function ClientsInvoiceList() {
     return (
         <div className="min-h-screen bg-gray-50 p-8 font-sans">
             <SendInvoiceModal
+                invoice={selectedInvoice}
                 isOpen={open}
                 onClose={() => setOpen(false)}
-                onSend={({ to }) => alert(`Envoyé à : ${to}`)}
             />
             {/* Header */}
             <div className="flex items-start justify-between mb-8">
@@ -190,7 +190,7 @@ export default function ClientsInvoiceList() {
                                     </td>
                                     <td className="px-5 py-4 text-slate-700 font-medium">
                                         {f.invoiceCurrency=="EUR" 
-                                            ? f.totalExclTaxEUR?.toLocaleString("fr-FR")+" €"
+                                            ? f.totalInclTaxEUR?.toLocaleString("fr-FR")+" €"
                                             : f.invoiceCurrency=="TND"
                                                 ? f.totalInclTaxTND.toLocaleString("fr-FR")+" TND"
                                                 : f.totalInclTaxUSD+" $"} 
@@ -245,7 +245,7 @@ export default function ClientsInvoiceList() {
                                             </button>
                                             <button
                                                 disabled={getClientInvoiceAllowedNextStatuses(f.invoiceStatus).length === 0}
-                                                onClick={() => { setOpen(true); console.log("send", f.idInvoice); }}
+                                                onClick={() => { setOpen(true); console.log("send", f.idInvoice); setSelectedInvoice(f) }}
                                                 className="p-2 rounded-xl bg-green-50 text-green-600 hover:bg-green-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                                 title="Envoyer"
                                             >

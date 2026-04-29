@@ -7,9 +7,9 @@ import Card from "../widgets/card";
 import { SectionLabel } from "../widgets/sectionLabel";
 import usePurchaseOrderDetails from "../../hooks/usePurchaseOrderDetails";
 import { paymentMethodLabels } from "../../types/paymentMethod";
-import { currencyTypeSchema } from "../../types/currency";
 import { PaymentConditionLabels } from "../../types/paymentCondition";
 import { DocumentPreviewModal } from "@/shared/components/ui/documentPreviewModal";
+import PageLoader from "@/shared/components/ui/pageLoader";
 
 
 type ModalProps = {
@@ -60,9 +60,15 @@ export function PurchaseOrderModalContent({
   purchaseOrderId: string
   onClose: () => void;
 }) {
-  const { router, purchaseOrder, purchaseOrderItems, successMessage, setPreviewDocument, previewDocument } = usePurchaseOrderDetails({ purchaseOrderId })
+  const { router, purchaseOrder, purchaseOrderItems, successMessage, setPreviewDocument, previewDocument, loadingDetails } = usePurchaseOrderDetails({ purchaseOrderId })
+  
+        if(loadingDetails){
+            return(
+                <PageLoader label="Chargement de bon de commande ..."/>
+            )
+        }
   return (
-    <div className="flex flex-col gap-4 max-h-[70vh] overflow-y-auto pr-1">
+  <div className="flex flex-col gap-4 max-h-[70vh] overflow-y-auto pr-1">
       {/* Client + Admin */}
       <div className="grid grid-cols-2 gap-4">
         {/* Client info */}
@@ -310,7 +316,7 @@ export function PurchaseOrderModalContent({
           Fermer
         </button>
       </div>
-    </div>
+        </div>
   );
 }
 

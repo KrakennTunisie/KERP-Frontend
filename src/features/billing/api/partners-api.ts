@@ -11,6 +11,7 @@ import { ExchangeRate } from "../types/exchangeRate";
 import { nextNumber } from "../types/nextNumber";
 import { PartnerInvoiceStats } from "../types/partnersStats";
 import { ClientInvoiceDashboardStats } from "../types/clientDashboardStats";
+import { SendMail } from "../types/sendEmail";
 
 export const partnersApi = {
   getClients: (query? : GetListParams) => 
@@ -46,6 +47,10 @@ export const partnersApi = {
 
 export const InvoicesAPI = {
   getNextInvoiceNumber :()=> apiClient.get<nextNumber>(INVOICES_ENDPOINTS.nextNumber),
+
+  sendEmailWithInvoice : (idInvoice: string, payload: SendMail)=> apiClient.post(INVOICES_ENDPOINTS.sendEmailInvoice(idInvoice), payload),
+
+  sendEmail : (payload: SendMail)=> apiClient.post(INVOICES_ENDPOINTS.sendSimpleEmail, payload),
 
   getClientsInvoices: (query? : GetListParams) => 
     apiClient.get<PageResponse<InvoicePageItem>>(INVOICES_ENDPOINTS.getClientsInvoices(query)),

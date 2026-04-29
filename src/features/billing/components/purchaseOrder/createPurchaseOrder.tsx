@@ -1,7 +1,6 @@
 "use client"
 
 import { DocumentPreviewModal } from "@/shared/components/ui/documentPreviewModal"
-import { InvoiceFormClientProps } from "../../hooks/useCreateEditInvoice"
 import { CurrencyType, currencyTypeSchema } from "../../types/currency"
 import { invoiceTypeSchema } from "../../types/invoiceType"
 import { OperationCategoryLabels, operationCategorySchema } from "../../types/operationCategory"
@@ -10,12 +9,11 @@ import { paymentMethodLabels, paymentMethodSchema } from "../../types/paymentMet
 import { tvaRateSchema } from "../../types/tvaRate"
 import ErrorForm from "../widgets/errorForm"
 import { SectionTitle } from "../widgets/sectionTitle"
-import { SendToTTNModal } from "../widgets/ttnConfirmationModal"
 import { PurchaseOrderFormClientProps, useCreatePurchaseOrder } from "../../hooks/useCreateEditPurchaseOrder"
-import { FileX, ShieldCheck } from "lucide-react"
 import { Controller } from "react-hook-form"
 import PurchaseOrderPreview from "../widgets/purchaseOrderPreview"
 import { PurchaseOrder } from "../../models/purchaseOrder"
+import PageLoader from "@/shared/components/ui/pageLoader"
 
 export default function CreatePurchaseOrder({
   mode,
@@ -23,11 +21,22 @@ export default function CreatePurchaseOrder({
 }: PurchaseOrderFormClientProps) {
   const {
     addItem,
-    removeItem, updateItem, clientSearch, setClientSearch, showDropdown, setShowDropdown, canCreatePurchaseOrder, errors, selectClient, clearClient, clients,
-    setCurrency, exchangeRate, previewData, form, onSubmit, router, isModalOpen, createPurchaseOrder, pdfUrl, onCloseDocumentModal, purchaseOrderRef,updatePurchaseOrder
+    removeItem, updateItem, clientSearch, setClientSearch, showDropdown, setShowDropdown, canCreatePurchaseOrder, 
+    errors, selectClient, clearClient, clients,
+    setCurrency,  previewData, form, onSubmit, router, isModalOpen, createPurchaseOrder, pdfUrl, 
+    onCloseDocumentModal, purchaseOrderRef,updatePurchaseOrder,
+    loadingEdit,
+    loadingForm,
   } = useCreatePurchaseOrder({ mode, purchaseOrderId })
 
   const { register } = form
+
+  if(loadingEdit){
+    return(
+      <PageLoader label="Chargement de bon de commande..."/>
+    )
+  }
+
   return (
     <div className="flex flex-col  overflow-hidden">
       {/* ── Header ── */}
@@ -76,6 +85,7 @@ export default function CreatePurchaseOrder({
         onClose={onCloseDocumentModal}
         onCreateInvoice={mode === "create" ? createPurchaseOrder : updatePurchaseOrder}
         document={pdfUrl}
+        loading={loadingForm}
         type="Bon Commande" />
       {/* ── Body ── */}
       <div className="flex gap-0 bg-white max-w-[1700px] ">

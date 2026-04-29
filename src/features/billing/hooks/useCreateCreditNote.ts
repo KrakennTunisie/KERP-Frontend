@@ -13,12 +13,10 @@ import {
     calculUnityPrice,
     recalculate,
 } from "../lib/invoiceCalculation";
-import defaultItem from "../mocks/invoice-items-mocks";
 import { invoiceCreditNoteCreateSchema } from "../models/creditNote";
 import { Invoice } from "../models/invoice";
-import { BaseItem, CreditNoteItem, InvoiceItem, defaultCreditNoteItem } from "../models/invoiceItem";
+import { BaseItem, CreditNoteItem,  defaultCreditNoteItem } from "../models/invoiceItem";
 import { CreditNoteTypeSchema } from "../types/creditNoteType";
-import { MOCK_INVOICES } from "../mocks/invoice-mocks";
 import { invoiceComplianceStatusSchema } from "../types/invoiceComplianceStatus";
 import { invoiceStatusSchema } from "../types/invoiceStatus";
 import { nextNumber } from "../types/nextNumber";
@@ -31,7 +29,8 @@ export default function useCreateCreditNote({ invoiceId }: InvoiceDetailsProps) 
     const router = useRouter();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [TtnModalOpen, setTtnModalOpen] = useState(false);
-    const [loading, setLoading] = useState(false);
+    const [loadingInvoice, setLoadingInvoice] = useState(false);
+    const [loadingTTN, seloadingTTN] = useState(false);
     const [sent, setSent] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
     const invoiceRef = useRef<HTMLDivElement>(null);
@@ -41,6 +40,7 @@ export default function useCreateCreditNote({ invoiceId }: InvoiceDetailsProps) 
     const [creditNoteItemMap, setCreditNoteItemMap] = useState<Record<number, any>>({});
     const [invoice, setInvoice] = useState<Invoice>();
     const [nextNumber, setNextNumber] = useState<nextNumber>()
+    const [loadingForm, setLoadingForm] = useState(false);
 
     const fetchNextNumber = async () => {
         try {
@@ -86,6 +86,7 @@ export default function useCreateCreditNote({ invoiceId }: InvoiceDetailsProps) 
         keyName: "fieldId",
     });
     const previewData = useWatch({ control });
+
     useEffect(() => {
         if (nextNumber?.value) {
             form.setValue("invoiceCreditNoteNumber", nextNumber.value, {
@@ -121,21 +122,20 @@ export default function useCreateCreditNote({ invoiceId }: InvoiceDetailsProps) 
 
     const fetchInvoice = async () => {
         try {
-            setLoading(true)
+            setLoadingInvoice(true)
             const invoice = await InvoicesAPI.getClientInvoiceById(invoiceId);
             setInvoice(invoice);
         } catch (error) {
             appToast.error("Erreur Fetch du client:", getApiErrorMessage(error));
         }
         finally {
-            setLoading(false)
+            setLoadingInvoice(false)
         }
     };
 
 
     useEffect(() => {
         fetchInvoice();
-
     }, [invoiceId]);
 
 
@@ -284,21 +284,22 @@ export default function useCreateCreditNote({ invoiceId }: InvoiceDetailsProps) 
 
     //Insertion de la facture au niveau de la BD 
     async function createCreditNoteInvoice() {
-        const values = getValues();
-        const documentFile = values.invoiceCreditNoteDocument ?? pdfUrl;
-
-        console.log("values: ", values)
-        if (!documentFile) {
-            appToast.error("Erreur de création", "Le document PDF est vide.");
-            return;
-        }
-
-        if (!values.originalInvoice) {
-            appToast.error("Erreur de création", "Aucune facture sélectionné.");
-            return;
-        }
-
         try {
+            setLoadingForm(true)
+
+            const values = getValues();
+            const documentFile = values.invoiceCreditNoteDocument ?? pdfUrl;
+
+            console.log("values: ", values)
+            if (!documentFile) {
+                appToast.error("Erreur de création", "Le document PDF est vide.");
+                return;
+            }
+
+            if (!values.originalInvoice) {
+                appToast.error("Erreur de création", "Aucune facture sélectionné.");
+                return;
+            }
             const formData = new FormData();
 
             formData.append("invoiceCreditNoteNumber", values.invoiceCreditNoteNumber);
@@ -334,14 +335,17 @@ export default function useCreateCreditNote({ invoiceId }: InvoiceDetailsProps) 
             const message = getApiErrorMessage(e);
             appToast.error("Échec de création, veuillez réessayer.", message);
         }
+        finally{
+            setLoadingForm(false)
+        }
 
     }
 
     // Envoyer la facture au TTN 
     function sendToTTN() {
-        setLoading(true);
+        seloadingTTN(true);
         setTimeout(() => {
-            setLoading(false)
+            seloadingTTN(false)
             setSuccessMessage("La facture a été envoyée avec succès au TTN.")
             setSent(true)
         }, 10000);
@@ -370,7 +374,9 @@ export default function useCreateCreditNote({ invoiceId }: InvoiceDetailsProps) 
         TtnModalOpen,
         setTtnModalOpen,
         pdfUrl,
-        loading,
+        loadingForm,
+        loadingInvoice,
+        loadingTTN,
         sent,
         successMessage,
 
