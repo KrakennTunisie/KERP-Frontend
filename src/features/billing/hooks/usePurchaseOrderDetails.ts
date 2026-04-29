@@ -11,25 +11,23 @@ export type PurchaseOrderDetailsProps = {
   purchaseOrderId: string
 }
 export default function usePurchaseOrderDetails({purchaseOrderId}:PurchaseOrderDetailsProps) {
-        const [marked, setMarked] = useState(false)
-        const [client,setClient]= useState<Partner>();
         const [previewDocument, setPreviewDocument] =useState<DocumentOrFile>(null);
         const [purchaseOrder , setPurchaseOrder]=useState<PurchaseOrderDetails>();
         const [purchaseOrderItems,setpurchaseOrderItems]=useState<InvoiceItem>();
-        const [loading, setLoading] = useState(false);
+        const [loadingDetails, setLoadingDetails] = useState(false);
         const [successMessage, setSuccessMessage] = useState("");
         const router = useRouter()
 
     const fetchPurchaseOrder = async () => {
         try {
-          setLoading(true)
+          setLoadingDetails(true)
           const purchaseOrder = await PurchaseOrderAPI.getClientPurchaseOrderById(purchaseOrderId);
           setPurchaseOrder(purchaseOrder);
         } catch (error) {
           appToast.error("Erreur Fetch du client:",getApiErrorMessage(error));
         }
         finally{
-          setLoading(false)
+          setLoadingDetails(false)
         }
       };
     
@@ -44,6 +42,7 @@ export default function usePurchaseOrderDetails({purchaseOrderId}:PurchaseOrderD
         successMessage,
         purchaseOrderItems,
         setPreviewDocument,
-        previewDocument
+        previewDocument,
+        loadingDetails
     }
 }

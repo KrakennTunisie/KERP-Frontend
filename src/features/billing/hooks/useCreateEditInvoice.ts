@@ -19,7 +19,7 @@ import {
 } from "../lib/invoiceCalculation";
 import defaultItem from "../mocks/invoice-items-mocks";
 import { CurrencyType, currencyTypeSchema } from "../types/currency";
-import { PurchaseOrder, PurchaseOrderDetails, PurchaseOrderSummary } from "../models/purchaseOrder";
+import {  PurchaseOrderDetails, PurchaseOrderSummary } from "../models/purchaseOrder";
 import { ExchangeRate } from "../types/exchangeRate";
 import { exchangeRateSourceSchema } from "../types/exchangeRateSource";
 import { invoiceComplianceStatusSchema } from "../types/invoiceComplianceStatus";
@@ -50,6 +50,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
       if(mode == "edit"){
 
      // setLoading(true)
+     setLoadingEdit(true)
       const invoice = await InvoicesAPI.getClientInvoiceById(invoiceId);
       setInvoice(invoice);
       }
@@ -57,7 +58,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
       appToast.error("Erreur Fetch du client:", getApiErrorMessage(error));
     }
     finally {
-      setLoading(false)
+      setLoadingEdit(false)
     }
   }
   const fetchNextNumber = async () => {
@@ -80,6 +81,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
     fetchNextNumber()
     fetchPurchaseOrderSummary()
   }, [])
+
   const router = useRouter()
   const form = useForm<InvoiceCreate>({
     resolver: zodResolver(invoiceCreateSchema),
@@ -234,7 +236,9 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [TtnModalOpen, setTtnModalOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loadingForm, setLoadingForm] = useState(false);
+  const [loadingEdit, setLoadingEdit] = useState(false);
+  const [loadingPurchaseOrders, setLoadingPurchaseOrders] = useState(false);
   const [loadingTTN, setLoadingTTN] = useState(false);
   const [sent, setSent] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
@@ -426,12 +430,15 @@ const [selectedPO, setSelectedPO] = useState<PurchaseOrderDetails | null>(null);
   const fetchPurchaseOrderSummary = async () => {
     try {
     //  setLoading(true)
-
+      setLoadingPurchaseOrders(true)
       const purchaseorders = await PurchaseOrderAPI.getPurchaseOrderSummary();
       setPurchaseOrders(purchaseorders);
 
     } catch (error) {
       appToast.error("Erreur Fetch du client:", getApiErrorMessage(error));
+    }
+    finally{
+      setLoadingPurchaseOrders(false)
     }
   }
   // récupérer un bon de commande séléctionnée
@@ -515,25 +522,22 @@ const [selectedPO, setSelectedPO] = useState<PurchaseOrderDetails | null>(null);
     setPdfUrl(null);
   }
 
-  async function createInvoice() {
-    const values = getValues();
-    const documentFile = values.invoiceDocument ?? pdfUrl;
-
-  console.log("values: ", values)
-  if (!documentFile) {
-    appToast.error("Erreur de création", "Le document PDF est vide.");
-    return;
-  }
-
-  if (!values.partner) {
-    appToast.error("Erreur de création", "Aucun client sélectionné.");
-    return;
-  }
-
-    
+  async function createInvoice() {   
     try {
-          setLoading(true)
+      setLoadingForm(true)
+      const values = getValues();
+      const documentFile = values.invoiceDocument ?? pdfUrl;
 
+      console.log("values: ", values)
+      if (!documentFile) {
+        appToast.error("Erreur de création", "Le document PDF est vide.");
+        return;
+      }
+
+      if (!values.partner) {
+        appToast.error("Erreur de création", "Aucun client sélectionné.");
+        return;
+      }
       const formData = new FormData();
 
       formData.append("invoiceNumber", values.invoiceNumber);
@@ -582,28 +586,30 @@ const [selectedPO, setSelectedPO] = useState<PurchaseOrderDetails | null>(null);
       const message = getApiErrorMessage(e);
       appToast.error("Échec de création, veuillez réessayer.", message);
     }
-        finally{
-    setLoading(false)
-  }
+    finally{
+    setLoadingForm(false)
+    }
   }
 
   const updateInvoice = async () => {
 
-    const values = getValues();
-    const documentFile = values.invoiceDocument ?? pdfUrl;
-
-    console.log("values: ", values)
-    if (!documentFile) {
-      appToast.error("Erreur de création", "Le document PDF est vide.");
-      return;
-    }
-
-    if (!values.partner) {
-      appToast.error("Erreur de création", "Aucun client sélectionné.");
-      return;
-    }
-
     try {
+
+      setLoadingForm(true)
+      
+      const values = getValues();
+      const documentFile = values.invoiceDocument ?? pdfUrl;
+
+      console.log("values: ", values)
+      if (!documentFile) {
+        appToast.error("Erreur de création", "Le document PDF est vide.");
+        return;
+      }
+
+      if (!values.partner) {
+        appToast.error("Erreur de création", "Aucun client sélectionné.");
+        return;
+      }
       const formData = new FormData();
 
       formData.append("idInvoice", values.idInvoice);
@@ -656,6 +662,9 @@ const [selectedPO, setSelectedPO] = useState<PurchaseOrderDetails | null>(null);
     } catch (e: unknown) {
       const message = getApiErrorMessage(e);
       appToast.error("Échec de création, veuillez réessayer.", message);
+    }finally{
+            setLoadingForm(false)
+
     }
 
   }
@@ -702,7 +711,10 @@ const [selectedPO, setSelectedPO] = useState<PurchaseOrderDetails | null>(null);
     sent,
     loadingTTN,
     successMessage,
-    loading,
+    loadingForm,
+    loadingEdit,
+    loadingClients,
+    loadingPurchaseOrders,
     onCloseDocumentModal,
     invoiceRef,
     pdfUrl,

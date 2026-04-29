@@ -12,17 +12,24 @@ import { PaymentConditionLabels, PaymentConditionSchema } from "../../types/paym
 import { DocumentPreviewModal } from "@/shared/components/ui/documentPreviewModal"
 import ErrorForm from "../widgets/errorForm"
 import { SendToTTNModal } from "../widgets/ttnConfirmationModal"
-import { mockPurchaseOrders } from "../../mocks/purchase-order-mocks"
 import { Controller } from "react-hook-form"
 import { purchaseOrderStatusLabels } from "../../types/purchaseOrderStatus"
+import PageLoader from "@/shared/components/ui/pageLoader"
 
 export default function CreateInvoiceClient({ mode,
     invoiceId, }: InvoiceFormClientProps) {
     const { addItem, removeItem, updateItem, clientSearch, setClientSearch, showDropdown, setShowDropdown, invoiceRef, pdfUrl, canCreateInvoice, errors, TtnModalOpen, setTtnModalOpen, sent, successMessage,purchaseOrders,
-        linkedToPO, selectedPO, handleSelectPO, loadingTTN, handleTogglePO, selectClient, clearClient, updateInvoice, clients, setCurrency, previewData, form, onSubmit, isModalOpen, router, calculateDueDate, onCloseDocumentModal, createInvoice, sendToTTN, loading
+        linkedToPO, selectedPO, handleSelectPO, loadingTTN, handleTogglePO, selectClient, clearClient, updateInvoice, clients, setCurrency, previewData, form, onSubmit, isModalOpen, router, calculateDueDate, onCloseDocumentModal, createInvoice, sendToTTN, 
+        loadingClients, loadingEdit, loadingForm, loadingPurchaseOrders
     } = useCreateInvoice({ mode, invoiceId })
 
     const { register } = form
+
+    if(loadingEdit){
+        return(
+            <PageLoader label="Chargement de facture"/>
+        )
+    }
 
     return (
         <div className="flex flex-col  overflow-hidden">
@@ -74,7 +81,7 @@ export default function CreateInvoiceClient({ mode,
                 onClose={onCloseDocumentModal}
                 onCreateInvoice={mode == "create" ? createInvoice : updateInvoice}
                 document={pdfUrl}
-                loading={loading}
+                loading={loadingForm}
                 type="Facture"
                  />
             {/* Modal pour demander au user s'il veut envoyer la Facture au TTN */}

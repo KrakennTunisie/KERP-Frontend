@@ -50,7 +50,9 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
   const [nextNumber, setNextNumber] = useState<nextNumber>()
   const [exchangeRate, setExchangeRate] = useState<ExchangeRate>()
   const [purchaseOrder, setPurchaseOrder] = useState<PurchaseOrderDetails>()
-  const [loading, setLoading] = useState(false);
+      const [loadingEdit, setLoadingEdit] = useState(false);
+      const [loadingForm, setLoadingForm] = useState(false);
+
   const router = useRouter()
   const form = useForm<PurchaseOrder>({
     resolver: zodResolver(basePurchaseOrderSchema),
@@ -84,7 +86,7 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
 
   const fetchClientPurchaseOrder = async () => {
     try {
-      setLoading(true)
+      setLoadingEdit(true)
       console.log(purchaseOrderId)
       const po = await PurchaseOrderAPI.getClientPurchaseOrderById(purchaseOrderId);
       setPurchaseOrder(po);
@@ -92,7 +94,7 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
       appToast.error("Erreur Fetch du client:", getApiErrorMessage(error));
     }
     finally {
-      setLoading(false)
+      setLoadingEdit(false)
     }
   }
   const fetchNextNumber = async () => {
@@ -406,21 +408,24 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
 
   //Création de bon commande
   async function createPurchaseOrder() {
-    const values = getValues();
-    const documentFile = values.purchaseOrderDocument ?? pdfUrl;
-
-    console.log("values: ", values)
-    if (!documentFile) {
-      appToast.error("Erreur de création", "Le document PDF est vide.");
-      return;
-    }
-
-    if (!values.partner) {
-      appToast.error("Erreur de création", "Aucun client sélectionné.");
-      return;
-    }
-
+  
     try {
+  
+      setLoadingForm(true)
+
+      const values = getValues();
+      const documentFile = values.purchaseOrderDocument ?? pdfUrl;
+
+      console.log("values: ", values)
+      if (!documentFile) {
+        appToast.error("Erreur de création", "Le document PDF est vide.");
+        return;
+      }
+
+      if (!values.partner) {
+        appToast.error("Erreur de création", "Aucun client sélectionné.");
+        return;
+      }
       const formData = new FormData();
 
       formData.append("purchaseOrderNumber", values.purchaseOrderNumber);
@@ -459,24 +464,31 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
       const message = getApiErrorMessage(e);
       appToast.error("Échec de création, veuillez réessayer.", message);
     }
+    finally{
+            setLoadingForm(false)
+    }
   }
   const updatePurchaseOrder = async () => {
   
-      const values = getValues();
-      const documentFile = values.purchaseOrderDocument ?? pdfUrl;
-  
-      console.log("values: ", values)
-      if (!documentFile) {
-        appToast.error("Erreur de création", "Le document PDF est vide.");
-        return;
-      }
-  
-      if (!values.partner) {
-        appToast.error("Erreur de création", "Aucun client sélectionné.");
-        return;
-      }
-  
+
       try {
+
+        setLoadingForm(true)
+
+        const values = getValues();
+        const documentFile = values.purchaseOrderDocument ?? pdfUrl;
+    
+        console.log("values: ", values)
+        if (!documentFile) {
+          appToast.error("Erreur de création", "Le document PDF est vide.");
+          return;
+        }
+    
+        if (!values.partner) {
+          appToast.error("Erreur de création", "Aucun client sélectionné.");
+          return;
+        }
+    
         const formData = new FormData();
   
         formData.append("idPurchaseOrder", values.idPurchaseOrder);
@@ -522,6 +534,9 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
       } catch (e: unknown) {
         const message = getApiErrorMessage(e);
         appToast.error("Échec de création, veuillez réessayer.", message);
+      }
+      finally{
+        setLoadingForm(false)
       }
   
     }
@@ -573,6 +588,10 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
 
     //Navigation
     router,
+
+    loadingEdit,
+    loadingForm,
+    loadingClients
 
   };
 

@@ -10,6 +10,7 @@ import { DeleteInvoiceModal } from "../widgets/deleteInvoiceModal";
 import { creditNoteTypeLabels } from "../../types/creditNoteType";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { formatDateLong } from "@/shared/utils/formatDate";
+import PageLoader from "@/shared/components/ui/pageLoader";
 
 export default function CreditNoteList({ params }: PropsClient) {
 
@@ -66,9 +67,9 @@ export default function CreditNoteList({ params }: PropsClient) {
                 onConfirm={deleteClientInvoice} />
 
             <SendInvoiceModal
+            invoice={null}
                 isOpen={open}
                 onClose={() => setOpen(false)}
-                onSend={({ to }) => alert(`Envoyé à : ${to}`)}
             />
             <div className="px-8">
             {/* Table card */}
@@ -126,7 +127,18 @@ export default function CreditNoteList({ params }: PropsClient) {
                         </tr>
                     </thead>
                     <tbody>
-                        {creditNotes.length === 0 ? (
+                        {loading ? 
+                          (
+                            <tr>
+                                <td
+                                className="px-8 py-10 text-sm font-bold text-gray-500"
+                                >
+                                <PageLoader label="Chargement Liste des factures..."/>
+                                </td>
+                            </tr>
+                            )
+                                                            
+                        :creditNotes.length === 0 ? (
                             <tr>
                                 <td colSpan={9} className="text-center py-12 text-slate-400 text-sm">
                                     {"Aucune facture trouvée."}

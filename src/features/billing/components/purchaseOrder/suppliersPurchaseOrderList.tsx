@@ -13,6 +13,7 @@ import { currencyTypeSchema } from "../../types/currency";
 import { UpdateInvoiceStatusModal } from "../widgets/updateStatusModal";
 import { ChevronLeft, ChevronRight, Settings } from "lucide-react";
 import SupplierPurchaseOrderModal, { SupplierPurchaseOrderModalContent } from "./supplierPurchaseOrderDetails";
+import PageLoader from "@/shared/components/ui/pageLoader";
 
 export default function SuppliersPurchaseOrderList() {
 
@@ -123,7 +124,18 @@ export default function SuppliersPurchaseOrderList() {
                         </tr>
                     </thead>
                     <tbody>
-                        {purchaseOrders.length === 0 ? (
+                        {loading ? 
+                            (
+                            <tr>
+                                <td
+                                className="px-8 py-10 text-sm font-bold text-gray-500"
+                                >
+                                <PageLoader label="Chargement..."/>
+                                </td>
+                            </tr>
+                            )
+                                                            
+                        :purchaseOrders.length === 0 ? (
                             <tr>
                                 <td colSpan={9} className="text-center py-12 text-slate-400 text-sm">
                                     Aucune facture trouvée.

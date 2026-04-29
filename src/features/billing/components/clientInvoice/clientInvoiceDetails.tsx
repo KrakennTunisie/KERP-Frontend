@@ -12,10 +12,17 @@ import { SendToTTNModal } from "../widgets/ttnConfirmationModal"
 import { paymentMethodLabels } from "../../types/paymentMethod"
 import { formatDateLong } from "@/shared/utils/formatDate"
 import { OperationCategoryLabels } from "../../types/operationCategory"
+import PageLoader from "@/shared/components/ui/pageLoader"
 
 export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps) {
     const {   client, invoice, previewDocument, setPreviewDocument, sendToTTN, TtnModalOpen, setTtnModalOpen,
         hasCreditInvoice,loading, sent, successMessage, router, updateStatus } = useClientInvoiceDetails({ invoiceId });
+
+        if(loading){
+            return(
+                <PageLoader label="Chargement de facture ..."/>
+            )
+        }
     return (
         <div className="min-h-screen bg-gray-50 font-sans">
 

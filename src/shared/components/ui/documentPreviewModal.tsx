@@ -76,28 +76,43 @@ export function DocumentPreviewModal({
 
       {isFile(document) && onCreateInvoice ? (
         <button
-      
+          disabled={loading}
           onClick={() => {
-            onCreateInvoice()
+            if (!loading) onCreateInvoice();
           }}
-          className="px-5 py-3 rounded-2xl bg-blue-600 text-white font-black hover:bg-blue inline-flex items-center gap-2 disabled:opacity-50"
+          className={`px-5 py-3 rounded-2xl text-white font-black inline-flex items-center gap-2
+            ${loading
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-blue-600 hover:bg-blue-700"
+            }`}
         >
-          {type === "Facture"
-            ? "Créer la facture"
-            : type === "Avoir"
-              ? "Créer la facture d'avoir"
-              : "Créer le bon de commande"}
+          {loading ? (
+            "Chargement..."
+          ) : type === "Facture" ? (
+            "Créer la facture"
+          ) : type === "Avoir" ? (
+            "Créer la facture d'avoir"
+          ) : (
+            "Créer le bon de commande"
+          )}
         </button>
       ) : (
-        <a
-          href={url ?? undefined}
-          target="_blank"
-          download={fileName ?? true}
-          className="px-5 py-3 rounded-2xl bg-blue-600 text-white font-black hover:bg-blue inline-flex items-center gap-2"
-        >
-          <Download className="w-4 h-4" />
-          Télécharger
-        </a>
+          <a
+            href={!loading ? url ?? undefined : undefined}
+            target="_blank"
+            download={!loading ? fileName ?? true : undefined}
+            onClick={(e) => {
+              if (loading) e.preventDefault();
+            }}
+            className={`px-5 py-3 rounded-2xl text-white font-black inline-flex items-center gap-2
+              ${loading
+                ? "bg-gray-400 cursor-not-allowed pointer-events-none"
+                : "bg-blue-600 hover:bg-blue-700"
+              }`}
+          >
+            <Download className="w-4 h-4" />
+            {loading ? "Chargement..." : "Télécharger"}
+          </a>
       )}
     </>
   );

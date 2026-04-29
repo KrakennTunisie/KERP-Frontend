@@ -12,9 +12,17 @@ import { invoiceStatusLabels, invoiceStatusSchema } from "../../types/invoiceSta
 import { DocumentPreviewModal } from "@/shared/components/ui/documentPreviewModal";
 import { creditNoteTypeLabels } from "../../types/creditNoteType";
 import { formatDateLong } from "@/shared/utils/formatDate";
+import PageLoader from "@/shared/components/ui/pageLoader";
 
 export default function CreditNoteDetails({ params }: PropsCreditNote) {
     const { updateStatus, previewDocument, setPreviewDocument, setStatusPaiement, invoice, sendToTTN, TtnModalOpen, setTtnModalOpen, loading, sent, successMessage, router } = useCreditNoteDetails({ params });
+    
+    
+            if(loading){
+                return(
+                    <PageLoader label="Chargement de facture d'avoir ..."/>
+                )
+            }
     return (
         <div className="min-h-screen bg-gray-50 font-sans">
 
