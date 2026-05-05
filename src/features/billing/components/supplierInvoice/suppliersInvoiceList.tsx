@@ -2,14 +2,24 @@
 
 import StatClientInvoiceCard from "@/shared/components/ui/statClientInvoiceCard";
 import useSupplierInvoiceList from "../../hooks/useSupplierInvoiceList";
-import { MOCK_INVOICES } from "../../mocks/invoice-mocks";
-import { invoiceStatusColors, invoiceStatusLabels, invoiceStatusSchema } from "../../types/invoiceStatus";
-import { categoriesFacturesFournisseurSchema } from "../../types/invoiceSupplierCategory";
+import { getClientInvoiceAllowedNextStatuses, getSupplierInvoiceAllowedNextStatuses, invoiceStatusColors, invoiceStatusLabels, invoiceStatusSchema } from "../../types/invoiceStatus";
+import { formatDateLong } from "@/shared/utils/formatDate";
+import { ChevronLeft, ChevronRight, Settings } from "lucide-react";
+import { UpdateInvoiceStatusModal } from "../widgets/updateStatusModal";
 
 
 export default function SuppliersInvoiceList() {
 
-    const { router, search, setSearch, filtre, categorie, setCategorie, setFiltre } = useSupplierInvoiceList();
+    const { router, search, setSearch, filtre, setFiltre, suppliersInvoices, 
+        currentPage, setCurrentPage, totalElements, totalPages,
+        setInvoiceId,
+        setUpdateOpen,
+        updateOpen,
+        updateLoading,
+        updateStatus,
+        selectedInvoice, setSelectedInvoice,
+        nextStatus, setNextStatus,
+        loading, suppliersInvoiceStats } = useSupplierInvoiceList();
 
     return (
         <div className="min-h-screen bg-gray-50 p-8 font-sans">
@@ -33,8 +43,8 @@ export default function SuppliersInvoiceList() {
                         </svg>
                     }
                     label="Total Année 2026"
-                    eur={0}
-                    tnd={0}
+                    eur={suppliersInvoiceStats.totalAmountEUR}
+                    tnd={suppliersInvoiceStats.totalAmountTND}
                     sub="Payé + À Encaisser"
                     variant="blue"
                 />
@@ -46,9 +56,9 @@ export default function SuppliersInvoiceList() {
                         </svg>
                     }
                     label="À Encaisser 2026"
-                    eur={0}
-                    tnd={0}
-                    sub={`${0} factures`}
+                    eur={suppliersInvoiceStats.pendingAmountEUR}
+                    tnd={suppliersInvoiceStats.pendingAmountTND}
+                    sub={`${suppliersInvoiceStats.pendingInvoices} factures`}
                     variant="amber"
                 />
                 <StatClientInvoiceCard
@@ -59,9 +69,9 @@ export default function SuppliersInvoiceList() {
                         </svg>
                     }
                     label="Mois en Cours"
-                    eur={0}
-                    tnd={0}
-                    sub={`${0} factures`}
+                    eur={suppliersInvoiceStats.averageInvoiceEUR}
+                    tnd={suppliersInvoiceStats.averageInvoiceTND}
+                    sub={`${suppliersInvoiceStats.pendingInvoices} factures`}
                     variant="emerald"
                 />
             </div>
@@ -103,7 +113,7 @@ export default function SuppliersInvoiceList() {
                     </div>
 
                     {/* Ligne 2 : Catégories */}
-                    <div className="flex gap-2 flex-wrap">
+{/*                     <div className="flex gap-2 flex-wrap">
                         {categoriesFacturesFournisseurSchema.options.map((cat) => (
                             <button
                                 key={cat}
@@ -122,7 +132,7 @@ export default function SuppliersInvoiceList() {
                             </button>
                         ))}
                     </div>
-
+ */}
                 </div>
 
             </div>
@@ -142,22 +152,22 @@ export default function SuppliersInvoiceList() {
                         </tr>
                     </thead>
                     <tbody>
-                        {MOCK_INVOICES.length === 0 ? (
+                        {suppliersInvoices.length === 0 ? (
                             <tr>
                                 <td colSpan={9} className="text-center py-12 text-slate-400 text-sm">
                                     Aucune facture trouvée.
                                 </td>
                             </tr>
                         ) : (
-                            MOCK_INVOICES.map((f) => (
+                            suppliersInvoices.map((f) => (
                                 <tr
                                     key={1}
                                     className="border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer"
                                 >
                                     <td className="px-5 py-4 font-bold text-slate-800">
-                                        {f.idInvoice}
+                                        {f.invoiceNumber}
                                     </td>
-                                    <td className="px-5 py-4 text-slate-700">SYSLAB</td>
+                                    <td className="px-5 py-4 text-slate-700">{f.partner.name}</td>
                                     <td className="px-5 py-4">
                                         <span className={`px-3 py-1 rounded-full text-xs font-bold ${f.invoiceStatus !== "ALL" ? invoiceStatusColors[f.invoiceStatus] : ""
                                             }}`}>
@@ -165,12 +175,12 @@ export default function SuppliersInvoiceList() {
                                         </span>
                                     </td>
                                     <td className="px-5 py-4 text-slate-700 font-medium">
-                                        {f.totalExclTax!.toLocaleString("fr-FR")} €
+                                        {f.totalInclTaxEUR!.toLocaleString("fr-FR")} €
                                     </td>
                                     <td className="px-5 py-4 text-slate-700 font-medium">
-                                        {f.totalExclTax!.toLocaleString("fr-FR")} TND
+                                        {f.totalInclTaxTND!.toLocaleString("fr-FR")} TND
                                     </td>
-                                    <td className="px-5 py-4 text-slate-600">{f.issueDate.toLocaleDateString("fr-FR")}</td>
+                                    <td className="px-5 py-4 text-slate-600">{formatDateLong(f.issueDate)}</td>
                                     <td className="px-5 py-4 text-center">
                                         {f.invoiceComplianceStatus ? (
                                             <svg className="w-5 h-5 text-emerald-500 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -197,6 +207,15 @@ export default function SuppliersInvoiceList() {
                                                 </svg>
                                             </button>
 
+                                           <button
+                                                onClick={(e) => {setSelectedInvoice(f); setInvoiceId(f.idInvoice); setUpdateOpen(true)}}
+                                                disabled={getSupplierInvoiceAllowedNextStatuses(f.invoiceStatus).length === 0}
+                                                className="p-2 rounded-xl bg-violet-50 text-violet-600 hover:bg-violet-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                title="Mettre à jour le statut"
+                                                >
+                                                <Settings className="w-4 h-4"/>
+                                            </button>
+
                                         </div>
                                     </td>
                                 </tr>
@@ -204,6 +223,70 @@ export default function SuppliersInvoiceList() {
                         )}
                     </tbody>
                 </table>
+                            { totalPages > 0 && (
+                                <div className="px-8 py-8 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <button
+                                    onClick={() => setCurrentPage(currentPage - 1)}
+                                    disabled={currentPage === 1 || loading}
+                                    className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-xl hover:bg-gray-50 disabled:opacity-30 transition-all shadow-sm"
+                                    >
+                                    <ChevronLeft className="w-4 h-4 text-gray-900" />
+                                    </button>
+                
+                                    <div className="flex items-center gap-1">
+                                    {Array.from({ length: totalPages }).map((_, i) => {
+                                        const page = i + 1;
+                
+                                        return (
+                                        <button
+                                            key={page}
+                                            onClick={() => setCurrentPage(page)}
+                                            disabled={loading}
+                                            className={`w-10 h-10 rounded-xl font-black text-xs transition-all ${
+                                            currentPage === page
+                                                ? "bg-gray-900 text-white shadow-lg"
+                                                : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50"
+                                            } disabled:opacity-50`}
+                                        >
+                                            {page}
+                                        </button>
+                                        );
+                                    })}
+                                    </div>
+                
+                                    <button
+                                    onClick={() => setCurrentPage(currentPage + 1)}
+                                    disabled={currentPage === totalPages || loading}
+                                    className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-xl hover:bg-gray-50 disabled:opacity-30 transition-all shadow-sm"
+                                    >
+                                    <ChevronRight className="w-4 h-4 text-gray-900" />
+                                    </button>
+                                </div>
+                
+                                {totalElements > 0 && (
+                                    <p className="text-xs font-bold text-gray-500">
+                                    {totalElements +" Facture"}
+                                    </p>
+                                )}
+                                </div>
+                            )}
+                                <UpdateInvoiceStatusModal
+                                open={updateOpen}
+                                onClose={()=> setUpdateOpen(false)}
+                                onConfirm={updateStatus}
+                                invoiceNumber={selectedInvoice?.invoiceNumber}
+                                currentStatus={selectedInvoice?.invoiceStatus}
+                                type="invoice"
+                                nextStatus={nextStatus}
+                                onNextStatusChange={setNextStatus}
+                                allowedStatuses={
+                                    selectedInvoice
+                                    ? getSupplierInvoiceAllowedNextStatuses(selectedInvoice.invoiceStatus)
+                                    : []
+                                }
+                                isSubmitting={updateLoading}
+                                />
             </div>
         </div>
 
