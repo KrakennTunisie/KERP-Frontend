@@ -9,7 +9,8 @@ import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 import { DocumentOrFile } from "@/shared/components/ui/documentPreviewModal";
 import { invoiceStatusSchema } from "../types/invoiceStatus";
 export type InvoiceDetailsProps = {
-  invoiceId: string
+  invoiceId: string,
+  type: string
 }
 
 
@@ -34,7 +35,7 @@ export const downloadFile = async (fileUrl: string, fileName: string): Promise<v
         console.error('Téléchargement échoué :', error);
     }
 };
-export default function useClientInvoiceDetails ({invoiceId}:InvoiceDetailsProps){
+export default function useClientInvoiceDetails ({invoiceId, type}:InvoiceDetailsProps){
     const [marked, setMarked] = useState(false)
     const [client,setClient]= useState<Partner>();
     const [previewDocument, setPreviewDocument] =useState<DocumentOrFile>(null);
@@ -79,8 +80,16 @@ const updateStatus = async ()=>{
   const fetchInvoice = async () => {
     try {
       setLoading(true)
+      if(type=="CLIENT"){
+
       const invoice = await InvoicesAPI.getClientInvoiceById(invoiceId);
       setInvoice(invoice);
+      }
+      else{
+        
+      const invoice = await InvoicesAPI.getSupplierInvoiceById(invoiceId);
+      setInvoice(invoice);
+      }
       console.log(invoice);
       setHasCreditInvoice(invoice?.hasInvoiceCreditNotes ?? false)
     } catch (error) {

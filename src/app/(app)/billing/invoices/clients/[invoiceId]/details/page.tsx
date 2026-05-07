@@ -3,6 +3,6 @@ import { PropsClient } from "@/features/billing/hooks/useClientsInvoiveList";
 
 export default async function invoiceDetail({ params }: PropsClient) {
     const { invoiceId } = await params
-    return <ClientInvoiceDetails invoiceId={invoiceId}/>;
+    return <ClientInvoiceDetails type={"CLIENT"} invoiceId={invoiceId}/>;
     
 }

@@ -1,7 +1,7 @@
 "use client"
 import { FileX, ShieldCheck} from 'lucide-react';
 import InvoicePreview from '../widgets/invoicePreview';
-import useCreateCreditNote from '../../hooks/useCreateCreditNote';
+import useCreateCreditNote, { InvoiceDetailsProps } from '../../hooks/useCreateCreditNote';
 import { SectionTitle } from '../widgets/sectionTitle';
 import { tvaRateSchema } from '../../types/tvaRate';
 import { invoiceTypeSchema } from '../../types/invoiceType';
@@ -10,7 +10,6 @@ import SummaryOriginalInvoice from '../widgets/summaryOriginalInvoice';
 import ErrorForm from '../widgets/errorForm';
 import { DocumentPreviewModal } from '@/shared/components/ui/documentPreviewModal';
 import { SendToTTNModal } from '../widgets/ttnConfirmationModal';
-import { InvoiceDetailsProps } from '../../hooks/useClientInvoiceDetails';
 
 export function CreateCreditNote({invoiceId}: InvoiceDetailsProps) {
     const { previewData, form, removeItem, addItem, updateItem, onSubmit, onCloseDocumentModal, createCreditNoteInvoice,
