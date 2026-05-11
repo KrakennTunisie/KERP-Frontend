@@ -430,9 +430,12 @@ const [selectedPO, setSelectedPO] = useState<PurchaseOrderDetails | null>(null);
   const fetchPurchaseOrderSummary = async () => {
     try {
     //  setLoading(true)
+    if(mode=="create"){
+
       setLoadingPurchaseOrders(true)
       const purchaseorders = await PurchaseOrderAPI.getPurchaseOrderSummary();
       setPurchaseOrders(purchaseorders);
+    }
 
     } catch (error) {
       appToast.error("Erreur Fetch du client:", getApiErrorMessage(error));

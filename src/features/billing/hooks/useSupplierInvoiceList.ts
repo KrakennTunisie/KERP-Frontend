@@ -1,4 +1,4 @@
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { InvoiceStatus, invoiceStatusSchema } from "../types/invoiceStatus";
 import { CategoriesFacturesFournisseur } from "../types/invoiceSupplierCategory";
@@ -13,9 +13,11 @@ export type PropsSupplier = {
     invoiceId: string
   }
 }
-export default function useSupplierInvoiceList ()
-{
-    const [search, setSearch] = useState("");
+export default function useSupplierInvoiceList (){
+    const searchParams = useSearchParams();
+
+  const supplier = searchParams.get("supplier") ?? "";
+    const [search, setSearch] = useState(supplier);
     const [filtre, setFiltre] = useState<InvoiceStatus>();
     const [loading, setLoading]= useState(false)
     const [deleteLoading, setDeleteLoading]= useState(false)

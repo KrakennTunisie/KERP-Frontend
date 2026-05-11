@@ -107,6 +107,8 @@ export const invoiceCreditNotePageItemSchema = z.object({
   totalInclTaxEUR: z.number(),
   totalExclTaxTND: z.number(),
   totalInclTaxTND: z.number(),
+  totalExclTaxUSD: z.number(),
+  totalInclTaxUSD: z.number(),
   invoice: invoiceSummarySchema
 });
 

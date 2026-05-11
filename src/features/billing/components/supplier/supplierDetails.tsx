@@ -9,6 +9,7 @@ import { appToast } from "@/shared/lib/toast";
 import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 import PageLoader from "@/shared/components/ui/pageLoader";
 import { PartnerInvoiceStats } from "../../types/partnersStats";
+import { InvoicePageItem } from "../../models/invoice";
 
 export default function SupplierDetails(){
   const params = useParams();
@@ -33,10 +34,10 @@ export default function SupplierDetails(){
     })
 
   const [supplier, setSupplier] = useState<SupplierPartner>();
+  const [supplierInvoices, setSupplierInvoices]= useState<InvoicePageItem[]|[]>([])
   const [loading, setLoading] = useState<boolean>(true);
 
-  useEffect(() => {
-  const fetchSupplier = async () => {
+    const fetchSupplier = async () => {
     try {
       setLoading(true)
       const supplier = await partnersApi.getSupplierById(supplierId);
@@ -51,7 +52,22 @@ export default function SupplierDetails(){
     }
   };
 
+
+  const fetchSupplierInvoices = async () => {
+    try {
+      setLoading(true)
+      const invoices = await InvoicesAPI.getSupplierTopInvoices(supplierId);
+      setSupplierInvoices(invoices);
+    } catch (error) {
+      appToast.error("Erreur fetch des factures fournisseur: ",getApiErrorMessage(error));
+    }
+    finally{
+      setLoading(false)
+    }
+  };
+  useEffect(() => {
   fetchSupplier();
+  fetchSupplierInvoices();
 }, [supplierId]);
 
 if(loading){
@@ -76,6 +92,7 @@ if(supplier==null){
             <PartnerDetails
                 partner={supplier}
                 partnerStats={supplierInvoiceStats}
+                partnerInvoices={supplierInvoices}
             />
         )
 

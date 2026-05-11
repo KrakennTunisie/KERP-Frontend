@@ -100,15 +100,16 @@ const clientsByMonth = months.map((month) => ({
   month: month.label,
   montant: clientInvoices
     .filter((inv) => inv.month === month.value)
-    .reduce((sum, inv) => sum + inv.amountEUR, 0),
+    .reduce((sum, inv) => sum + inv.amountEUR, 0).toFixed(2),
 }));
 
   const suppliersByMonth = months.map((month) => ({
     month: month.label,
     montant: supplierInvoices
       .filter((inv) => inv.month === month.value)
-      .reduce((sum, inv) => sum + inv.amountEUR, 0),
+      .reduce((sum, inv) => sum + inv.amountEUR, 0).toFixed(2),
   }));
+
 console.log("suppliersByMonth: ",suppliersByMonth)
   const clientsGrouped = clientInvoices.reduce<{ client: string; montant: number }[]>(
     (acc, inv) => {
@@ -123,7 +124,8 @@ console.log("suppliersByMonth: ",suppliersByMonth)
       return acc;
     },
     []
-  );
+  )  .sort((a, b) => b.montant - a.montant) // 🔥 tri décroissant
+     .slice(0, 3);
 
     const suppliersGrouped = supplierInvoices.reduce<{ client: string; montant: number }[]>(
     (acc, inv) => {
@@ -138,7 +140,8 @@ console.log("suppliersByMonth: ",suppliersByMonth)
       return acc;
     },
     []
-  );
+  ) .sort((a, b) => b.montant - a.montant) // 🔥 tri décroissant
+     .slice(0, 3);
 
 
 

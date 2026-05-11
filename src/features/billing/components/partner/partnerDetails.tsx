@@ -15,26 +15,19 @@ import PartnerHeader from "./partnerHeroSection";
 import PartnerInfoCard from "./partnerInfoCard";
 import PartnerInvoicesCard from "./partnerInvoices";
 import { ClientPartner,  SupplierPartner } from "../../models/partner";
-import { Invoice } from "../../models/invoice";
-import { useEffect, useState } from "react";
+import {  InvoicePageItem } from "../../models/invoice";
 import { PartnerInvoiceStats } from "../../types/partnersStats";
+import { useState } from "react";
+import { SendEmailModal } from "@/shared/components/widgets/sendEmailModal";
 
 type PartnerDetailsProps = {
   partner: ClientPartner | SupplierPartner;
-  partnerStats: PartnerInvoiceStats
+  partnerStats: PartnerInvoiceStats,
+  partnerInvoices: InvoicePageItem[]|[]
 };
-export default function PartnerDetails({ partner, partnerStats }: PartnerDetailsProps) {
+export default function PartnerDetails({ partner, partnerStats, partnerInvoices }: PartnerDetailsProps) {
   const isSupplier = partner.partnerType === "SUPPLIER";
-
-  const getSupplierInvoiceStats = async ()=>{
-
-  }
-
-
-
-  useEffect(()=>{
-
-  },[])
+  const [open, setOpen]=useState(false)
   const pageConfig = {
     title: isSupplier ? "Fournisseur" : "Client",
     backHref: isSupplier ? "/billing/suppliers" : "/billing/clients",
@@ -55,8 +48,8 @@ export default function PartnerDetails({ partner, partnerStats }: PartnerDetails
       ? "Les 3 dernières factures d'achat"
       : "Les 3 dernières factures de vente",
     invoicesButtonHref: isSupplier
-      ? `/billing/invoices/suppliers?supplier=${partner.idPartner}`
-      : `/billing/invoices/clients?client=${partner.idPartner}`,
+      ? `/billing/invoices/suppliers?supplier=${partner.name}`
+      : `/billing/invoices/clients?client=${partner.name}`,
     invoicesButtonLabel: "Voir toutes les factures",
     detailsTypeLabel: isSupplier ? "Fournisseur" : "Client",
     emptyInvoiceType: isSupplier ? "Achat" : "Vente",
@@ -73,6 +66,7 @@ export default function PartnerDetails({ partner, partnerStats }: PartnerDetails
             partner={partner}
             pageConfig={pageConfig}
             icon={HeaderIcon}
+            setOpen={()=>setOpen(true)}
         />
 
       <main className="flex-1 overflow-y-auto p-8">
@@ -153,7 +147,7 @@ export default function PartnerDetails({ partner, partnerStats }: PartnerDetails
 
             <PartnerInvoicesCard
                 partnerType={partner.partnerType}
-                invoices={partner.invoices}
+                invoices={partnerInvoices}
                 subtitle={pageConfig.invoicesSubtitle}
                 buttonHref={pageConfig.invoicesButtonHref}
                 buttonLabel={pageConfig.invoicesButtonLabel}
@@ -163,6 +157,13 @@ export default function PartnerDetails({ partner, partnerStats }: PartnerDetails
             <PartnerInfoCard
                 partner={partner}
                 typeLabel={pageConfig.detailsTypeLabel}
+            />
+
+            <SendEmailModal
+               isOpen= {open}
+               onClose={()=>setOpen(false)}
+               defaultTo={partner.email}
+               recipientName={partner.name}
             />
         </div>
       </main>

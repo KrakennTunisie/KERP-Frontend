@@ -66,9 +66,18 @@ const updateStatus = async ()=>{
       const formData = new FormData();
         
       formData.append("status",  invoiceStatusSchema.enum.PAID);
+      if(type=="CLIENT"){
+
       const invoice = await InvoicesAPI.updateClientInvoiceStatus(invoiceId, formData);
       setInvoice(invoice);
       setHasCreditInvoice(invoice?.hasInvoiceCreditNotes ?? false)
+      }
+      else{
+        
+      const invoice = await InvoicesAPI.updateSupplierInvoiceStatus(invoiceId, formData);
+      setInvoice(invoice);
+      setHasCreditInvoice(invoice?.hasInvoiceCreditNotes ?? false)
+      }
     } catch (error) {
       appToast.error("Erreur Fetch du client:",getApiErrorMessage(error));
     }
@@ -84,14 +93,15 @@ const updateStatus = async ()=>{
 
       const invoice = await InvoicesAPI.getClientInvoiceById(invoiceId);
       setInvoice(invoice);
+      setHasCreditInvoice(invoice?.hasInvoiceCreditNotes ?? false)
       }
       else{
         
       const invoice = await InvoicesAPI.getSupplierInvoiceById(invoiceId);
       setInvoice(invoice);
+      setHasCreditInvoice(invoice?.hasInvoiceCreditNotes ?? false)
       }
       console.log(invoice);
-      setHasCreditInvoice(invoice?.hasInvoiceCreditNotes ?? false)
     } catch (error) {
       appToast.error("Erreur Fetch du client:",getApiErrorMessage(error));
     }

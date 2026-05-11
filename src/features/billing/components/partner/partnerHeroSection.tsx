@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, MapPin, Mail, Phone, LucideIcon } from "lucide-react";
+import { ArrowLeft, MapPin, Mail, Phone, LucideIcon, Send } from "lucide-react";
 import { Partner } from "../../models/partner";
 
 type PartnerHeaderProps = {
@@ -15,7 +15,7 @@ type PartnerHeaderProps = {
     heroIconClass: string;
     heroInfoIconClass: string;
   };
-
+  setOpen: () => void,
   icon: LucideIcon;
 };
 
@@ -23,6 +23,7 @@ export default function PartnerHeader({
   partner,
   pageConfig,
   icon: Icon,
+  setOpen,
 }: PartnerHeaderProps) {
   return (
     <div className="bg-white border-b border-gray-100 px-8 py-8">
@@ -92,6 +93,13 @@ export default function PartnerHeader({
             </div>
 
           </div>
+          <button
+              onClick={setOpen}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 text-sm font-bold border border-blue-100 hover:border-blue-200 transition self-start shrink-0"
+            >
+              <Send className="w-4 h-4" />
+              Envoyer un e-mail
+            </button>
         </div>
       </div>
     </div>

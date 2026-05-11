@@ -1,5 +1,5 @@
 'use client';
-import { invoiceStatusColors, invoiceStatusLabels, invoiceStatusSchema } from "../../types/invoiceStatus";
+import { getCreditNoteAllowedNextStatuses, invoiceStatusColors, invoiceStatusLabels, invoiceStatusSchema } from "../../types/invoiceStatus";
 import Link from "next/link";
 import { PropsClient } from "../../hooks/useClientsInvoiveList";
 import { SendInvoiceModal } from "../widgets/sendInvoiceModal";
@@ -16,7 +16,7 @@ export default function CreditNoteList({ params }: PropsClient) {
 
     const { router, search, setSearch, open, setOpen, setDeleteOpen, deleteOpen, creditNoteRef,
         filtre, setFiltre, deleteCreditNote, creditNotes, totalElements, totalPages, idInvoice, setIdInvoice, deleteId, setDeleteId, deleteClientInvoice,  currentPage,
-     setCurrentPage, loading,} = useCreditNoteList({ params });
+     setCurrentPage, loading, selectedCreditNote, setSelectedCreditNote} = useCreditNoteList({ params });
     return (
         <div className="min-h-screen bg-gray-50 p font-sans">
             {/* TOP BAR */}
@@ -67,7 +67,7 @@ export default function CreditNoteList({ params }: PropsClient) {
                 onConfirm={deleteClientInvoice} />
 
             <SendInvoiceModal
-            invoice={null}
+                invoice={null}
                 isOpen={open}
                 onClose={() => setOpen(false)}
             />
@@ -92,9 +92,12 @@ export default function CreditNoteList({ params }: PropsClient) {
                     <div className="flex gap-2">
                         {invoiceStatusSchema.options
                             .filter((f) =>
+                                f.includes(invoiceStatusSchema.enum.IN_PROGRESS) ||
                                 f.includes(invoiceStatusSchema.enum.REFUNDED) ||
                                 f.includes(invoiceStatusSchema.enum.NOT_REFUNDED) ||
-                                f.includes(invoiceStatusSchema.enum.DRAFT)
+                                f.includes(invoiceStatusSchema.enum.DRAFT) ||
+                                f.includes(invoiceStatusSchema.enum.ALL) 
+
                             )
                             .map((f) => (
                                 <button
@@ -145,9 +148,9 @@ export default function CreditNoteList({ params }: PropsClient) {
                                 </td>
                             </tr>
                         ) : (
-                            creditNotes.map((f) => (
+                            creditNotes.map((f, index) => (
                                 <tr
-                                    key={1}
+                                    key={index}
                                     className="border-b border-slate-50 hover:bg-slate-50 transition-colors"
                                 >
                                     <td className="px-5 py-4 font-bold text-slate-800">
@@ -168,7 +171,7 @@ export default function CreditNoteList({ params }: PropsClient) {
                                                                             ? f.totalInclTaxEUR 
                                                                             : f?.invoice.invoiceCurrency =="TND" 
                                                                                 ? f.totalInclTaxTND  
-                                                                                :f?.total} {f.invoice.invoiceCurrency}
+                                                                                :f?.totalInclTaxUSD} {f.invoice.invoiceCurrency}
                                     </td>
                                     <td className="px-5 py-4 text-slate-600">{formatDateLong(f.issueDate)}</td>
                                     <td className="px-5 py-4 text-center">
@@ -198,16 +201,8 @@ export default function CreditNoteList({ params }: PropsClient) {
                                             </button>
                                             {/** Send To TTn button */}
                                             <button
-                                                disabled={([
-                                                    invoiceComplianceStatusSchema.enum.RECEIVED,
-                                                    invoiceComplianceStatusSchema.enum.COMPLETED,
-                                                    invoiceComplianceStatusSchema.enum.SIGNING_PENDING,
-                                                    invoiceComplianceStatusSchema.enum.SIGNING_SUCCEEDED,
-                                                    invoiceComplianceStatusSchema.enum.TTN_ACCEPTED,
-                                                    invoiceComplianceStatusSchema.enum.TTN_PENDING,
-                                                    invoiceComplianceStatusSchema.enum.TTN_SUBMITTED
-                                                ] as string[]).includes(f.invoiceCreditNoteComplianceStatus!)}
-                                                onClick={(e) => { setOpen(true);  console.log("send", f.invoiceCreditNoteNumber); }}
+                                                disabled={getCreditNoteAllowedNextStatuses(f.invoiceCreditNoteStatus).length === 0}
+                                                onClick={(e) => { /* setOpen(true); */ setSelectedCreditNote(f);  console.log("send", f.invoiceCreditNoteNumber); }}
                                                 className="p-2 rounded-xl bg-green-50 text-green-600 hover:bg-green-100 transition-colors  cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                                                 title="Envoyer"
                                             >

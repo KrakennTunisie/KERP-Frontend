@@ -11,7 +11,7 @@ import { OperationCategoryLabels } from "../../types/operationCategory";
 import { invoiceStatusLabels, invoiceStatusSchema } from "../../types/invoiceStatus";
 import { DocumentPreviewModal } from "@/shared/components/ui/documentPreviewModal";
 import { creditNoteTypeLabels } from "../../types/creditNoteType";
-import { formatDateLong } from "@/shared/utils/formatDate";
+import { formatDateLong, formatDateLongWithTime } from "@/shared/utils/formatDate";
 import PageLoader from "@/shared/components/ui/pageLoader";
 
 export default function CreditNoteDetails({ params }: PropsCreditNote) {
@@ -212,7 +212,7 @@ export default function CreditNoteDetails({ params }: PropsCreditNote) {
                             {invoice?.invoiceCreditNoteItems?.map((item, index) => (
                                 <div
                                     key={item.idInvoiceCreditNoteItem}
-                                    className={`grid grid-cols-[1fr_70px_90px_100px] gap-2 py-3.5 items-center ${index < mockInvoiceItems.length - 1 ? 'border-b border-gray-50' : ''
+                                    className={`grid grid-cols-[1fr_70px_90px_100px] gap-2 py-3.5 items-center ${index < (invoice?.invoiceCreditNoteItems?.length || 1) - 1 ? 'border-b border-gray-50' : ''
                                         }`}
                                 >
                                     <div>
@@ -222,7 +222,7 @@ export default function CreditNoteDetails({ params }: PropsCreditNote) {
                                     </div>
                                     <p className="text-sm text-gray-700 text-right">{item.quantity}</p>
                                     <p className="text-sm text-gray-700 text-right">{item.invoiceItem.unityPriceEXclTax}</p>
-                                    <p className="text-sm font-bold text-gray-900 text-right">{item.invoiceItem.itemTotalExclTax}</p>
+                                    <p className="text-sm font-bold text-gray-900 text-right">{item.quantity *item.invoiceItem.unityPriceEXclTax}</p>
                                 </div>
                             ))}
                         </div>
@@ -339,7 +339,7 @@ export default function CreditNoteDetails({ params }: PropsCreditNote) {
                             {invoice?.invoiceCreditNoteEvents?.map((event, index) => (
                                 <div key={event.idInvoiceEvent} className="flex items-start gap-2.5 relative">
                                     {/* Ligne verticale entre les points */}
-                                    {index < mockInvoiceEvents.length - 1 && (
+                                    {index < (invoice?.invoiceCreditNoteEvents?.length || 0) - 1 && (
                                         <div className="absolute left-[4px] top-3.5 w-px h-full bg-red-100" />
                                     )}
                                     <div className="w-2.5 h-2.5 rounded-full bg-red-200 shrink-0 mt-1 z-10" />
@@ -348,7 +348,7 @@ export default function CreditNoteDetails({ params }: PropsCreditNote) {
                                             {InvoiceEventLabels[event?.invoiceCreditNoteEventType] ?? "créé"}
                                         </p>
                                         <p className="text-[11px] font-semibold text-gray-400 mt-0.5">
-                                            {formatDateLong(event.eventDate)} - {event.eventTrigger}
+                                            {formatDateLongWithTime(event.eventDate)} - {event.eventTrigger}
                                         </p>
                                         <p className="text-[11px] text-gray-400 mt-0.5">{event.description}</p>
                                     </div>

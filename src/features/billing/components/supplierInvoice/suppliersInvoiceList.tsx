@@ -2,7 +2,7 @@
 
 import StatClientInvoiceCard from "@/shared/components/ui/statClientInvoiceCard";
 import useSupplierInvoiceList from "../../hooks/useSupplierInvoiceList";
-import { getClientInvoiceAllowedNextStatuses, getSupplierInvoiceAllowedNextStatuses, invoiceStatusColors, invoiceStatusLabels, invoiceStatusSchema } from "../../types/invoiceStatus";
+import {  getSupplierInvoiceAllowedNextStatuses, invoiceStatusColors, invoiceStatusLabels, invoiceStatusSchema } from "../../types/invoiceStatus";
 import { formatDateLong } from "@/shared/utils/formatDate";
 import { ChevronLeft, ChevronRight, Settings } from "lucide-react";
 import { UpdateInvoiceStatusModal } from "../widgets/updateStatusModal";
@@ -69,8 +69,8 @@ export default function SuppliersInvoiceList() {
                         </svg>
                     }
                     label="Mois en Cours"
-                    eur={suppliersInvoiceStats.averageInvoiceEUR}
-                    tnd={suppliersInvoiceStats.averageInvoiceTND}
+                    eur={suppliersInvoiceStats.pendingAmountEUR}
+                    tnd={suppliersInvoiceStats.pendingAmountTND}
                     sub={`${suppliersInvoiceStats.pendingInvoices} factures`}
                     variant="emerald"
                 />
@@ -112,27 +112,6 @@ export default function SuppliersInvoiceList() {
                         </div>
                     </div>
 
-                    {/* Ligne 2 : Catégories */}
-{/*                     <div className="flex gap-2 flex-wrap">
-                        {categoriesFacturesFournisseurSchema.options.map((cat) => (
-                            <button
-                                key={cat}
-                                onClick={() => setCategorie(cat)}
-                                className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${categorie === cat
-                                    ? "bg-emerald-600 text-white shadow"
-                                    : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
-                                    }`}
-                            >
-                                {cat === "Toutes catégories" && (
-                                    <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
-                                        <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
-                                    </svg>
-                                )}
-                                {cat}
-                            </button>
-                        ))}
-                    </div>
- */}
                 </div>
 
             </div>
@@ -159,9 +138,9 @@ export default function SuppliersInvoiceList() {
                                 </td>
                             </tr>
                         ) : (
-                            suppliersInvoices.map((f) => (
+                            suppliersInvoices.map((f, index) => (
                                 <tr
-                                    key={1}
+                                    key={index}
                                     className="border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer"
                                 >
                                     <td className="px-5 py-4 font-bold text-slate-800">

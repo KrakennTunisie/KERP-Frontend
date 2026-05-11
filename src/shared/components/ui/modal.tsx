@@ -20,7 +20,12 @@ export function Modal({ open, title, onClose, children, footer }: ModalProps) {
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           {title && (
-            <p className="text-lg font-black text-gray-900">{title}</p>
+              <p
+                className="text-lg font-black text-gray-900 truncate max-w-l"
+                title={title}
+              >
+                {title}
+              </p>  
           )}
 
           <button

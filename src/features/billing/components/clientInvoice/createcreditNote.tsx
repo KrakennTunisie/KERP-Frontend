@@ -263,7 +263,7 @@ export function CreateCreditNote({invoiceId}: InvoiceDetailsProps) {
                                                                 {"QTÉ"}
                                                             </label>
                                                             <input
-                                                                type="text"
+                                                                type="number"
                                                                 value={creditNoteItemMap[index]?.quantity ?? ""}
                                                                 onChange={(e) => {
                                                                     const val = parseFloat(e.target.value) || 0;
@@ -311,6 +311,7 @@ export function CreateCreditNote({invoiceId}: InvoiceDetailsProps) {
                                                             </label>
                                                             <select
                                                                 value={creditNoteItemMap[index].vatRate}
+                                                                disabled
                                                                 onChange={(e) => {
                                                                     const val = Number(e.target.value);
 

@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { X, Download, Send, Mail } from "lucide-react";
-import {  InvoicePageItem } from "../../models/invoice";
-import { InvoicesAPI } from "../../api/partners-api";
+import {  Invoice, InvoicePageItem } from "../../models/invoice";
+import {  MailingAPI } from "../../api/partners-api";
 import { appToast } from "@/shared/lib/toast";
 import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 
@@ -15,14 +15,7 @@ interface SendInvoiceModalProps {
 }
 
 
-
-
-export function SendInvoiceModal({
-  invoice,
-  isOpen,
-  onClose,
-}: SendInvoiceModalProps) {
-const formatAmount = () => {
+export const formatAmount = (invoice:InvoicePageItem|Invoice | null) => {
   if (!invoice) return "";
 
   switch (invoice.invoiceCurrency) {
@@ -37,6 +30,14 @@ const formatAmount = () => {
   }
 };
 
+
+export function SendInvoiceModal({
+  invoice,
+  isOpen,
+  onClose,
+}: SendInvoiceModalProps) {
+
+
   const [to, setTo] = useState("");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
@@ -49,7 +50,7 @@ const formatAmount = () => {
     const defaultMessage = invoice
       ? `Bonjour ${invoice.partner.name},
 
-    Veuillez trouver ci-joint la facture ${invoice.invoiceNumber} pour un montant de ${formatAmount()}.
+    Veuillez trouver ci-joint la facture ${invoice.invoiceNumber} pour un montant de ${formatAmount(invoice)}.
 
     Cordialement,`
     :"";
@@ -65,7 +66,7 @@ const formatAmount = () => {
 
     setSending(true);
     if(invoice!==null){
-      await InvoicesAPI.sendEmailWithInvoice(invoice?.idInvoice,{
+      await MailingAPI.sendEmailWithInvoice(invoice?.idInvoice,{
               toEmail: to,
               subject: subject, 
               body: message
@@ -222,7 +223,7 @@ const formatAmount = () => {
                 MONTANT
               </span>
               <span style={{ fontSize: 19, fontWeight: 800, color: "#1e3a8a", letterSpacing: "-0.02em" }}>
-                {formatAmount()}
+                {formatAmount(invoice)}
               </span>
             </div>
           </div>
@@ -302,7 +303,7 @@ const formatAmount = () => {
             </div>
             <div>
               <p style={{ fontSize: 11, fontWeight: 600, color: "#888", textTransform: "uppercase", letterSpacing: "0.07em", margin: "0 0 2px" }}>
-                Pièce jointe
+                {"Pièce jointe " + invoice?.invoiceNumber}
               </p>
               <p style={{ fontSize: 13, fontWeight: 600, color: "#1e3a8a", margin: 0 }}>
               
