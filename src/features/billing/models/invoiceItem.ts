@@ -19,6 +19,7 @@ export const baseItemSchema = z.object({
 export const invoiceItemSchema = baseItemSchema.extend({
     idInvoiceItem: z.uuid(),
     invoice: z.string().nullable(),
+    purchaseOrderItem :z.lazy(() => purchaseOrderItemSchema).nullable(),
 }).strict();
 // invoice item
 export const creditNoteItemSchema = baseItemSchema.extend({
@@ -35,6 +36,7 @@ export const baseInvoiceCreditNoteItemSchema= z.object({
 export const purchaseOrderItemSchema = baseItemSchema.extend({
     idPurchaseOrderItem: z.uuid(),
     purchaseOrder: z.string().nullable(),
+    invoicedQuantity : z.number()
 }).strict();
 
 // type partagé pour les composants réutilisables
@@ -52,6 +54,7 @@ export type  baseInvoiceCreditNote =z.infer<typeof baseInvoiceCreditNoteItemSche
 // models/invoiceItem.ts
 export const defaultInvoiceItem = (): InvoiceItem => ({
     idInvoiceItem: "0",
+    purchaseOrderItem: null,
     description: "",
     quantity: 1,
     unityPriceEXclTax: 0,
@@ -68,6 +71,7 @@ export const defaultPurchaseOrderItem = (): PurchaseOrderItem => ({
     idPurchaseOrderItem: uuidv4(),
     description: "",
     quantity: 1,
+    invoicedQuantity:0,
     unityPriceEXclTax: 0,
     vatRate: 0,
     itemTotalExclTax: 0,
