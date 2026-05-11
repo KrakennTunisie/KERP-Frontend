@@ -26,10 +26,10 @@ export const INVOICES_ENDPOINTS={
   clientsInvoices: "/invoices/client-invoices",
   suppliersInvoices: "/invoices/supplier-invoices",
   nextNumber: "/invoices/next-number",
-  sendSimpleEmail:`/invoices/send-email`,
-  sendEmailInvoice:(id: string )=>`/invoices/${id}/send-email`,
   getClientsInvoices: (query? : GetListParams)=> `/invoices/client-invoices${buildQueryString(query)}`,
+  getClientTopInvoices: (id: string)=>`/invoices/client-invoices/client/${id}`,
   getSuppliersInvoices: (query? : GetListParams)=> `/invoices/supplier-invoices${buildQueryString(query)}`,
+  getSupplierTopInvoices: (id: string)=>`/invoices/supplier-invoices/supplier/${id}`,
   clientInvoiceById: (id?: string) => `/invoices/client-invoices/${id}`,
   clientInvoiceStatusById: (id?: string) => `/invoices/client-invoices/${id}/status`,
   supplierInvoiceStatusById: (id?: string) => `/invoices/supplier-invoices/${id}/status`,
@@ -79,4 +79,12 @@ export const DASHBOARD_ENDPOINTS={
   dashboard : '/dashboard',
   statsClientsInvoices: '/dashboard/clients-invoices',
   statsSuppliersInvoices: '/dashboard/suppliers-invoices'
+}
+
+export const MAILING_ENDPOINTS={
+  mailing:'/mailing',
+  sendSimpleEmail:`/mailing/send-email`,
+  sendEmailInvoice:(id: string )=>`/mailing/invoice/${id}/send-email`,
+  sendEmailCreditNote:(id: string )=>`/mailing/creditNote/${id}/send-email`,
+
 }

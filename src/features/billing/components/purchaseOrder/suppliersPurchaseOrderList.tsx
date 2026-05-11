@@ -142,9 +142,9 @@ export default function SuppliersPurchaseOrderList() {
                                 </td>
                             </tr>
                         ) : (
-                            purchaseOrders.map((f) => (
+                            purchaseOrders.map((f, index) => (
                                 <tr
-                                    key={1}
+                                    key={index}
                                     className="border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer"
                                 >
                                     <td className="px-5 py-4 font-bold text-slate-800">

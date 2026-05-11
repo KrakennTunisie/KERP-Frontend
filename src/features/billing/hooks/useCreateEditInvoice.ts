@@ -525,10 +525,13 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
   // récupérer la liste des bons de commande disponible en cours de livraison ou bien broullion 
   const fetchPurchaseOrderSummary = async () => {
     try {
-      //  setLoading(true)
+    //  setLoading(true)
+    if(mode=="create"){
+
       setLoadingPurchaseOrders(true)
       const purchaseorders = await PurchaseOrderAPI.getPurchaseOrderSummary();
       setPurchaseOrders(purchaseorders);
+    }
 
     } catch (error) {
       appToast.error("Erreur Fetch du client:", getApiErrorMessage(error));

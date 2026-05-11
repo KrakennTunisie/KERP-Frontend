@@ -9,6 +9,7 @@ import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 import PageLoader from "@/shared/components/ui/pageLoader";
 import PartnerDetails from "../partner/partnerDetails";
 import { PartnerInvoiceStats } from "../../types/partnersStats";
+import { InvoicePageItem } from "../../models/invoice";
 
 
 
@@ -37,6 +38,8 @@ export default function ClientDetails(){
   averageInvoiceUSD: 0,
   })
   const [loading, setLoading] = useState<boolean>();
+  const [clientInvoices, setClientInvoices]= useState<InvoicePageItem[]|[]>([])
+  
   const fetchClient = async () => {
     try {
       setLoading(true)
@@ -52,9 +55,23 @@ export default function ClientDetails(){
     }
   };
 
+  const fetchClientInvoices = async () => {
+      try {
+        setLoading(true)
+        const invoices = await InvoicesAPI.getClientTopInvoices(clientId);
+        setClientInvoices(invoices);
+      } catch (error) {
+        appToast.error("Erreur fetch des factures client: ",getApiErrorMessage(error));
+      }
+      finally{
+        setLoading(false)
+      }
+    };
+
   useEffect(() => {
 
   fetchClient();
+  fetchClientInvoices();
 }, [clientId]);
 
 if(loading){
@@ -77,6 +94,7 @@ if(client==null){
             <PartnerDetails
                 partner={client}
                 partnerStats={clientInvoiceStats}
+                partnerInvoices={clientInvoices}
             />
         )
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { InvoiceStatus } from "../types/invoiceStatus";
+import { InvoiceStatus, invoiceStatusSchema } from "../types/invoiceStatus";
 import { useRouter } from "next/navigation";
 import { PropsClient } from "./useClientsInvoiveList";
 import { InvoiceCreditNotePageItem } from "../models/creditNote";
@@ -24,6 +24,7 @@ const [search, setSearch] = useState("");
     const [totalPages, setTotalPages] = useState(1);
     const [totalElements, setTotalElements] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
+    const [selectedCreditNote, setSelectedCreditNote]=useState<InvoiceCreditNotePageItem>();
     function deleteCreditNote(idCreditNote:string)
     {
       setDeleteOpen(true);
@@ -54,10 +55,9 @@ const [search, setSearch] = useState("");
                 debouncedSearchQuery.trim().length >= 3
                   ? debouncedSearchQuery.trim()
                   : undefined;
-    
               const response = await InvoicesCreditNoteAPI.getInvoiceCreditNotes(invoiceRef,{
             keyword: keyword,
-            filter: filtre?.toString(),
+            filter: filtre==invoiceStatusSchema.enum.ALL ? "": filtre?.toString(),
             page: currentPage - 1,
           });
     
@@ -109,6 +109,7 @@ const [search, setSearch] = useState("");
      deleteLoading,
      deleteId,
      setDeleteId,
-     deleteClientInvoice
+     deleteClientInvoice,
+     selectedCreditNote, setSelectedCreditNote
     }
 }
