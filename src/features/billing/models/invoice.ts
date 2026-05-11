@@ -11,7 +11,7 @@ import { documentSchema } from "./document";
 import { InvoiceEventSchema } from "./invoiceEvent";
 import { invoiceItemSchema } from "./invoiceItem";
 import { partnerSchema, partnerSummarySchema } from "./partner";
-import { basePurchaseOrderSchema } from "./purchaseOrder";
+import { basePurchaseOrderSchema, purchaseOrderSummaryDTO } from "./purchaseOrder";
 
 const baseInvoiceSchema = z.object({
   invoiceNumber: z.string(),
@@ -151,7 +151,7 @@ export const invoiceCreateSchema = withDueDateValidation(
     vatAmount: z.number().nullable(),
     invoiceComplianceStatus: invoiceComplianceStatusSchema.nullable(),
     partner: z.lazy(() => partnerSummarySchema).nullable(),
-    purchaseOrder: z.string().nullable()
+    purchaseOrder:z.lazy(() => purchaseOrderSummaryDTO).nullable()
   })
 );
 

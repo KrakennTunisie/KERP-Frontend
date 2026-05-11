@@ -19,7 +19,7 @@ import {
 } from "../lib/invoiceCalculation";
 import defaultItem from "../mocks/invoice-items-mocks";
 import { CurrencyType, currencyTypeSchema } from "../types/currency";
-import {  PurchaseOrderDetails, PurchaseOrderSummary } from "../models/purchaseOrder";
+import { PurchaseOrderDetails, PurchaseOrderSummary } from "../models/purchaseOrder";
 import { ExchangeRate } from "../types/exchangeRate";
 import { exchangeRateSourceSchema } from "../types/exchangeRateSource";
 import { invoiceComplianceStatusSchema } from "../types/invoiceComplianceStatus";
@@ -47,12 +47,14 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
   const [invoice, setInvoice] = useState<Invoice>()
   const fetchClientInvoice = async () => {
     try {
-      if(mode == "edit"){
+      if (mode == "edit") {
 
-     // setLoading(true)
-     setLoadingEdit(true)
-      const invoice = await InvoicesAPI.getClientInvoiceById(invoiceId);
-      setInvoice(invoice);
+        // setLoading(true)
+        setLoadingEdit(true)
+        const invoice = await InvoicesAPI.getClientInvoiceById(invoiceId);
+
+        console.log("mappedInvoice", invoice);
+        setInvoice(invoice);
       }
     } catch (error) {
       appToast.error("Erreur Fetch du client:", getApiErrorMessage(error));
@@ -143,17 +145,34 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
           : invoice.invoiceCurrency == "TND"
             ? invoice.totalInclTaxTND
             : invoice.totalInclTax,
-        invoiceItems:
-          invoice.invoiceItems && invoice.invoiceItems.length > 0
-            ? invoice.invoiceItems
-            : [defaultItem()],
+        invoiceItems: invoice.purchaseOrder
+          ? invoice.invoiceItems!.map((item: any) => ({
+            idInvoiceItem: item.idInvoiceItem,
+            purchaseOrderItem : item.purchaseOrderItem,
+            invoice: item.invoice ?? null,
+            description: item.description,
+            unityPriceEXclTax: item.unityPriceEXclTax,
+            vatRate: item.vatRate,
+            itemTotalExclTax: item.itemTotalExclTax,
+            itemTaxAmount: item.itemTaxAmount,
+            itemTotalInclTax: item.itemTotalInclTax,
+            operationCategory: item.operationCategory,
+            quantity: item.quantity,
+          }))
+          : invoice.invoiceItems,
         vatRate: invoice.vatRate ?? 0,
         paymentCondition:
           invoice.paymentCondition ?? PaymentConditionSchema.enum.NET_15,
         paymentMethod:
           invoice.paymentMethod ?? paymentMethodSchema.enum.BANK_TRANSFER,
         partner: invoice.partner ?? null,
-        purchaseOrder: invoice.purchaseOrder?.idPurchaseOrder ?? "",
+        purchaseOrder: invoice.purchaseOrder ? {
+          idPurchaseOrder: invoice.purchaseOrder?.idPurchaseOrder,
+          purchaseOrderNumber: invoice.purchaseOrder?.purchaseOrderNumber,
+          issueDate: new Date(invoice.purchaseOrder!.issueDate),
+          purchaseOrderStatus: invoice.purchaseOrder?.purchaseOrderStatus,
+          currency: invoice.invoiceCurrency,
+        } : null,
         invoiceCurrency: invoice.invoiceCurrency ?? currencyTypeSchema.enum.TND,
         appliedExchangeRate: invoice.appliedExchangeRate ?? 4,
         exchangeRateReferenceDate: invoice.exchangeRateReferenceDate
@@ -247,7 +266,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
 
 
   const [linkedToPO, setLinkedToPO] = useState(false);
-const [selectedPO, setSelectedPO] = useState<PurchaseOrderDetails | null>(null);
+  const [selectedPO, setSelectedPO] = useState<PurchaseOrderDetails | null>(null);
   const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrderSummary[] | []>([])
 
   // UI state only
@@ -310,14 +329,12 @@ const [selectedPO, setSelectedPO] = useState<PurchaseOrderDetails | null>(null);
 
   //Synchronisation des items lors d'un nouveau item
   const syncItems = (newItems: BaseItem[]) => {
-    const mappedItems: InvoiceItem[] = newItems.map(({
-      idPurchaseOrderItem,
-      purchaseOrder,
-      ...rest
-    }: any) => ({
-      ...rest,
-      idInvoiceItem: (rest as InvoiceItem).idInvoiceItem ?? uuidv4(),
-      invoice: (rest as InvoiceItem).invoice ?? null,
+
+    const mappedItems: InvoiceItem[] = newItems.map((item: any) => ({
+      ...item,
+      idInvoiceItem: (item as InvoiceItem).idInvoiceItem ?? uuidv4(),
+      invoice: (item as InvoiceItem).invoice ?? null,
+      purchaseOrderItem: null
     }));
 
     replace(mappedItems);
@@ -325,8 +342,50 @@ const [selectedPO, setSelectedPO] = useState<PurchaseOrderDetails | null>(null);
       shouldValidate: true,
       shouldDirty: true,
     });
-  };
 
+
+  };
+  const SyncPurchaseOrderItems = (newItems: BaseItem[], isInitialSync: boolean = false) => {
+    const mappedItems: InvoiceItem[] = newItems
+      .map((item: any) => {
+        const sourcePOItem = item.purchaseOrderItem ?? item;
+
+        const {
+          idInvoiceItem,
+          invoice,
+          purchaseOrderItem,
+          ...cleanPurchaseOrderItem
+        } = sourcePOItem;
+
+        const quantity = isInitialSync
+          ? (sourcePOItem.quantity ?? 0) - (sourcePOItem.invoicedQuantity ?? 0)
+          : (item.quantity ?? 0);
+
+        return {
+          idInvoiceItem: item.idInvoiceItem ?? uuidv4(),
+          invoice: item.invoice ?? null,
+          description: item.description,
+          unityPriceEXclTax: item.unityPriceEXclTax,
+          vatRate: item.vatRate,
+          itemTotalExclTax: item.itemTotalExclTax,
+          itemTaxAmount: item.itemTaxAmount,
+          itemTotalInclTax: item.itemTotalInclTax,
+          operationCategory: item.operationCategory,
+          quantity,
+          purchaseOrderItem: cleanPurchaseOrderItem,
+        };
+      })
+      .filter(item => item.quantity > 0);
+
+    console.log(mappedItems);
+
+    replace(mappedItems);
+
+    setValue("invoiceItems", mappedItems, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+  };
 
   // Ajout d'un card qui permet l'ajout les données d'unt item (P.U ,QT , TVA)
   const addItem = () => {
@@ -377,9 +436,46 @@ const [selectedPO, setSelectedPO] = useState<PurchaseOrderDetails | null>(null);
     setValue("totalExclTax", totals.totalHT, { shouldValidate: true, shouldDirty: true });
     setValue("vatAmount", totals.totalTVA, { shouldValidate: true, shouldDirty: true });
     setValue("totalInclTax", totals.totalTTC, { shouldValidate: true, shouldDirty: true });
-    syncItems(updatedItems);
+    if (linkedToPO && selectedPO || invoice?.purchaseOrder!=null) {
+      SyncPurchaseOrderItems(updatedItems, false);
+    } else {
+      syncItems(updatedItems);
+    }
   };
 
+  const initialQuantitiesRef = useRef<Record<string, number>>({});
+
+  useEffect(() => {
+    if (mode === "edit" && getValues("invoiceItems")?.length) {
+      getValues("invoiceItems")!.forEach(item => {
+        initialQuantitiesRef.current[item.idInvoiceItem!] = item.quantity;
+      });
+    }
+  }, [invoice]);
+
+  const getInitialQuantity = (idInvoiceItem: string) => {
+    const originalItem = invoice?.invoiceItems!.find(
+      (invoiceItem) => invoiceItem.idInvoiceItem === idInvoiceItem
+    );
+    console.log(originalItem?.quantity)
+    return originalItem?.quantity ?? 0;
+  };
+  const getMaxQuantity = (item: InvoiceItem) => {
+    if (mode === "edit" && item.purchaseOrderItem) {
+      const remaining = (item.purchaseOrderItem?.quantity ?? 0) -
+        (item.purchaseOrderItem?.invoicedQuantity ?? 0);
+
+      const initialQty = getInitialQuantity(item.idInvoiceItem!);
+      console.log(initialQty)
+      return remaining + initialQty;
+    }
+    if (mode === "create" && selectedPO && linkedToPO) {
+      return (item.purchaseOrderItem?.quantity ?? 0) -
+        (item.purchaseOrderItem?.invoicedQuantity ?? 0);
+    }
+
+    return undefined;
+  };
 
 
   // Sélection d'un client
@@ -440,21 +536,21 @@ const [selectedPO, setSelectedPO] = useState<PurchaseOrderDetails | null>(null);
     } catch (error) {
       appToast.error("Erreur Fetch du client:", getApiErrorMessage(error));
     }
-    finally{
+    finally {
       setLoadingPurchaseOrders(false)
     }
   }
   // récupérer un bon de commande séléctionnée
   const fetchPurchaseOrder = async (idPurchaseOrder: string) => {
     try {
-   //   setLoading(true)
+      //   setLoading(true)
       const purchaseOrder = await PurchaseOrderAPI.getClientPurchaseOrderById(idPurchaseOrder);
       return purchaseOrder;
     } catch (error) {
       appToast.error("Erreur Fetch du client:", getApiErrorMessage(error));
     }
     finally {
-   //   setLoading(false)
+      //   setLoading(false)
     }
   };
 
@@ -464,6 +560,7 @@ const [selectedPO, setSelectedPO] = useState<PurchaseOrderDetails | null>(null);
     const po = await fetchPurchaseOrder(idPurchaseOrder);
     if (!po) return;
     setSelectedPO(po);
+
     form.setValue("issueDate", new Date(po!.issueDate));
     console.log(po!.paymentCondition);
     form.setValue("paymentCondition", po!.paymentCondition);
@@ -475,9 +572,16 @@ const [selectedPO, setSelectedPO] = useState<PurchaseOrderDetails | null>(null);
     setValue("totalExclTax", totals.totalHT, { shouldValidate: true, shouldDirty: true });
     setValue("vatAmount", totals.totalTVA, { shouldValidate: true, shouldDirty: true });
     setValue("totalInclTax", totals.totalTTC, { shouldValidate: true, shouldDirty: true });
-    setValue("purchaseOrder",po.purchaseOrderNumber);
+    setValue("purchaseOrder", {
+      idPurchaseOrder: po.idPurchaseOrder,
+      purchaseOrderNumber: po.purchaseOrderNumber,
+      issueDate: new Date(po.issueDate),
+      purchaseOrderStatus: po.purchaseOrderStatus,
+      currency: po.purchaseCurrency,
+    });
     console.log(po!.purchaseOrderItems);
-    syncItems(po!.purchaseOrderItems!)
+    SyncPurchaseOrderItems(po!.purchaseOrderItems!, true)
+    console.log(form.getValues("invoiceItems"))
 
   }
 
@@ -486,7 +590,7 @@ const [selectedPO, setSelectedPO] = useState<PurchaseOrderDetails | null>(null);
     setLinkedToPO(checked);
     if (!checked) {
       setSelectedPO(null);
-     
+
       clearClient();
       setValue("invoiceItems", [defaultItem()], { shouldValidate: true, shouldDirty: true, });
       setValue("issueDate", new Date(), { shouldValidate: true, shouldDirty: true, });
@@ -496,7 +600,7 @@ const [selectedPO, setSelectedPO] = useState<PurchaseOrderDetails | null>(null);
       setValue("totalExclTax", 0, { shouldValidate: true, shouldDirty: true });
       setValue("vatAmount", 0, { shouldValidate: true, shouldDirty: true });
       setValue("totalInclTax", 0, { shouldValidate: true, shouldDirty: true });
-      setValue("purchaseOrder",null);
+      setValue("purchaseOrder", null);
     }
   }
 
@@ -507,6 +611,7 @@ const [selectedPO, setSelectedPO] = useState<PurchaseOrderDetails | null>(null);
       const element = invoiceRef.current;
 
       if (!element) return;
+      console.log(getValues("purchaseOrder"))
       const file = await handleSaveAsPDF(element, getValues("invoiceNumber"));
       if (file) {
         setValue("invoiceDocument", file, { shouldValidate: true, shouldDirty: true });
@@ -525,7 +630,7 @@ const [selectedPO, setSelectedPO] = useState<PurchaseOrderDetails | null>(null);
     setPdfUrl(null);
   }
 
-  async function createInvoice() {   
+  async function createInvoice() {
     try {
       setLoadingForm(true)
       const values = getValues();
@@ -546,9 +651,8 @@ const [selectedPO, setSelectedPO] = useState<PurchaseOrderDetails | null>(null);
       formData.append("invoiceNumber", values.invoiceNumber);
       formData.append("issueDate", values.issueDate.toISOString());
       formData.append("dueDate", values.dueDate.toISOString());
-      if(selectedPO)
-      {
-      formData.append("purchaseOrder",selectedPO?.idPurchaseOrder)
+      if (selectedPO) {
+        formData.append("purchaseOrder", selectedPO?.idPurchaseOrder)
       }
       formData.append("invoiceType", values.invoiceType);
       formData.append("invoiceCurrency", values.invoiceCurrency);
@@ -568,7 +672,12 @@ const [selectedPO, setSelectedPO] = useState<PurchaseOrderDetails | null>(null);
       formData.append("partner", values.partner.idPartner);
 
       if (values.invoiceItems?.length) {
-        formData.append("invoiceItemsList", JSON.stringify(values.invoiceItems));
+        const invoiceItemsToSend = values.invoiceItems.map(({ purchaseOrderItem, ...rest }: any) => ({
+          ...rest,
+          idPurchaseOrderItem: purchaseOrderItem?.idPurchaseOrderItem ?? null,
+        }));
+
+        formData.append("invoiceItemsList", JSON.stringify(invoiceItemsToSend));
       }
 
       formData.append("invoiceDocument", documentFile);
@@ -589,8 +698,8 @@ const [selectedPO, setSelectedPO] = useState<PurchaseOrderDetails | null>(null);
       const message = getApiErrorMessage(e);
       appToast.error("Échec de création, veuillez réessayer.", message);
     }
-    finally{
-    setLoadingForm(false)
+    finally {
+      setLoadingForm(false)
     }
   }
 
@@ -599,7 +708,7 @@ const [selectedPO, setSelectedPO] = useState<PurchaseOrderDetails | null>(null);
     try {
 
       setLoadingForm(true)
-      
+
       const values = getValues();
       const documentFile = values.invoiceDocument ?? pdfUrl;
 
@@ -640,13 +749,17 @@ const [selectedPO, setSelectedPO] = useState<PurchaseOrderDetails | null>(null);
 
       formData.append("partner", values.partner.idPartner);
 
-      if (selectedPO) {
-        formData.append("purchaseOrder", selectedPO.idPurchaseOrder);
+      if (invoice!.purchaseOrder) {
+        formData.append("purchaseOrder", invoice!.purchaseOrder.idPurchaseOrder);
       }
-
+     
       if (values.invoiceItems?.length) {
+        const invoiceItemsToSend = values.invoiceItems.map(({ purchaseOrderItem, ...rest }: any) => ({
+          ...rest,
+          idPurchaseOrderItem: purchaseOrderItem?.idPurchaseOrderItem ?? null,
+        }));
 
-        formData.append("invoiceItemsList", JSON.stringify(values.invoiceItems));
+        formData.append("invoiceItemsList", JSON.stringify(invoiceItemsToSend));
       }
 
       formData.append("invoiceDocument", documentFile);
@@ -665,8 +778,8 @@ const [selectedPO, setSelectedPO] = useState<PurchaseOrderDetails | null>(null);
     } catch (e: unknown) {
       const message = getApiErrorMessage(e);
       appToast.error("Échec de création, veuillez réessayer.", message);
-    }finally{
-            setLoadingForm(false)
+    } finally {
+      setLoadingForm(false)
 
     }
 
@@ -744,6 +857,9 @@ const [selectedPO, setSelectedPO] = useState<PurchaseOrderDetails | null>(null);
     updateInvoice,
     //Navigation
     router,
+    initialQuantitiesRef,
+    getMaxQuantity,
+    invoice
 
   };
 

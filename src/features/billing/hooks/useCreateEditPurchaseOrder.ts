@@ -290,6 +290,7 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
         ...item,
         idPurchaseOrderItem: (item as PurchaseOrderItem).idPurchaseOrderItem ?? uuidv4(),
         purchaseOrder: (item as PurchaseOrderItem).purchaseOrder ?? null,
+        invoicedQuantity: (item as PurchaseOrderItem).invoicedQuantity ?? 0,
     }));
 
     replace(mappedItems);

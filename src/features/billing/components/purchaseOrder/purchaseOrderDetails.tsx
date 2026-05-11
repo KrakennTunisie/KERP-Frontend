@@ -61,14 +61,14 @@ export function PurchaseOrderModalContent({
   onClose: () => void;
 }) {
   const { router, purchaseOrder, purchaseOrderItems, successMessage, setPreviewDocument, previewDocument, loadingDetails } = usePurchaseOrderDetails({ purchaseOrderId })
-  
-        if(loadingDetails){
-            return(
-                <PageLoader label="Chargement de bon de commande ..."/>
-            )
-        }
+
+  if (loadingDetails) {
+    return (
+      <PageLoader label="Chargement de bon de commande ..." />
+    )
+  }
   return (
-  <div className="flex flex-col gap-4 max-h-[70vh] overflow-y-auto pr-1">
+    <div className="flex flex-col gap-4 max-h-[70vh] overflow-y-auto pr-1">
       {/* Client + Admin */}
       <div className="grid grid-cols-2 gap-4">
         {/* Client info */}
@@ -270,20 +270,24 @@ export function PurchaseOrderModalContent({
         {/* Totals */}
         <div className="mt-4 flex flex-col items-end gap-2">
           {[
-                { label: 'Sous-total HT', value: purchaseOrder?.purchaseCurrency == "EUR" 
-                                                            ? purchaseOrder.totalExclTaxEUR 
-                                                            : purchaseOrder?.purchaseCurrency =="TND" 
-                                                                ? purchaseOrder.totalExclTaxTND
-                                                                :purchaseOrder?.totalExclTaxUSD},
-                { label: 'Total TVA', value: purchaseOrder?.purchaseCurrency == "EUR" 
-                                                            ? (purchaseOrder.totalInclTaxEUR - purchaseOrder.totalExclTaxEUR).toFixed(2)
-                                                            : purchaseOrder?.purchaseCurrency =="TND" 
-                                                                ? (purchaseOrder.totalInclTaxTND - purchaseOrder.totalExclTaxTND).toFixed(2)
-                                                                :
-                                                                  purchaseOrder?.purchaseCurrency =="USD" 
-                                                                  ? (purchaseOrder?.totalInclTaxUSD - purchaseOrder?.totalExclTaxUSD).toFixed(2)
-                                                                  :0},
-            ].map(({ label, value }) => (
+            {
+              label: 'Sous-total HT', value: purchaseOrder?.purchaseCurrency == "EUR"
+                ? purchaseOrder.totalExclTaxEUR
+                : purchaseOrder?.purchaseCurrency == "TND"
+                  ? purchaseOrder.totalExclTaxTND
+                  : purchaseOrder?.totalExclTaxUSD
+            },
+            {
+              label: 'Total TVA', value: purchaseOrder?.purchaseCurrency == "EUR"
+                ? (purchaseOrder.totalInclTaxEUR - purchaseOrder.totalExclTaxEUR).toFixed(2)
+                : purchaseOrder?.purchaseCurrency == "TND"
+                  ? (purchaseOrder.totalInclTaxTND - purchaseOrder.totalExclTaxTND).toFixed(2)
+                  :
+                  purchaseOrder?.purchaseCurrency == "USD"
+                    ? (purchaseOrder?.totalInclTaxUSD - purchaseOrder?.totalExclTaxUSD).toFixed(2)
+                    : 0
+            },
+          ].map(({ label, value }) => (
             <div key={label} className="flex justify-between w-64">
               <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
                 {label}
@@ -297,11 +301,11 @@ export function PurchaseOrderModalContent({
               Total TTC
             </span>
             <span className="text-2xl font-extrabold text-blue-600 tracking-tight">
-                {purchaseOrder?.purchaseCurrency == "EUR" 
-                        ? purchaseOrder.totalInclTaxEUR + " EUR"
-                        : purchaseOrder?.purchaseCurrency =="TND" 
-                            ? purchaseOrder.totalInclTaxTND +" TND" 
-                            :purchaseOrder?.totalInclTaxUSD +" USD"}
+              {purchaseOrder?.purchaseCurrency == "EUR"
+                ? purchaseOrder.totalInclTaxEUR + " EUR"
+                : purchaseOrder?.purchaseCurrency == "TND"
+                  ? purchaseOrder.totalInclTaxTND + " TND"
+                  : purchaseOrder?.totalInclTaxUSD + " USD"}
             </span>
           </div>
         </div>
@@ -316,7 +320,7 @@ export function PurchaseOrderModalContent({
           Fermer
         </button>
       </div>
-        </div>
+    </div>
   );
 }
 

@@ -180,7 +180,7 @@ export default function ClientInvoiceDetails({ invoiceId, type }: InvoiceDetails
                                     </svg>
                                 </div>
                                 <div>
-                                    <p className="font-bold text-gray-900 text-sm">{client?.name}</p>
+                                    <p className="font-bold text-gray-900 text-sm">{invoice?.partner?.name}</p>
                                     <p className="text-xs text-gray-500 mt-1 leading-5">
                                         {invoice?.partner?.address}<br />{invoice?.partner?.country}
                                     </p>
@@ -193,7 +193,7 @@ export default function ClientInvoiceDetails({ invoiceId, type }: InvoiceDetails
                                 </div>
                                 <div>
                                     <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Contact</p>
-                                    <p className="text-sm font-bold text-gray-900">{invoice?.partner?.name}</p>
+                                    <p className="text-sm font-bold text-gray-900">{invoice?.partner?.email}</p>
                                 </div>
                             </div>
                         </Card>

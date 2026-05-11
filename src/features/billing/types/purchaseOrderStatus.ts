@@ -6,7 +6,10 @@ export const purchaseOrderStatusSchema = z.enum([
   "DRAFT",
   "IN_DELIVERY",
   "CANCELLED",
-  "CLOSED"
+  "CLOSED",
+  "PARTIALLY_INVOICED",
+  "FULLY_INVOICED"
+
   
 ]);
 
@@ -18,7 +21,9 @@ export const purchaseOrderStatusLabels: Record<purchaseOrderStatus, string> = {
   DRAFT: "BROUILLON",
   IN_DELIVERY: "En cours de livraison",
   CANCELLED: "ANNULÉE",
-  CLOSED : "CLOTURÉE"
+  CLOSED : "CLOTURÉE",
+  PARTIALLY_INVOICED : "Facturée partiellement",
+  FULLY_INVOICED : "Facturée totalement"
  
 };
 
@@ -30,11 +35,15 @@ export const purchaseOrderStatusColors: Record<
   IN_DELIVERY: "bg-blue-100 text-blue-700 border border-blue-200",
   CANCELLED: "bg-red-100 text-red-700 border border-red-200",
   CLOSED: "bg-emerald-100 text-emerald-700 border border-emerald-200",
+  FULLY_INVOICED : "bg-green-100 text-green-700 border border-green-200",
+  PARTIALLY_INVOICED: "bg-amber-100 text-amber-700 border border-amber-200"
 };
 export const CLIENT_PURCHASEORDER_STATUS_PASSAGE_POLICY: Record<purchaseOrderStatus, purchaseOrderStatus[]> = {
   DRAFT: ["IN_DELIVERY","CANCELLED"],
-  IN_DELIVERY :["CANCELLED","CLOSED"],
+  IN_DELIVERY :["CANCELLED","FULLY_INVOICED","PARTIALLY_INVOICED"],
   CANCELLED: [],
+  PARTIALLY_INVOICED: ["FULLY_INVOICED"],
+  FULLY_INVOICED:["CLOSED"],
   ALL: [],
   CLOSED: [],
 };

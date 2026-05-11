@@ -262,7 +262,16 @@ export function SupplierPurchaseOrderModalContent({
         <div className="mt-4 flex flex-col items-end gap-2">
           {[
             { label: "Sous-total HT", value: purchaseOrder?.purchaseCurrency == currencyTypeSchema.enum.TND ? purchaseOrder?.totalExclTaxTND : purchaseOrder?.totalExclTaxEUR },
-            { label: "Total TVA", value: purchaseOrder?.vatRate },
+            {
+              label: 'Total TVA', value: purchaseOrder?.purchaseCurrency == "EUR"
+                ? (purchaseOrder.totalInclTaxEUR - purchaseOrder.totalExclTaxEUR).toFixed(2)
+                : purchaseOrder?.purchaseCurrency == "TND"
+                  ? (purchaseOrder.totalInclTaxTND - purchaseOrder.totalExclTaxTND).toFixed(2)
+                  :
+                  purchaseOrder?.purchaseCurrency == "USD"
+                    ? (purchaseOrder?.totalInclTaxUSD - purchaseOrder?.totalExclTaxUSD).toFixed(2)
+                    : 0
+            },
           ].map(({ label, value }) => (
             <div key={label} className="flex justify-between w-64">
               <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
