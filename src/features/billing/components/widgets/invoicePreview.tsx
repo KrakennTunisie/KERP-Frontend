@@ -77,7 +77,7 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
                                         <div className="inline-flex items-center px-4 py-1.5 rounded-lg bg-blue-50 border border-blue-200">
                                             <span className="text-sm font-bold text-blue-700">
                                                 {"purchaseOrder" in data && data.purchaseOrder
-                                                    ? `N° ${data.purchaseOrder}`
+                                                    ? `N° ${data.purchaseOrder.purchaseOrderNumber}`
                                                    : ""
                                                 }
                                             </span>
