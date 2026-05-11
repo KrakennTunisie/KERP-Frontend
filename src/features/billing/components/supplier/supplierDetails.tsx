@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import PartnerDetails from "../partner/partnerDetails";
 import { useParams } from "next/navigation";
 import {  SupplierPartner } from "../../models/partner";
-import { partnersApi } from "../../api/partners-api";
+import { InvoicesAPI, partnersApi } from "../../api/partners-api";
 import { appToast } from "@/shared/lib/toast";
 import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 import PageLoader from "@/shared/components/ui/pageLoader";
@@ -40,6 +40,8 @@ export default function SupplierDetails(){
     try {
       setLoading(true)
       const supplier = await partnersApi.getSupplierById(supplierId);
+      const clientStats = await InvoicesAPI.getSupplierInvoiceStats(supplierId)
+      setSupplierInvoiceStats(clientStats);
       setSupplier(supplier);
     } catch (error) {
       appToast.error("Erreur fetch du fournisseur: ",getApiErrorMessage(error));

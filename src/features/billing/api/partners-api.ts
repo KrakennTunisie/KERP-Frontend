@@ -70,6 +70,9 @@ export const InvoicesAPI = {
   getAllClientInvoiceStats: () =>
     apiClient.get<PartnerInvoiceStats>(INVOICES_ENDPOINTS.allClientInvoicesStats),
 
+  getAllSupplierInvoiceStats: () =>
+    apiClient.get<PartnerInvoiceStats>(INVOICES_ENDPOINTS.allSupplierInvoicesStats),
+
   getSupplierInvoiceStats: (id: string) =>
     apiClient.get<PartnerInvoiceStats>(INVOICES_ENDPOINTS.supplierInvoiceStats(id)),
 
@@ -83,6 +86,9 @@ export const InvoicesAPI = {
 
   updateClientInvoiceStatus : 
   (id: string, payload: FormData) => apiClient.patch<Invoice>(INVOICES_ENDPOINTS.clientInvoiceStatusById(id), payload),
+
+  updateSupplierInvoiceStatus : 
+  (id: string, payload: FormData) => apiClient.patch<Invoice>(INVOICES_ENDPOINTS.supplierInvoiceStatusById(id), payload),
 
   updateSupplierInvoice : (id: string, payload: FormData) => apiClient.patch<Invoice>(INVOICES_ENDPOINTS.suppliersInvoices, payload),
 
@@ -165,5 +171,6 @@ export const ExchangeRateAPI = {
 };
 
 export const DashboardAPI = {
-  clientDashbordStats: ()=> apiClient.get<ClientInvoiceDashboardStats[]>(DASHBOARD_ENDPOINTS.statsClientsInvoices)
+  clientDashbordStats: ()=> apiClient.get<ClientInvoiceDashboardStats[]>(DASHBOARD_ENDPOINTS.statsClientsInvoices),
+  supplierDashbordStats: ()=> apiClient.get<ClientInvoiceDashboardStats[]>(DASHBOARD_ENDPOINTS.statsSuppliersInvoices)
 }

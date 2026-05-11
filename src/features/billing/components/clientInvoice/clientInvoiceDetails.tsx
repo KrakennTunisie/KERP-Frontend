@@ -14,9 +14,9 @@ import { formatDateLong } from "@/shared/utils/formatDate"
 import { OperationCategoryLabels } from "../../types/operationCategory"
 import PageLoader from "@/shared/components/ui/pageLoader"
 
-export default function ClientInvoiceDetails({ invoiceId }: InvoiceDetailsProps) {
+export default function ClientInvoiceDetails({ invoiceId, type }: InvoiceDetailsProps) {
     const {   client, invoice, previewDocument, setPreviewDocument, sendToTTN, TtnModalOpen, setTtnModalOpen,
-        hasCreditInvoice,loading, sent, successMessage, router, updateStatus } = useClientInvoiceDetails({ invoiceId });
+        hasCreditInvoice,loading, sent, successMessage, router, updateStatus } = useClientInvoiceDetails({ invoiceId, type });
 
         if(loading){
             return(

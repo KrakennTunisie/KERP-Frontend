@@ -32,7 +32,6 @@ import { ClientInvoiceDashboardStats } from "../../types/clientDashboardStats";
 import { DashboardAPI } from "../../api/partners-api";
 import { appToast } from "@/shared/lib/toast";
 import { getApiErrorMessage } from "@/shared/api/handle-api-error";
-import { CategoryAmount, SupplierExpenseStats } from "../../models/purchaseOrder";
 
 export function BillingDashboard() {
   const currentYear = new Date().getFullYear();
@@ -56,34 +55,27 @@ export function BillingDashboard() {
     }
   };
 
+    const [supplierInvoices, setSupplierInvoices]=useState<ClientInvoiceDashboardStats[]|[]>([])
+
+  const fetchSupplierssInvoices = async () => {
+    try {
+      //setLoading(true);
+
+      const response = await DashboardAPI.supplierDashbordStats();
+
+      setSupplierInvoices(response);
+    } catch (error) {
+      appToast.error("Erreur de fetch clients: ",getApiErrorMessage(error))
+    } finally {
+      //setLoading(false);
+    }
+  };
+
   useEffect(()=>{
     fetchClientsInvoices()
+    fetchSupplierssInvoices()
   },[])
-/*   const clientInvoices = [
-    { id: "1", client: "TechCorp Solutions SA", amountEUR: 10000, amountTND: 33500, month: 1, conformite: true },
-    { id: "2", client: "Digital Pro SARL", amountEUR: 7500, amountTND: 25125, month: 2, conformite: true },
-    { id: "3", client: "Innovation Labs", amountEUR: 12000, amountTND: 40200, month: 2, conformite: false },
-    { id: "4", client: "Startup Hub", amountEUR: 5000, amountTND: 16750, month: 2, conformite: true },
-    { id: "5", client: "TechCorp Solutions SA", amountEUR: 15000, amountTND: 50250, month: 3, conformite: true },
-    { id: "6", client: "Digital Pro SARL", amountEUR: 8000, amountTND: 26800, month: 3, conformite: true },
-    { id: "7", client: "Innovation Labs", amountEUR: 9500, amountTND: 31825, month: 4, conformite: true },
-    { id: "8", client: "Entreprise Alpha", amountEUR: 6000, amountTND: 20100, month: 4, conformite: false },
-    { id: "9", client: "TechCorp Solutions SA", amountEUR: 11000, amountTND: 36850, month: 5, conformite: true },
-    { id: "10", client: "Startup Hub", amountEUR: 7000, amountTND: 23450, month: 5, conformite: true },
-  ]; */
 
-  const supplierInvoices : SupplierExpenseStats[] = [
-    { id: "1", supplier: "Office Supply Pro SA", category: "Fournitures", amountEUR: 1500, amountTND: 5025, month: 1 },
-    { id: "2", supplier: "Tech Hardware Ltd", category: "Matériel informatique", amountEUR: 5000, amountTND: 16750, month: 2 },
-    { id: "3", supplier: "Services Cloud SARL", category: "Services", amountEUR: 800, amountTND: 2680, month: 2 },
-    { id: "4", supplier: "Consulting Pro", category: "Conseil", amountEUR: 3000, amountTND: 10050, month: 2 },
-    { id: "5", supplier: "Marketing Agency", category: "Marketing", amountEUR: 2000, amountTND: 6700, month: 3 },
-    { id: "6", supplier: "Office Supply Pro SA", category: "Fournitures", amountEUR: 1200, amountTND: 4020, month: 3 },
-    { id: "7", supplier: "Tech Hardware Ltd", category: "Matériel informatique", amountEUR: 6000, amountTND: 20100, month: 4 },
-    { id: "8", supplier: "Services Cloud SARL", category: "Services", amountEUR: 900, amountTND: 3015, month: 4 },
-    { id: "9", supplier: "Marketing Agency", category: "Marketing", amountEUR: 2500, amountTND: 8375, month: 5 },
-    { id: "10", supplier: "Consulting Pro", category: "Conseil", amountEUR: 3500, amountTND: 11725, month: 5 },
-  ];
 
   const totalClientsYearEUR = clientInvoices.reduce((sum, inv) => sum + inv.amountEUR, 0);
   const totalClientsYearTND = clientInvoices.reduce((sum, inv) => sum + inv.amountTND, 0);
@@ -111,13 +103,13 @@ const clientsByMonth = months.map((month) => ({
     .reduce((sum, inv) => sum + inv.amountEUR, 0),
 }));
 
-  const suppliersByMonth = months.map((month, index) => ({
-    month,
+  const suppliersByMonth = months.map((month) => ({
+    month: month.label,
     montant: supplierInvoices
-      .filter((inv) => inv.month === index + 1)
+      .filter((inv) => inv.month === month.value)
       .reduce((sum, inv) => sum + inv.amountEUR, 0),
   }));
-
+console.log("suppliersByMonth: ",suppliersByMonth)
   const clientsGrouped = clientInvoices.reduce<{ client: string; montant: number }[]>(
     (acc, inv) => {
       const existing = acc.find((item) => item.client === inv.client);
@@ -133,23 +125,22 @@ const clientsByMonth = months.map((month) => ({
     []
   );
 
+    const suppliersGrouped = supplierInvoices.reduce<{ client: string; montant: number }[]>(
+    (acc, inv) => {
+      const existing = acc.find((item) => item.client === inv.client);
 
-  const categoriesGroupedYear = supplierInvoices.reduce<
-    { category: string; montant: number }[]
-  >((acc, inv) => {
-    const existing = acc.find((item) => item.category === inv.category);
+      if (existing) {
+        existing.montant += inv.amountEUR;
+      } else {
+        acc.push({ client: inv.client, montant: inv.amountEUR });
+      }
 
-    if (existing) {
-      existing.montant += inv.amountEUR;
-    } else {
-      acc.push({ category: inv.category, montant: inv.amountEUR });
-    }
-
-    return acc;
-  }, []);
+      return acc;
+    },
+    []
+  );
 
 
-  const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#8b5cf6", "#ec4899"];
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-50/30">
@@ -267,28 +258,15 @@ const clientsByMonth = months.map((month) => ({
                 </ResponsiveContainer>
               </ChartCard>
 
-              <ChartCard title={`Total par Catégorie ${currentYear} (EUR)`}>
+              <ChartCard title={`Total par Fournisseur ${currentYear} (EUR)`}>
                 <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={categoriesGroupedYear}
-                      dataKey="montant"
-                      nameKey="category"
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={100}
-                      label={(entry) => {
-                          const payload = entry.payload as { category: string; montant: number };
-
-                          return `${payload.category}: ${payload.montant.toLocaleString()}€`;
-                        }}
-                    >
-                      {categoriesGroupedYear.map((_, index) => (
-                        <Cell key={index} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
+                  <BarChart data={suppliersGrouped}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis dataKey="client" angle={-15} textAnchor="end" height={80} />
+                    <YAxis />
                     <Tooltip />
-                  </PieChart>
+                    <Bar dataKey="montant" fill="#10b981" radius={[12, 12, 0, 0]} />
+                  </BarChart>
                 </ResponsiveContainer>
               </ChartCard>
             </div>
