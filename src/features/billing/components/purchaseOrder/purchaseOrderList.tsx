@@ -145,7 +145,7 @@ export default function PurchaseOrderList() {
                             purchaseOrders.map((f, index) => (
                                 <tr
                                     key={index}
-                                    className="border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer"
+                                    className="border-b border-slate-50 hover:bg-slate-50 transition-colors"
                                 >
                                     <td className="px-5 py-4 font-bold text-slate-800">
                                         {f.purchaseOrderNumber}
@@ -170,7 +170,7 @@ export default function PurchaseOrderList() {
                                             {/* Voir */}
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); setOpen(true); setIdPurchaseOrder(f.idPurchaseOrder); setInvoiceRef(f.purchaseOrderNumber) }}
-                                                className="p-2 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
+                                                className="p-2 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 cursor-pointer transition-colors"
                                                 title="Voir"
                                             >
                                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -182,7 +182,7 @@ export default function PurchaseOrderList() {
                                             {/* Modifier */}
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); console.log("edit", f.idPurchaseOrder); router.push(`/billing/purchaseOrder/${f.idPurchaseOrder}/edit`); }}
-                                                className="p-2 rounded-xl bg-amber-50 text-amber-600 hover:bg-amber-100 transition-colors"
+                                                className="p-2 rounded-xl bg-amber-50 text-amber-600 hover:bg-amber-100 cursor-pointer transition-colors"
                                                 title="Modifier"
                                             >
                                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -193,7 +193,7 @@ export default function PurchaseOrderList() {
                                             <button
                                                 onClick={(e) => { setSelectedPurchaseOrder(f); setIdPurchaseOrder(f.idPurchaseOrder); setUpdateOpen(true)}}
                                                 disabled={getClientPurchaseOrderAllowedNextStatuses(f.purchaseOrderStatus).length === 0}
-                                                className="p-2 rounded-xl bg-violet-50 text-violet-600 hover:bg-violet-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                className="p-2 rounded-xl bg-violet-50 text-violet-600 hover:bg-violet-100 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                                                 title="Mettre à jour le statut"
                                             >
                                                 <Settings className="w-4 h-4" />

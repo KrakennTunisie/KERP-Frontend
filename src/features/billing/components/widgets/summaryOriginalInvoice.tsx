@@ -2,7 +2,6 @@ import { DeepPartial } from "react-hook-form";
 import { z } from "zod"
 import { invoiceCreditNoteSchema } from "../../models/creditNote";
 import { formatDateLong } from "@/shared/utils/formatDate";
-import { formatAmount } from "./sendInvoiceModal";
 
 type InvoicePreviewProps = {
     data: DeepPartial<z.infer<typeof invoiceCreditNoteSchema>>;
@@ -23,14 +22,13 @@ export default function SummaryOriginalInvoice({ data }: InvoicePreviewProps) {
 
     <div className="pr-5">
       <p className="text-[9px] font-black text-red-300 uppercase tracking-widest mb-1">Numéro</p>
-      <p className="text-sm font-black text-red-500">{data.invoiceCreditNoteNumber ?? "—"}</p>
-      <p className="text-[10px] text-red-300 mt-0.5">{data.originalInvoice?.invoiceNumber ?? ""}</p>
+      <p className="text-sm font-black text-red-500">{data.originalInvoice?.invoiceNumber  ?? "—"}</p>
     </div>
 
     <div className="px-5">
       <p className="text-[9px] font-black text-red-300 uppercase tracking-widest mb-1">{"Date d'émission"}</p>
       <p className="text-sm font-black text-red-900">
-        {formatDateLong(data.issueDate)}
+        {formatDateLong(data.originalInvoice?.issueDate)}
       </p>
     </div>
 

@@ -141,7 +141,7 @@ export default function SuppliersInvoiceList() {
                             suppliersInvoices.map((f, index) => (
                                 <tr
                                     key={index}
-                                    className="border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer"
+                                    className="border-b border-slate-50 hover:bg-slate-50 transition-colors"
                                 >
                                     <td className="px-5 py-4 font-bold text-slate-800">
                                         {f.invoiceNumber}
@@ -177,7 +177,7 @@ export default function SuppliersInvoiceList() {
                                             {/* Voir */}
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); console.log("view", f.idInvoice); router.push(`/billing/invoices/suppliers/details/${f.idInvoice}`) }}
-                                                className="p-2 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
+                                                className="p-2 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors cursor-pointer"
                                                 title="Voir"
                                             >
                                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -189,7 +189,7 @@ export default function SuppliersInvoiceList() {
                                            <button
                                                 onClick={(e) => {setSelectedInvoice(f); setInvoiceId(f.idInvoice); setUpdateOpen(true)}}
                                                 disabled={getSupplierInvoiceAllowedNextStatuses(f.invoiceStatus).length === 0}
-                                                className="p-2 rounded-xl bg-violet-50 text-violet-600 hover:bg-violet-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                className="p-2 rounded-xl bg-violet-50 text-violet-600 hover:bg-violet-100 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                                                 title="Mettre à jour le statut"
                                                 >
                                                 <Settings className="w-4 h-4"/>

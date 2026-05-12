@@ -1,21 +1,21 @@
 import { useEffect, useState } from "react";
 import { InvoiceStatus, invoiceStatusSchema } from "../types/invoiceStatus";
 import { useRouter } from "next/navigation";
-import { PropsClient } from "./useClientsInvoiveList";
 import { InvoiceCreditNotePageItem } from "../models/creditNote";
 import { useDebounce } from "@/shared/hooks/useDebounce";
 import { InvoicesCreditNoteAPI } from "../api/partners-api";
 import { appToast } from "@/shared/lib/toast";
 import { getApiErrorMessage } from "@/shared/api/handle-api-error";
+import { InvoiceDetailsProps } from "./useClientInvoiceDetails";
 
 
-export default  function useCreditNoteList({params}:PropsClient){
+export default  function useCreditNoteList({invoiceId, type}:InvoiceDetailsProps){
 const [search, setSearch] = useState("");
     const [filtre, setFiltre] = useState<InvoiceStatus>();
     const [open, setOpen] = useState(false);
     const [loading, setLoading]= useState(false)
     const [deleteOpen, setDeleteOpen] = useState(false);
-    const [invoiceRef ,setInvoiceRef] = useState(params.invoiceId);
+    const [invoiceRef ,setInvoiceRef] = useState(invoiceId);
     const [creditNoteRef ,setCreditNoteRef] = useState<string>();
     const [creditNotes, setCreditNotes]=useState<InvoiceCreditNotePageItem[]| []>([])
     const [deleteId, setDeleteId]= useState("")

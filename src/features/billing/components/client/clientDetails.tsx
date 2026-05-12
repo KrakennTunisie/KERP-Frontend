@@ -10,8 +10,7 @@ import PageLoader from "@/shared/components/ui/pageLoader";
 import PartnerDetails from "../partner/partnerDetails";
 import { PartnerInvoiceStats } from "../../types/partnersStats";
 import { InvoicePageItem } from "../../models/invoice";
-
-
+import { NotFound } from "@/shared/components/widgets/notFound";
 
 
 export default function ClientDetails(){
@@ -39,7 +38,6 @@ export default function ClientDetails(){
   })
   const [loading, setLoading] = useState<boolean>();
   const [clientInvoices, setClientInvoices]= useState<InvoicePageItem[]|[]>([])
-  
   const fetchClient = async () => {
     try {
       setLoading(true)
@@ -74,21 +72,16 @@ export default function ClientDetails(){
   fetchClientInvoices();
 }, [clientId]);
 
-if(loading){
+if(loading && !client){
   return(
       <PageLoader label="Chargement du client ..."/>            
 
   )
 }
 
-if(client==null){
-  return(
-      <div className="p-6">
-        <p className="text-sm font-medium text-gray-500">
-          Client introuvable.
-        </p>
-      </div>
-  )
+
+if(!client){
+  return <NotFound resource="Client" />;
 }
         return(
             <PartnerDetails

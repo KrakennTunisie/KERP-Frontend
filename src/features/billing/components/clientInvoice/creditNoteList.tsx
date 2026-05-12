@@ -1,7 +1,6 @@
 'use client';
 import { getCreditNoteAllowedNextStatuses, invoiceStatusColors, invoiceStatusLabels, invoiceStatusSchema } from "../../types/invoiceStatus";
 import Link from "next/link";
-import { PropsClient } from "../../hooks/useClientsInvoiveList";
 import { SendInvoiceModal } from "../widgets/sendInvoiceModal";
 import { invoiceComplianceStatusSchema } from "../../types/invoiceComplianceStatus";
 import useCreditNoteList from "../../hooks/useCreditNoteList";
@@ -11,12 +10,13 @@ import { creditNoteTypeLabels } from "../../types/creditNoteType";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { formatDateLong } from "@/shared/utils/formatDate";
 import PageLoader from "@/shared/components/ui/pageLoader";
+import { InvoiceDetailsProps } from "../../hooks/useClientInvoiceDetails";
 
-export default function CreditNoteList({ params }: PropsClient) {
+export default function CreditNoteList({ invoiceId, type }: InvoiceDetailsProps) {
 
     const { router, search, setSearch, open, setOpen, setDeleteOpen, deleteOpen, creditNoteRef,
         filtre, setFiltre, deleteCreditNote, creditNotes, totalElements, totalPages, idInvoice, setIdInvoice, deleteId, setDeleteId, deleteClientInvoice,  currentPage,
-     setCurrentPage, loading, selectedCreditNote, setSelectedCreditNote} = useCreditNoteList({ params });
+     setCurrentPage, loading, selectedCreditNote, setSelectedCreditNote} = useCreditNoteList({ invoiceId, type });
     return (
         <div className="min-h-screen bg-gray-50 p font-sans">
             {/* TOP BAR */}
@@ -52,13 +52,13 @@ export default function CreditNoteList({ params }: PropsClient) {
                 </div>
 
                 {/* RIGHT */}
-                <Link
-                    href={`/billing/invoices/clients/${params.invoiceId}/credit-note/create`}
+              {type=="CLIENT" &&   <Link
+                    href={`/billing/invoices/clients/${invoiceId}/credit-note/create`}
                     className="flex items-center gap-2 bg-red-600 hover:bg-red-700 transition-colors text-white font-bold px-6 py-3 rounded-xl shadow-md text-sm"
                 >
                     <span className="text-lg leading-none">+</span>
                     {"Nouvelle Facture d'avoir"}
-                </Link>
+                </Link>}
             </div>
             <DeleteInvoiceModal
                 open={deleteOpen}
@@ -190,8 +190,12 @@ export default function CreditNoteList({ params }: PropsClient) {
 
                                             {/* Voir */}
                                             <button
-                                                onClick={(e) => { e.stopPropagation(); console.log("view", f.invoiceCreditNoteNumber); router.push(`/billing/invoices/clients/${params.invoiceId}/credit-note/${f.invoiceCreditNoteNumber}`) }}
-                                                className="p-2 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
+                                                onClick={(e) => { e.stopPropagation(); type=="CLIENT" ?
+                                                     router.push(`/billing/invoices/clients/${invoiceId}/credit-note/${f.invoiceCreditNoteNumber}`)
+                                                    :router.push(`/billing/invoices/suppliers/${invoiceId}/credit-note/${f.invoiceCreditNoteNumber}`)
+
+                                                 }}
+                                                className="p-2 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 cursor-pointer transition-colors"
                                                 title="Voir"
                                             >
                                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -214,7 +218,7 @@ export default function CreditNoteList({ params }: PropsClient) {
                                             <button
                                                // disabled={/* f.invoiceCreditNoteComplianceStatus != null */}
                                                 onClick={(e) => { deleteCreditNote(f.invoiceCreditNoteNumber); setDeleteId(f.idInvoiceCreditNote) }}
-                                                className="p-2 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 transition-colors disabled:opacity-50  cursor-pointer disabled:cursor-not-allowed"
+                                                className="p-2 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 transition-colors cursor-pointer disabled:opacity-50  cursor-pointer disabled:cursor-not-allowed"
                                                 title="Supprimer"
                                             >
                                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
