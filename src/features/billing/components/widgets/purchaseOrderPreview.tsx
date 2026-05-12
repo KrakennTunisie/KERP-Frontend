@@ -176,14 +176,14 @@ const PurchaseOrderPreview = forwardRef<HTMLDivElement, PurchaseOrderPreviewProp
                         <div className="flex justify-between text-sm">
                             <span className="text-slate-500 font-medium">Total HT</span>
                             <span className="font-bold text-slate-800">{data.totalExclTax?.toFixed(2)}
-                                {data.currency}
+                                {" "+data.currency}
                             </span>
                         </div>
                         <div className="flex justify-between text-sm">
                             <span className="text-slate-500 font-medium">Total TVA</span>
                             <span className="font-bold text-slate-800">
-                                {data.totalInclTax?.toFixed(2)}
-
+                                {data?.totalInclTax && data?.totalExclTax && (data?.totalInclTax - data?.totalExclTax).toFixed(2)+" "}
+                                {data.currency}
                             </span>
                         </div>
                         <div className="h-px bg-slate-900 my-1" />

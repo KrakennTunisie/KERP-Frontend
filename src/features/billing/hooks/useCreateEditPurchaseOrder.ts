@@ -1,13 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
 
-import { BaseItem, InvoiceItem, PurchaseOrderItem, } from "../models/invoiceItem";
+import { BaseItem,  PurchaseOrderItem, } from "../models/invoiceItem";
 import {defaultPurchaseOrderItem} from "../models/invoiceItem";
-import { Partner, PartnerSummary } from "../models/partner";
-import { MOCK_PARTNERS } from "../mocks/clients-mocks";
+import {  PartnerSummary } from "../models/partner";
 import {
   calculateInvoiceTotals,
   calculUnityPrice,
@@ -367,20 +366,6 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
   };
 
 
-  // changement de la devise EUR -> TND et vice versa
-  const setCurrency = (newCurrency: CurrencyType) => {
-    const oldCurrency = previousCurrencyRef.current;
-    const currentItems = getValues("purchaseOrderItems") ?? [];
-    const convertedItems = currentItems.map((item) => convertItemCurrency(item, oldCurrency, newCurrency, getValues("appliedExchangeRate")));
-
-    previousCurrencyRef.current = newCurrency;
-    setValue("currency", newCurrency, { shouldValidate: true, shouldDirty: true, });
-    const totals = calculateInvoiceTotals(convertedItems);
-    setValue("totalExclTax", totals.totalHT, { shouldValidate: true, shouldDirty: true });
-    setValue("vatAmount", totals.totalTVA, { shouldValidate: true, shouldDirty: true });
-    setValue("totalInclTax", totals.totalTTC, { shouldValidate: true, shouldDirty: true });
-    syncItems(convertedItems);
-  };
 
 
   // Permet la visualisation  de la facture en PDF une fois remplie
@@ -566,7 +551,6 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
     setShowDropdown,
     selectClient,
     clearClient,
-    setCurrency,
 
     //data validation
 

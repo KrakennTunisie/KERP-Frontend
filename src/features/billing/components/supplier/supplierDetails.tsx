@@ -10,6 +10,7 @@ import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 import PageLoader from "@/shared/components/ui/pageLoader";
 import { PartnerInvoiceStats } from "../../types/partnersStats";
 import { InvoicePageItem } from "../../models/invoice";
+import { NotFound } from "@/shared/components/widgets/notFound";
 
 export default function SupplierDetails(){
   const params = useParams();
@@ -78,13 +79,12 @@ if(loading){
 }
 
 if(supplier==null){
-  return(
-      <div className="p-6">
-        <p className="text-sm font-medium text-gray-500">
-          Fournisseur introuvable.
-        </p>
-      </div>
-  )
+  return (
+    <NotFound
+      resource="Fournisseur"
+      actionLabel="Retour à la liste"
+    />
+  );
 }
 
         return(

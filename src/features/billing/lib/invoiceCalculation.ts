@@ -1,4 +1,4 @@
-import { BaseItem, InvoiceItem } from "../models/invoiceItem"
+import { BaseItem, InvoiceItem, PurchaseOrderItem } from "../models/invoiceItem"
 import { CurrencyType } from "../types/currency";
 
 
@@ -29,8 +29,7 @@ export function recalculate(
 export function convertItemCurrency(
   item: BaseItem,
   fromCurrency: CurrencyType,
-  toCurrency: CurrencyType,
-  exchangeRate: number
+  toCurrency: CurrencyType
 ): BaseItem {
   if (fromCurrency === toCurrency) {
     return recalculate(item);
@@ -50,17 +49,40 @@ export function convertItemCurrency(
 // calcul les totaux TTC HT de tous les items
 export function calculateInvoiceTotals(items: BaseItem[] = []) {
   const totalHT = items.reduce(
-    (acc, item) => acc + (item.itemTotalExclTax ?? 0),
+    (acc, item) => acc + (item.quantity * item.unityPriceEXclTax) ,
     0
   );
 
   const totalTVA = items.reduce(
-    (acc, item) => acc + (item.itemTaxAmount ?? 0),
+    (acc, item) => acc + ((item.quantity * item.unityPriceEXclTax)*(item.vatRate/100)),
     0
   );
 
   const totalTTC = items.reduce(
-    (acc, item) => acc + (item.itemTotalInclTax ?? 0),
+    (acc, item) => acc + ((item.quantity * item.unityPriceEXclTax)*(1 + item.vatRate/100)),
+    0
+  );
+
+  return {
+    totalHT,
+    totalTVA,
+    totalTTC,
+  };
+}
+
+export function calculateInvoiceTotalsFromPurchaseOrder(items: PurchaseOrderItem[] = []) {
+  const totalHT = items.reduce(
+    (acc, item) => acc + ((item.quantity - item.invoicedQuantity) * item.unityPriceEXclTax) ,
+    0
+  );
+
+  const totalTVA = items.reduce(
+    (acc, item) => acc + (((item.quantity - item.invoicedQuantity)  * item.unityPriceEXclTax)*(item.vatRate/100)),
+    0
+  );
+
+  const totalTTC = items.reduce(
+    (acc, item) => acc + (((item.quantity - item.invoicedQuantity) * item.unityPriceEXclTax)*(1 + item.vatRate/100)),
     0
   );
 

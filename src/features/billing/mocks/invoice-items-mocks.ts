@@ -14,6 +14,7 @@ export default function defaultItem(id?: string): InvoiceItem {
     itemTotalInclTax: 0,
     operationCategory: operationCategorySchema.enum.SERVICE_PROVISION,
     invoice:null,
+    creditedQuantity:0
   }
 }
 
@@ -21,7 +22,7 @@ export default function defaultItem(id?: string): InvoiceItem {
 export const mockInvoiceItems: InvoiceItem[] = [
   {
     idInvoiceItem: '123e4567-e89b-12d3-a456-426614174000',
-    purchaseOrderItem :null,
+    purchaseOrderItem: null,
     description: 'Conseil RH - T1 2025',
     quantity: 40,
     unityPriceEXclTax: 250,
@@ -30,11 +31,12 @@ export const mockInvoiceItems: InvoiceItem[] = [
     itemTaxAmount: 1900,
     itemTotalInclTax: 11900,
     operationCategory: operationCategorySchema.enum.SERVICE_PROVISION,
-    invoice: null
+    invoice: null,
+    creditedQuantity: 0
   },
   {
     idInvoiceItem: '323e4567-e89b-12d3-a456-426614174002',
-    purchaseOrderItem :null,
+    purchaseOrderItem: null,
     description: 'Développement Programme de Formation',
     quantity: 10,
     unityPriceEXclTax: 400,
@@ -43,12 +45,13 @@ export const mockInvoiceItems: InvoiceItem[] = [
     itemTaxAmount: 760,
     itemTotalInclTax: 4760,
     operationCategory: operationCategorySchema.enum.SERVICE_PROVISION,
-    invoice: null
+    invoice: null,
+    creditedQuantity: 0
   },
 
   {
     idInvoiceItem: '423e4567-e89b-12d3-a456-426614174003',
-    purchaseOrderItem :null,
+    purchaseOrderItem: null,
     description: 'Audit Système d\'Information',
     quantity: 5,
     unityPriceEXclTax: 800,
@@ -57,11 +60,12 @@ export const mockInvoiceItems: InvoiceItem[] = [
     itemTaxAmount: 760,
     itemTotalInclTax: 4760,
     operationCategory: operationCategorySchema.enum.SERVICE_PROVISION,
-    invoice: null
+    invoice: null,
+    creditedQuantity: 0
   },
   {
     idInvoiceItem: '523e4567-e89b-12d3-a456-426614174004',
-    purchaseOrderItem :null,
+    purchaseOrderItem: null,
     description: 'Licence Logiciel Annuelle',
     quantity: 3,
     unityPriceEXclTax: 600,
@@ -70,6 +74,7 @@ export const mockInvoiceItems: InvoiceItem[] = [
     itemTaxAmount: 126,
     itemTotalInclTax: 1926,
     operationCategory: operationCategorySchema.enum.SERVICE_PROVISION,
-    invoice: null
+    invoice: null,
+    creditedQuantity: 0
   },
 ]

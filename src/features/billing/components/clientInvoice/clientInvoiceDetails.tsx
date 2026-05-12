@@ -117,7 +117,9 @@ export default function ClientInvoiceDetails({ invoiceId, type }: InvoiceDetails
                             {hasCreditInvoice ?
                              <button
                                 onClick={() => 
+                                    type=="CLIENT" ?
                                     router.push(`/billing/invoices/clients/${invoiceId}/credit-note`)
+                                    :router.push(`/billing/invoices/suppliers/${invoiceId}/credit-note`)
                                 }
                                 className="flex items-center justify-center gap-2 py-3.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-600 text-sm font-bold hover:brightness-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
                                 <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -143,7 +145,9 @@ export default function ClientInvoiceDetails({ invoiceId, type }: InvoiceDetails
                             <button
                                 disabled={!hasCreditInvoice}
                                 onClick={() => 
+                                    type=="CLIENT" ?
                                     router.push(`/billing/invoices/clients/${invoiceId}/credit-note`)
+                                    :router.push(`/billing/invoices/suppliers/${invoiceId}/credit-note`)
                                 }
                                 className="flex items-center justify-center gap-2 py-3.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-600 text-sm font-bold hover:brightness-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
                                 <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -358,7 +362,7 @@ export default function ClientInvoiceDetails({ invoiceId, type }: InvoiceDetails
                             <SectionLabel>{"Journal d'audit"}</SectionLabel>
                         </div>
                         <div
-                            className="flex flex-col gap-3.5 max-h-[300px] overflow-y-auto pr-2"
+                            className="flex flex-col gap-3.5 max-h-[100px] overflow-y-auto pr-2"
                             style={{
                                 scrollbarWidth: 'thin',
                                 scrollbarColor: '#CBD5E1 transparent',

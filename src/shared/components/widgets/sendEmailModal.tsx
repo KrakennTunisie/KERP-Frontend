@@ -75,7 +75,8 @@ export function SendEmailModal({
     <>
       <button
         onClick={onClose}
-        className="px-5 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-sm font-bold text-slate-600 transition"
+        disabled={sending}
+        className="px-5 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed text-sm font-bold text-slate-600 transition"
       >
         Annuler
       </button>
@@ -83,7 +84,7 @@ export function SendEmailModal({
       <button
         onClick={handleSend}
         disabled={sending || !to || !subject}
-        className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold transition"
+        className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold transition"
       >
         {sending ? (
           <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

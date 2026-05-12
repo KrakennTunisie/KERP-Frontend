@@ -20,6 +20,7 @@ export const invoiceItemSchema = baseItemSchema.extend({
     idInvoiceItem: z.uuid(),
     invoice: z.string().nullable(),
     purchaseOrderItem :z.lazy(() => purchaseOrderItemSchema).nullable(),
+    creditedQuantity: z.number(),
 }).strict();
 // invoice item
 export const creditNoteItemSchema = baseItemSchema.extend({
@@ -64,6 +65,7 @@ export const defaultInvoiceItem = (): InvoiceItem => ({
     itemTotalInclTax: 0,
     operationCategory: "SERVICE_PROVISION",
     invoice: null,
+    creditedQuantity: 0
 });
 
 // models/purchaseOrderItem.ts

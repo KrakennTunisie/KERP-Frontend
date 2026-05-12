@@ -13,6 +13,7 @@ import { DocumentPreviewModal } from "@/shared/components/ui/documentPreviewModa
 import { creditNoteTypeLabels } from "../../types/creditNoteType";
 import { formatDateLong, formatDateLongWithTime } from "@/shared/utils/formatDate";
 import PageLoader from "@/shared/components/ui/pageLoader";
+import { NotFound } from "@/shared/components/widgets/notFound";
 
 export default function CreditNoteDetails({ params }: PropsCreditNote) {
     const { updateStatus, previewDocument, setPreviewDocument, setStatusPaiement, invoice, sendToTTN, TtnModalOpen, setTtnModalOpen, loading, sent, successMessage, router } = useCreditNoteDetails({ params });
@@ -22,6 +23,12 @@ export default function CreditNoteDetails({ params }: PropsCreditNote) {
                 return(
                     <PageLoader label="Chargement de facture d'avoir ..."/>
                 )
+            }
+            if(invoice==null){
+                <NotFound
+                    resource="Facture d'avoir"
+                    message="Cette facture n'existe pas ou vous n'avez pas les droits pour y accéder."
+                />
             }
     return (
         <div className="min-h-screen bg-gray-50 font-sans">
@@ -330,7 +337,7 @@ export default function CreditNoteDetails({ params }: PropsCreditNote) {
                             <SectionLabel>{"Journal d'audit"}</SectionLabel>
                         </div>
                         <div
-                            className="flex flex-col gap-3.5 max-h-[300px] overflow-y-auto pr-2"
+                            className="flex flex-col gap-3.5 max-h-[100px] overflow-y-auto pr-2"
                             style={{
                                 scrollbarWidth: 'thin',
                                 scrollbarColor: '#CBD5E1 transparent',

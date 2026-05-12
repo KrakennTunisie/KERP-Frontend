@@ -71,6 +71,7 @@ export function useClientInvoiceList () {
     
       fetchClientInvoicesStats();
     }, []);
+
     const deleteClientInvoice = async ()=>{
         try {
           setDeleteLoading(true);

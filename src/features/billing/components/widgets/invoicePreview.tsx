@@ -198,7 +198,7 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
                                         <td className="text-right text-sm text-slate-600 py-4">{item?.quantity}</td>
                                         <td className="text-right text-sm text-slate-600 py-4">{item?.unityPriceEXclTax?.toFixed(2)}</td>
                                         <td className="text-right text-sm font-bold text-slate-800 py-4">
-                                            {item?.itemTotalExclTax?.toFixed(2)}
+                                            {item?.itemTotalExclTax}
                                         </td>
                                     </tr>
                                 ));

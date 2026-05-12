@@ -95,7 +95,7 @@ export default function PartnerHeader({
           </div>
           <button
               onClick={setOpen}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 text-sm font-bold border border-blue-100 hover:border-blue-200 transition self-start shrink-0"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 text-sm font-bold border border-blue-100 hover:border-blue-200 transition self-start shrink-0 cursor-pointer"
             >
               <Send className="w-4 h-4" />
               Envoyer un e-mail
