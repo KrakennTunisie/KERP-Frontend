@@ -78,10 +78,10 @@ export default function ClientInvoiceDetails({ invoiceId, type }: InvoiceDetails
                                 )}
                             </div>
                             {/* Bouton envoi TTN — visible seulement si pas encore envoyée */}
-                            {!invoice?.invoiceComplianceStatus && (
                                 <button
+                                    disabled={invoice?.invoiceStatus==invoiceStatusSchema.enum.DRAFT}
                                     onClick={() => { setTtnModalOpen(true) }}
-                                    className="shrink-0 px-4 py-2 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue transition-colors cursor-pointer inline-flex items-center gap-2" >
+                                    className="shrink-0 px-4 py-2 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2" >
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
                                         className="h-4 w-4"
@@ -97,7 +97,6 @@ export default function ClientInvoiceDetails({ invoiceId, type }: InvoiceDetails
                                     </svg>
                                     {"Envoyer au TTN"}
                                 </button>
-                            )}
                         </div>
                     </Card>
                     {/* Modal pour demander au user s'il veut envoyer la Facture au TTN */}

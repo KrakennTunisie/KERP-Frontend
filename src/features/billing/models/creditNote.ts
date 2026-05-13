@@ -5,7 +5,7 @@ import { invoiceComplianceStatusSchema } from "../types/invoiceComplianceStatus"
 import { invoiceStatusSchema } from "../types/invoiceStatus";
 import { fileSchema } from "../types/pdfSchema";
 import { documentSchema } from "./document";
-import { invoiceSchema, invoiceSummarySchema } from "./invoice";
+import { invoiceDetailedSummarySchema, invoiceSchema, invoiceSummarySchema } from "./invoice";
 import { InvoiceCreditNoteEventSchema } from "./invoiceEvent";
 
 const detailsInvoiceCreditNoteItemSchema = z.object({
@@ -109,7 +109,7 @@ export const invoiceCreditNotePageItemSchema = z.object({
   totalInclTaxTND: z.number(),
   totalExclTaxUSD: z.number(),
   totalInclTaxUSD: z.number(),
-  invoice: invoiceSummarySchema
+  invoice: invoiceDetailedSummarySchema
 });
 
 

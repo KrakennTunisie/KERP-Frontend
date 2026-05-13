@@ -71,29 +71,24 @@ export default function SupplierDetails(){
   fetchSupplierInvoices();
 }, [supplierId]);
 
-if(loading){
-  return(
-      <PageLoader label="Chargement de fournsisseur ..."/>            
-
-  )
-}
-
-if(supplier==null){
-  return (
-    <NotFound
-      resource="Fournisseur"
-      actionLabel="Retour à la liste"
-    />
-  );
-}
-
+      if(loading){
         return(
+            <PageLoader label="Chargement du fournisseur ..."/>            
 
+        )
+      }
+      else if(!supplier){
+        return <NotFound resource="Fournisseur" />;
+      }
+
+      else{   
+        return(
             <PartnerDetails
                 partner={supplier}
                 partnerStats={supplierInvoiceStats}
                 partnerInvoices={supplierInvoices}
             />
         )
+      }
 
 }

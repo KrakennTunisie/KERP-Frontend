@@ -13,8 +13,10 @@ import { ClientInvoiceDashboardStats } from "../types/clientDashboardStats";
 import { SendMail } from "../types/sendEmail";
 
 export const partnersApi = {
+  
   getClients: (query? : GetListParams) => 
     apiClient.get<PageResponse<ClientPartnerItem>>(BILLING_ENDPOINTS.getClients(query)),
+
   getSummaryClients: (query? : GetListParams) =>
     apiClient.get<PartnerSummary[]>(BILLING_ENDPOINTS.getClientsSummary(query)),
 
