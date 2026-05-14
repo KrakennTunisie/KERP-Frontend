@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import PartnerDetails from "../partner/partnerDetails";
 import { useParams } from "next/navigation";
-import {  SupplierPartner } from "../../models/partner";
+import { SupplierPartnerDetails } from "../../models/partner";
 import { InvoicesAPI, partnersApi } from "../../api/partners-api";
 import { appToast } from "@/shared/lib/toast";
 import { getApiErrorMessage } from "@/shared/api/handle-api-error";
@@ -34,7 +34,7 @@ export default function SupplierDetails(){
     averageInvoiceUSD: 0,
     })
 
-  const [supplier, setSupplier] = useState<SupplierPartner>();
+  const [supplier, setSupplier] = useState<SupplierPartnerDetails>();
   const [supplierInvoices, setSupplierInvoices]= useState<InvoicePageItem[]|[]>([])
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -42,9 +42,11 @@ export default function SupplierDetails(){
     try {
       setLoading(true)
       const supplier = await partnersApi.getSupplierById(supplierId);
+      setSupplier(supplier);
+
       const clientStats = await InvoicesAPI.getSupplierInvoiceStats(supplierId)
       setSupplierInvoiceStats(clientStats);
-      setSupplier(supplier);
+
     } catch (error) {
       appToast.error("Erreur fetch du fournisseur: ",getApiErrorMessage(error));
     }
@@ -71,29 +73,24 @@ export default function SupplierDetails(){
   fetchSupplierInvoices();
 }, [supplierId]);
 
-if(loading){
-  return(
-      <PageLoader label="Chargement de fournsisseur ..."/>            
-
-  )
-}
-
-if(supplier==null){
-  return (
-    <NotFound
-      resource="Fournisseur"
-      actionLabel="Retour à la liste"
-    />
-  );
-}
-
+      if(loading){
         return(
+            <PageLoader label="Chargement du fournisseur ..."/>            
 
+        )
+      }
+      else if(!supplier){
+        return <NotFound resource="Fournisseur" />;
+      }
+
+      else{   
+        return(
             <PartnerDetails
                 partner={supplier}
                 partnerStats={supplierInvoiceStats}
                 partnerInvoices={supplierInvoices}
             />
         )
+      }
 
 }

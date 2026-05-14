@@ -7,21 +7,21 @@ import {
   TrendingDown,
   TrendingUp,
   FileText,
-  Euro,
   Clock,
+  CircleDollarSign,
 } from "lucide-react";
 import PartnerStatCard from "../widgets/partnerStatCard";
 import PartnerHeader from "./partnerHeroSection";
 import PartnerInfoCard from "./partnerInfoCard";
 import PartnerInvoicesCard from "./partnerInvoices";
-import { ClientPartner,  SupplierPartner } from "../../models/partner";
+import {   ClientPartnerDetails,   SupplierPartnerDetails } from "../../models/partner";
 import {  InvoicePageItem } from "../../models/invoice";
 import { PartnerInvoiceStats } from "../../types/partnersStats";
 import { useState } from "react";
 import { SendEmailModal } from "@/shared/components/widgets/sendEmailModal";
 
 type PartnerDetailsProps = {
-  partner: ClientPartner | SupplierPartner;
+  partner: ClientPartnerDetails | SupplierPartnerDetails;
   partnerStats: PartnerInvoiceStats,
   partnerInvoices: InvoicePageItem[]|[]
 };
@@ -130,7 +130,7 @@ export default function PartnerDetails({ partner, partnerStats, partnerInvoices 
                         {partnerStats.averageInvoiceTND}
                     </p>
                 }
-                icon={Euro}
+                icon={CircleDollarSign}
                 iconContainerClassName="bg-purple-50"
                 iconClassName="text-purple-600"
                 footer={

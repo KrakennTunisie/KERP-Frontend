@@ -86,5 +86,6 @@ export const MAILING_ENDPOINTS={
   sendSimpleEmail:`/mailing/send-email`,
   sendEmailInvoice:(id: string )=>`/mailing/invoice/${id}/send-email`,
   sendEmailCreditNote:(id: string )=>`/mailing/creditNote/${id}/send-email`,
+  sendEmailPurchaseOrder:(id: string )=>`/mailing/purchase-order/${id}/send-email`,
 
 }

@@ -1,7 +1,7 @@
 "use client"
 
 import { DocumentPreviewModal } from "@/shared/components/ui/documentPreviewModal"
-import { CurrencyType, currencyTypeSchema } from "../../types/currency"
+import { currencyTypeSchema } from "../../types/currency"
 import { invoiceTypeSchema } from "../../types/invoiceType"
 import { OperationCategoryLabels, operationCategorySchema } from "../../types/operationCategory"
 import { PaymentConditionLabels, PaymentConditionSchema } from "../../types/paymentCondition"
@@ -67,7 +67,7 @@ export default function CreatePurchaseOrder({
           <button
             onClick={onSubmit}
             disabled={!canCreatePurchaseOrder}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold shadow-md transition ${!canCreatePurchaseOrder
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold shadow-md transition cursor-pointer ${!canCreatePurchaseOrder
               ? "bg-gray-300 cursor-not-allowed text-gray-500 shadow-none"
               : "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-200"
               }`}>

@@ -65,12 +65,13 @@ export default function CreditNoteList({ invoiceId, type }: InvoiceDetailsProps)
                 onClose={() => setDeleteOpen(false)}
                 invoiceRef={creditNoteRef}
                 onConfirm={deleteClientInvoice} />
-
+            
             <SendInvoiceModal
-                invoice={null}
+                invoice={selectedCreditNote ?? null}
                 isOpen={open}
                 onClose={() => setOpen(false)}
             />
+
             <div className="px-8">
             {/* Table card */}
             <div className="bg-white rounded-2xl  shadow-sm border border-slate-100 overflow-hidden">
@@ -206,7 +207,7 @@ export default function CreditNoteList({ invoiceId, type }: InvoiceDetailsProps)
                                             {/** Send To TTn button */}
                                             <button
                                                 disabled={getCreditNoteAllowedNextStatuses(f.invoiceCreditNoteStatus).length === 0}
-                                                onClick={(e) => { /* setOpen(true); */ setSelectedCreditNote(f);  console.log("send", f.invoiceCreditNoteNumber); }}
+                                                onClick={(e) => {  setOpen(true);  setSelectedCreditNote(f);  console.log("send", f.invoiceCreditNoteNumber); }}
                                                 className="p-2 rounded-xl bg-green-50 text-green-600 hover:bg-green-100 transition-colors  cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                                                 title="Envoyer"
                                             >

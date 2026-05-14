@@ -178,6 +178,9 @@ export const invoiceSummarySchema = z.object({
   totalInclTaxUSD: z.number(),
 })
 
+export const invoiceDetailedSummarySchema = invoiceSummarySchema.extend({
+  partner : partnerSummarySchema
+})
 
 
 export type Invoice = z.infer<typeof invoiceSchema>;

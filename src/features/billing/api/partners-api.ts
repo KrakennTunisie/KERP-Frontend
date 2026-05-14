@@ -4,7 +4,7 @@ import { BILLING_ENDPOINTS, DASHBOARD_ENDPOINTS, EXCHANGE_RATE_ENDPOINTS, INVOIC
 import { ExchangeRateParams, GetListParams, PageResponse } from "@/shared/api/types";
 import { InvoiceCreditNoteCreate, InvoiceCreditNoteDetails, InvoiceCreditNotePageItem } from "../models/creditNote";
 import { Invoice, InvoiceCreate, InvoicePageItem } from "../models/invoice";
-import { ClientPartner, ClientPartnerItem, CreateClientPartner, CreateSupplierPartner, PartnerSummary, SupplierPartner, SupplierPartnerItem, UpdatePartner } from "../models/partner";
+import { ClientPartner, ClientPartnerDetails, ClientPartnerItem, CreateClientPartner, CreateSupplierPartner, PartnerSummary, SupplierPartner, SupplierPartnerDetails, SupplierPartnerItem, UpdatePartner } from "../models/partner";
 import { PurchaseOrderCreate, PurchaseOrderDetails, PurchaseOrderPageItem,  PurchaseOrderSummary, PurchaseOrderUpdate } from "../models/purchaseOrder";
 import { ExchangeRate } from "../types/exchangeRate";
 import { nextNumber } from "../types/nextNumber";
@@ -13,8 +13,10 @@ import { ClientInvoiceDashboardStats } from "../types/clientDashboardStats";
 import { SendMail } from "../types/sendEmail";
 
 export const partnersApi = {
+
   getClients: (query? : GetListParams) => 
     apiClient.get<PageResponse<ClientPartnerItem>>(BILLING_ENDPOINTS.getClients(query)),
+
   getSummaryClients: (query? : GetListParams) =>
     apiClient.get<PartnerSummary[]>(BILLING_ENDPOINTS.getClientsSummary(query)),
 
@@ -22,10 +24,10 @@ export const partnersApi = {
     apiClient.get<PageResponse<SupplierPartnerItem>>(BILLING_ENDPOINTS.getSuppliers(query)),
 
   getClientById: (id: string) =>
-    apiClient.get<ClientPartner>(BILLING_ENDPOINTS.clientById(id)),
+    apiClient.get<ClientPartnerDetails>(BILLING_ENDPOINTS.clientById(id)),
 
   getSupplierById: (id: string) =>
-    apiClient.get<SupplierPartner>(BILLING_ENDPOINTS.supplierById(id)),
+    apiClient.get<SupplierPartnerDetails>(BILLING_ENDPOINTS.supplierById(id)),
 
   createClient: (payload: FormData) =>
     apiClient.post<CreateClientPartner>(BILLING_ENDPOINTS.clients, payload),
@@ -173,6 +175,8 @@ export const MailingAPI ={
   sendEmailWithInvoice : (idInvoice: string, payload: SendMail)=> apiClient.post(MAILING_ENDPOINTS.sendEmailInvoice(idInvoice), payload),
 
   sendEmailWithCreditNote : (idInvoice: string, payload: SendMail)=> apiClient.post(MAILING_ENDPOINTS.sendEmailCreditNote(idInvoice), payload),
+
+  sendEmailWithPurchaseOrder : (idInvoice: string, payload: SendMail)=> apiClient.post(MAILING_ENDPOINTS.sendEmailPurchaseOrder(idInvoice), payload),
 
   sendEmail : (payload: SendMail)=> apiClient.post(MAILING_ENDPOINTS.sendSimpleEmail, payload),
 

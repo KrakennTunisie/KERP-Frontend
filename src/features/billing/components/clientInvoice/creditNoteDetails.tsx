@@ -4,8 +4,6 @@ import useCreditNoteDetails, { PropsCreditNote } from "../../hooks/useCreditNote
 import Card from "../widgets/card";
 import { SendToTTNModal } from "../widgets/ttnConfirmationModal";
 import { SectionLabel } from "../widgets/sectionLabel";
-import { mockInvoiceItems } from "../../mocks/invoice-items-mocks";
-import { mockInvoiceEvents } from "../../mocks/invoiceEvent-mocks";
 import { InvoiceEventLabels } from "../../types/invoiceEventType";
 import { OperationCategoryLabels } from "../../types/operationCategory";
 import { invoiceStatusLabels, invoiceStatusSchema } from "../../types/invoiceStatus";
@@ -14,6 +12,7 @@ import { creditNoteTypeLabels } from "../../types/creditNoteType";
 import { formatDateLong, formatDateLongWithTime } from "@/shared/utils/formatDate";
 import PageLoader from "@/shared/components/ui/pageLoader";
 import { NotFound } from "@/shared/components/widgets/notFound";
+import { invoiceComplianceStatusSchema } from "../../types/invoiceComplianceStatus";
 
 export default function CreditNoteDetails({ params }: PropsCreditNote) {
     const { updateStatus, previewDocument, setPreviewDocument, setStatusPaiement, invoice, sendToTTN, TtnModalOpen, setTtnModalOpen, loading, sent, successMessage, router } = useCreditNoteDetails({ params });
@@ -85,10 +84,12 @@ export default function CreditNoteDetails({ params }: PropsCreditNote) {
                                 )}
                             </div>
                             {/* Bouton envoi TTN — visible seulement si pas encore envoyée */}
-                            {!invoice?.invoiceCreditNoteComplianceStatus && (
                                 <button
+                                    disabled={invoice?.invoiceCreditNoteStatus==invoiceStatusSchema.enum.DRAFT 
+                                        || invoice?.invoiceCreditNoteComplianceStatus==invoiceComplianceStatusSchema.enum.TTN_ACCEPTED
+                                    }
                                     onClick={() => { setTtnModalOpen(true) }}
-                                    className="shrink-0 px-4 py-2 rounded-xl bg-red-600 text-white text-sm font-semibold hover:bg-blue transition-colors cursor-pointer inline-flex items-center gap-2" >
+                                    className="shrink-0 px-4 py-2 rounded-xl bg-red-600 text-white text-sm font-semibold hover:bg-blue transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2" >
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
                                         className="h-4 w-4"
@@ -104,7 +105,6 @@ export default function CreditNoteDetails({ params }: PropsCreditNote) {
                                     </svg>
                                     {"Envoyer au TTN"}
                                 </button>
-                            )}
                         </div>
                     </Card>
                     {/* Modal pour demander au user s'il veut envoyer la Facture au TTN */}
@@ -178,7 +178,7 @@ export default function CreditNoteDetails({ params }: PropsCreditNote) {
                                     disabled={invoice?.invoiceCreditNoteStatus !== invoiceStatusSchema.enum.IN_PROGRESS}
                                     onClick={() => updateStatus(invoiceStatusSchema.enum.REFUNDED)}
                                     className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-[13px] font-medium border transition-all
-          ${invoice?.invoiceCreditNoteStatus === invoiceStatusSchema.enum.IN_PROGRESS
+                                        ${invoice?.invoiceCreditNoteStatus === invoiceStatusSchema.enum.IN_PROGRESS
                                             ? "bg-green-50 border-green-200 text-green-600 hover:brightness-95 cursor-pointer"
                                             : "bg-green-100 border-green-200 text-green-700 opacity-50 cursor-not-allowed"
                                         }`}
