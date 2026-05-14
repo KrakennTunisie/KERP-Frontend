@@ -123,7 +123,10 @@ export default function ClientsInvoiceList() {
                     </div>
                     <div className="flex gap-2">
                         {invoiceStatusSchema.options
-                        .filter(f => f !== invoiceStatusSchema.enum.REFUNDED && f !== invoiceStatusSchema.enum.NOT_REFUNDED && f!== invoiceStatusSchema.enum.IN_PROGRESS)
+                        .filter(f => f !== invoiceStatusSchema.enum.REFUNDED 
+                            && f !== invoiceStatusSchema.enum.NOT_REFUNDED 
+                            && f!== invoiceStatusSchema.enum.IN_PROGRESS
+                            && f!=invoiceStatusSchema.enum.TO_PAY)
                         .map((f) => (
                             <button
                                 key={f}

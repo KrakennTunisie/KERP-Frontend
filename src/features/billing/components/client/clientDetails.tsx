@@ -2,7 +2,7 @@
 
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ClientPartner } from "../../models/partner";
+import { ClientPartner, ClientPartnerDetails } from "../../models/partner";
 import { InvoicesAPI, partnersApi } from "../../api/partners-api";
 import { appToast } from "@/shared/lib/toast";
 import { getApiErrorMessage } from "@/shared/api/handle-api-error";
@@ -18,7 +18,7 @@ export default function ClientDetails(){
 
   const clientId = params?.clientId as string;
 
-  const [client, setClient] = useState<ClientPartner>();
+  const [client, setClient] = useState<ClientPartnerDetails>();
   const [clientInvoiceStats, setClientInvoiceStats]=useState<PartnerInvoiceStats>({
   totalAmountTND: 0,
   totalAmountEUR: 0,

@@ -9,8 +9,9 @@ import { appToast } from "@/shared/lib/toast";
 import { MailingAPI } from "../../api/partners-api";
 import { InvoicePageItem } from "../../models/invoice";
 import { InvoiceCreditNotePageItem } from "../../models/creditNote";
+import { PurchaseOrderPageItem } from "../../models/purchaseOrder";
 
-type SendableInvoice = InvoicePageItem | InvoiceCreditNotePageItem;
+type SendableInvoice = InvoicePageItem | InvoiceCreditNotePageItem| PurchaseOrderPageItem;
 
 interface SendInvoiceModalProps {
   invoice: SendableInvoice | null;
@@ -24,50 +25,87 @@ const isCreditNote = (
   return !!invoice && "invoiceCreditNoteNumber" in invoice;
 };
 
-const getInvoiceNumber = (invoice: SendableInvoice | null) => {
-  if (!invoice) return "";
 
-  return isCreditNote(invoice)
-    ? invoice.invoiceCreditNoteNumber
-    : invoice.invoiceNumber;
+const isPurchaseOrder = (
+  document: SendableInvoice | null,
+): document is PurchaseOrderPageItem => {
+  return !!document && "purchaseOrderNumber" in document;
 };
 
-const getInvoiceCurrency = (invoice: SendableInvoice | null) => {
-  if (!invoice) return "";
+const getDocumentNumber = (document: SendableInvoice | null) => {
+  if (!document) return "";
 
-  return isCreditNote(invoice)
-    ? invoice.invoice.invoiceCurrency
-    : invoice.invoiceCurrency;
+  if (isCreditNote(document)) {
+    return document.invoiceCreditNoteNumber;
+  }
+
+  if (isPurchaseOrder(document)) {
+    return document.purchaseOrderNumber;
+  }
+
+  return document.invoiceNumber;
 };
 
-const getInvoiceEmail = (invoice: SendableInvoice | null) => {
-  if (!invoice) return "";
+const getDocumentCurrency = (document: SendableInvoice | null) => {
+  if (!document) return "";
 
-  return isCreditNote(invoice)
-    ? invoice.invoice.partner.email
-    : invoice.partner.email;
+  if (isCreditNote(document)) {
+    return document.invoice.invoiceCurrency;
+  }
+
+  if (isPurchaseOrder(document)) {
+    return document.purchaseCurrency;
+  }
+
+  return document.invoiceCurrency;
 };
 
-const getInvoicePartnerName = (invoice: SendableInvoice | null) => {
-  if (!invoice) return "";
+const getDocumentEmail = (document: SendableInvoice | null) => {
+  if (!document) return "";
 
-  return isCreditNote(invoice)
-    ? invoice.invoice.partner.name
-    : invoice.partner.name;
+  if (isCreditNote(document)) {
+    return document.invoice.partner.email;
+  }
+
+  if (isPurchaseOrder(document)) {
+    return document.partner.email;
+  }
+
+  return document.partner.email;
 };
 
-const getInvoiceId = (invoice: SendableInvoice | null) => {
-  if (!invoice) return "";
+const getDocumentPartnerName = (document: SendableInvoice | null) => {
+  if (!document) return "";
 
-  return isCreditNote(invoice)
-    ? invoice.idInvoiceCreditNote
-    : invoice.idInvoice;
+  if (isCreditNote(document)) {
+    return document.invoice.partner.name;
+  }
+
+  if (isPurchaseOrder(document)) {
+    return document.partner.name;
+  }
+
+  return document.partner.name;
+};
+
+const getDocumentId = (document: SendableInvoice | null) => {
+  if (!document) return "";
+
+  if (isCreditNote(document)) {
+    return document.idInvoiceCreditNote;
+  }
+
+  if (isPurchaseOrder(document)) {
+    return document.idPurchaseOrder;
+  }
+
+  return document.idInvoice;
 };
 
 export const formatAmount = (invoice: SendableInvoice | null) => {
   if (!invoice) return "";
 
-  switch (getInvoiceCurrency(invoice)) {
+  switch (getDocumentCurrency(invoice)) {
     case "EUR":
       return `${invoice.totalInclTaxEUR?.toLocaleString("fr-FR")} €`;
     case "TND":
@@ -89,7 +127,7 @@ export function SendInvoiceModal({
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
 
-  const documentNumber = useMemo(() => getInvoiceNumber(invoice), [invoice]);
+  const documentNumber = useMemo(() => getDocumentNumber(invoice), [invoice]);
 
   const documentLabel = isCreditNote(invoice)
     ? "facture d'avoir"
@@ -97,11 +135,15 @@ export function SendInvoiceModal({
 
   useEffect(() => {
     if (!invoice) return;
+  const documentLabel = isCreditNote(invoice)
+    ? "facture d'avoir"
+    : isPurchaseOrder(invoice)
+      ? "bon de commande"
+      : "facture";
+    setTo(getDocumentEmail(invoice) ?? "");
+    setSubject(`${documentLabel} ${documentNumber}`);
 
-    setTo(getInvoiceEmail(invoice) ?? "");
-    setSubject(`${isCreditNote(invoice) ? "Facture d'avoir" : "Facture"} ${documentNumber}`);
-
-    setMessage(`Bonjour ${getInvoicePartnerName(invoice)},
+    setMessage(`Bonjour ${getDocumentPartnerName(invoice)},
 
 Veuillez trouver ci-joint la ${documentLabel} ${documentNumber} pour un montant de ${formatAmount(invoice)}.
 
@@ -116,19 +158,25 @@ Cordialement,`);
     try {
       setSending(true);
 
-      isCreditNote(invoice) 
-      
-      ? await MailingAPI.sendEmailWithCreditNote(getInvoiceId(invoice),{
+      if (isCreditNote(invoice)) {
+        await MailingAPI.sendEmailWithCreditNote(getDocumentId(invoice),{
         toEmail: to,
         subject,
         body: message
-      })
-
-      : await MailingAPI.sendEmailWithInvoice(getInvoiceId(invoice), {
+      });
+      } else if (isPurchaseOrder(invoice)) {
+        await MailingAPI.sendEmailWithPurchaseOrder(getDocumentId(invoice),{
         toEmail: to,
         subject,
-        body: message,
+        body: message
       });
+      } else {
+        await MailingAPI.sendEmailWithInvoice(getDocumentId(invoice),{
+        toEmail: to,
+        subject,
+        body: message
+      });
+      }
 
       appToast.success(`${documentLabel} envoyée avec succès.`);
       onClose();
@@ -159,7 +207,7 @@ Cordialement,`);
                 Envoyer la {documentLabel}
               </p>
               <p className="mt-0.5 text-xs uppercase tracking-wider text-white/70">
-                À {getInvoicePartnerName(invoice)}
+                À {getDocumentPartnerName(invoice)}
               </p>
             </div>
           </div>
@@ -241,7 +289,7 @@ Cordialement,`);
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
               {"Pièce ointe"}
             </p>
-            <p className="text-sm font-semibold text-blue-800">{getInvoiceNumber(invoice)}</p>
+            <p className="text-sm font-semibold text-blue-800">{getDocumentNumber(invoice)}</p>
           </div>
           </div>
         </div>

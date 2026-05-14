@@ -39,6 +39,9 @@ export function BillingDashboard() {
     month: "long",
   });
 
+  const currentNumericMonth = new Date().getMonth(); // 0-based
+
+
   const [clientInvoices, setclientInvoices]=useState<ClientInvoiceDashboardStats[]|[]>([])
 
   const fetchClientsInvoices = async () => {
@@ -88,11 +91,13 @@ export function BillingDashboard() {
 
 
 const months = Array.from({ length: 6 }, (_, index) => {
-  const date = new Date(currentYear, index);
+  const monthIndex = currentNumericMonth - 3 + index;
+
+  const date = new Date(currentYear, monthIndex);
 
   return {
     label: date.toLocaleString("fr-FR", { month: "short" }),
-    value: index + 1, // Janvier = 1, Février = 2, etc.
+    value: date.getMonth() + 1,
   };
 });
 
@@ -124,7 +129,7 @@ console.log("suppliersByMonth: ",suppliersByMonth)
       return acc;
     },
     []
-  )  .sort((a, b) => b.montant - a.montant) // 🔥 tri décroissant
+  )  .sort((a, b) => b.montant - a.montant) 
      .slice(0, 3);
 
     const suppliersGrouped = supplierInvoices.reduce<{ client: string; montant: number }[]>(
@@ -140,7 +145,7 @@ console.log("suppliersByMonth: ",suppliersByMonth)
       return acc;
     },
     []
-  ) .sort((a, b) => b.montant - a.montant) // 🔥 tri décroissant
+  ) .sort((a, b) => b.montant - a.montant) 
      .slice(0, 3);
 
 

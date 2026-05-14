@@ -10,13 +10,14 @@ import { mockInvoiceItems } from "../../mocks/invoice-items-mocks";
 import { ChevronLeft, ChevronRight, Settings } from "lucide-react";
 import { UpdateInvoiceStatusModal } from "../widgets/updateStatusModal";
 import PageLoader from "@/shared/components/ui/pageLoader";
+import { SendInvoiceModal } from "../widgets/sendInvoiceModal";
 
 export default function PurchaseOrderList() {
 
     const { router, search, setSearch, deleteOpen, setDeleteOpen, purchaseOrders, totalElements, totalPages, deletePurchaseOrder, setIdPurchaseOrder, idPurchaseOrder,updateLoading,setNextStatus,setUpdateLoading,nextStatus
         , filtre, setFiltre, invoiceRef, setInvoiceRef, open, setOpen,updateOpen,setUpdateOpen,selectedPurchaseOrder,setSelectedPurchaseOrder,updateStatus,     setCurrentPage,
-    currentPage,
-    loading, } = usePurchaseOrderList();
+    currentPage, openSendMail, setOpenSendMail,
+    loading } = usePurchaseOrderList();
     return (
         <div className="min-h-screen bg-gray-50 p-8 font-sans">
             {/* Header */}
@@ -30,7 +31,7 @@ export default function PurchaseOrderList() {
                     </p>
                 </div>
                 <Link
-                    href="/billing/purchaseOrder/create"
+                    href="/billing/purchaseOrder/clients/create"
                     className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 transition-colors text-white font-bold px-6 py-3 rounded-xl shadow-md text-sm"
                 >
                     <span className="text-lg leading-none">+</span>
@@ -72,6 +73,12 @@ export default function PurchaseOrderList() {
                         : []
                 }
                 isSubmitting={updateLoading}
+            />
+
+            <SendInvoiceModal
+                invoice={selectedPurchaseOrder}
+                isOpen={openSendMail}
+                onClose={() => setOpenSendMail(false)}
             />
 
             {/* Table card */}
@@ -197,6 +204,17 @@ export default function PurchaseOrderList() {
                                                 title="Mettre à jour le statut"
                                             >
                                                 <Settings className="w-4 h-4" />
+                                            </button>
+
+                                            <button
+                                                disabled={f.purchaseOrderStatus === purchaseOrderStatusSchema.enum.DRAFT}
+                                                onClick={() => { setOpenSendMail(true); console.log("send", f.idPurchaseOrder); setSelectedPurchaseOrder(f) }}
+                                                className="p-2 rounded-xl bg-green-50 text-green-600 hover:bg-green-100 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                                title="Envoyer"
+                                            >
+                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12zm0 0h7.5" />
+                                                </svg>
                                             </button>
                                             {/* Supprimer */}
                                             <button
