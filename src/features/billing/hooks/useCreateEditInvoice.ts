@@ -45,15 +45,13 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
   const [nextNumber, setNextNumber] = useState<nextNumber>()
   const [exchangeRate, setExchangeRate] = useState<ExchangeRate>()
   const [invoice, setInvoice] = useState<Invoice>()
+
+  /** Appel de la fonction qui permet la récupération des données lorsque la facture est en mode = edit */
   const fetchClientInvoice = async () => {
     try {
       if (mode == "edit") {
-
-        // setLoading(true)
         setLoadingEdit(true)
         const invoice = await InvoicesAPI.getClientInvoiceById(invoiceId);
-
-        console.log("mappedInvoice", invoice);
         setInvoice(invoice);
       }
     } catch (error) {
@@ -63,6 +61,8 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
       setLoadingEdit(false)
     }
   }
+
+  /*** Affichage le nombre suivant du facture => Série des nombre */
   const fetchNextNumber = async () => {
     try {
       if (mode == "create") {
@@ -85,6 +85,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
   }, [])
 
   const router = useRouter()
+  /***** Initialisation .... */
   const form = useForm<InvoiceCreate>({
     resolver: zodResolver(invoiceCreateSchema),
     defaultValues: {
@@ -122,16 +123,16 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
     control,
     name: "invoiceItems",
   });
-
+  /*** Récupération des données de la facture lorsque le mode est edit */
   useEffect(() => {
     if (mode === "edit" && invoice) {
+      console.log(invoice.issueDate)
       reset({
         idInvoice: invoice.idInvoice,
         invoiceType: invoice.invoiceType,
         invoiceNumber: invoice.invoiceNumber,
         issueDate: new Date(invoice.issueDate),
         dueDate: new Date(invoice.dueDate),
-
         creationDate: new Date(),
         sentToclientDate: null,
         sentToTTNDate: null,
@@ -201,7 +202,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
     }
   }, [nextNumber]);
 
-
+  /**** Récupération de l'éxchange rate */
   const fetchExchangeRate = async (toCurrency: string) => {
     try {
       if (mode == "create") {
@@ -277,8 +278,8 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
   const previousCurrencyRef = useRef<CurrencyType>("TND");
   // const previewData = useWatch({ control });
   const previewData = getValues();
-  // Validation des données obligatoire
 
+  // Validation des données obligatoire
   const canCreateInvoice =
     (mode == "create" ? isDirty : true) &&
     isValid &&
@@ -345,6 +346,8 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
 
 
   };
+
+  /***** Synchronisation des items lorsque la facture est réliée à un bon de commande */
   const SyncPurchaseOrderItems = (newItems: BaseItem[], isInitialSync: boolean = false) => {
     const mappedItems: InvoiceItem[] = newItems
       .map((item: any) => {
@@ -443,16 +446,8 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
     }
   };
 
-  const initialQuantitiesRef = useRef<Record<string, number>>({});
 
-  useEffect(() => {
-    if (mode === "edit" && getValues("invoiceItems")?.length) {
-      getValues("invoiceItems")!.forEach(item => {
-        initialQuantitiesRef.current[item.idInvoiceItem!] = item.quantity;
-      });
-    }
-  }, [invoice]);
-
+  // récupération de la quantité initiale d'un item lors de la modification => pour faire la référence
   const getInitialQuantity = (idInvoiceItem: string) => {
     const originalItem = invoice?.invoiceItems!.find(
       (invoiceItem) => invoiceItem.idInvoiceItem === idInvoiceItem
@@ -627,6 +622,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
     setPdfUrl(null);
   }
 
+  /******* Création d'une facture */
   async function createInvoice() {
     try {
       setLoadingForm(true)
@@ -646,6 +642,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
       const formData = new FormData();
 
       formData.append("invoiceNumber", values.invoiceNumber);
+  
       formData.append("issueDate", values.issueDate.toISOString());
       formData.append("dueDate", values.dueDate.toISOString());
       if (selectedPO) {
@@ -699,6 +696,8 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
       setLoadingForm(false)
     }
   }
+
+  //******** Modifier une facture */
 
   const updateInvoice = async () => {
 
@@ -854,7 +853,6 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
     updateInvoice,
     //Navigation
     router,
-    initialQuantitiesRef,
     getMaxQuantity,
     invoice
 

@@ -41,7 +41,8 @@ export default function useCreateCreditNote({ invoiceId }: InvoiceDetailsProps) 
     const [invoice, setInvoice] = useState<Invoice>();
     const [nextNumber, setNextNumber] = useState<nextNumber>()
     const [loadingForm, setLoadingForm] = useState(false);
-
+    
+    /*** Récupération de la nombre suivant */
     const fetchNextNumber = async () => {
         try {
 

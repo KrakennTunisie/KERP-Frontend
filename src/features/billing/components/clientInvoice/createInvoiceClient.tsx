@@ -132,31 +132,39 @@ export default function CreateInvoiceClient({ mode,
                                         render={({ field }) => (
                                             <input
                                                 type="date"
-                                                value={field.value
-                                                    ? new Date(new Date(field.value).getTime() + 24 * 60 * 60 * 1000)
-                                                        .toISOString().split("T")[0]
+                                                value={field.value ? (() => {
+                                                    const d = new Date(field.value);
+                                                    const year = d.getFullYear();
+                                                    const month = String(d.getMonth() + 1).padStart(2, "0");
+                                                    const day = String(d.getDate()).padStart(2, "0");
+                                                    return `${year}-${month}-${day}`;
+                                                })()
                                                     : ""
                                                 }
                                                 onChange={(e) => {
-                                                    field.onChange(new Date(e.target.value));
-                                                    calculateDueDate();
+                                                  field.onChange(new Date(e.target.value));
+                                                  calculateDueDate();
                                                 }}
                                                 min={new Date().toISOString().split("T")[0]}
                                                 max={
                                                     (() => {
-                                                        // Mode create — BC sélectionné
+                                                        let poDate: Date | null = null;
+
                                                         if (linkedToPO && selectedPO) {
-                                                            return new Date(new Date(selectedPO.issueDate).getTime() + 24 * 60 * 60 * 1000)
-                                                                .toISOString().split("T")[0];
-                                                        }
-                                                        else {
-                                                            // Mode edit — BC déjà lié
+                                                            poDate = new Date(selectedPO.issueDate);
+                                                        } else {
                                                             const editPODate = form.getValues("purchaseOrder.issueDate");
                                                             if (editPODate) {
-                                                                return new Date(new Date(editPODate).getTime() + 24 * 60 * 60 * 1000)
-                                                                    .toISOString().split("T")[0];
+                                                                poDate = new Date(editPODate);
                                                             }
+                                                        }
 
+                                                        if (poDate) {
+                                                            // Fix timezone: utiliser les valeurs locales
+                                                            const year = poDate.getFullYear();
+                                                            const month = String(poDate.getMonth() + 1).padStart(2, "0");
+                                                            const day = String(poDate.getDate()).padStart(2, "0");
+                                                            return `${year}-${month}-${day}`;
                                                         }
                                                     })()
                                                 }
@@ -408,7 +416,7 @@ export default function CreateInvoiceClient({ mode,
                                     {/* Input désignation */}
                                     <input
                                         type="text"
-                                        readOnly={linkedToPO && !!selectedPO || invoice?.purchaseOrder!=null}
+                                        readOnly={linkedToPO && !!selectedPO || invoice?.purchaseOrder != null}
                                         value={item.description}
                                         onChange={(e) => updateItem(item.idInvoiceItem!, "description", e.target.value)}
                                         className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition mb-4"
@@ -421,7 +429,7 @@ export default function CreateInvoiceClient({ mode,
                                         </label>
                                         <select
                                             value={item.operationCategory}
-                                            disabled={linkedToPO && !!selectedPO || invoice?.purchaseOrder!=null}
+                                            disabled={linkedToPO && !!selectedPO || invoice?.purchaseOrder != null}
                                             onChange={(e) => updateItem(item.idInvoiceItem!, "operationCategory", e.target.value)}
                                             className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
                                         >
@@ -453,7 +461,7 @@ export default function CreateInvoiceClient({ mode,
                                             </label>
                                             <input
                                                 type="text"
-                                                readOnly={linkedToPO && !!selectedPO || invoice?.purchaseOrder!=null}
+                                                readOnly={linkedToPO && !!selectedPO || invoice?.purchaseOrder != null}
                                                 defaultValue={item.unityPriceEXclTax}
                                                 onBlur={(e) => updateItem(item.idInvoiceItem!, "unityPriceEXclTax", parseFloat(e.target.value))}
                                                 className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 text-center focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
@@ -465,7 +473,7 @@ export default function CreateInvoiceClient({ mode,
                                             </label>
                                             <select
                                                 value={item.vatRate}
-                                                disabled={linkedToPO && !!selectedPO ||  invoice?.purchaseOrder!=null}
+                                                disabled={linkedToPO && !!selectedPO || invoice?.purchaseOrder != null}
                                                 onChange={(e) => updateItem(item.idInvoiceItem!, "vatRate", Number(e.target.value))}
                                                 className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 text-center focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
                                             >
