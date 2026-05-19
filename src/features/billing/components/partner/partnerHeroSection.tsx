@@ -54,18 +54,8 @@ export default function PartnerHeader({
                   {partner.name}
                 </h1>
 
-{/*                 <span
-                  className={`inline-flex items-center px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border ${pageConfig.badgeClass}`}
-                >
-                  {pageConfig.title}
-                </span> */}
               </div>
 
-{/*               <p className="text-sm font-bold text-gray-600 mb-4">
-                MF: {partner.identifier}
-              </p> */}
-
-              {/* Contact Info */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
 
                 <div className="flex items-center gap-2 text-gray-600">

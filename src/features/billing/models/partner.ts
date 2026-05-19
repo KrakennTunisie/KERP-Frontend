@@ -5,6 +5,9 @@ import { fileSchema } from "../types/pdfSchema";
 import type { Invoice } from "./invoice";
 import { documentSchema } from "./document";
 import { $ZodAny } from "node_modules/zod/v4/core/schemas.cjs";
+import { PaymentConditionSchema } from "../types/paymentCondition";
+import { tvaRateStirngSchema } from "../types/tvaRate";
+import { currencyTypeSchema } from "../types/currency";
 
 export const partnerSchema = z.object({
   idPartner: z.uuid(),
@@ -94,6 +97,48 @@ export const clientPartnerDetailsSchema = partnerSchema.extend({
 export const supplierPartnerDetailsSchema = partnerSchema.extend({
   partnerType: z.literal("SUPPLIER"),
 });
+
+export const addPartnerSchema = z.object({
+  partnerType: partnerTypeSchema,
+
+  salutation: z.string().min(1, "La salutation est obligatoire"),
+  firstName: z.string().min(1, "Le nom est obligatoire").min(3, "Le nom doit contenir au moins 3 caractères"),
+  lastName: z.string().min(1, "Le nom est obligatoire").min(3, "Le nom doit contenir au moins 3 caractères"),
+
+  companyName: z.string().min(1, "Le nom est obligatoire").min(3, "Le nom doit contenir au moins 3 caractères"),
+  shortName: z.string().min(1, "Le nom est obligatoire"),
+
+  currency: currencyTypeSchema,
+  email: z.email("Email invalide"),
+  workPhone: z.string(),
+  mobilePhone: z.string(),
+
+  taxId: z.string().min(1, "Le matricule fiscal est obligatoire"),
+  iban: z.string(),
+  taxRate: tvaRateStirngSchema,
+  paymentTerms: PaymentConditionSchema,
+  enablePortal: z.boolean(),
+
+  billingCountry: z.string().min(1, "Le pays de facturation est obligatoire"),
+  billingStreet1: z.string().min(1, "L'adresse de facturation est obligatoire"),
+  billingStreet2: z.string(),
+  billingCity: z.string().min(1, "La ville de facturation est obligatoire"),
+  billingState: z.string(),
+  billingZip: z.string(),
+
+  shippingCountry: z.string(),
+  shippingStreet1: z.string(),
+  shippingStreet2: z.string(),
+  shippingCity: z.string(),
+  shippingState: z.string(),
+  shippingZip: z.string(),
+
+  rne: fileSchema,
+  contract: fileSchema,
+  patente: fileSchema,
+});
+
+export type AddPartnerFormData = z.infer<typeof addPartnerSchema>;
 
 
 export type ClientPartnerDetails = z.infer<typeof clientPartnerDetailsSchema>;

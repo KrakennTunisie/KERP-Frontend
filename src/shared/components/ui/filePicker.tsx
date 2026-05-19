@@ -1,11 +1,15 @@
 "use client";
 
 import { FileText, Upload, X } from "lucide-react";
+import { Label } from "./label";
 
 type FilePickerProps = {
   label: string;
   file?: File;
   error?: string;
+  tooltip?:string;
+  required?: boolean;
+  id:string;
   onPick: (file: File) => void;
   onRemove?: () => void;
 };
@@ -14,6 +18,9 @@ export default function FilePicker({
   label,
   file,
   error,
+  tooltip,
+  required,
+  id,
   onPick,
   onRemove,
 }: FilePickerProps) {
@@ -25,9 +32,15 @@ export default function FilePicker({
 
   return (
     <div className="space-y-2">
-      <p className="text-sm font-black text-gray-900">
-        {label} <span className="text-rose-600">*</span>
-      </p>
+     {label && (
+        <Label
+        tooltip={tooltip}
+          htmlFor={id}
+          required = {required}
+        >
+          {label}
+        </Label>
+      )}
 
       <label
         className={`flex flex-col items-center justify-center gap-3 rounded-3xl border-2 border-dashed px-4 py-6 text-center cursor-pointer transition-all ${
