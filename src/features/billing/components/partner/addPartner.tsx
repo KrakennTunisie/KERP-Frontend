@@ -99,7 +99,7 @@ const fields = {
   const isClient = type === "CLIENT";
 
   const listPath = isClient ? "/clients" : "/suppliers";
-  
+
    const copyBillingToShipping = () => {
     setValue("shippingCountry", watch("billingCountry"));
     setValue("shippingStreet1", watch("billingStreet1"));
@@ -203,27 +203,49 @@ const fields = {
 
   return (
     <div className=" bg-gray-50">
+<header className="border-b border-slate-200 bg-white px-5 py-4">
+  <div className="mx-auto max-w-5xl">
+    <button
+      type="button"
+       onClick={() => router.push('/billing'+listPath)}
+      className="
+        group mb-3 inline-flex items-center gap-1.5
+        rounded-lg px-1.5 py-1
+        text-xs font-medium text-slate-500
+        cursor-pointer
+        transition-all hover:bg-slate-50 hover:text-slate-900
+      "
+    >
+      <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
+      {isClient ? "Retour aux clients": "Retour aux fournisseurs"}
+    </button>
 
-      <header className="bg-white border-b border-gray-100 px-8 py-6">
-        <div className="max-w-5xl mx-auto">
-          <button
-           // onClick={() => navigate('/clients')}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 font-bold mb-4 transition-colors group"
-          >
-            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-            Retour aux clients
-          </button>
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 bg-blue-600 rounded-[24px] flex items-center justify-center">
-              <User className="w-8 h-8 text-white" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-black text-gray-900 tracking-tighter">Nouveau Client</h1>
-              <p className="text-sm font-bold text-gray-600 mt-1">Créer un nouveau client</p>
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="flex items-center gap-3">
+      <div
+        className="
+          flex h-10 w-10 shrink-0 items-center justify-center
+          rounded-xl bg-blue-600 text-white
+          shadow-sm shadow-blue-100
+        "
+      >
+        <User className="h-5 w-5" />
+      </div>
+
+      <div>
+
+        <h1 className="text-xl font-semibold tracking-tight text-slate-950">
+         {isClient ? "Nouveau client": "Nouveau fournisseur"}
+        </h1>
+
+        <p className="mt-0.5 text-xs font-medium text-slate-500">
+          {isClient ? "Créer une fiche client": "Créer une fiche fournisseur"}
+        </p>
+      </div>
+    </div>
+  </div>
+</header>
+
+      
 
     <main className="flex-1 overflow-y-auto p-8">          
             <form
@@ -757,7 +779,7 @@ const fields = {
                 </Card>
 
                 {/* Actions */}
-                <div className="-mx-4 border-t border-slate-200 bg-white px-4 py-4 sm:mx-0 sm:rounded-2xl sm:border sm:shadow-sm">
+                <div className="-mx-3 border-t border-slate-200 bg-white px-4 py-4 sm:mx-0 sm:rounded-xl sm:border sm:shadow-sm">
                     <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
                         <Button
                             type="button"

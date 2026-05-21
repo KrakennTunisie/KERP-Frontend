@@ -13,7 +13,7 @@ export type PropsClient = {
 }
 export function useSupplierPurchaseOrderList() {
   const [search, setSearch] = useState("");
-  const [filtre, setFiltre] = useState<purchaseOrderStatus>();
+  const [filtre, setFiltre] = useState<purchaseOrderStatus>("ALL");
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [loading, setLoading] = useState(false)
   const [updateLoading, setUpdateLoading]= useState(false)

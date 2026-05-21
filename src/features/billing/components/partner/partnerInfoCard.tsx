@@ -15,7 +15,7 @@ type PartnerInfoCardProps = {
   typeLabel: string;
 };
 
-type PreviewDocument = Document | File | null;
+export type PreviewDocument = Document | File | null;
 
 export default function PartnerInfoCard({
   partner,
@@ -48,25 +48,21 @@ export default function PartnerInfoCard({
             <InfoItem
               label="Matricule fiscal"
               value={partner.taxRegistrationNumber}
-              icon={<ReceiptText className="w-5 h-5 text-gray-700" />}
             />
 
             <InfoItem
               label="Type"
               value={typeLabel}
-              icon={<BadgeCheck className="w-5 h-5 text-gray-700" />}
             />
 
             <InfoItem
               label="IBAN"
               value={partner.iban}
-              icon={<CreditCard className="w-5 h-5 text-gray-700" />}
             />
 
             <InfoItem
               label="Partenaire depuis"
               value={"2024-05-02"}
-              icon={<CalendarDays className="w-5 h-5 text-gray-700" />}
             />
           </div>
 

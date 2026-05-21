@@ -13,6 +13,9 @@ export const purchaseOrderStatusSchema = z.enum([
   
 ]);
 
+ export const purchaseOrderStatusWithoutAllSchema =
+  purchaseOrderStatusSchema.exclude(["ALL"]);
+
 export type purchaseOrderStatus = z.infer<typeof purchaseOrderStatusSchema>;
 
 

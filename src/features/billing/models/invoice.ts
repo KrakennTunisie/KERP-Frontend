@@ -2,7 +2,7 @@ import { z } from "zod";
 import { currencyTypeSchema } from "../types/currency";
 import { exchangeRateSourceSchema } from "../types/exchangeRateSource";
 import { invoiceComplianceStatusSchema } from "../types/invoiceComplianceStatus";
-import { invoiceStatusSchema } from "../types/invoiceStatus";
+import { invoiceStatusSchema, invoiceStatusSchemaWithoutAll } from "../types/invoiceStatus";
 import { invoiceTypeSchema } from "../types/invoiceType";
 import { PaymentConditionSchema } from "../types/paymentCondition";
 import { paymentMethodSchema } from "../types/paymentMethod";
@@ -80,7 +80,7 @@ const invoiceObjectSchema = baseInvoiceSchema.extend({
   sentToTTNDate: z.date().nullable(),
   sentToclientDate: z.date().nullable(),
   creationDate: z.date().nullable(),
-  invoiceStatus: invoiceStatusSchema,
+  invoiceStatus: invoiceStatusSchemaWithoutAll,
   invoiceComplianceStatus: invoiceComplianceStatusSchema.nullable(),
   complianceQRcode: z.string().nullable(),
   partner: z.lazy(() => partnerSchema).nullable(),

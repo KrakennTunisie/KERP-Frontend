@@ -1,32 +1,33 @@
 "use client";
 
-import type { ReactNode } from "react";
-
-type InfoCardProps = {
+type InfoItemProps = {
   label: string;
-  value: string | undefined;
-  icon: ReactNode;
+  value?: string | null;
 };
 
-export default function InfoItem({
-  label,
-  value,
-  icon,
-}: InfoCardProps) {
-  return (
-    <div className="rounded-3xl border border-gray-200 bg-gray-50 p-4 min-h-[112px] flex flex-col justify-between">
-      <div className="w-10 h-10 rounded-2xl bg-white border border-gray-200 flex items-center justify-center mb-4">
-        {icon}
-      </div>
+export default function InfoItem({ label, value }: InfoItemProps) {
+  const isEmpty = !value || value.trim() === "";
+  const displayValue = isEmpty ? "Non renseigné" : value;
 
-      <div>
-        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">
-          {label}
-        </p>
-        <p className="text-sm font-black text-gray-900 break-words">
-          {value}
-        </p>
-      </div>
+  return (
+    <div className="group relative rounded-2xl border border-slate-100 bg-white px-4 py-3.5 shadow-[0_1px_4px_0_rgb(0,0,0,0.04)] transition-all duration-200 ">
+
+      {/* Accent bar */}
+
+      <p className="mb-0.5 text-[9px] font-black uppercase tracking-[0.12em] text-slate-400">
+        {label}
+      </p>
+
+      <p
+        className={`truncate text-sm font-semibold leading-snug transition-colors duration-200 ${
+          isEmpty
+            ? "italic text-slate-300"
+            : "text-slate-800 group-hover:text-slate-900"
+        }`}
+        title={isEmpty ? undefined : displayValue}
+      >
+        {displayValue}
+      </p>
     </div>
   );
 }

@@ -13,7 +13,7 @@ export type PropsClient = {
 }
 export function usePurchaseOrderList() {
   const [search, setSearch] = useState("");
-  const [filtre, setFiltre] = useState<purchaseOrderStatus>();
+  const [filtre, setFiltre] = useState<purchaseOrderStatus>("ALL");
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [loading, setLoading] = useState(false)
   const [updateLoading, setUpdateLoading]= useState(false)
@@ -76,7 +76,7 @@ export function usePurchaseOrderList() {
   useEffect(() => {
 
     fetchClientsPurchaseOrders();
-  }, [invoiceRef, debouncedSearchQuery, currentPage, filtre]);
+  }, [ debouncedSearchQuery, currentPage, filtre]);
 
   const updateStatus = async ()=>{
             try {
