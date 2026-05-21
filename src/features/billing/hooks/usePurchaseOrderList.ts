@@ -20,6 +20,7 @@ export function usePurchaseOrderList() {
   const [invoiceRef, setInvoiceRef] = useState("");
   const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrderPageItem[] | []>([])
   const [open, setOpen] = useState(false);
+  const [openSendMail, setOpenSendMail] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false)
   const [idPurchaseOrder, setIdPurchaseOrder] = useState("")
   const [totalPages, setTotalPages] = useState(1);
@@ -127,7 +128,8 @@ export function usePurchaseOrderList() {
     setNextStatus,
     updateLoading,
     setUpdateLoading,
-    updateStatus
+    updateStatus,
+    openSendMail, setOpenSendMail
   }
 }
 

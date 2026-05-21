@@ -6,8 +6,6 @@ import {
   Plus
 } from 'lucide-react';
 
-
-
 import { ClientPartnerItem } from '../../models/partner';
 import ClientUpdateModal from "./updateClientModal";
 import ClientDeleteModal from "./deleteClientModal";
@@ -17,9 +15,12 @@ import { appToast } from "@/shared/lib/toast";
 import { useDebounce } from '@/shared/hooks/useDebounce';
 import ClientsTable from './clientsTable';
 import ClientCreateModal from './createClientModal';
+import { useRouter } from 'next/navigation';
 
 
 export default function ClientsList() {
+
+  const router = useRouter();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCity, setFilterCity] = useState<string>('all');
@@ -107,8 +108,9 @@ useEffect(() => {
           </div>
 
           <button
-            onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 px-8 py-4 bg-gray-900 text-white rounded-[20px] hover:bg-black transition-all font-black text-sm shadow-xl shadow-gray-200 cursor-pointer"
+           // onClick={() => setShowAddModal(true)}
+           onClick={()=>router.push("/billing/clients/new")} 
+           className="flex items-center gap-2 px-8 py-4 bg-gray-900 text-white rounded-[20px] hover:bg-black transition-all font-black text-sm shadow-xl shadow-gray-200 cursor-pointer"
           >
             <Plus className="w-5 h-5" />
             Ajouter un client

@@ -1,7 +1,7 @@
 import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 import { useDebounce } from "@/shared/hooks/useDebounce";
 import { appToast } from "@/shared/lib/toast";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { InvoicesAPI } from "../api/partners-api";
 import { InvoicePageItem } from "../models/invoice";
@@ -13,7 +13,10 @@ export type PropsClient = {
   }
 }
 export function useClientInvoiceList () {
-    const [search, setSearch] = useState("");
+      const searchParams = useSearchParams();
+      const value = searchParams.get("client") ?? "";
+
+    const [search, setSearch] = useState(value);
     const [filtre, setFiltre] = useState<InvoiceStatus>();
     const [loading, setLoading]= useState(false)
     const [deleteLoading, setDeleteLoading]= useState(false)
@@ -48,6 +51,8 @@ export function useClientInvoiceList () {
       averageInvoiceEUR: 0,
       averageInvoiceUSD: 0,
       })
+
+
       //const [loading, setLoading] = useState<boolean>();
       const fetchClientInvoicesStats = async () => {
         try {
@@ -66,6 +71,7 @@ export function useClientInvoiceList () {
     
       fetchClientInvoicesStats();
     }, []);
+
     const deleteClientInvoice = async ()=>{
         try {
           setDeleteLoading(true);

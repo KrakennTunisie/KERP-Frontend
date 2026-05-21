@@ -19,7 +19,7 @@ import PageLoader from "@/shared/components/ui/pageLoader"
 export default function CreateInvoiceClient({ mode,
     invoiceId, }: InvoiceFormClientProps) {
     const { addItem, removeItem, updateItem, clientSearch, setClientSearch, showDropdown, setShowDropdown, invoiceRef, pdfUrl, canCreateInvoice, errors, TtnModalOpen, setTtnModalOpen, sent, successMessage, purchaseOrders,
-        linkedToPO, selectedPO, handleSelectPO, loadingTTN, handleTogglePO, selectClient, clearClient, updateInvoice, clients, setCurrency, previewData, form, onSubmit, isModalOpen, router, calculateDueDate, onCloseDocumentModal, createInvoice, sendToTTN,
+        linkedToPO, selectedPO, handleSelectPO, loadingTTN, handleTogglePO, selectClient, clearClient, updateInvoice, clients, previewData, form, onSubmit, isModalOpen, router, calculateDueDate, onCloseDocumentModal, createInvoice, sendToTTN,
         loadingClients, loadingEdit, loadingForm, getMaxQuantity, invoice
     } = useCreateInvoice({ mode, invoiceId })
 
@@ -354,7 +354,6 @@ export default function CreateInvoiceClient({ mode,
                                     </label>
                                     <select
                                         {...register("invoiceCurrency")}
-                                        onChange={(e) => setCurrency(e.target.value as CurrencyType)}
                                         disabled={linkedToPO && !!selectedPO || mode == "edit"}
                                         className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
                                     >

@@ -8,8 +8,9 @@ import {
   AlertCircle,
   FileText,
 } from "lucide-react";
-import { Invoice } from "../../models/invoice";
+import { Invoice, InvoicePageItem } from "../../models/invoice";
 import { InvoiceStatus } from "../../types/invoiceStatus";
+import { formatDateLong } from "@/shared/utils/formatDate";
 
 type PartnerType = "CLIENT" | "SUPPLIER";
 
@@ -17,7 +18,7 @@ export type PartnerInvoiceItem = Partial<Invoice>;
 
 type PartnerInvoicesCardProps = {
   partnerType: PartnerType | undefined;
-  invoices: PartnerInvoiceItem[] | undefined;
+  invoices: InvoicePageItem[] | [];
   subtitle: string;
   buttonHref: string;
   buttonLabel: string;
@@ -134,8 +135,8 @@ export default function PartnerInvoicesCard({
                     <Link
                       href={
                         isSupplier
-                          ? `/billing/invoices/suppliers/${invoice.idInvoice}`
-                          : `/billing/invoices/clients/${invoice.idInvoice}`
+                          ? `/billing/invoices/suppliers/details/${invoice.idInvoice}`
+                          : `/billing/invoices/clients/${invoice.idInvoice}/details`
                       }
                       className="text-lg font-black text-blue-600 hover:text-blue-800 tracking-tight underline-offset-4 hover:underline"
                     >
@@ -145,12 +146,12 @@ export default function PartnerInvoicesCard({
                     <div className="flex items-center gap-4 mt-2">
                       <div className="flex items-center gap-2 text-xs font-bold text-gray-600">
                         <Calendar className="w-3 h-3" />
-                        <span>Émise: {invoice?.issueDate?.toLocaleString()}</span>
+                        <span>Émise: {formatDateLong(invoice.issueDate)}</span>
                       </div>
 
                       <div className="flex items-center gap-2 text-xs font-bold text-rose-600">
                         <Calendar className="w-3 h-3" />
-                        <span>Échéance: {invoice.dueDate?.toLocaleString()}</span>
+                        <span>Échéance: {formatDateLong(invoice.dueDate)}</span>
                       </div>
                     </div>
                   </div>
@@ -159,11 +160,12 @@ export default function PartnerInvoicesCard({
                 <div className="flex items-center gap-6">
                   <div className="text-right">
                     <p className="text-2xl font-black text-gray-900 tracking-tighter">
-                      {invoice?.totalInclTax?.toLocaleString()}{" "}
-                      <span className="text-sm text-gray-600">TND</span>
-                    </p>
-                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-tighter mt-1">
-                      {invoice.invoiceType || emptyInvoiceType}
+                      {invoice?.invoiceCurrency == "EUR" 
+                                                                            ? invoice.totalInclTaxEUR 
+                                                                            : invoice?.invoiceCurrency =="TND" 
+                                                                                ? invoice.totalInclTaxTND 
+                                                                                :invoice?.totalInclTaxUSD}
+                      <span className="text-sm text-gray-600">{" "+invoice.invoiceCurrency}</span>
                     </p>
                   </div>
 

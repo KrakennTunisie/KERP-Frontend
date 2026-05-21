@@ -4,5 +4,5 @@ import { PropsClient } from "@/features/billing/hooks/useClientsInvoiveList";
 export default async  function ListCreditNote ({ params }:PropsClient ) {
    const { invoiceId } = await params
 
-           return <CreditNoteList params={{ invoiceId }}/>;
+           return <CreditNoteList invoiceId={ invoiceId } type={"CLIENT"}/>;
 }

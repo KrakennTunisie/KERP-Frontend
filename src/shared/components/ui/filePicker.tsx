@@ -1,11 +1,15 @@
 "use client";
 
 import { FileText, Upload, X } from "lucide-react";
+import { Label } from "./label";
 
 type FilePickerProps = {
   label: string;
   file?: File;
   error?: string;
+  tooltip?:string;
+  required?: boolean;
+  id:string;
   onPick: (file: File) => void;
   onRemove?: () => void;
 };
@@ -14,6 +18,9 @@ export default function FilePicker({
   label,
   file,
   error,
+  tooltip,
+  required,
+  id,
   onPick,
   onRemove,
 }: FilePickerProps) {
@@ -25,71 +32,78 @@ export default function FilePicker({
 
   return (
     <div className="space-y-2">
-      <p className="text-sm font-black text-gray-900">
-        {label} <span className="text-rose-600">*</span>
-      </p>
+     {label && (
+        <Label
+        tooltip={tooltip}
+          htmlFor={id}
+          required = {required}
+        >
+          {label}
+        </Label>
+      )}
 
-      <label
-        className={`flex flex-col items-center justify-center gap-3 rounded-3xl border-2 border-dashed px-4 py-6 text-center cursor-pointer transition-all ${
-          error
-            ? "border-rose-300 bg-rose-50/50"
-            : file
-            ? "border-emerald-300 bg-emerald-50/50"
-            : "border-gray-200 bg-gray-50 hover:bg-gray-100"
-        }`}
-      >
-        <input
-          type="file"
-          className="hidden"
-          onChange={(e) => {
-            const f = e.target.files?.[0];
-            if (f) onPick(f);
-          }}
-        />
+     <label
+  className={`flex flex-col items-center justify-center gap-3 text-center cursor-pointer transition-all rounded-2xl border-2 border-dashed px-4 py-5 ${
+    file
+      ? "border-solid border-emerald-300 bg-emerald-50"
+      : "border-gray-200 bg-gray-50 hover:bg-gray-100"
+  } ${error ? "border-rose-300 bg-rose-50" : ""}`}
+>
+  <input
+    type="file"
+    className="hidden"
+    onChange={(e) => {
+      const f = e.target.files?.[0];
+      if (f) onPick(f);
+    }}
+  />
 
-        {!file ? (
-          <>
-            <div className="w-12 h-12 rounded-2xl bg-white border border-gray-200 flex items-center justify-center shadow-sm">
-              <Upload className="w-5 h-5 text-gray-500" />
-            </div>
-            <div>
-              <p className="text-sm font-black text-gray-900">Choisir un fichier</p>
-              <p className="text-xs font-semibold text-gray-500 mt-1">
-                PDF, image ou document administratif
-              </p>
-            </div>
-          </>
-        ) : (
-          <div className="w-full flex items-start gap-3 text-left">
-            <div className="w-11 h-11 rounded-2xl bg-white border border-gray-200 flex items-center justify-center shrink-0">
-              <FileText className="w-5 h-5 text-emerald-600" />
-            </div>
+  {!file ? (
+    <>
+      <div className="w-11 h-11 rounded-xl bg-white border border-gray-200 flex items-center justify-center">
+        <Upload className="w-5 h-5 text-gray-400" />
+      </div>
+      <div>
+        <p className="text-sm font-medium text-gray-800">Choisir un fichier</p>
+        <p className="text-xs text-gray-400 mt-1">PDF, image ou document administratif</p>
+      </div>
+    </>
+  ) : (
+    <>
+      {/* Icône + extension badge */}
+      <div className="relative">
+        <div className="w-12 h-12 rounded-xl bg-white border border-emerald-200 flex items-center justify-center">
+          <FileText className="w-5 h-5 text-emerald-600" />
+        </div>
+        <span className="absolute -bottom-1 -right-1 text-[9px] font-bold uppercase bg-emerald-500 text-white px-1 py-0.5 rounded-md leading-none">
+          {file.name.split(".").pop()}
+        </span>
+      </div>
 
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-black text-gray-900 truncate">
-                {file.name}
-              </p>
-              <p className="text-xs font-semibold text-gray-500 mt-1">
-                {formatSize(file.size)}
-              </p>
-            </div>
+      {/* Nom affiché : début...fin */}
+      <div className="w-full px-1">
+        <p className="text-xs font-medium text-emerald-900 leading-snug break-all line-clamp-2">
+          {file.name.length > 24
+            ? `${file.name.slice(0, 10)}…${file.name.slice(-10)}`
+            : file.name}
+        </p>
+        <p className="text-xs text-emerald-500 mt-1">{formatSize(file.size)}</p>
+      </div>
 
-            {onRemove && (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  onRemove();
-                }}
-                className="w-9 h-9 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 flex items-center justify-center shrink-0"
-                aria-label={`Supprimer ${label}`}
-              >
-                <X className="w-4 h-4 text-gray-600" />
-              </button>
-            )}
-          </div>
-        )}
-      </label>
+      {/* Bouton supprimer */}
+      {onRemove && (
+        <button
+          type="button"
+          onClick={(e) => { e.preventDefault(); onRemove(); }}
+          className="w-8 h-8 rounded-xl border border-emerald-200 bg-white hover:bg-emerald-50 flex items-center justify-center"
+          aria-label={`Supprimer ${label}`}
+        >
+          <X className="w-3.5 h-3.5 text-emerald-700" />
+        </button>
+      )}
+    </>
+  )}
+</label>
 
       {error ? (
         <p className="text-xs text-rose-600 font-semibold">{error}</p>

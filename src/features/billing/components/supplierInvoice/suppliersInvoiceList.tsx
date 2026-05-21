@@ -2,7 +2,7 @@
 
 import StatClientInvoiceCard from "@/shared/components/ui/statClientInvoiceCard";
 import useSupplierInvoiceList from "../../hooks/useSupplierInvoiceList";
-import { getClientInvoiceAllowedNextStatuses, getSupplierInvoiceAllowedNextStatuses, invoiceStatusColors, invoiceStatusLabels, invoiceStatusSchema } from "../../types/invoiceStatus";
+import {  getSupplierInvoiceAllowedNextStatuses, invoiceStatusColors, invoiceStatusLabels, invoiceStatusSchema } from "../../types/invoiceStatus";
 import { formatDateLong } from "@/shared/utils/formatDate";
 import { ChevronLeft, ChevronRight, Settings } from "lucide-react";
 import { UpdateInvoiceStatusModal } from "../widgets/updateStatusModal";
@@ -69,8 +69,8 @@ export default function SuppliersInvoiceList() {
                         </svg>
                     }
                     label="Mois en Cours"
-                    eur={suppliersInvoiceStats.averageInvoiceEUR}
-                    tnd={suppliersInvoiceStats.averageInvoiceTND}
+                    eur={suppliersInvoiceStats.pendingAmountEUR}
+                    tnd={suppliersInvoiceStats.pendingAmountTND}
                     sub={`${suppliersInvoiceStats.pendingInvoices} factures`}
                     variant="emerald"
                 />
@@ -112,27 +112,6 @@ export default function SuppliersInvoiceList() {
                         </div>
                     </div>
 
-                    {/* Ligne 2 : Catégories */}
-{/*                     <div className="flex gap-2 flex-wrap">
-                        {categoriesFacturesFournisseurSchema.options.map((cat) => (
-                            <button
-                                key={cat}
-                                onClick={() => setCategorie(cat)}
-                                className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${categorie === cat
-                                    ? "bg-emerald-600 text-white shadow"
-                                    : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
-                                    }`}
-                            >
-                                {cat === "Toutes catégories" && (
-                                    <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
-                                        <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
-                                    </svg>
-                                )}
-                                {cat}
-                            </button>
-                        ))}
-                    </div>
- */}
                 </div>
 
             </div>
@@ -159,10 +138,10 @@ export default function SuppliersInvoiceList() {
                                 </td>
                             </tr>
                         ) : (
-                            suppliersInvoices.map((f) => (
+                            suppliersInvoices.map((f, index) => (
                                 <tr
-                                    key={1}
-                                    className="border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer"
+                                    key={index}
+                                    className="border-b border-slate-50 hover:bg-slate-50 transition-colors"
                                 >
                                     <td className="px-5 py-4 font-bold text-slate-800">
                                         {f.invoiceNumber}
@@ -198,7 +177,7 @@ export default function SuppliersInvoiceList() {
                                             {/* Voir */}
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); console.log("view", f.idInvoice); router.push(`/billing/invoices/suppliers/details/${f.idInvoice}`) }}
-                                                className="p-2 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
+                                                className="p-2 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors cursor-pointer"
                                                 title="Voir"
                                             >
                                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -210,7 +189,7 @@ export default function SuppliersInvoiceList() {
                                            <button
                                                 onClick={(e) => {setSelectedInvoice(f); setInvoiceId(f.idInvoice); setUpdateOpen(true)}}
                                                 disabled={getSupplierInvoiceAllowedNextStatuses(f.invoiceStatus).length === 0}
-                                                className="p-2 rounded-xl bg-violet-50 text-violet-600 hover:bg-violet-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                className="p-2 rounded-xl bg-violet-50 text-violet-600 hover:bg-violet-100 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                                                 title="Mettre à jour le statut"
                                                 >
                                                 <Settings className="w-4 h-4"/>

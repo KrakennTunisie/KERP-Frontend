@@ -13,8 +13,8 @@ import { BaseItem, InvoiceItem, PurchaseOrderItem } from "../models/invoiceItem"
 import { PartnerSummary } from "../models/partner";
 import {
   calculateInvoiceTotals,
+  calculateInvoiceTotalsFromPurchaseOrder,
   calculUnityPrice,
-  convertItemCurrency,
   recalculate,
 } from "../lib/invoiceCalculation";
 import defaultItem from "../mocks/invoice-items-mocks";
@@ -159,6 +159,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
             itemTotalInclTax: item.itemTotalInclTax,
             operationCategory: item.operationCategory,
             quantity: item.quantity,
+            creditedQuantity: 0
           }))
           : invoice.invoiceItems,
         vatRate: invoice.vatRate ?? 0,
@@ -335,7 +336,9 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
       ...item,
       idInvoiceItem: (item as InvoiceItem).idInvoiceItem ?? uuidv4(),
       invoice: (item as InvoiceItem).invoice ?? null,
-      purchaseOrderItem: null
+      purchaseOrderItem: null,
+      creditedQuantity: 0,
+
     }));
 
     replace(mappedItems);
@@ -370,12 +373,13 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
           description: item.description,
           unityPriceEXclTax: item.unityPriceEXclTax,
           vatRate: item.vatRate,
-          itemTotalExclTax: item.itemTotalExclTax,
-          itemTaxAmount: item.itemTaxAmount,
-          itemTotalInclTax: item.itemTotalInclTax,
+          itemTotalExclTax: (quantity * item.unityPriceEXclTax),
+          itemTaxAmount: (quantity * item.unityPriceEXclTax)*(item.vatRate/100),
+          itemTotalInclTax: (quantity * item.unityPriceEXclTax)*(1+item.vatRate/100),
           operationCategory: item.operationCategory,
           quantity,
           purchaseOrderItem: cleanPurchaseOrderItem,
+          creditedQuantity: 0,
         };
       })
       .filter(item => item.quantity > 0);
@@ -488,20 +492,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
   };
 
 
-  // changement de la devise EUR -> TND et vice versa
-  const setCurrency = (newCurrency: CurrencyType) => {
-    const oldCurrency = previousCurrencyRef.current;
-    const currentItems = getValues("invoiceItems") ?? [];
-    const convertedItems = currentItems.map((item) => convertItemCurrency(item, oldCurrency, newCurrency, getValues("appliedExchangeRate")));
-
-    previousCurrencyRef.current = newCurrency;
-    setValue("invoiceCurrency", newCurrency, { shouldValidate: true, shouldDirty: true, });
-    const totals = calculateInvoiceTotals(convertedItems);
-    setValue("totalExclTax", totals.totalHT, { shouldValidate: true, shouldDirty: true });
-    setValue("vatAmount", totals.totalTVA, { shouldValidate: true, shouldDirty: true });
-    setValue("totalInclTax", totals.totalTTC, { shouldValidate: true, shouldDirty: true });
-    syncItems(convertedItems);
-  };
+  
 
   // calcule de la date d'échance lors la saisie de condition de paiement 
   const calculateDueDate = (): Date => {
@@ -520,10 +511,13 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
   // récupérer la liste des bons de commande disponible en cours de livraison ou bien broullion 
   const fetchPurchaseOrderSummary = async () => {
     try {
-      //  setLoading(true)
+    //  setLoading(true)
+    if(mode=="create"){
+
       setLoadingPurchaseOrders(true)
       const purchaseorders = await PurchaseOrderAPI.getPurchaseOrderSummary();
       setPurchaseOrders(purchaseorders);
+    }
 
     } catch (error) {
       appToast.error("Erreur Fetch du client:", getApiErrorMessage(error));
@@ -560,7 +554,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
     calculateDueDate()
     form.setValue("invoiceCurrency", po!.purchaseCurrency);
     po?.partner && selectClient(po?.partner);
-    const totals = calculateInvoiceTotals(po!.purchaseOrderItems!);
+    const totals = calculateInvoiceTotalsFromPurchaseOrder(po!.purchaseOrderItems!);
     setValue("totalExclTax", totals.totalHT, { shouldValidate: true, shouldDirty: true });
     setValue("vatAmount", totals.totalTVA, { shouldValidate: true, shouldDirty: true });
     setValue("totalInclTax", totals.totalTTC, { shouldValidate: true, shouldDirty: true });
@@ -813,7 +807,6 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
     setShowDropdown,
     selectClient,
     clearClient,
-    setCurrency,
 
 
     setTtnModalOpen,

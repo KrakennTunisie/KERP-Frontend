@@ -4,15 +4,15 @@ import useCreditNoteDetails, { PropsCreditNote } from "../../hooks/useCreditNote
 import Card from "../widgets/card";
 import { SendToTTNModal } from "../widgets/ttnConfirmationModal";
 import { SectionLabel } from "../widgets/sectionLabel";
-import { mockInvoiceItems } from "../../mocks/invoice-items-mocks";
-import { mockInvoiceEvents } from "../../mocks/invoiceEvent-mocks";
 import { InvoiceEventLabels } from "../../types/invoiceEventType";
 import { OperationCategoryLabels } from "../../types/operationCategory";
 import { invoiceStatusLabels, invoiceStatusSchema } from "../../types/invoiceStatus";
 import { DocumentPreviewModal } from "@/shared/components/ui/documentPreviewModal";
 import { creditNoteTypeLabels } from "../../types/creditNoteType";
-import { formatDateLong } from "@/shared/utils/formatDate";
+import { formatDateLong, formatDateLongWithTime } from "@/shared/utils/formatDate";
 import PageLoader from "@/shared/components/ui/pageLoader";
+import { NotFound } from "@/shared/components/widgets/notFound";
+import { invoiceComplianceStatusSchema } from "../../types/invoiceComplianceStatus";
 
 export default function CreditNoteDetails({ params }: PropsCreditNote) {
     const { updateStatus, previewDocument, setPreviewDocument, setStatusPaiement, invoice, sendToTTN, TtnModalOpen, setTtnModalOpen, loading, sent, successMessage, router } = useCreditNoteDetails({ params });
@@ -22,6 +22,12 @@ export default function CreditNoteDetails({ params }: PropsCreditNote) {
                 return(
                     <PageLoader label="Chargement de facture d'avoir ..."/>
                 )
+            }
+            if(invoice==null){
+                <NotFound
+                    resource="Facture d'avoir"
+                    message="Cette facture n'existe pas ou vous n'avez pas les droits pour y accéder."
+                />
             }
     return (
         <div className="min-h-screen bg-gray-50 font-sans">
@@ -78,10 +84,12 @@ export default function CreditNoteDetails({ params }: PropsCreditNote) {
                                 )}
                             </div>
                             {/* Bouton envoi TTN — visible seulement si pas encore envoyée */}
-                            {!invoice?.invoiceCreditNoteComplianceStatus && (
                                 <button
+                                    disabled={invoice?.invoiceCreditNoteStatus==invoiceStatusSchema.enum.DRAFT 
+                                        || invoice?.invoiceCreditNoteComplianceStatus==invoiceComplianceStatusSchema.enum.TTN_ACCEPTED
+                                    }
                                     onClick={() => { setTtnModalOpen(true) }}
-                                    className="shrink-0 px-4 py-2 rounded-xl bg-red-600 text-white text-sm font-semibold hover:bg-blue transition-colors cursor-pointer inline-flex items-center gap-2" >
+                                    className="shrink-0 px-4 py-2 rounded-xl bg-red-600 text-white text-sm font-semibold hover:bg-blue transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2" >
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
                                         className="h-4 w-4"
@@ -97,7 +105,6 @@ export default function CreditNoteDetails({ params }: PropsCreditNote) {
                                     </svg>
                                     {"Envoyer au TTN"}
                                 </button>
-                            )}
                         </div>
                     </Card>
                     {/* Modal pour demander au user s'il veut envoyer la Facture au TTN */}
@@ -171,7 +178,7 @@ export default function CreditNoteDetails({ params }: PropsCreditNote) {
                                     disabled={invoice?.invoiceCreditNoteStatus !== invoiceStatusSchema.enum.IN_PROGRESS}
                                     onClick={() => updateStatus(invoiceStatusSchema.enum.REFUNDED)}
                                     className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-[13px] font-medium border transition-all
-          ${invoice?.invoiceCreditNoteStatus === invoiceStatusSchema.enum.IN_PROGRESS
+                                        ${invoice?.invoiceCreditNoteStatus === invoiceStatusSchema.enum.IN_PROGRESS
                                             ? "bg-green-50 border-green-200 text-green-600 hover:brightness-95 cursor-pointer"
                                             : "bg-green-100 border-green-200 text-green-700 opacity-50 cursor-not-allowed"
                                         }`}
@@ -212,7 +219,7 @@ export default function CreditNoteDetails({ params }: PropsCreditNote) {
                             {invoice?.invoiceCreditNoteItems?.map((item, index) => (
                                 <div
                                     key={item.idInvoiceCreditNoteItem}
-                                    className={`grid grid-cols-[1fr_70px_90px_100px] gap-2 py-3.5 items-center ${index < mockInvoiceItems.length - 1 ? 'border-b border-gray-50' : ''
+                                    className={`grid grid-cols-[1fr_70px_90px_100px] gap-2 py-3.5 items-center ${index < (invoice?.invoiceCreditNoteItems?.length || 1) - 1 ? 'border-b border-gray-50' : ''
                                         }`}
                                 >
                                     <div>
@@ -222,7 +229,7 @@ export default function CreditNoteDetails({ params }: PropsCreditNote) {
                                     </div>
                                     <p className="text-sm text-gray-700 text-right">{item.quantity}</p>
                                     <p className="text-sm text-gray-700 text-right">{item.invoiceItem.unityPriceEXclTax}</p>
-                                    <p className="text-sm font-bold text-gray-900 text-right">{item.invoiceItem.itemTotalExclTax}</p>
+                                    <p className="text-sm font-bold text-gray-900 text-right">{item.quantity *item.invoiceItem.unityPriceEXclTax}</p>
                                 </div>
                             ))}
                         </div>
@@ -330,7 +337,7 @@ export default function CreditNoteDetails({ params }: PropsCreditNote) {
                             <SectionLabel>{"Journal d'audit"}</SectionLabel>
                         </div>
                         <div
-                            className="flex flex-col gap-3.5 max-h-[300px] overflow-y-auto pr-2"
+                            className="flex flex-col gap-3.5 max-h-[100px] overflow-y-auto pr-2"
                             style={{
                                 scrollbarWidth: 'thin',
                                 scrollbarColor: '#CBD5E1 transparent',
@@ -339,7 +346,7 @@ export default function CreditNoteDetails({ params }: PropsCreditNote) {
                             {invoice?.invoiceCreditNoteEvents?.map((event, index) => (
                                 <div key={event.idInvoiceEvent} className="flex items-start gap-2.5 relative">
                                     {/* Ligne verticale entre les points */}
-                                    {index < mockInvoiceEvents.length - 1 && (
+                                    {index < (invoice?.invoiceCreditNoteEvents?.length || 0) - 1 && (
                                         <div className="absolute left-[4px] top-3.5 w-px h-full bg-red-100" />
                                     )}
                                     <div className="w-2.5 h-2.5 rounded-full bg-red-200 shrink-0 mt-1 z-10" />
@@ -348,7 +355,7 @@ export default function CreditNoteDetails({ params }: PropsCreditNote) {
                                             {InvoiceEventLabels[event?.invoiceCreditNoteEventType] ?? "créé"}
                                         </p>
                                         <p className="text-[11px] font-semibold text-gray-400 mt-0.5">
-                                            {formatDateLong(event.eventDate)} - {event.eventTrigger}
+                                            {formatDateLongWithTime(event.eventDate)} - {event.eventTrigger}
                                         </p>
                                         <p className="text-[11px] text-gray-400 mt-0.5">{event.description}</p>
                                     </div>

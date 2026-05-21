@@ -15,7 +15,7 @@ import {
 } from "../lib/invoiceCalculation";
 import { invoiceCreditNoteCreateSchema } from "../models/creditNote";
 import { Invoice } from "../models/invoice";
-import { BaseItem, CreditNoteItem,  defaultCreditNoteItem } from "../models/invoiceItem";
+import { BaseItem, CreditNoteItem,  defaultCreditNoteItem, InvoiceItem } from "../models/invoiceItem";
 import { CreditNoteTypeSchema } from "../types/creditNoteType";
 import { invoiceComplianceStatusSchema } from "../types/invoiceComplianceStatus";
 import { invoiceStatusSchema } from "../types/invoiceStatus";
@@ -182,6 +182,21 @@ export default function useCreateCreditNote({ invoiceId }: InvoiceDetailsProps) 
 
         calculateInvoiceTotals(getValues("creditNoteItems")!);
     };
+
+      const getInitialQuantity = (idInvoiceItem: string) => {
+        const originalItem = invoice?.invoiceItems!.find(
+        (invoiceItem) => invoiceItem.idInvoiceItem === idInvoiceItem
+        );
+        console.log(originalItem?.quantity)
+        return originalItem?.quantity ?? 0;
+    };
+
+    const getMaxQuantity = (item: InvoiceItem) => {
+       const  initialQuantity = getInitialQuantity(item.idInvoiceItem)
+          return initialQuantity -
+            (item.creditedQuantity ?? 0);
+
+      };
 
     // L'ajout d'une carte pour une prestation
     const addItem = () => {
@@ -393,6 +408,7 @@ export default function useCreateCreditNote({ invoiceId }: InvoiceDetailsProps) 
         creditNoteItemMap,
         setCreditNoteItemMap,
         filteredItems,
-        syncItems
+        syncItems,
+        getMaxQuantity
     }
 }

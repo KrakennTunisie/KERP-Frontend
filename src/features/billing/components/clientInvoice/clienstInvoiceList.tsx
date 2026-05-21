@@ -123,7 +123,10 @@ export default function ClientsInvoiceList() {
                     </div>
                     <div className="flex gap-2">
                         {invoiceStatusSchema.options
-                        .filter(f => f !== invoiceStatusSchema.enum.REFUNDED && f !== invoiceStatusSchema.enum.NOT_REFUNDED && f!== invoiceStatusSchema.enum.IN_PROGRESS)
+                        .filter(f => f !== invoiceStatusSchema.enum.REFUNDED 
+                            && f !== invoiceStatusSchema.enum.NOT_REFUNDED 
+                            && f!== invoiceStatusSchema.enum.IN_PROGRESS
+                            && f!=invoiceStatusSchema.enum.TO_PAY)
                         .map((f) => (
                             <button
                                 key={f}
@@ -176,14 +179,14 @@ export default function ClientsInvoiceList() {
                             clientsInvoices.map((f, index) => (
                                 <tr
                                     key={index}
-                                    className="border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer"
+                                    className="border-b border-slate-50 hover:bg-slate-50 transition-colors"
                                 >
                                     <td className="px-5 py-4 font-bold text-slate-800">
                                         {f.invoiceNumber}
                                     </td>
                                     <td className="px-5 py-4 text-slate-700">{f.partner.name}</td>
                                     <td className="px-5 py-4">
-                                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${f.invoiceStatus !== "ALL" ? invoiceStatusColors[f.invoiceStatus] : ""
+                                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${f.invoiceStatus !== "ALL" ? invoiceStatusColors[f.invoiceStatus] : ""
                                             }}`}>
                                             {invoiceStatusLabels[f.invoiceStatus]}
                                         </span>
@@ -215,7 +218,7 @@ export default function ClientsInvoiceList() {
                                             {/* Voir */}
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); console.log("view", f.idInvoice); router.push(`/billing/invoices/clients/${f.idInvoice}/details`) }}
-                                                className="p-2 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
+                                                className="p-2 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 cursor-pointer transition-colors"
                                                 title="Voir"
                                             >
                                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -228,7 +231,7 @@ export default function ClientsInvoiceList() {
                                             <button
                                                 disabled={getClientInvoiceAllowedNextStatuses(f.invoiceStatus).length === 0}
                                                 onClick={(e) => { e.stopPropagation(); console.log("edit", f.idInvoice); router.push(`/billing/invoices/clients/${f.idInvoice}/edit`); }}
-                                                className="p-2 rounded-xl bg-amber-50 text-amber-600 hover:bg-amber-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                className="p-2 rounded-xl bg-amber-50 text-amber-600 hover:bg-amber-100 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                                                 title="Modifier"
                                             >
                                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -238,7 +241,7 @@ export default function ClientsInvoiceList() {
                                             <button
                                                 onClick={(e) => {setSelectedInvoice(f); setInvoiceId(f.idInvoice); setUpdateOpen(true)}}
                                                 disabled={getClientInvoiceAllowedNextStatuses(f.invoiceStatus).length === 0}
-                                                className="p-2 rounded-xl bg-violet-50 text-violet-600 hover:bg-violet-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                className="p-2 rounded-xl bg-violet-50 text-violet-600 hover:bg-violet-100 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                                                 title="Mettre à jour le statut"
                                                 >
                                                 <Settings className="w-4 h-4"/>
@@ -246,7 +249,7 @@ export default function ClientsInvoiceList() {
                                             <button
                                                 disabled={getClientInvoiceAllowedNextStatuses(f.invoiceStatus).length === 0}
                                                 onClick={() => { setOpen(true); console.log("send", f.idInvoice); setSelectedInvoice(f) }}
-                                                className="p-2 rounded-xl bg-green-50 text-green-600 hover:bg-green-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                className="p-2 rounded-xl bg-green-50 text-green-600 hover:bg-green-100 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                                                 title="Envoyer"
                                             >
                                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -258,7 +261,7 @@ export default function ClientsInvoiceList() {
                                             <button
                                                 disabled={getClientInvoiceAllowedNextStatuses(f.invoiceStatus).length === 0}
                                                 onClick={(e) => { setDeleteOpen(true); setInvoiceRef(f.invoiceNumber); setInvoiceId(f.idInvoice); console.log("delete", f.idInvoice); }}
-                                                className="p-2 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                className="p-2 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                                                 title="Supprimer"
                                             >
                                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

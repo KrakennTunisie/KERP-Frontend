@@ -15,7 +15,7 @@ export function CreateCreditNote({invoiceId}: InvoiceDetailsProps) {
     const { previewData, form, removeItem, addItem, updateItem, onSubmit, onCloseDocumentModal, createCreditNoteInvoice,
         setItemSearchMap, setShowDropdownMap, itemSearchMap, showDropdownMap, creditNoteItemMap, setCreditNoteItemMap, filteredItems, fields,
         canCreateInvoice, invoiceRef, isModalOpen, TtnModalOpen, setTtnModalOpen, pdfUrl, loadingForm, loadingInvoice, loadingTTN, successMessage, 
-        sent, sendToTTN, router, errors } = useCreateCreditNote({invoiceId});
+        sent, sendToTTN, router, errors, getMaxQuantity } = useCreateCreditNote({invoiceId});
     const { register } = form
     return (
         <div className="flex-1 flex flex-col min-h-0 bg-white">
@@ -263,7 +263,9 @@ export function CreateCreditNote({invoiceId}: InvoiceDetailsProps) {
                                                                 {"QTÉ"}
                                                             </label>
                                                             <input
-                                                                type="text"
+                                                                type="number"
+                                                                min={0}
+                                                                max={getMaxQuantity(creditNoteItemMap[index])}
                                                                 value={creditNoteItemMap[index]?.quantity ?? ""}
                                                                 onChange={(e) => {
                                                                     const val = parseFloat(e.target.value) || 0;
@@ -311,6 +313,7 @@ export function CreateCreditNote({invoiceId}: InvoiceDetailsProps) {
                                                             </label>
                                                             <select
                                                                 value={creditNoteItemMap[index].vatRate}
+                                                                disabled
                                                                 onChange={(e) => {
                                                                     const val = Number(e.target.value);
 
@@ -333,6 +336,9 @@ export function CreateCreditNote({invoiceId}: InvoiceDetailsProps) {
                                                                 ))}
                                                             </select>
                                                         </div>
+                                                            <span className="text-xs text-blue-500">
+                                                                Quantité restant à créditer : {getMaxQuantity(creditNoteItemMap[index])}
+                                                            </span>
                                                     </div>
                                                 )}
                                             </div>

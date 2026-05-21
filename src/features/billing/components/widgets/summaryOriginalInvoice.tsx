@@ -1,6 +1,7 @@
 import { DeepPartial } from "react-hook-form";
 import { z } from "zod"
 import { invoiceCreditNoteSchema } from "../../models/creditNote";
+import { formatDateLong } from "@/shared/utils/formatDate";
 
 type InvoicePreviewProps = {
     data: DeepPartial<z.infer<typeof invoiceCreditNoteSchema>>;
@@ -21,18 +22,13 @@ export default function SummaryOriginalInvoice({ data }: InvoicePreviewProps) {
 
     <div className="pr-5">
       <p className="text-[9px] font-black text-red-300 uppercase tracking-widest mb-1">Numéro</p>
-      <p className="text-sm font-black text-red-500">{data.invoiceCreditNoteNumber ?? "—"}</p>
-      <p className="text-[10px] text-red-300 mt-0.5">{data.originalInvoice?.invoiceNumber ?? ""}</p>
+      <p className="text-sm font-black text-red-500">{data.originalInvoice?.invoiceNumber  ?? "—"}</p>
     </div>
 
     <div className="px-5">
       <p className="text-[9px] font-black text-red-300 uppercase tracking-widest mb-1">{"Date d'émission"}</p>
       <p className="text-sm font-black text-red-900">
-        {data.issueDate
-          ? new Intl.DateTimeFormat("fr-FR", {
-              day: "2-digit", month: "short", year: "numeric",
-            }).format(new Date(data.issueDate))
-          : "—"}
+        {formatDateLong(data.originalInvoice?.issueDate)}
       </p>
     </div>
 
@@ -46,11 +42,11 @@ export default function SummaryOriginalInvoice({ data }: InvoicePreviewProps) {
       <p className="text-[9px] font-black text-red-300 uppercase tracking-widest mb-1">Montant TTC</p>
       <p className="text-base font-black text-red-900 tracking-tight">
         {
-              data?.originalInvoice?.totalInclTax != null
-                ? new Intl.NumberFormat("fr-TN").format(
-                  data.originalInvoice.totalInclTax
-                )
-                : "—"
+          data.originalInvoice?.invoiceCurrency == "EUR" 
+                ? data.originalInvoice?.totalInclTaxEUR
+                : data.originalInvoice?.invoiceCurrency =="TND" 
+                    ? data.originalInvoice?.totalInclTaxTND 
+                    :data.originalInvoice?.totalInclTaxUSD 
             }{" "}
         <span className="text-xs font-bold text-red-300">{data.originalInvoice?.invoiceCurrency ?? ""}</span>
       </p>

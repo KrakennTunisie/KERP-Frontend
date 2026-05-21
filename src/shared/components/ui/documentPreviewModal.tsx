@@ -80,7 +80,7 @@ export function DocumentPreviewModal({
           onClick={() => {
             if (!loading) onCreateInvoice();
           }}
-          className={`px-5 py-3 rounded-2xl text-white font-black inline-flex items-center gap-2
+          className={`px-5 py-3 rounded-2xl text-white font-black inline-flex items-center gap-2 cursor-pointer
             ${loading
               ? "bg-gray-400 cursor-not-allowed"
               : "bg-blue-600 hover:bg-blue-700"

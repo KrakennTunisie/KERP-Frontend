@@ -142,10 +142,10 @@ export default function SuppliersPurchaseOrderList() {
                                 </td>
                             </tr>
                         ) : (
-                            purchaseOrders.map((f) => (
+                            purchaseOrders.map((f, index) => (
                                 <tr
-                                    key={1}
-                                    className="border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer"
+                                    key={index}
+                                    className="border-b border-slate-50 hover:bg-slate-50 transition-colors"
                                 >
                                     <td className="px-5 py-4 font-bold text-slate-800">
                                         {f.purchaseOrderNumber}
@@ -166,7 +166,7 @@ export default function SuppliersPurchaseOrderList() {
                                             {/* Voir */}
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); setOpen(true) ;setIdPurchaseOrder(f.idPurchaseOrder)}}
-                                                className="p-2 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
+                                                className="p-2 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors cursor-pointer"
                                                 title="Voir"
                                             >
                                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -178,7 +178,7 @@ export default function SuppliersPurchaseOrderList() {
                                             <button
                                                 onClick={(e) => { setSelectedPurchaseOrder(f); setIdPurchaseOrder(f.idPurchaseOrder); setUpdateOpen(true) }}
                                                 disabled={getClientPurchaseOrderAllowedNextStatuses(f.purchaseOrderStatus).length === 0}
-                                                className="p-2 rounded-xl bg-violet-50 text-violet-600 hover:bg-violet-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                className="p-2 rounded-xl bg-violet-50 text-violet-600 hover:bg-violet-100 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                                                 title="Mettre à jour le statut"
                                             >
                                                 <Settings className="w-4 h-4" />
@@ -187,7 +187,7 @@ export default function SuppliersPurchaseOrderList() {
                                             <button
                                                 disabled={f.purchaseOrderStatus != purchaseOrderStatusSchema.enum.DRAFT}
                                                 onClick={(e) => { setDeleteOpen(true); setInvoiceRef(f.idPurchaseOrder); setIdPurchaseOrder(f.idPurchaseOrder); console.log("delete", f.idPurchaseOrder); }}
-                                                className="p-2 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                className="p-2 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                                                 title="Supprimer"
                                             >
                                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

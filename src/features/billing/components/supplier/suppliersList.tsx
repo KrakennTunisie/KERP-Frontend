@@ -17,9 +17,12 @@ import { partnersApi } from "../../api/partners-api";
 import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 import { appToast } from "@/shared/lib/toast";
 import { useDebounce } from "@/shared/hooks/useDebounce";
+import { useRouter } from 'next/navigation';
 
 
 export default function SuppliersList() {
+
+  const router = useRouter()
 
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCity, setFilterCity] = useState<string>('all');
@@ -107,7 +110,8 @@ useEffect(() => {
           </div>
           
           <button
-            onClick={() => setShowAddModal(true)}
+           // onClick={() => setShowAddModal(true)}
+            onClick={()=>router.push("/billing/suppliers/new")}
             className="flex items-center gap-2 px-8 py-4 bg-gray-900 text-white rounded-[20px] hover:bg-black transition-all font-black text-sm shadow-xl shadow-gray-200 cursor-pointer"
           >
             <Plus className="w-5 h-5" />

@@ -198,7 +198,7 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
                                         <td className="text-right text-sm text-slate-600 py-4">{item?.quantity}</td>
                                         <td className="text-right text-sm text-slate-600 py-4">{item?.unityPriceEXclTax?.toFixed(2)}</td>
                                         <td className="text-right text-sm font-bold text-slate-800 py-4">
-                                            {item?.itemTotalExclTax?.toFixed(2)}
+                                            {item?.itemTotalExclTax}
                                         </td>
                                     </tr>
                                 ));
@@ -232,14 +232,14 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
                     <div className="w-64 flex flex-col gap-2">
                         <div className="flex justify-between text-sm">
                             <span className="text-slate-500 font-medium">Total HT</span>
-                            <span className="font-bold text-slate-800">{data.totalExclTax?.toFixed(2)}
+                            <span className="font-bold text-slate-800">{data.totalExclTax?.toFixed(2)+" "}
                                 {isCredit ? data.originalInvoice?.invoiceCurrency : data.invoiceCurrency}
                             </span>
                         </div>
                         <div className="flex justify-between text-sm">
                             <span className="text-slate-500 font-medium">Total TVA</span>
                             <span className="font-bold text-slate-800">
-                                {data?.totalInclTax && data?.totalExclTax && (data?.totalInclTax - data?.totalExclTax).toFixed(2)}
+                                {data?.totalInclTax && data?.totalExclTax && (data?.totalInclTax - data?.totalExclTax).toFixed(2)+" "}
                                 {isCredit ? data.originalInvoice?.invoiceCurrency : data.invoiceCurrency}
                             </span>
                         </div>

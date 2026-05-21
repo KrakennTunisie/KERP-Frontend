@@ -261,7 +261,7 @@ export function PurchaseOrderModalContent({
                 {item.unityPriceEXclTax}
               </p>
               <p className="text-sm font-bold text-gray-900 text-right">
-                {item.itemTotalExclTax}
+                {item.quantity * item.unityPriceEXclTax}
               </p>
             </div>
           ))}

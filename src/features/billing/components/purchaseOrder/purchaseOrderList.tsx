@@ -10,13 +10,14 @@ import { mockInvoiceItems } from "../../mocks/invoice-items-mocks";
 import { ChevronLeft, ChevronRight, Settings } from "lucide-react";
 import { UpdateInvoiceStatusModal } from "../widgets/updateStatusModal";
 import PageLoader from "@/shared/components/ui/pageLoader";
+import { SendInvoiceModal } from "../widgets/sendInvoiceModal";
 
 export default function PurchaseOrderList() {
 
     const { router, search, setSearch, deleteOpen, setDeleteOpen, purchaseOrders, totalElements, totalPages, deletePurchaseOrder, setIdPurchaseOrder, idPurchaseOrder,updateLoading,setNextStatus,setUpdateLoading,nextStatus
         , filtre, setFiltre, invoiceRef, setInvoiceRef, open, setOpen,updateOpen,setUpdateOpen,selectedPurchaseOrder,setSelectedPurchaseOrder,updateStatus,     setCurrentPage,
-    currentPage,
-    loading, } = usePurchaseOrderList();
+    currentPage, openSendMail, setOpenSendMail,
+    loading } = usePurchaseOrderList();
     return (
         <div className="min-h-screen bg-gray-50 p-8 font-sans">
             {/* Header */}
@@ -30,7 +31,7 @@ export default function PurchaseOrderList() {
                     </p>
                 </div>
                 <Link
-                    href="/billing/purchaseOrder/create"
+                    href="/billing/purchaseOrder/clients/create"
                     className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 transition-colors text-white font-bold px-6 py-3 rounded-xl shadow-md text-sm"
                 >
                     <span className="text-lg leading-none">+</span>
@@ -72,6 +73,12 @@ export default function PurchaseOrderList() {
                         : []
                 }
                 isSubmitting={updateLoading}
+            />
+
+            <SendInvoiceModal
+                invoice={selectedPurchaseOrder}
+                isOpen={openSendMail}
+                onClose={() => setOpenSendMail(false)}
             />
 
             {/* Table card */}
@@ -145,7 +152,7 @@ export default function PurchaseOrderList() {
                             purchaseOrders.map((f, index) => (
                                 <tr
                                     key={index}
-                                    className="border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer"
+                                    className="border-b border-slate-50 hover:bg-slate-50 transition-colors"
                                 >
                                     <td className="px-5 py-4 font-bold text-slate-800">
                                         {f.purchaseOrderNumber}
@@ -170,7 +177,7 @@ export default function PurchaseOrderList() {
                                             {/* Voir */}
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); setOpen(true); setIdPurchaseOrder(f.idPurchaseOrder); setInvoiceRef(f.purchaseOrderNumber) }}
-                                                className="p-2 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
+                                                className="p-2 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 cursor-pointer transition-colors"
                                                 title="Voir"
                                             >
                                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -182,7 +189,7 @@ export default function PurchaseOrderList() {
                                             {/* Modifier */}
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); console.log("edit", f.idPurchaseOrder); router.push(`/billing/purchaseOrder/${f.idPurchaseOrder}/edit`); }}
-                                                className="p-2 rounded-xl bg-amber-50 text-amber-600 hover:bg-amber-100 transition-colors"
+                                                className="p-2 rounded-xl bg-amber-50 text-amber-600 hover:bg-amber-100 cursor-pointer transition-colors"
                                                 title="Modifier"
                                             >
                                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -193,10 +200,21 @@ export default function PurchaseOrderList() {
                                             <button
                                                 onClick={(e) => { setSelectedPurchaseOrder(f); setIdPurchaseOrder(f.idPurchaseOrder); setUpdateOpen(true)}}
                                                 disabled={getClientPurchaseOrderAllowedNextStatuses(f.purchaseOrderStatus).length === 0}
-                                                className="p-2 rounded-xl bg-violet-50 text-violet-600 hover:bg-violet-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                className="p-2 rounded-xl bg-violet-50 text-violet-600 hover:bg-violet-100 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                                                 title="Mettre à jour le statut"
                                             >
                                                 <Settings className="w-4 h-4" />
+                                            </button>
+
+                                            <button
+                                                disabled={f.purchaseOrderStatus === purchaseOrderStatusSchema.enum.DRAFT}
+                                                onClick={() => { setOpenSendMail(true); console.log("send", f.idPurchaseOrder); setSelectedPurchaseOrder(f) }}
+                                                className="p-2 rounded-xl bg-green-50 text-green-600 hover:bg-green-100 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                                title="Envoyer"
+                                            >
+                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12zm0 0h7.5" />
+                                                </svg>
                                             </button>
                                             {/* Supprimer */}
                                             <button
