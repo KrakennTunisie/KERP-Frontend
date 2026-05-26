@@ -243,7 +243,7 @@ export default function CreateInvoiceClient({ mode,
                                                         {selectedPO.purchaseOrderNumber}
                                                     </p>
                                                     <p className="text-xs text-blue-500 mt-0.5 truncate">
-                                                        {selectedPO.partner?.name}
+                                                        {selectedPO.partner?.partnerName}
                                                     </p>
                                                 </div>
 
@@ -299,8 +299,8 @@ export default function CreateInvoiceClient({ mode,
                                                 }}
                                                 className="w-full text-left px-4 py-3 hover:bg-blue-50 transition border-b border-slate-50 last:border-0"
                                             >
-                                                <p className="text-sm font-bold text-slate-800">{client.name}</p>
-                                                <p className="text-xs text-slate-400 mt-0.5">{client.address}</p>
+                                                <p className="text-sm font-bold text-slate-800">{client.partnerName}</p>
+                                                <p className="text-xs text-slate-400 mt-0.5">{client.billingAddress.region}</p>
                                             </button>
                                         ))}
                                     </div>
@@ -309,7 +309,7 @@ export default function CreateInvoiceClient({ mode,
                             {previewData.partner && (
                                 <div className="border-2 border-blue-100 bg-blue-50/40 rounded-xl p-4">
                                     <div className="flex items-start justify-between">
-                                        <p className="font-bold text-blue-700 text-sm">{previewData.partner.name}</p>
+                                        <p className="font-bold text-blue-700 text-sm">{previewData.partner.partnerName}</p>
                                         <button
                                             type="button"
                                             onClick={clearClient}
@@ -321,7 +321,7 @@ export default function CreateInvoiceClient({ mode,
                                             </svg>
                                         </button>
                                     </div>
-                                    <p className="text-xs text-blue-500 mt-0.5">{previewData.partner.address}</p>
+                                    <p className="text-xs text-blue-500 mt-0.5">{previewData.partner.billingAddress.region}</p>
                                     <div className="flex items-center gap-4 mt-2">
                                         <span className="flex items-center gap-1 text-[10px] font-bold text-blue-500 uppercase tracking-wide">
                                             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -333,7 +333,7 @@ export default function CreateInvoiceClient({ mode,
                                             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                                             </svg>
-                                            {previewData.partner.phoneNumber}
+                                            {previewData.partner.professionnalPhoneNumber}
                                         </span>
                                     </div>
                                 </div>

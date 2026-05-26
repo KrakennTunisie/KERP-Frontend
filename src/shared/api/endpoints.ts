@@ -89,3 +89,6 @@ export const MAILING_ENDPOINTS={
   sendEmailPurchaseOrder:(id: string )=>`/mailing/purchase-order/${id}/send-email`,
 
 }
+export const  AUDITLOGS_ENDPOINTS = {
+ getAuditLogsByIdClient: (id: string) => `/logs/logs-clients/${id}`, 
+}  

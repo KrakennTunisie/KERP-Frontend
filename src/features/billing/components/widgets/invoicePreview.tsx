@@ -117,8 +117,8 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
                             </p>
                             {partner ? (
                                 <>
-                                    <p className="text-base font-bold text-slate-900">{partner.name}</p>
-                                    <p className="text-sm text-slate-500 mt-0.5">{partner.address}</p>
+                                    <p className="text-base font-bold text-slate-900">{partner.companyName}</p>
+                                    <p className="text-sm text-slate-500 mt-0.5">{partner.billingAddress?.region}</p>
                                     <p className="text-sm font-bold text-black mt-2">{partner.email}</p>
                                 </>
                             ) : (

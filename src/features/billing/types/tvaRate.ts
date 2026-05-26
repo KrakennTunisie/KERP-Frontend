@@ -7,7 +7,7 @@ export const tvaRateSchema = z.union([
     z.literal(19),
 ]);
 
-export const tvaRateStirngSchema = z.union([
+export const tvaRateStringSchema = z.union([
     z.literal("0"),
     z.literal("7"),
     z.literal("13"),
@@ -17,4 +17,4 @@ export const tvaRateStirngSchema = z.union([
 
 export type TvaRate = z.infer<typeof tvaRateSchema>;
 
-export type TvaRateString = z.infer<typeof tvaRateStirngSchema>;
+export type TvaRateString = z.infer<typeof tvaRateStringSchema>;

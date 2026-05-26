@@ -17,7 +17,7 @@ export function useClientInvoiceList () {
       const value = searchParams.get("client") ?? "";
 
     const [search, setSearch] = useState(value);
-    const [filtre, setFiltre] = useState<InvoiceStatus>();
+    const [filtre, setFiltre] = useState<InvoiceStatus>("ALL");
     const [loading, setLoading]= useState(false)
     const [deleteLoading, setDeleteLoading]= useState(false)
     const [updateLoading, setUpdateLoading]= useState(false)

@@ -14,40 +14,47 @@ export function KpiCard({
   footer: string;
 }) {
   const styles = {
-    blue: "from-blue-50 to-blue-100/50 border-blue-200 text-blue-900 bg-blue-600",
-    emerald:
-      "from-emerald-50 to-emerald-100/50 border-emerald-200 text-emerald-900 bg-emerald-600",
-    purple:
-      "from-purple-50 to-purple-100/50 border-purple-200 text-purple-900 bg-purple-600",
-    amber:
-      "from-amber-50 to-amber-100/50 border-amber-200 text-amber-900 bg-amber-600",
+    blue: "bg-blue-600 text-white shadow-blue-100",
+    emerald: "bg-emerald-600 text-white shadow-emerald-100",
+    purple: "bg-purple-600 text-white shadow-purple-100",
+    amber: "bg-amber-500 text-white shadow-amber-100",
   };
 
-  const [gradient, , border, text, bg] = styles[color].split(" ");
-
   return (
-    <div className={`rounded-[32px] border bg-gradient-to-br ${gradient} ${border} p-6`}>
-      <div className="mb-4 flex items-center gap-3">
-        <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${bg}`}>
-          {icon}
-        </div>
-        <p className={`text-xs font-black uppercase tracking-widest ${text}`}>
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-200 hover:border-slate-300 hover:shadow-md">
+      <div className="mb-3 flex items-start justify-between gap-3">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">
           {title}
         </p>
+
+        <div
+          className={`
+            flex h-10 w-10 shrink-0 items-center justify-center
+            rounded-xl shadow-sm
+            ring-1 ring-black/5
+            [&_svg]:h-5 [&_svg]:w-5
+            ${styles[color]}
+          `}
+        >
+          {icon}
+        </div>
       </div>
 
-      <p className={`text-2xl font-black tracking-tighter ${text}`}>{value}</p>
-
-      {secondValue && (
-        <p className={`text-xl font-black tracking-tighter ${text}`}>
-          {secondValue}
+      <div className="space-y-0.5">
+        <p className="text-xl font-semibold leading-tight tracking-tight text-slate-900">
+          {value}
         </p>
-      )}
 
-      <p className={`mt-2 text-[10px] font-bold uppercase ${text}`}>{footer}</p>
+        {secondValue && (
+          <p className="text-sm font-medium leading-tight text-slate-600">
+            {secondValue}
+          </p>
+        )}
+      </div>
+
+      <p className="mt-3 text-[11px] font-medium leading-snug text-slate-500">
+        {footer}
+      </p>
     </div>
   );
 }
-
-
-

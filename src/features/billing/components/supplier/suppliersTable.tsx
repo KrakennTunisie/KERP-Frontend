@@ -45,7 +45,7 @@ export default function SuppliersTable({
             <Truck className="w-5 h-5 text-emerald-600" />
           </div>
           <div>
-            <p className="text-sm font-black text-gray-900">{supplier.name}</p>
+            <p className="text-sm font-medium text-gray-900">{supplier.name}</p>
             <p className="text-[10px] font-bold text-gray-500 uppercase tracking-tighter">
               {supplier.address}
             </p>
@@ -57,7 +57,7 @@ export default function SuppliersTable({
       key: "identifier",
       header: "Matricule Fiscal",
       cell: (supplier) => (
-        <p className="text-sm font-black text-gray-900">
+        <p className="text-sm font-medium text-gray-900">
           {supplier.taxRegistrationNumber}
         </p>
       ),
@@ -67,8 +67,8 @@ export default function SuppliersTable({
       header: "Localisation",
       cell: (supplier) => (
         <>
-          <p className="text-sm font-bold text-gray-900">{supplier.country}</p>
-          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-tighter">
+          <p className="text-sm font-medium text-gray-900">{supplier.country}</p>
+          <p className="text-[10px] font-medium text-gray-500 uppercase tracking-tighter">
             • {supplier.country}
           </p>
         </>
@@ -80,13 +80,13 @@ export default function SuppliersTable({
       cell: (supplier) => (
         <div className="space-y-1">
           {supplier.email && (
-            <div className="flex items-center gap-2 text-xs font-bold text-gray-600">
+            <div className="flex items-center gap-2 text-xs font-medium text-gray-600">
               <Mail className="w-3 h-3" />
               <span>{supplier.email}</span>
             </div>
           )}
           {supplier.phoneNumber && (
-            <div className="flex items-center gap-2 text-xs font-bold text-gray-600">
+            <div className="flex items-center gap-2 text-xs font-medium text-gray-600">
               <Phone className="w-3 h-3" />
               <span>{supplier.phoneNumber}</span>
             </div>

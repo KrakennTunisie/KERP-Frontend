@@ -18,7 +18,7 @@ export default function useSupplierInvoiceList (){
 
   const supplier = searchParams.get("supplier") ?? "";
     const [search, setSearch] = useState(supplier);
-    const [filtre, setFiltre] = useState<InvoiceStatus>();
+    const [filtre, setFiltre] = useState<InvoiceStatus>("ALL");
     const [loading, setLoading]= useState(false)
     const [deleteLoading, setDeleteLoading]= useState(false)
     const [updateLoading, setUpdateLoading]= useState(false)

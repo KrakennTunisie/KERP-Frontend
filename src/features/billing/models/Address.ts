@@ -13,6 +13,18 @@ export const addressSchema = z.object({
  
   
 });
+export const getAddressSchema = z.object({
+  idAddress: z.uuid().or(z.string()),
+  region: z.string().min(1),
+  state: z.string().min(1),
+  street: z.string().min(1),
+  street2: z.string().min(1),
+  city: z.string().min(1),
+  zipCode: z.string(),
+  addressType : z.string().nullable()
+ 
+  
+});
 export const addAddressSchema = addressSchema.pick({
  
   region: true,

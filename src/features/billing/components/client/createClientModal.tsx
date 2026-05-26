@@ -1,7 +1,6 @@
 "use client";
 
 import PartnerForm from "../partner/partnerForm";
-import { CreateClientPartner, createClientPartnerSchema } from "../../models/partner";
 import { Modal } from "@/shared/components/ui/modal";
 import { SubmitHandler } from "react-hook-form";
 import { appToast } from "@/shared/lib/toast";
@@ -17,7 +16,7 @@ type Props = {
 
 export default function ClientCreateModal({ open, onClose, onCreated}: Props) {
       
-  const onSubmit: SubmitHandler<CreateClientPartner> = async (values) => {
+  /*const onSubmit: SubmitHandler<CreateClientPartner> = async (values) => {
         try {
           const formData = new FormData();
 
@@ -57,8 +56,8 @@ export default function ClientCreateModal({ open, onClose, onCreated}: Props) {
       title="Ajouter un client"
       onClose={onClose}
     >
-      <PartnerForm
-        schema={createClientPartnerSchema}
+     /* <PartnerForm
+        schema={}
         submitLabel="Ajouter"
         defaultValues={{
           partnerType: "CLIENT",
@@ -66,5 +65,5 @@ export default function ClientCreateModal({ open, onClose, onCreated}: Props) {
         onSubmit={onSubmit}
       />
     </Modal>
-  );
+  );*/
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import PartnerForm from "../partner/partnerForm";
-import { SupplierPartnerItem, UpdatePartner, updatePartnerSchema } from "../../models/partner";
+
 import { Modal } from "@/shared/components/ui/modal";
 import { SubmitHandler } from "react-hook-form";
 import { appToast } from "@/shared/lib/toast";
@@ -11,13 +11,13 @@ import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 
 type Props = {
   open: boolean;
-  data: SupplierPartnerItem;
+
   onClose: () => void;
   onCreated: () => void; // refresh list, etc.
 };
 
-export default function SupplierUpdateModal({ open, onClose, onCreated, data }: Props) {
-      const onSubmit: SubmitHandler<UpdatePartner> = async (values) => {
+export default function SupplierUpdateModal({ open, onClose, onCreated,}: Props) {
+ /*    const onSubmit: SubmitHandler<UpdatePartner> = async (values) => {
         try {
           const updatedSupplier = await partnersApi.updateSupplier(data.idPartner, values);
 
@@ -49,5 +49,5 @@ export default function SupplierUpdateModal({ open, onClose, onCreated, data }: 
         type="update"
       />
     </Modal>
-  );
+  );*/
 }

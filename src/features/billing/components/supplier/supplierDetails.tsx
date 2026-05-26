@@ -13,7 +13,7 @@ import { InvoicePageItem } from "../../models/invoice";
 import { NotFound } from "@/shared/components/widgets/notFound";
 
 export default function SupplierDetails(){
-  const params = useParams();
+ /* const params = useParams();
 
   const supplierId = params?.supplierId as string;
     const [supplierInvoiceStats, setSupplierInvoiceStats]=useState<PartnerInvoiceStats>({
@@ -91,6 +91,6 @@ export default function SupplierDetails(){
                 partnerInvoices={supplierInvoices}
             />
         )
-      }
+      }*/
 
 }

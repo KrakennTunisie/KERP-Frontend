@@ -15,14 +15,14 @@ import { OperationCategoryLabels } from "../../types/operationCategory"
 import PageLoader from "@/shared/components/ui/pageLoader"
 
 export default function ClientInvoiceDetails({ invoiceId, type }: InvoiceDetailsProps) {
-    const {   client, invoice, previewDocument, setPreviewDocument, sendToTTN, TtnModalOpen, setTtnModalOpen,
-        hasCreditInvoice,loading, sent, successMessage, router, updateStatus } = useClientInvoiceDetails({ invoiceId, type });
+    const { client, invoice, previewDocument, setPreviewDocument, sendToTTN, TtnModalOpen, setTtnModalOpen,
+        hasCreditInvoice, loading, sent, successMessage, router, updateStatus } = useClientInvoiceDetails({ invoiceId, type });
 
-        if(loading){
-            return(
-                <PageLoader label="Chargement de facture ..."/>
-            )
-        }
+    if (loading) {
+        return (
+            <PageLoader label="Chargement de facture ..." />
+        )
+    }
     return (
         <div className="min-h-screen bg-gray-50 font-sans">
 
@@ -40,9 +40,9 @@ export default function ClientInvoiceDetails({ invoiceId, type }: InvoiceDetails
                         <div className="flex items-center gap-2.5">
                             <span className="text-[22px] font-extrabold tracking-tight text-gray-900">{invoice?.invoiceNumber}</span>
                             <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-wide bg-amber-50 text-amber-600 border border-amber-200">
-                                    {invoice?.invoiceStatus
+                                {invoice?.invoiceStatus
                                     ? invoiceStatusLabels[invoice.invoiceStatus]
-                                    : '-'}                            
+                                    : '-'}
                             </span>
                         </div>
                         <p className="text-xs text-gray-400 mt-0.5">Emise le {formatDateLong(invoice?.issueDate)} · Échéance le {formatDateLong(invoice?.dueDate)}</p>
@@ -78,25 +78,25 @@ export default function ClientInvoiceDetails({ invoiceId, type }: InvoiceDetails
                                 )}
                             </div>
                             {/* Bouton envoi TTN — visible seulement si pas encore envoyée */}
-                                <button
-                                    disabled={invoice?.invoiceStatus==invoiceStatusSchema.enum.DRAFT}
-                                    onClick={() => { setTtnModalOpen(true) }}
-                                    className="shrink-0 px-4 py-2 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2" >
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        className="h-4 w-4"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="2"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                    >
-                                        <line x1="22" y1="2" x2="11" y2="13" />
-                                        <polygon points="22 2 15 22 11 13 2 9 22 2" />
-                                    </svg>
-                                    {"Envoyer au TTN"}
-                                </button>
+                            <button
+                                disabled={invoice?.invoiceStatus == invoiceStatusSchema.enum.DRAFT}
+                                onClick={() => { setTtnModalOpen(true) }}
+                                className="shrink-0 px-4 py-2 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2" >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-4 w-4"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                >
+                                    <line x1="22" y1="2" x2="11" y2="13" />
+                                    <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                                </svg>
+                                {"Envoyer au TTN"}
+                            </button>
                         </div>
                     </Card>
                     {/* Modal pour demander au user s'il veut envoyer la Facture au TTN */}
@@ -114,51 +114,51 @@ export default function ClientInvoiceDetails({ invoiceId, type }: InvoiceDetails
                         <SectionLabel>Actions rapides</SectionLabel>
                         <div className="grid grid-cols-2 gap-3">
                             {hasCreditInvoice ?
-                             <button
-                                onClick={() => 
-                                    type=="CLIENT" ?
-                                    router.push(`/billing/invoices/clients/${invoiceId}/credit-note`)
-                                    :router.push(`/billing/invoices/suppliers/${invoiceId}/credit-note`)
-                                }
-                                className="flex items-center justify-center gap-2 py-3.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-600 text-sm font-bold hover:brightness-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-                                <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                                    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-                                    <polyline points="14 2 14 8 20 8" />
-                                    <line x1="9" y1="15" x2="15" y2="15" />
-                                </svg>
-                                {"Liste facture d'avoir"}
-                            </button> :
-                            type=="CLIENT" ?
-                            <button
-                                onClick={() => router.push(`/billing/invoices/clients/${invoiceId}/credit-note/create`)}
-                                disabled={invoice?.invoiceStatus ===invoiceStatusSchema.enum.PAID || invoice?.invoiceStatus === invoiceStatusSchema.enum.DRAFT}
-                                className="flex items-center justify-center gap-2 py-3.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-600 text-sm font-bold hover:brightness-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-                                <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                                    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-                                    <polyline points="14 2 14 8 20 8" />
-                                    <line x1="9" y1="15" x2="15" y2="15" />
-                                </svg>
-                                {"Créer Avoir"}
-                            </button>
-                            :
-                            <button
-                                disabled={!hasCreditInvoice}
-                                onClick={() => 
-                                    type=="CLIENT" ?
-                                    router.push(`/billing/invoices/clients/${invoiceId}/credit-note`)
-                                    :router.push(`/billing/invoices/suppliers/${invoiceId}/credit-note`)
-                                }
-                                className="flex items-center justify-center gap-2 py-3.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-600 text-sm font-bold hover:brightness-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-                                <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                                    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-                                    <polyline points="14 2 14 8 20 8" />
-                                    <line x1="9" y1="15" x2="15" y2="15" />
-                                </svg>
-                                {"Liste facture d'avoir"}
-                            </button>
+                                <button
+                                    onClick={() =>
+                                        type == "CLIENT" ?
+                                            router.push(`/billing/invoices/clients/${invoiceId}/credit-note`)
+                                            : router.push(`/billing/invoices/suppliers/${invoiceId}/credit-note`)
+                                    }
+                                    className="flex items-center justify-center gap-2 py-3.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-600 text-sm font-bold hover:brightness-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                                        <polyline points="14 2 14 8 20 8" />
+                                        <line x1="9" y1="15" x2="15" y2="15" />
+                                    </svg>
+                                    {"Liste facture d'avoir"}
+                                </button> :
+                                type == "CLIENT" ?
+                                    <button
+                                        onClick={() => router.push(`/billing/invoices/clients/${invoiceId}/credit-note/create`)}
+                                        disabled={invoice?.invoiceStatus === invoiceStatusSchema.enum.PAID || invoice?.invoiceStatus === invoiceStatusSchema.enum.DRAFT}
+                                        className="flex items-center justify-center gap-2 py-3.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-600 text-sm font-bold hover:brightness-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                                        <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                                            <polyline points="14 2 14 8 20 8" />
+                                            <line x1="9" y1="15" x2="15" y2="15" />
+                                        </svg>
+                                        {"Créer Avoir"}
+                                    </button>
+                                    :
+                                    <button
+                                        disabled={!hasCreditInvoice}
+                                        onClick={() =>
+                                            type == "CLIENT" ?
+                                                router.push(`/billing/invoices/clients/${invoiceId}/credit-note`)
+                                                : router.push(`/billing/invoices/suppliers/${invoiceId}/credit-note`)
+                                        }
+                                        className="flex items-center justify-center gap-2 py-3.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-600 text-sm font-bold hover:brightness-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                                        <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                                            <polyline points="14 2 14 8 20 8" />
+                                            <line x1="9" y1="15" x2="15" y2="15" />
+                                        </svg>
+                                        {"Liste facture d'avoir"}
+                                    </button>
                             }
                             <button
-                                disabled={invoice?.invoiceStatus ===invoiceStatusSchema.enum.PAID || invoice?.invoiceStatus ===invoiceStatusSchema.enum.DRAFT}
+                                disabled={invoice?.invoiceStatus === invoiceStatusSchema.enum.PAID || invoice?.invoiceStatus === invoiceStatusSchema.enum.DRAFT}
                                 onClick={updateStatus}
                                 className={`flex items-center justify-center gap-2 py-3.5 rounded-xl border text-sm font-bold transition-all bg-blue-100 border-blue-300 hover:brightness-95 text-blue-700 disabled:opacity-50 disabled:cursor-not-allowed`}
                             >
@@ -183,16 +183,16 @@ export default function ClientInvoiceDetails({ invoiceId, type }: InvoiceDetails
                                     </svg>
                                 </div>
                                 <div>
-                                    <p className="font-bold text-gray-900 text-sm">{invoice?.partner?.name}</p>
+                                    <p className="font-bold text-gray-900 text-sm">{invoice?.partner?.partnerName}</p>
                                     <p className="text-xs text-gray-500 mt-1 leading-5">
-                                        {invoice?.partner?.address}<br />{invoice?.partner?.country}
+                                        {invoice?.partner?.billingAddress.region}<br />{invoice?.partner?.billingAddress.region}
                                     </p>
                                 </div>
                             </div>
                             <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-gray-100">
                                 <div>
                                     <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Téléphone</p>
-                                    <p className="text-xs font-bold text-gray-900 font-mono">{invoice?.partner?.phoneNumber}</p>
+                                    <p className="text-xs font-bold text-gray-900 font-mono">{invoice?.partner?.professionnalPhoneNumber}</p>
                                 </div>
                                 <div>
                                     <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Contact</p>
@@ -205,11 +205,11 @@ export default function ClientInvoiceDetails({ invoiceId, type }: InvoiceDetails
                             <SectionLabel>Détails administratifs</SectionLabel>
                             <div className="grid grid-cols-2 gap-3">
 
-                               {invoice?.purchaseOrder &&
-                                <div key="Bon du commande">
-                                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Bon du commande</p>
-                                    <p className="text-sm font-bold text-gray-900">{invoice.purchaseOrder.purchaseOrderNumber}</p>
-                                </div>}
+                                {invoice?.purchaseOrder &&
+                                    <div key="Bon du commande">
+                                        <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Bon du commande</p>
+                                        <p className="text-sm font-bold text-gray-900">{invoice.purchaseOrder.purchaseOrderNumber}</p>
+                                    </div>}
                                 <div key="Méthode de paiement">
                                     <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Méthode de paiement</p>
                                     <p className="text-sm font-bold text-gray-900">{invoice?.paymentMethod ? paymentMethodLabels[invoice.paymentMethod] : '-'}</p>
@@ -252,7 +252,7 @@ export default function ClientInvoiceDetails({ invoiceId, type }: InvoiceDetails
                                     <div>
                                         <p className="text-sm font-semibold text-gray-900">{item.description}</p>
                                         <p className="text-xs text-gray-400 mt-0.5">{item.vatRate + '%'}</p>
-                                         <p className="text-xs text-gray-400 mt-0.5">{OperationCategoryLabels[item.operationCategory]}</p>
+                                        <p className="text-xs text-gray-400 mt-0.5">{OperationCategoryLabels[item.operationCategory]}</p>
                                     </div>
                                     <p className="text-sm text-gray-700 text-right">{item.quantity}</p>
                                     <p className="text-sm text-gray-700 text-right">{item.unityPriceEXclTax}</p>
@@ -263,19 +263,23 @@ export default function ClientInvoiceDetails({ invoiceId, type }: InvoiceDetails
 
                         <div className="mt-4 flex flex-col items-end gap-2">
                             {[
-                                { label: 'Sous-total HT', value: invoice?.invoiceCurrency == "EUR" 
-                                                                            ? invoice.totalExclTaxEUR 
-                                                                            : invoice?.invoiceCurrency =="TND" 
-                                                                                ? invoice.totalExclTaxTND
-                                                                                :invoice?.totalExclTaxUSD},
-                                { label: 'Total TVA', value: invoice?.invoiceCurrency == "EUR" 
-                                                                            ? (invoice.totalInclTaxEUR - invoice.totalExclTaxEUR).toFixed(2)
-                                                                            : invoice?.invoiceCurrency =="TND" 
-                                                                                ? (invoice.totalInclTaxTND - invoice.totalExclTaxTND).toFixed(2)
-                                                                                :
-                                                                                 invoice?.invoiceCurrency =="USD" 
-                                                                                 ? (invoice?.totalInclTaxUSD - invoice?.totalExclTaxUSD).toFixed(2)
-                                                                                 :0},
+                                {
+                                    label: 'Sous-total HT', value: invoice?.invoiceCurrency == "EUR"
+                                        ? invoice.totalExclTaxEUR
+                                        : invoice?.invoiceCurrency == "TND"
+                                            ? invoice.totalExclTaxTND
+                                            : invoice?.totalExclTaxUSD
+                                },
+                                {
+                                    label: 'Total TVA', value: invoice?.invoiceCurrency == "EUR"
+                                        ? (invoice.totalInclTaxEUR - invoice.totalExclTaxEUR).toFixed(2)
+                                        : invoice?.invoiceCurrency == "TND"
+                                            ? (invoice.totalInclTaxTND - invoice.totalExclTaxTND).toFixed(2)
+                                            :
+                                            invoice?.invoiceCurrency == "USD"
+                                                ? (invoice?.totalInclTaxUSD - invoice?.totalExclTaxUSD).toFixed(2)
+                                                : 0
+                                },
                             ].map(({ label, value }) => (
                                 <div key={label} className="flex justify-between w-64">
                                     <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">{label}</span>
@@ -286,12 +290,12 @@ export default function ClientInvoiceDetails({ invoiceId, type }: InvoiceDetails
                             <div className="flex justify-between w-64 items-center">
                                 <span className="text-[10px] font-bold uppercase tracking-widest text-gray-700">Total TTC</span>
                                 <span className="text-2xl font-extrabold text-blue-600 tracking-tight">
-                                    {invoice?.invoiceCurrency == "EUR" 
-                                                                            ? invoice.totalInclTaxEUR + " EUR"
-                                                                            : invoice?.invoiceCurrency =="TND" 
-                                                                                ? invoice.totalInclTaxTND +" TND" 
-                                                                                :invoice?.totalInclTaxUSD +" USD"}
-                                                                            </span>
+                                    {invoice?.invoiceCurrency == "EUR"
+                                        ? invoice.totalInclTaxEUR + " EUR"
+                                        : invoice?.invoiceCurrency == "TND"
+                                            ? invoice.totalInclTaxTND + " TND"
+                                            : invoice?.totalInclTaxUSD + " USD"}
+                                </span>
                             </div>
                         </div>
                     </Card>
@@ -392,7 +396,7 @@ export default function ClientInvoiceDetails({ invoiceId, type }: InvoiceDetails
                     <Card>
                         <SectionLabel>{"Documents attachés"}</SectionLabel>
                         <div
-                            onClick={() => { setPreviewDocument(invoice?.invoiceDocument)}}
+                            onClick={() => { setPreviewDocument(invoice?.invoiceDocument) }}
                             className="flex items-center justify-between p-2.5 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer group">
                             <div className="flex items-center gap-2.5">
                                 <div className="w-9 h-9 rounded-lg bg-rose-50 flex items-center justify-center shrink-0">
@@ -403,7 +407,7 @@ export default function ClientInvoiceDetails({ invoiceId, type }: InvoiceDetails
                                 </div>
                                 <div>
                                     <p className="text-sm font-semibold text-gray-900 truncate max-w-[200px]">
-                                      {invoice?.invoiceDocument?.fileName}
+                                        {invoice?.invoiceDocument?.fileName}
                                     </p>
                                     <p className="text-[11px] text-gray-400 mt-0.5">{"245 KB · 2025-01-15"}</p>
                                 </div>
@@ -416,11 +420,11 @@ export default function ClientInvoiceDetails({ invoiceId, type }: InvoiceDetails
 
                 </div>
             </div>
-                <DocumentPreviewModal
-                    open={!!previewDocument}
-                    onClose={() => setPreviewDocument(null)}
-                    document={previewDocument}
-                  />
+            <DocumentPreviewModal
+                open={!!previewDocument}
+                onClose={() => setPreviewDocument(null)}
+                document={previewDocument}
+            />
         </div>
     );
 }

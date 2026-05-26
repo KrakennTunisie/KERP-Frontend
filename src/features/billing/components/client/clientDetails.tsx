@@ -2,8 +2,8 @@
 
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ClientPartner, ClientPartnerDetails } from "../../models/partner";
-import { InvoicesAPI, partnersApi } from "../../api/partners-api";
+import { ClientPartnerDetails, PartnerAllDetails } from "../../models/partner";
+import { AuditLogAPI, InvoicesAPI, partnersApi } from "../../api/partners-api";
 import { appToast } from "@/shared/lib/toast";
 import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 import PageLoader from "@/shared/components/ui/pageLoader";
@@ -11,6 +11,7 @@ import PartnerDetails from "../partner/partnerDetails";
 import { PartnerInvoiceStats } from "../../types/partnersStats";
 import { InvoicePageItem } from "../../models/invoice";
 import { NotFound } from "@/shared/components/widgets/notFound";
+import { AuditLog } from "../../models/AuditLogs";
 
 
 export default function ClientDetails(){
@@ -18,7 +19,7 @@ export default function ClientDetails(){
 
   const clientId = params?.clientId as string;
 
-  const [client, setClient] = useState<ClientPartnerDetails>();
+  const [client, setClient] = useState<PartnerAllDetails>();
   const [clientInvoiceStats, setClientInvoiceStats]=useState<PartnerInvoiceStats>({
   totalAmountTND: 0,
   totalAmountEUR: 0,
@@ -38,6 +39,7 @@ export default function ClientDetails(){
   })
   const [loading, setLoading] = useState<boolean>();
   const [clientInvoices, setClientInvoices]= useState<InvoicePageItem[]|[]>([])
+  const [clientLogs, setClientLogs]= useState<AuditLog[]|[]>([])
   const fetchClient = async () => {
     try {
       setLoading(true)
@@ -66,11 +68,25 @@ export default function ClientDetails(){
       }
     };
 
-  useEffect(() => {
+    const fetchClientLogs = async () => {
+      try {
+        setLoading(true)
+      const clientLogs = await AuditLogAPI.getAuditLogs(clientId)
+       setClientLogs(clientLogs);
+      } catch (error) {
+        appToast.error("Erreur fetch les logs du client: ",getApiErrorMessage(error));
+      }
+      finally{
+        setLoading(false)
+      }
+    };
 
+  useEffect(() => {
   fetchClient();
   fetchClientInvoices();
+  fetchClientLogs();
 }, [clientId]);
+
 
       if(loading){
         return(
@@ -88,6 +104,8 @@ export default function ClientDetails(){
                 partner={client}
                 partnerStats={clientInvoiceStats}
                 partnerInvoices={clientInvoices}
+                partnerLogs={clientLogs}
+                onRefresh = {fetchClientLogs}
             />
         )
       }

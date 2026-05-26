@@ -3,7 +3,7 @@ import { PaymentConditionSchema } from "../types/paymentCondition";
 import { paymentMethodSchema } from "../types/paymentMethod";
 import { partnerSchema, partnerSummarySchema } from "./partner";
 import { purchaseOrderItemSchema } from "./invoiceItem";
-import { purchaseOrderStatusSchema } from "../types/purchaseOrderStatus";
+import { purchaseOrderStatusSchema, purchaseOrderStatusWithoutAllSchema } from "../types/purchaseOrderStatus";
 import { currencyTypeSchema } from "../types/currency";
 import { exchangeRateSourceSchema } from "../types/exchangeRateSource";
 import { fileSchema } from "../types/pdfSchema";
@@ -15,7 +15,7 @@ import { purchaseOrderTypeSchema } from "../types/PurchaseOrderType";
 const purchaseOrderBaseFields = {
     purchaseOrderNumber: z.string(),
     issueDate: z.date(),
-    purchaseOrderStatus: purchaseOrderStatusSchema,
+    purchaseOrderStatus: purchaseOrderStatusWithoutAllSchema,
     purchaseOrderType: purchaseOrderTypeSchema,
     currency: currencyTypeSchema,
     vatAmount: z.number(),
@@ -69,7 +69,7 @@ export const purchaseOrderPageItemSchema = z.object({
     idPurchaseOrder: z.string(),
     purchaseOrderNumber: z.string(),
     issueDate: z.date(),
-    purchaseOrderStatus: purchaseOrderStatusSchema,
+    purchaseOrderStatus: purchaseOrderStatusWithoutAllSchema,
     purchaseCurrency: currencyTypeSchema,
     vatRate: z.number(),
     appliedExchangeRate: z.number(),
@@ -86,7 +86,7 @@ export const purchaseOrderDetailsSchema = z.object({
     idPurchaseOrder: z.string(),
     purchaseOrderNumber: z.string(),
     issueDate: z.date(),
-    purchaseOrderStatus: purchaseOrderStatusSchema,
+    purchaseOrderStatus: purchaseOrderStatusWithoutAllSchema,
     purchaseOrderType :purchaseOrderTypeSchema,
     purchaseCurrency: currencyTypeSchema,
     vatRate: z.number(),

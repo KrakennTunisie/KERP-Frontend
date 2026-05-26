@@ -13,6 +13,20 @@ export const invoiceStatusSchema = z.enum([
   "IN_PROGRESS"
 ]);
 
+export const invoiceStatusSchemaWithoutAll = z.enum([
+  "DRAFT",
+  "TO_PAY",
+  "TO_COLLECT",
+  "PAID",
+  "CANCELLED",
+  "REFUNDED",
+  "NOT_REFUNDED",
+  "IN_PROGRESS"
+]);
+
+export type InvoiceStatusWithoutAll = z.infer<typeof invoiceStatusSchemaWithoutAll>;
+
+
 export type InvoiceStatus = z.infer<typeof invoiceStatusSchema>;
 
 
