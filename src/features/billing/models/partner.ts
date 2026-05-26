@@ -36,6 +36,30 @@ export const partnerSchema = z.object({
   invoices: z.array(z.lazy(() => z.any())).optional(),
   logs : z.array(z.lazy(() => z.any())).optional(),
 });
+export const createPartnerSchema = z.object({
+  idPartner: z.uuid(),
+  active : z.boolean(),
+  enablePortal : z.boolean,
+  maritalStatus: z.string(),
+  partnerName: z.string(),
+  companyName: z.string(),
+  displayName: z.string(),
+  email: z.email("Email invalide"),
+  professionnalPhoneNumber: z.string(),
+  personnelPhoneNumber: z.string(),
+  taxRegistrationNumber: z.string(),
+  currency: currencyTypeSchema,
+  taxRate: tvaRateStringSchema,
+  paymentCondition: PaymentConditionSchema,
+  billingAddress : addAddressSchema,
+  shippingAddress : addAddressSchema,
+  language: z.string().min(1, "Language est obligatoire"),
+  iban: z.string().min(1, "IBAN est obligatoire"),
+  rne: documentSchema.nullable(),
+  contract:  documentSchema.nullable(),
+  patente:  documentSchema.nullable() ,
+  partnerType: partnerTypeSchema,
+});
 
 export const partnerDetailsSchema = z.object({
   idPartner: z.uuid(),
@@ -78,8 +102,8 @@ export const supplierPartnerSchema = partnerSchema.extend({
 });
 
 
-export type ClientPartner = z.infer<typeof clientPartnerSchema>;
-export type SupplierPartner = z.infer<typeof supplierPartnerSchema>;
+export type CreatePartner = z.infer<typeof partnerSchema>;
+
 
 export const clientPartnerDetailsSchema = partnerSchema.extend({
   partnerType: z.literal("CLIENT"),
@@ -90,7 +114,7 @@ export const supplierPartnerDetailsSchema = partnerSchema.extend({
 });
 
 export const addPartnerSchema = z.object({
-  partnerType: partnerTypeSchema || undefined,
+  partnerType: partnerTypeSchema,
   active : z.boolean(),
   maritalStatus: z.string().min(1, "La salutation est obligatoire"),
   firstName: z.string().min(1, "Le nom est obligatoire").min(3, "Le nom doit contenir au moins 3 caractères"),
@@ -114,12 +138,10 @@ export const addPartnerSchema = z.object({
   shippingAddress :addAddressSchema,
   rne: fileSchema || undefined,
   contract: fileSchema || undefined,
-  patente: fileSchema || undefined,
+  patente: fileSchema.nullable(),
 });
 
 export type AddPartnerFormData = z.infer<typeof addPartnerSchema>;
-
-
 export type PartnerAllDetails = z.infer<typeof partnerDetailsSchema>;
 export type ClientPartnerDetails = z.infer<typeof clientPartnerDetailsSchema>;
 export type SupplierPartnerDetails = z.infer<typeof supplierPartnerDetailsSchema>;

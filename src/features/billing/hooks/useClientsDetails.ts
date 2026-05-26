@@ -3,7 +3,7 @@ import { useState, Activity } from "react";
 import { PreviewDocument } from "../components/partner/partnerInfoCard";
 import { MOCK_INVOICES } from "../mocks/invoice-mocks";
 import { InvoicePageItem } from "../models/invoice";
-import { ClientPartnerDetails, SupplierPartnerDetails } from "../models/partner";
+import { ClientPartnerDetails, PartnerAllDetails, SupplierPartnerDetails } from "../models/partner";
 import { InvoiceStatusWithoutAll, invoiceStatusColors, invoiceStatusLabels } from "../types/invoiceStatus";
 import { PartnerInvoiceStats } from "../types/partnersStats";
 import { ChartMode } from "../components/widgets/RevnueExpensesBarChart";
@@ -35,7 +35,7 @@ interface EmailLog {
 }
 
  export type PartnerDetailsProps = {
-  partner: ClientPartnerDetails | SupplierPartnerDetails;
+  partner: PartnerAllDetails;
   partnerStats: PartnerInvoiceStats,
   partnerInvoices: InvoicePageItem[]|[]
   partnerLogs : AuditLog[]|[]

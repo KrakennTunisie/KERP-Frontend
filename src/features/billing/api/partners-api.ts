@@ -4,7 +4,7 @@ import { AUDITLOGS_ENDPOINTS, BILLING_ENDPOINTS, DASHBOARD_ENDPOINTS, EXCHANGE_R
 import { ExchangeRateParams, GetListParams, PageResponse } from "@/shared/api/types";
 import { InvoiceCreditNoteCreate, InvoiceCreditNoteDetails, InvoiceCreditNotePageItem } from "../models/creditNote";
 import { Invoice, InvoiceCreate, InvoicePageItem } from "../models/invoice";
-import { ClientPartner, ClientPartnerDetails, ClientPartnerItem, CreateClientPartner, CreateSupplierPartner, PartnerAllDetails, PartnerSummary, SupplierPartner, SupplierPartnerDetails, SupplierPartnerItem, UpdatePartner } from "../models/partner";
+import {  ClientPartnerDetails, ClientPartnerItem, CreatePartner, PartnerAllDetails, PartnerSummary, SupplierPartnerDetails, SupplierPartnerItem, UpdatePartner } from "../models/partner";
 import { PurchaseOrderCreate, PurchaseOrderDetails, PurchaseOrderPageItem,  PurchaseOrderSummary, PurchaseOrderUpdate } from "../models/purchaseOrder";
 import { ExchangeRate } from "../types/exchangeRate";
 import { nextNumber } from "../types/nextNumber";
@@ -31,10 +31,10 @@ export const partnersApi = {
     apiClient.get<PartnerAllDetails>(BILLING_ENDPOINTS.supplierById(id)),
 
   createClient: (payload: FormData) =>
-    apiClient.post<CreateClientPartner>(BILLING_ENDPOINTS.clients, payload),
+    apiClient.post<CreatePartner>(BILLING_ENDPOINTS.clients, payload),
 
   createSupplier: (payload: FormData) =>
-    apiClient.post<CreateSupplierPartner>(BILLING_ENDPOINTS.suppliers, payload),
+    apiClient.post<CreatePartner>(BILLING_ENDPOINTS.suppliers, payload),
 
   updateClient : (id: string, payload: FormData) => apiClient.patch<UpdatePartner>(BILLING_ENDPOINTS.clientById(id), payload),
 

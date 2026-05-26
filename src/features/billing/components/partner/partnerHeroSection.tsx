@@ -12,10 +12,10 @@ import {
   UserX,
   UserCheck,
 } from "lucide-react";
-import { Partner } from "../../models/partner";
+import { Partner, PartnerAllDetails } from "../../models/partner";
 
 type PartnerHeaderProps = {
-  partner: Partial<Partner>;
+  partner:PartnerAllDetails;
 
   pageConfig: {
     backHref: string;
