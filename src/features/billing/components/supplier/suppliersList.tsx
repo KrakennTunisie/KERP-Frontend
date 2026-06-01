@@ -34,15 +34,23 @@ export default function SuppliersList() {
   const [deleteConfirmId, setDeleteConfirmId] = useState<string>('');
 
   const [formData, setFormData] = useState<SupplierPartnerItem>({
-    iban:'',
+    iban: '',
     taxRegistrationNumber: '',
-    name: '',
-    address: '',
-    country: '',
+    partnerName: '',
+    companyName: '',
+    billingAddress: {
+      street1: '',
+      street2: '',
+      region: '',
+      state: '',
+      zipCode: "",
+      city: "",
+      addressType: "",
+    },
     email: '',
-    phoneNumber: '',
+    professionnalPhoneNumber: '',
     partnerType: "SUPPLIER",
-    idPartner:'',
+    idPartner: '',
 
   });
 
@@ -53,7 +61,7 @@ export default function SuppliersList() {
   
   const debouncedSearchQuery = useDebounce(searchQuery, 2000);
 
-const cities = useMemo(() => Array.from(new Set(suppliers.map((c) => c.country))), [suppliers]);
+const cities = useMemo(() => Array.from(new Set(suppliers.map((c) => c.billingAddress.region))), [suppliers]);
 
 const fetchClients = async () => {
     try {
@@ -146,18 +154,6 @@ useEffect(() => {
             onUpdateRequest = {onUpdateRequest}
         />
 
-                <SupplierCreateModal
-                    open={showAddModal}
-                    onClose={() => setShowAddModal(false)}
-                    onCreated={fetchClients}
-                    />
-                
-                <SupplierUpdateModal
-                  open ={showUpdateModal}
-                  onClose={()=> setShowUpdateModal(false)}
-                  onCreated={fetchClients}
-                  data={formData}
-                />
 
                 <SupplierDeleteModal
                     open={!!deleteConfirmId}

@@ -1,6 +1,8 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { RefreshCw } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { PartnerRevenueStats } from "../../types/partnerRevenueStats";
+import { useMemo } from "react";
 
 export type ChartMode = "revenues" | "expenses" | "both";
 
@@ -13,7 +15,7 @@ type RevenueExpenseChartData = {
 type RevenueExpenseBarChartProps = {
   title?: string;
   description?: string;
-  data: RevenueExpenseChartData[];
+  data: PartnerRevenueStats[];
   mode: ChartMode;
   selectedPeriod: number;
   onPeriodChange: (period: number) => void;
@@ -45,6 +47,15 @@ export default function RevenueExpenseBarChart({
       : mode === "expenses"
         ? "Dépenses"
         : "Revenus et Dépenses");
+        
+  const chartData = useMemo(() => {
+  const transformed = data.map((item) => ({
+    month: item.monthLabel,
+    revenus: item.revenueTTC ?? 0,
+  }));
+  return transformed;
+}, [data]);
+
 
   return (
     <Card className="border-slate-200 shadow-sm">
@@ -87,7 +98,7 @@ export default function RevenueExpenseBarChart({
 
       <CardContent>
         <ResponsiveContainer width="100%" height={320}>
-          <BarChart data={data} barCategoryGap={mode === "both" ? "35%" : "55%"}>
+          <BarChart data={chartData} barCategoryGap={mode === "both" ? "35%" : "55%"}>
             <defs>
               <linearGradient id="gradRevenus" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="#60a5fa" />

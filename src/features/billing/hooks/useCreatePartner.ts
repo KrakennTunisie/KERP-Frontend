@@ -12,15 +12,20 @@ import { Form } from "lucide-react";
 export interface pageProps {
     type: string
     mode: string
-    clientId?: string
+    partnerId?: string
 }
-export interface partnerProps {
+export interface clientProps {
     params: {
         clientId: string
     }
 }
+export interface supplierProps {
+    params: {
+        supplierId: string
+    }
+}
 
-export default function UseCreatePartner({ type, mode, clientId }: pageProps) {
+export default function UseCreatePartner({ type, mode, partnerId }: pageProps) {
     const router = useRouter();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const useFormAny = useForm as unknown as (opts: any) => ReturnType<typeof useForm<AddPartnerFormData>>;
@@ -104,11 +109,11 @@ export default function UseCreatePartner({ type, mode, clientId }: pageProps) {
         try {
             if (mode == "edit" && type == partnerTypeSchema.enum.CLIENT) {
                 setLoadingEdit(true)
-                const partner = await partnersApi.getClientById(clientId as string);
+                const partner = await partnersApi.getClientById(partnerId as string);
                 setPartner(partner);
             } else if (mode == "edit" && type == partnerTypeSchema.enum.SUPPLIER) {
                 setLoadingEdit(true)
-                const partner = await partnersApi.getSupplierById(clientId as string);
+                const partner = await partnersApi.getSupplierById(partnerId as string);
                 setPartner(partner);
             }
         } catch (error) {
@@ -120,7 +125,7 @@ export default function UseCreatePartner({ type, mode, clientId }: pageProps) {
     }
     useEffect(() => {
         fetchPartner();
-    }, [clientId]);
+    }, [partnerId]);
     useEffect(() => {
         if (mode === "edit" && partner) {
             const fullName = partner.partnerName?.trim() ?? "";
@@ -223,14 +228,14 @@ export default function UseCreatePartner({ type, mode, clientId }: pageProps) {
             formData.append("shippingAddress.zipCode", data.shippingAddress?.zipCode ?? "");
             console.log(Object.fromEntries(formData));
                 if (type == partnerTypeSchema.enum.SUPPLIER) {
-                    const createdSupplier = await partnersApi.updateSupplier(clientId! ,formData);
+                    const createdSupplier = await partnersApi.updateSupplier(partnerId! ,formData);
                     if (createdSupplier) {
                         appToast.success("Fournisseur modifiée avec succès");
                         router.back();
                     }
                 }
                 else {
-                    const createdClient = await partnersApi.updateClient(clientId!,formData);
+                    const createdClient = await partnersApi.updateClient(partnerId!,formData);
 
                     if (createdClient) {
                         appToast.success("Client modifiée avec succès");

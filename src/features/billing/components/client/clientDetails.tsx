@@ -1,9 +1,9 @@
 'use client'
 
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ClientPartnerDetails, PartnerAllDetails } from "../../models/partner";
-import { AuditLogAPI, InvoicesAPI, partnersApi } from "../../api/partners-api";
+import { AuditLogAPI, DashboardAPI, InvoicesAPI, partnersApi } from "../../api/partners-api";
 import { appToast } from "@/shared/lib/toast";
 import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 import PageLoader from "@/shared/components/ui/pageLoader";
@@ -12,6 +12,8 @@ import { PartnerInvoiceStats } from "../../types/partnersStats";
 import { InvoicePageItem } from "../../models/invoice";
 import { NotFound } from "@/shared/components/widgets/notFound";
 import { AuditLog } from "../../models/AuditLogs";
+import { partnerTypeSchema } from "../../types/partnerType";
+import { PartnerRevenueStats } from "../../types/partnerRevenueStats";
 
 
 export default function ClientDetails(){
@@ -40,6 +42,8 @@ export default function ClientDetails(){
   const [loading, setLoading] = useState<boolean>();
   const [clientInvoices, setClientInvoices]= useState<InvoicePageItem[]|[]>([])
   const [clientLogs, setClientLogs]= useState<AuditLog[]|[]>([])
+  const [clientRevenueInitial, setClientRevenueInitial]= useState<PartnerRevenueStats[]|[]>([])
+  const [supplierDespenses, setSupplierDespenses]= useState<PartnerRevenueStats[]|[]>([])
   const fetchClient = async () => {
     try {
       setLoading(true)
@@ -68,6 +72,29 @@ export default function ClientDetails(){
       }
     };
 
+     const fetchPartnerRevenue = async () => {
+       if (!client) return;
+       console.log("enter")
+      try {
+        setLoading(true)
+        if(client?.partnerType == partnerTypeSchema.enum.CLIENT)
+        {
+          const clientRevenue = await DashboardAPI.clientRevenueStats(client.idPartner,"6")
+          setClientRevenueInitial(clientRevenue);
+        }
+        else{
+          const supplierDespenses = await DashboardAPI.supplierRevenueStats(client?.idPartner,"6")
+          setSupplierDespenses(supplierDespenses);
+        }
+        
+      } catch (error) {
+        appToast.error("Erreur fetch des stats du  partenaire: ",getApiErrorMessage(error));
+      }
+      finally{
+        setLoading(false)
+      }
+    };
+
     const fetchClientLogs = async () => {
       try {
         setLoading(true)
@@ -84,9 +111,16 @@ export default function ClientDetails(){
   useEffect(() => {
   fetchClient();
   fetchClientInvoices();
-  fetchClientLogs();
+  fetchClientLogs();;
 }, [clientId]);
 
+ useEffect(() => {
+  fetchPartnerRevenue();
+}, [client]);
+
+const totalRevenueInitial = useMemo(() => 
+  clientRevenueInitial.reduce((sum, item) => sum + (item.revenueTTC ?? 0), 0),
+[clientRevenueInitial]);
 
       if(loading){
         return(
@@ -106,6 +140,8 @@ export default function ClientDetails(){
                 partnerInvoices={clientInvoices}
                 partnerLogs={clientLogs}
                 onRefresh = {fetchClientLogs}
+                clientRevenueInitial={clientRevenueInitial}
+                totalRevenueInitial={totalRevenueInitial} 
             />
         )
       }

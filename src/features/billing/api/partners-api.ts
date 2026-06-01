@@ -12,6 +12,7 @@ import { PartnerInvoiceStats } from "../types/partnersStats";
 import { ClientInvoiceDashboardStats } from "../types/clientDashboardStats";
 import { SendMail } from "../types/sendEmail";
 import { AuditLog } from "../models/AuditLogs";
+import { PartnerRevenueStats } from "../types/partnerRevenueStats";
 
 export const partnersApi = {
 
@@ -168,7 +169,9 @@ export const ExchangeRateAPI = {
 
 export const DashboardAPI = {
   clientDashbordStats: ()=> apiClient.get<ClientInvoiceDashboardStats[]>(DASHBOARD_ENDPOINTS.statsClientsInvoices),
-  supplierDashbordStats: ()=> apiClient.get<ClientInvoiceDashboardStats[]>(DASHBOARD_ENDPOINTS.statsSuppliersInvoices)
+  supplierDashbordStats: ()=> apiClient.get<ClientInvoiceDashboardStats[]>(DASHBOARD_ENDPOINTS.statsSuppliersInvoices),
+  clientRevenueStats: (idPartner: string , period : string)=>apiClient.get<PartnerRevenueStats[]>(DASHBOARD_ENDPOINTS.getClientRevenue(idPartner,period)),
+  supplierRevenueStats: (idPartner: string , period : string)=>apiClient.get<PartnerRevenueStats[]>(DASHBOARD_ENDPOINTS.getSupplierRevune(idPartner,period)),
 }
 
 export const MailingAPI ={
@@ -183,5 +186,6 @@ export const MailingAPI ={
 
 }
 export const AuditLogAPI = {
-  getAuditLogs: (id: string)=> apiClient.get<AuditLog[]>(AUDITLOGS_ENDPOINTS.getAuditLogsByIdClient(id))
+  getAuditLogs: (id: string)=> apiClient.get<AuditLog[]>(AUDITLOGS_ENDPOINTS.getAuditLogsByIdClient(id)),
+  getAuditLogsBySupplier: (id: string)=> apiClient.get<AuditLog[]>(AUDITLOGS_ENDPOINTS.getAuditLogsByIdSupplier(id))
 }

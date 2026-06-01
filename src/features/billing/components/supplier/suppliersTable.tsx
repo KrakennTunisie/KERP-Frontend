@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { DataTable, type DataTableColumn } from "@/shared/components/datatable";
 import { SupplierPartnerItem } from "../../models/partner";
+import { TableActionButton } from "../widgets/tableActionButton";
 
 type SupplierTableProps = {
   rows: SupplierPartnerItem[];
@@ -45,9 +46,9 @@ export default function SuppliersTable({
             <Truck className="w-5 h-5 text-emerald-600" />
           </div>
           <div>
-            <p className="text-sm font-medium text-gray-900">{supplier.name}</p>
+            <p className="text-sm font-medium text-gray-900">{supplier.companyName}</p>
             <p className="text-[10px] font-bold text-gray-500 uppercase tracking-tighter">
-              {supplier.address}
+              {supplier.billingAddress.region}
             </p>
           </div>
         </div>
@@ -67,9 +68,9 @@ export default function SuppliersTable({
       header: "Localisation",
       cell: (supplier) => (
         <>
-          <p className="text-sm font-medium text-gray-900">{supplier.country}</p>
+          <p className="text-sm font-medium text-gray-900">{supplier.billingAddress.region}</p>
           <p className="text-[10px] font-medium text-gray-500 uppercase tracking-tighter">
-            • {supplier.country}
+            • {supplier.billingAddress.city}
           </p>
         </>
       ),
@@ -85,47 +86,44 @@ export default function SuppliersTable({
               <span>{supplier.email}</span>
             </div>
           )}
-          {supplier.phoneNumber && (
+          {supplier.professionnalPhoneNumber && (
             <div className="flex items-center gap-2 text-xs font-medium text-gray-600">
               <Phone className="w-3 h-3" />
-              <span>{supplier.phoneNumber}</span>
+              <span>{supplier.professionnalPhoneNumber}</span>
             </div>
           )}
         </div>
       ),
     },
     {
-      key: "actions",
-      header: "Actions",
-      className: "text-center",
-      cell: (supplier) => (
-        <div className="flex items-center justify-center gap-2">
-          <button
-            onClick={() => router.push(`/billing/suppliers/${supplier.idPartner}`)}
-            className="p-2.5 bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 rounded-xl shadow-sm transition-all cursor-pointer"
-            title="Voir"
-          >
-            <Eye className="w-4 h-4" />
-          </button>
-
-          <button
-            onClick={() => onUpdateRequest(supplier)}
-            className="p-2.5 bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 rounded-xl shadow-sm transition-all cursor-pointer"
-            title="Modifier"
-          >
-            <Edit className="w-4 h-4" />
-          </button>
-
-          <button
-            onClick={() => onDeleteRequest(supplier.idPartner)}
-            className="p-2.5 bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 rounded-xl shadow-sm transition-all cursor-pointer"
-            title="Supprimer"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
-        </div>
-      ),
-    },
+          key: "actions",
+          header: "Actions",
+          className: "text-right",
+          cell: (supplier) => (
+            <div className="flex items-center justify-end gap-1.5">
+              <TableActionButton
+                title="Voir"
+                icon={Eye}
+                variant="blue"
+                onClick={() => router.push(`/billing/suppliers/${supplier.idPartner}`)}
+              />
+    
+              <TableActionButton
+                title="Modifier"
+                icon={Edit}
+                variant="blue"
+                onClick={() => router.push(`/billing/suppliers/${supplier.idPartner}/edit`)}
+              />
+    
+              <TableActionButton
+                title="Supprimer"
+                icon={Trash2}
+                variant="blue"
+                onClick={() => onDeleteRequest(supplier.idPartner)}
+              />
+            </div>
+          ),
+        },
   ];
 
   return (

@@ -75,10 +75,13 @@ export const EXCHANGE_RATE_ENDPOINTS = {
 
 }
 
-export const DASHBOARD_ENDPOINTS={
-  dashboard : '/dashboard',
+export const DASHBOARD_ENDPOINTS = {
+  dashboard: '/dashboard',
   statsClientsInvoices: '/dashboard/clients-invoices',
-  statsSuppliersInvoices: '/dashboard/suppliers-invoices'
+  statsSuppliersInvoices: '/dashboard/suppliers-invoices',
+  getClientRevenue: (idPartner: string, period: string) => `/dashboard/client-revenue/${idPartner}?period=${period}`,
+  getSupplierRevune: (idPartner: string, period : string) => `/dashboard/supplier-despenses/${idPartner}?period=${period}`,
+  getAllClientReveune: '/dashboard/all-client-revenue',
 }
 
 export const MAILING_ENDPOINTS={
@@ -91,4 +94,5 @@ export const MAILING_ENDPOINTS={
 }
 export const  AUDITLOGS_ENDPOINTS = {
  getAuditLogsByIdClient: (id: string) => `/logs/logs-clients/${id}`, 
+ getAuditLogsByIdSupplier: (id: string) => `/logs/logs-suppliers/${id}`, 
 }  

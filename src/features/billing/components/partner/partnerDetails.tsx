@@ -1,5 +1,5 @@
 "use client";
-import {TrendingUp,FileText,Clock,ReceiptText,Receipt,Mail,CheckCircle,Package,Euro,} from "lucide-react";
+import { TrendingUp, FileText, Clock, ReceiptText, Receipt, Mail, CheckCircle, Package, Euro, } from "lucide-react";
 import PartnerStatCard from "../widgets/partnerStatCard";
 import PartnerHeader from "./partnerHeroSection";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
@@ -20,14 +20,14 @@ import UseClientsDetails, { PartnerDetailsProps } from "../../hooks/useClientsDe
 import { ClientPartnerDetails } from "../../models/partner";
 import { getActivityIcon } from "../../types/logsIcons";
 import { refresh } from "next/cache";
+import { partnerTypeSchema } from "../../types/partnerType";
 
 
-export default function PartnerDetails({ partner, partnerStats, partnerInvoices , partnerLogs,onRefresh }: PartnerDetailsProps) {
+export default function PartnerDetails({ partner, clientRevenueInitial,supplierDespensesInitial, totalRevenueInitial,totalDespensesInitial, partnerStats, partnerInvoices, partnerLogs, onRefresh }: PartnerDetailsProps) {
 
-  const { getStatusLabel, getEmailStatusColor, chartMode, getStatusIcon, getLabelColor, getStatusColor, toggleSection
-    , previewDocument, setPreviewDocument, selectedPeriod, setSelectedPeriod, emailLogs, clientPayments, activeTab, setActiveTab
-    , chartData, HeaderIcon, setOpen, pageConfig, totalRevenueLastSixMonths, openSections } = UseClientsDetails({ partner, partnerStats, partnerInvoices,partnerLogs,onRefresh });
-  console.log(chartMode)
+  const { getStatusLabel, getEmailStatusColor, chartMode, getStatusIcon, getLabelColor, getStatusColor, toggleSection, clientRevenue, fetchPartnerStats, totalRevenue,totalDespenses
+    , previewDocument, setPreviewDocument, selectedPeriod, setSelectedPeriod, emailLogs, clientPayments, activeTab, setActiveTab, refresh,setRefresed,supplierDespenses
+    , chartData, HeaderIcon, setOpen, pageConfig, totalRevenueLastSixMonths, openSections } = UseClientsDetails({ partner, partnerStats, clientRevenueInitial,supplierDespensesInitial, totalRevenueInitial, totalDespensesInitial, partnerInvoices, partnerLogs, onRefresh });
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-gray-50">
       <PartnerHeader
@@ -123,23 +123,39 @@ export default function PartnerDetails({ partner, partnerStats, partnerInvoices 
             {/* ── Overview Tab ───────────────────────────────────── */}
             <TabsContent value="overview" className="space-y-6">
 
-              <RevenueExpenseBarChart
-                mode={chartMode}
-                data={chartData}
+           { partner.partnerType == partnerTypeSchema.enum.CLIENT ?  <RevenueExpenseBarChart
+                mode={"revenues"}
+                data={ refresh ? (clientRevenue ?? []) : (clientRevenueInitial ?? [])}
                 selectedPeriod={selectedPeriod}
                 onPeriodChange={setSelectedPeriod}
-                onRefresh={() => console.log("Refresh chart")}
+                onRefresh={() => {
+                 fetchPartnerStats(partner, selectedPeriod.toString())
+                 setRefresed(true);
+
+                }}
                 totalLabel={
-                  chartMode === "revenues"
-                    ? `Total des revenus (${selectedPeriod} derniers mois)`
-                    : `Total des dépenses (${selectedPeriod} derniers mois)`
+                 `Total des revenus (${selectedPeriod} derniers mois)`
                 }
                 totalValue={
-                  chartMode === "revenues"
-                    ? totalRevenueLastSixMonths
-                    : totalRevenueLastSixMonths
+                     refresh ? totalRevenue : totalRevenueInitial
+                }
+              />:
+              <RevenueExpenseBarChart
+                mode={"expenses"}
+                data={ refresh ? (supplierDespenses ?? []) : (supplierDespensesInitial ?? []) }
+                selectedPeriod={selectedPeriod}
+                onPeriodChange={setSelectedPeriod}
+                onRefresh={() => {
+                 fetchPartnerStats(partner, selectedPeriod.toString())
+                 setRefresed(true);
+
+                }}
+                totalLabel={`Total des dépenses (${selectedPeriod} derniers mois)`}
+                totalValue={
+                  refresh ? totalDespenses : totalDespensesInitial
                 }
               />
+              }
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Client Details */}
@@ -153,7 +169,7 @@ export default function PartnerDetails({ partner, partnerStats, partnerInvoices 
                   logs={partnerLogs}
                   onRefresh={onRefresh}
                   getActivityIcon={getActivityIcon}
-                
+
                 />
               </div>
             </TabsContent>

@@ -22,12 +22,12 @@ import { partnerTypeSchema } from "../../types/partnerType";
 
 
 
-export default function AddPartnerPage({ type, mode, clientId }: pageProps) {
+export default function AddPartnerPage({ type, mode, partnerId }: pageProps) {
     const {
         copyBillingToShipping, documentFields, isClient, router, getValues,
         onSubmit, getError, register, handleSubmit, setValue, setValueAny, isSubmitting
         , watch
-    } = UseCreatePartner({ type, mode, clientId })
+    } = UseCreatePartner({ type, mode,partnerId })
     return (
         <div className=" bg-gray-50">
 
