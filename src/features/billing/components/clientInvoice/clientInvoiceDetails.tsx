@@ -13,11 +13,25 @@ import { paymentMethodLabels } from "../../types/paymentMethod"
 import { formatDateLong, formatDateLongWithTime } from "@/shared/utils/formatDate"
 import { OperationCategoryLabels } from "../../types/operationCategory"
 import PageLoader from "@/shared/components/ui/pageLoader"
+import { DocumentTopBar } from "../widgets/documentTopBar"
+import PartnerCollapsibleSection from "../widgets/collapseSection"
+import { mockPurchaseOrders } from "../../mocks/purchase-order-mocks"
+import {  Copy, Eye, Pencil, ReceiptText, Send, Settings, Trash2 } from "lucide-react"
+import { purchaseOrderStatusColors, purchaseOrderStatusLabels } from "../../types/purchaseOrderStatus"
+import { useState } from "react"
+import { DocumentListItem } from "../widgets/documentListItem"
 
 export default function ClientInvoiceDetails({ invoiceId, type }: InvoiceDetailsProps) {
     const {   client, invoice, previewDocument, setPreviewDocument, sendToTTN, TtnModalOpen, setTtnModalOpen,
         hasCreditInvoice,loading, sent, successMessage, router, updateStatus } = useClientInvoiceDetails({ invoiceId, type });
-
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({
+    invoices: true,
+    payments: false,
+    purchaseOrders: false,
+  });
+    const toggleSection = (section: string) => {
+    setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
+  };
         if(loading){
             return(
                 <PageLoader label="Chargement de facture ..."/>
@@ -27,31 +41,58 @@ export default function ClientInvoiceDetails({ invoiceId, type }: InvoiceDetails
         <div className="min-h-screen bg-gray-50 font-sans">
 
             {/* TOP BAR */}
-            <div className="bg-white border-b border-gray-200 px-6 py-3.5 flex items-center justify-between sticky top-0 z-50 shadow-sm">
-                <div className="flex items-center gap-4">
-                    <button
-                        onClick={() => router.back()}
-                        className="w-9 h-9 rounded-xl border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors">
-                        <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                            <path d="M19 12H5M12 5l-7 7 7 7" />
-                        </svg>
-                    </button>
-                    <div>
-                        <div className="flex items-center gap-2.5">
-                            <span className="text-[22px] font-extrabold tracking-tight text-gray-900">{invoice?.invoiceNumber}</span>
-                            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-wide bg-amber-50 text-amber-600 border border-amber-200">
-                                    {invoice?.invoiceStatus
-                                    ? invoiceStatusLabels[invoice.invoiceStatus]
-                                    : '-'}                            
-                            </span>
-                        </div>
-                        <p className="text-xs text-gray-400 mt-0.5">Emise le {formatDateLong(invoice?.issueDate)} · Échéance le {formatDateLong(invoice?.dueDate)}</p>
-                    </div>
-                </div>
-            </div>
+            <DocumentTopBar
+            documentTypeLabel="Facture"
+            documentNumber={invoice?.invoiceNumber}
+            statusLabel={
+                invoice?.invoiceStatus
+                ? invoiceStatusLabels[invoice.invoiceStatus]
+                : "-"
+            }
+            statusVariant="pending"
+            issueDate={formatDateLong(invoice?.issueDate)}
+            dueDate={formatDateLong(invoice?.dueDate)}
+            onBack={() => router.back()}
+            actionItems={[
+                    {
+                    label: "Cloner",
+                    icon: Copy,
+                    onClick: () => console.log("Cloner", invoice?.idInvoice),
+                    },
+                    {
+                    label: "Mettre à jour statut",
+                    icon: Settings,
+                    onClick: () => console.log("Mettre à jour statut", invoice?.idInvoice),
+                    disabled: invoice?.invoiceStatus === "CANCELLED",
+                    },
+                    {
+                    label: "Envoyer",
+                    icon: Send,
+                    onClick: () => console.log("Envoyer", invoice?.idInvoice),
+                    disabled: invoice?.invoiceStatus === "CANCELLED",
+                    },
+                    {
+                    label: "Modifier",
+                    icon: Pencil,
+                    onClick: () =>
+                        router.push(`/billing/invoices/clients/${invoice?.idInvoice}/edit`),
+                    disabled:
+                        invoice?.invoiceStatus === "PAID" ||
+                        invoice?.invoiceStatus === "CANCELLED",
+                    },
+                    {
+                    label: "Supprimer",
+                    icon: Trash2,
+                    color: "text-rose-600",
+                    hover: "hover:bg-rose-50",
+                    onClick: () => console.log("Supprimer", invoice?.idInvoice),
+                    disabled: invoice?.invoiceStatus !== "DRAFT",
+                    },
+                ]}
+            />
 
             {/* MAIN */}
-            <div className="max-w-[1200px] mx-auto px-6 py-6 grid grid-cols-[1fr_300px] gap-5">
+            <div className=" mx-auto px-6 py-6 grid grid-cols-[1fr_300px] gap-5">
 
                 {/* LEFT */}
                 <div className="flex flex-col gap-4">
@@ -59,7 +100,7 @@ export default function ClientInvoiceDetails({ invoiceId, type }: InvoiceDetails
                     {/* Fiscal status */}
                     <Card>
                         <div className="flex items-center gap-4">
-                            <div className="w-13 h-13 rounded-2xl bg-blue-600 flex items-center justify-center shrink-0 p-3">
+                            <div className="w-13 h-13 rounded-xl bg-blue-600 flex items-center justify-center shrink-0 p-3">
                                 <ShieldIcon />
                             </div>
                             <div className="flex-1">
@@ -361,7 +402,7 @@ export default function ClientInvoiceDetails({ invoiceId, type }: InvoiceDetails
                             <SectionLabel>{"Journal d'audit"}</SectionLabel>
                         </div>
                         <div
-                            className="flex flex-col gap-3.5 max-h-[100px] overflow-y-auto pr-2"
+                            className="flex flex-col gap-3.5 max-h-[350px] overflow-y-auto pr-2"
                             style={{
                                 scrollbarWidth: 'thin',
                                 scrollbarColor: '#CBD5E1 transparent',
@@ -415,7 +456,86 @@ export default function ClientInvoiceDetails({ invoiceId, type }: InvoiceDetails
                     </Card>
 
                 </div>
+
+
             </div>
+
+            <Card className="mx-5">
+
+                <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                    <p className="text-base font-bold text-slate-900">
+                        Suivi des factures d’avoir
+                    </p>
+                    <p className="mt-1 text-sm text-slate-500">
+                        Consultez, modifiez ou envoyez les avoirs liés à cette facture.
+                    </p>
+                    </div>
+
+                    <div className="inline-flex w-fit items-center gap-2 rounded-full bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 ring-1 ring-rose-100">
+                    <ReceiptText className="h-3.5 w-3.5" />
+                    {mockPurchaseOrders.length} avoir(s)
+                    </div>
+                </div>
+
+                <PartnerCollapsibleSection
+                title="Factures d'avoir"
+                addLabel="Ajouter avoir"
+                count={mockPurchaseOrders.length}
+                open={openSections.creditNotes}
+                onToggle={() => toggleSection("creditNotes")}
+                items={mockPurchaseOrders}
+                getKey={(creditNote) => creditNote.idPurchaseOrder}
+                onAdd={() => console.log("Ajouter facture d'avoir")}
+                renderItem={(creditNote) => (
+                    <DocumentListItem
+                    item={creditNote}
+                    variant="creditNote"
+                    icon={ReceiptText}
+                    title="facture d'avoir"
+                    menuTitle="Actions facture d'avoir"
+                    getNumber={(item) => item.purchaseOrderNumber}
+                    getDate={(item) => item.issueDate}
+                    getAmount={(item) => item.totalInclTax}
+                    getCurrency={() => "TND"}
+                    getStatus={(item) => item.purchaseOrderStatus}
+                    statusLabels={purchaseOrderStatusLabels}
+                    statusColors={purchaseOrderStatusColors}
+                    actions={[
+                        {
+                        label: "Voir le détail",
+                        icon: Eye,
+                        onClick: () =>
+                            console.log("Voir facture d'avoir", creditNote.idPurchaseOrder),
+                        },
+                        {
+                        label: "Modifier",
+                        icon: Pencil,
+                        onClick: () =>
+                            console.log("Modifier facture d'avoir", creditNote.idPurchaseOrder),
+                        disabled: creditNote.purchaseOrderStatus === "CANCELLED",
+                        },
+                        {
+                        label: "Envoyer",
+                        icon: Send,
+                        onClick: () =>
+                            console.log("Envoyer facture d'avoir", creditNote.idPurchaseOrder),
+                        disabled: creditNote.purchaseOrderStatus === "CANCELLED",
+                        },
+                        {
+                        label: "Supprimer",
+                        icon: Trash2,
+                        color: "text-rose-600",
+                        hover: "hover:bg-rose-50",
+                        onClick: () =>
+                            console.log("Supprimer facture d'avoir", creditNote.idPurchaseOrder),
+                        disabled: creditNote.purchaseOrderStatus !== "DRAFT",
+                        },
+                    ]}
+                    />
+                )}
+                />
+            </Card>
                 <DocumentPreviewModal
                     open={!!previewDocument}
                     onClose={() => setPreviewDocument(null)}

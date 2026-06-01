@@ -61,7 +61,7 @@ export const purchaseOrderSummaryDTO = z.object({
     idPurchaseOrder: z.string(),
     purchaseOrderNumber: z.string(),
     issueDate: z.date(),
-    purchaseOrderStatus: purchaseOrderStatusSchema,
+    purchaseOrderStatus: purchaseOrderStatusWithoutAllSchema,
     currency: currencyTypeSchema,
 })
 
@@ -86,7 +86,7 @@ export const purchaseOrderDetailsSchema = z.object({
     idPurchaseOrder: z.string(),
     purchaseOrderNumber: z.string(),
     issueDate: z.date(),
-    purchaseOrderStatus: purchaseOrderStatusSchema,
+    purchaseOrderStatus: purchaseOrderStatusWithoutAllSchema,
     purchaseOrderType :purchaseOrderTypeSchema,
     purchaseCurrency: currencyTypeSchema,
     vatRate: z.number(),

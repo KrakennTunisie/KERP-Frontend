@@ -13,6 +13,7 @@ import {
   UserCheck,
 } from "lucide-react";
 import { Partner } from "../../models/partner";
+import { ActionMenu } from "@/shared/components/ui/actionMenuItem";
 
 type PartnerHeaderProps = {
   partner: Partial<Partner>;
@@ -90,58 +91,41 @@ export default function PartnerHeader({
             </div>
           </div>
 
-          {/* Actions */}
-          <div className="grid grid-cols-2 gap-1.5 self-start shrink-0">
-            <button
-              onClick={setOpen}
-              title="Envoyer un e-mail"
-              className="group relative inline-flex items-center justify-center w-8 h-8 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-100 hover:border-blue-200 transition cursor-pointer"
-            >
-              <Send className="w-3.5 h-3.5" />
-
-              <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-slate-900 px-2 py-1 text-[10px] font-semibold text-white opacity-0 shadow-lg transition group-hover:opacity-100">
-                Envoyer un e-mail
-              </span>
-            </button>
-
-            <button
-              onClick={() => console.log("Activate")}
-              title="Activate"
-              className="group relative inline-flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-100 hover:border-emerald-200 transition cursor-pointer"
-            >
-              <UserCheck className="w-3.5 h-3.5" />
-
-              <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-slate-900 px-2 py-1 text-[10px] font-semibold text-white opacity-0 shadow-lg transition group-hover:opacity-100">
-                Activer
-              </span>
-            </button>
-
-            <button
-              onClick={() => console.log("Deactivate")}
-              title="Deactivate"
-              className="group relative inline-flex items-center justify-center w-8 h-8 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-100 hover:border-amber-200 transition cursor-pointer"
-            >
-              <UserX className="w-3.5 h-3.5" />
-
-              <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-slate-900 px-2 py-1 text-[10px] font-semibold text-white opacity-0 shadow-lg transition group-hover:opacity-100">
-                Désactiver
-              </span>
-            </button>
-
-            <button
-              onClick={() => console.log("Supprimer")}
-              title="Supprimer"
-              className="group relative inline-flex items-center justify-center w-8 h-8 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-100 hover:border-rose-200 transition cursor-pointer"
-            >
-              <UserMinus className="w-3.5 h-3.5" />
-
-              <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-slate-900 px-2 py-1 text-[10px] font-semibold text-white opacity-0 shadow-lg transition group-hover:opacity-100">
-                Supprimer
-              </span>
-            </button>
+          <ActionMenu
+            orientation="vertical"
+            items={[
+              {
+                label: "Envoyer un e-mail",
+                icon: Send,
+                color: "text-blue-600",
+                hover: "hover:bg-blue-50",
+                onClick: setOpen,
+              },
+              {
+                label: "Activer",
+                icon: UserCheck,
+                color: "text-emerald-600",
+                hover: "hover:bg-emerald-50",
+                onClick: () => console.log("Activate"),
+              },
+              {
+                label: "Désactiver",
+                icon: UserX,
+                color: "text-amber-600",
+                hover: "hover:bg-amber-50",
+                onClick: () => console.log("Deactivate"),
+              },
+              {
+                label: "Supprimer",
+                icon: UserMinus,
+                color: "text-rose-600",
+                hover: "hover:bg-rose-50",
+                onClick: () => console.log("Supprimer"),
+              },
+            ]}
+          />
           </div>
         </div>
       </div>
-    </div>
   );
 }

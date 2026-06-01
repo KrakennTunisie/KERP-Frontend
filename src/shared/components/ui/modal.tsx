@@ -15,7 +15,7 @@ export function Modal({ open, title, onClose, children, footer }: ModalProps) {
 
   return (
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-4 z-50">
-      <div className="bg-white w-full max-w-3xl rounded-3xl p-6 shadow-xl border border-gray-100">
+      <div className="bg-white w-full max-w-3xl rounded-xl p-6 shadow-xl border border-gray-100">
         
         {/* Header */}
         <div className="flex items-center justify-between mb-4">

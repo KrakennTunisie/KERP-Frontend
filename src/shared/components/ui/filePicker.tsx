@@ -43,7 +43,7 @@ export default function FilePicker({
       )}
 
       <label
-        className={`flex flex-col items-center justify-center gap-3 rounded-3xl border-2 border-dashed px-4 py-6 text-center cursor-pointer transition-all ${
+        className={`flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed px-4 py-6 text-center cursor-pointer transition-all ${
           error
             ? "border-rose-300 bg-rose-50/50"
             : file

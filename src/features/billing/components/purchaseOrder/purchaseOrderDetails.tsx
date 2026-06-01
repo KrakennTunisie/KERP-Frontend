@@ -25,7 +25,7 @@ export default function PurchaseOrderModal({ open, title, onClose, children, foo
 
   return (
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-4 z-50">
-      <div className="bg-white w-full max-w-3xl rounded-3xl p-6 shadow-xl border border-gray-100">
+      <div className="bg-white w-full max-w-3xl rounded-xl p-6 shadow-xl border border-gray-100">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           {title && <p className="text-lg font-black text-gray-900">{title}</p>}

@@ -574,7 +574,7 @@ const fields = {
                 <CardContent className="p-5 sm:p-6">
                     <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
                     {/* Facturation */}
-                    <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                         <div className="mb-5">
                         <h3 className="font-semibold text-slate-900">
                             Adresse de facturation
@@ -671,7 +671,7 @@ const fields = {
                     </div>
 
                     {/* Livraison */}
-                    <div className="rounded-3xl border border-slate-200 bg-slate-50/70 p-5 shadow-sm">
+                    <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-5 shadow-sm">
                         <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                         <div>
                             <h3 className="font-semibold text-slate-900">

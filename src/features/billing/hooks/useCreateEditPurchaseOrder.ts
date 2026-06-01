@@ -27,6 +27,8 @@ import { useDebounce } from "@/shared/hooks/useDebounce";
 import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 import { purchaseOrderTypeSchema } from "../types/PurchaseOrderType";
 import { ExchangeRate } from "../types/exchangeRate";
+import { generatePdfFile } from "@/shared/pdf/pdfGenerator";
+import { purchaseOrderToPdfData } from "@/shared/pdf/documentAdapter";
 
 export type PropsPurchaseOrder = {
   params: {
@@ -376,6 +378,8 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
 
       if (!element) return;
       const file = await handleSaveAsPDF(element, getValues("purchaseOrderNumber"));
+            const pdfFile = await generatePdfFile(purchaseOrderToPdfData(values));
+      
       if (file) {
         setValue("purchaseOrderDocument", file, { shouldValidate: true, shouldDirty: true });
         setPdfUrl(file);

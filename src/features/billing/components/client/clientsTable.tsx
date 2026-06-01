@@ -5,7 +5,6 @@ import {
   Building2,
   Mail,
   Phone,
-  Eye,
   Edit,
   Trash2,
 } from "lucide-react";
@@ -16,6 +15,7 @@ import {
 } from "@/shared/components/datatable";
 
 import { ClientPartnerItem } from "../../models/partner";
+import { ActionMenu } from "@/shared/components/ui/actionMenuItem";
 
 type ClientsTableProps = {
   rows: ClientPartnerItem[];
@@ -85,9 +85,13 @@ export default function ClientsTable({
           </div>
 
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-slate-900">
-              {client.name}
-            </p>
+                    <button
+                        type="button"
+                        onClick={() => router.push(`/billing/clients/${client.idPartner}`)}
+                        className="text-xs font-bold text-blue-600 underline-offset-4 transition hover:text-blue-800 hover:underline cursor-pointer"
+                      >
+                        {client.name}
+                      </button>
 
             <p className="mt-0.5 truncate text-[11px] font-medium text-slate-500">
               {client.address || "Adresse non renseignée"}
@@ -150,30 +154,28 @@ export default function ClientsTable({
       header: "Actions",
       className: "text-right",
       cell: (client) => (
-        <div className="flex items-center justify-end gap-1.5">
-          <TableActionButton
-            title="Voir"
-            icon={Eye}
-            variant="blue"
-            onClick={() => router.push(`/billing/clients/${client.idPartner}`)}
+          <ActionMenu
+            orientation="horizontal"
+            title="Actions client"
+            items={[
+              {
+                label: "Modifier",
+                icon: Edit,
+                color: "text-amber-600",
+                hover: "hover:bg-amber-50",
+                onClick: () => onUpdateRequest(client),
+              },
+              {
+                label: "Supprimer",
+                icon: Trash2,
+                color: "text-rose-600",
+                hover: "hover:bg-rose-50",
+                onClick: () => onDeleteRequest(client.idPartner),
+              },
+            ]}
           />
-
-          <TableActionButton
-            title="Modifier"
-            icon={Edit}
-            variant="warning"
-            onClick={() => onUpdateRequest(client)}
-          />
-
-          <TableActionButton
-            title="Supprimer"
-            icon={Trash2}
-            variant="danger"
-            onClick={() => onDeleteRequest(client.idPartner)}
-          />
-        </div>
       ),
-    },
+    }
   ];
 
   return (

@@ -16,6 +16,8 @@ import {
   UserPen,
   RefreshCw,
   ReceiptText,
+  Eye,
+  CreditCard,
 } from "lucide-react";
 import PartnerStatCard from "../widgets/partnerStatCard";
 import PartnerHeader from "./partnerHeroSection";
@@ -48,11 +50,12 @@ import RevenueExpenseBarChart from "../widgets/RevnueExpensesBarChart";
 import EmailHistoryCard from "@/shared/components/ui/emailHistoryLog";
 import { InvoiceStatus, invoiceStatusColors, invoiceStatusLabels, InvoiceStatusWithoutAll } from "../../types/invoiceStatus";
 import { purchaseOrderStatusColors, purchaseOrderStatusLabels } from "../../types/purchaseOrderStatus";
+import { DocumentListItem } from "../widgets/documentListItem";
 
   interface Payment {
   id: string;
   number: string;
-  date: string;
+  date: Date;
   amount: number;
   method: string;
   invoiceNumber: string;
@@ -121,7 +124,7 @@ const clientPayments: Payment[] = [
     {
       id: '1',
       number: 'PAY-2025-001',
-      date: '2025-02-14',
+      date: new Date(),
       amount: 12500,
       method: 'Virement bancaire',
       invoiceNumber: 'FAC-2025-001',
@@ -129,7 +132,7 @@ const clientPayments: Payment[] = [
     {
       id: '2',
       number: 'PAY-2025-012',
-      date: '2025-03-15',
+      date: new Date(),
       amount: 5000,
       method: 'Chèque',
       invoiceNumber: 'FAC-2025-015',
@@ -445,21 +448,49 @@ const chartMode = partner.partnerType === "CLIENT" ? "revenues" : "expenses";
                 items={partnerInvoices}
                 getKey={(invoice) => invoice.idInvoice}
                 onAdd={() => console.log("Ajouter facture")}
-                renderItem={(invoice) => 
-                  (
-                    <InvoiceListItem
-                      key={invoice.idInvoice}
-                      invoice={invoice}
-                      currency="TND"
-                      getStatusIcon={getStatusIcon}
-                      getStatusColor={()=>getStatusColor(invoice.invoiceStatus)}
-                      getStatusLabel={()=>getLabelColor(invoice.invoiceStatus)}
-                      onOpen={(id) => console.log("Ouvrir facture", id)}
-                      onEdit={(id) => console.log("Modifier facture", id)}
-                      onDelete={(id) => console.log("Supprimer facture", id)}
-                    />
-                  )
-                }
+                renderItem={(invoice) => (
+                  <DocumentListItem
+                    item={invoice}
+                    variant="invoice"
+                    icon={FileText}
+                    title="facture"
+                    menuTitle="Actions facture"
+                    getNumber={(item) => item.invoiceNumber}
+                    getDate={(item) => item.issueDate}
+                    getAmount={(item) => item.totalExclTaxEUR}
+                    getCurrency={(item) => item.invoiceCurrency}
+                    getStatus={(item) => item.invoiceStatus}
+                    statusLabels={invoiceStatusLabels}
+                    statusColors={invoiceStatusColors}
+                    actions={[
+                      {
+                        label: "Voir le détail",
+                        icon: Eye,
+                        onClick: () => console.log("Voir facture", invoice.idInvoice),
+                      },
+                      {
+                        label: "Modifier",
+                        icon: Pencil,
+                        onClick: () => console.log("Modifier facture", invoice.idInvoice),
+                        disabled: invoice.invoiceStatus === "CANCELLED",
+                      },
+                      {
+                        label: "Envoyer",
+                        icon: Send,
+                        onClick: () => console.log("Envoyer facture", invoice.idInvoice),
+                        disabled: invoice.invoiceStatus === "CANCELLED",
+                      },
+                      {
+                        label: "Supprimer",
+                        icon: Trash2,
+                        color: "text-rose-600",
+                        hover: "hover:bg-rose-50",
+                        onClick: () => console.log("Supprimer facture", invoice.idInvoice),
+                        disabled: invoice.invoiceStatus !== "DRAFT",
+                      },
+                    ]}
+                  />
+                )}
               />
 
               <PartnerCollapsibleSection
@@ -472,40 +503,39 @@ const chartMode = partner.partnerType === "CLIENT" ? "revenues" : "expenses";
                 getKey={(payment) => payment.id}
                 onAdd={() => console.log("Ajouter paiement")}
                 renderItem={(payment) => (
-                  <div className="flex items-center justify-between p-3.5 bg-slate-50/60 rounded-xl hover:bg-slate-100/60 transition-colors">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 bg-emerald-50 rounded-xl flex items-center justify-center shrink-0">
-                        <CheckCircle className="w-4 h-4 text-emerald-600" />
-                      </div>
-
-                      <div>
-                        <p className="text-sm font-black text-slate-900">
-                          {payment.number}
-                        </p>
-                        <p className="text-[11px] text-slate-400 mt-0.5">
-                          {payment.method} · Pour {payment.invoiceNumber}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                      <p className="text-base font-black text-emerald-600">
-                        {payment.amount.toLocaleString()}
-                        <span className="text-xs font-semibold text-slate-400 ml-1">
-                          TND
-                        </span>
-                      </p>
-
-                      <p className="text-[11px] text-slate-400">
-                        {payment.date}
-                      </p>
-
-                      <RowActions
-                        onEdit={() => console.log("Modifier paiement", payment.id)}
-                        onDelete={() => console.log("Supprimer paiement", payment.id)}
-                      />
-                    </div>
-                  </div>
+                  <DocumentListItem<Payment>
+                    item={payment}
+                    variant="payment"
+                    icon={CreditCard}
+                    title="paiement"
+                    menuTitle="Actions paiement"
+                    getNumber={(item) => item.number}
+                    getDate={(item) => item.date}
+                    getAmount={(item) => item.amount}
+                    getCurrency={() => "TND"}
+                    amountLabel="Montant payé"
+                    secondaryLabel="Facture"
+                    getSecondaryText={(item) => item.invoiceNumber}
+                    actions={[
+                      {
+                        label: "Voir le détail",
+                        icon: Eye,
+                        onClick: () => console.log("Voir paiement", payment.id),
+                      },
+                      {
+                        label: "Modifier",
+                        icon: Pencil,
+                        onClick: () => console.log("Modifier paiement", payment.id),
+                      },
+                      {
+                        label: "Supprimer",
+                        icon: Trash2,
+                        color: "text-rose-600",
+                        hover: "hover:bg-rose-50",
+                        onClick: () => console.log("Supprimer paiement", payment.id),
+                      },
+                  ]}
+                  />
                 )}
               />
 
@@ -518,41 +548,52 @@ const chartMode = partner.partnerType === "CLIENT" ? "revenues" : "expenses";
                 items={mockPurchaseOrders}
                 getKey={(order) => order.idPurchaseOrder}
                 onAdd={() => console.log("Ajouter bon de commande")}
-                renderItem={(order) => (
-                  <div className="flex items-center justify-between p-3.5 bg-slate-50/60 rounded-xl hover:bg-slate-100/60 transition-colors">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 bg-purple-50 rounded-xl flex items-center justify-center shrink-0">
-                        <Package className="w-4 h-4 text-purple-500" />
-                      </div>
-
-                      <div>
-                        <p className="text-sm font-black text-slate-900">
-                          {order.purchaseOrderNumber}
-                        </p>
-                        <p className="text-[11px] text-slate-400 mt-0.5">
-                          {formatDateLong(order.issueDate)}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                      <p className="text-base font-black text-slate-900">
-                        {order.totalExclTax?.toLocaleString() ?? "—"}
-                        <span className="text-xs font-semibold text-slate-400 ml-1">
-                          TND
-                        </span>
-                      </p>
-
-                      <Badge className={purchaseOrderStatusColors[order.purchaseOrderStatus]}>
-                        {purchaseOrderStatusLabels[order.purchaseOrderStatus]}
-                      </Badge>
-
-                      <RowActions
-                        onEdit={() => console.log("Modifier bon commande", order.idPurchaseOrder)}
-                        onDelete={() => console.log("Supprimer bon commande", order.idPurchaseOrder)}
-                      />
-                    </div>
-                  </div>
+                renderItem={(creditNote) => (
+                    <DocumentListItem
+                    item={creditNote}
+                    variant="creditNote"
+                    icon={ReceiptText}
+                    title="facture d'avoir"
+                    menuTitle="Actions facture d'avoir"
+                    getNumber={(item) => item.purchaseOrderNumber}
+                    getDate={(item) => item.issueDate}
+                    getAmount={(item) => item.totalInclTax}
+                    getCurrency={() => "TND"}
+                    getStatus={(item) => item.purchaseOrderStatus}
+                    statusLabels={purchaseOrderStatusLabels}
+                    statusColors={purchaseOrderStatusColors}
+                    actions={[
+                        {
+                        label: "Voir le détail",
+                        icon: Eye,
+                        onClick: () =>
+                            console.log("Voir facture d'avoir", creditNote.idPurchaseOrder),
+                        },
+                        {
+                        label: "Modifier",
+                        icon: Pencil,
+                        onClick: () =>
+                            console.log("Modifier facture d'avoir", creditNote.idPurchaseOrder),
+                        disabled: creditNote.purchaseOrderStatus === "CANCELLED",
+                        },
+                        {
+                        label: "Envoyer",
+                        icon: Send,
+                        onClick: () =>
+                            console.log("Envoyer facture d'avoir", creditNote.idPurchaseOrder),
+                        disabled: creditNote.purchaseOrderStatus === "CANCELLED",
+                        },
+                        {
+                        label: "Supprimer",
+                        icon: Trash2,
+                        color: "text-rose-600",
+                        hover: "hover:bg-rose-50",
+                        onClick: () =>
+                            console.log("Supprimer facture d'avoir", creditNote.idPurchaseOrder),
+                        disabled: creditNote.purchaseOrderStatus !== "DRAFT",
+                        },
+                    ]}
+                    />
                 )}
               />
 
@@ -566,44 +607,51 @@ const chartMode = partner.partnerType === "CLIENT" ? "revenues" : "expenses";
                 getKey={(creditNote) => creditNote.idPurchaseOrder}
                 onAdd={() => console.log("Ajouter facture d'avoir")}
                 renderItem={(creditNote) => (
-                  <div className="flex items-center justify-between p-3.5 bg-slate-50/60 rounded-xl hover:bg-slate-100/60 transition-colors">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 bg-rose-50 rounded-xl flex items-center justify-center shrink-0">
-                        <ReceiptText className="w-4 h-4 text-rose-600" />
-                      </div>
-
-                      <div>
-                        <p className="text-sm font-black text-slate-900">
-                          {creditNote.purchaseOrderNumber}
-                        </p>
-                        <p className="text-[11px] text-slate-400 mt-0.5">
-                          Date : {formatDateLong(creditNote.issueDate)}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                      <p className="text-base font-black text-slate-900">
-                        {creditNote.totalExclTax?.toLocaleString() ?? "—"}
-                        <span className="text-xs font-semibold text-slate-400 ml-1">
-                          TND
-                        </span>
-                      </p>
-
-                      <Badge className={purchaseOrderStatusColors[creditNote.purchaseOrderStatus]}>
-                        {purchaseOrderStatusLabels[creditNote.purchaseOrderStatus]}
-                      </Badge>
-
-                      <RowActions
-                        onEdit={() =>
-                          console.log("Modifier facture d'avoir", creditNote.idPurchaseOrder)
-                        }
-                        onDelete={() =>
-                          console.log("Supprimer facture d'avoir", creditNote.idPurchaseOrder)
-                        }
-                      />
-                    </div>
-                  </div>
+                    <DocumentListItem
+                    item={creditNote}
+                    variant="creditNote"
+                    icon={ReceiptText}
+                    title="facture d'avoir"
+                    menuTitle="Actions facture d'avoir"
+                    getNumber={(item) => item.purchaseOrderNumber}
+                    getDate={(item) => item.issueDate}
+                    getAmount={(item) => item.totalInclTax}
+                    getCurrency={() => "TND"}
+                    getStatus={(item) => item.purchaseOrderStatus}
+                    statusLabels={purchaseOrderStatusLabels}
+                    statusColors={purchaseOrderStatusColors}
+                    actions={[
+                        {
+                        label: "Voir le détail",
+                        icon: Eye,
+                        onClick: () =>
+                            console.log("Voir facture d'avoir", creditNote.idPurchaseOrder),
+                        },
+                        {
+                        label: "Modifier",
+                        icon: Pencil,
+                        onClick: () =>
+                            console.log("Modifier facture d'avoir", creditNote.idPurchaseOrder),
+                        disabled: creditNote.purchaseOrderStatus === "CANCELLED",
+                        },
+                        {
+                        label: "Envoyer",
+                        icon: Send,
+                        onClick: () =>
+                            console.log("Envoyer facture d'avoir", creditNote.idPurchaseOrder),
+                        disabled: creditNote.purchaseOrderStatus === "CANCELLED",
+                        },
+                        {
+                        label: "Supprimer",
+                        icon: Trash2,
+                        color: "text-rose-600",
+                        hover: "hover:bg-rose-50",
+                        onClick: () =>
+                            console.log("Supprimer facture d'avoir", creditNote.idPurchaseOrder),
+                        disabled: creditNote.purchaseOrderStatus !== "DRAFT",
+                        },
+                    ]}
+                    />
                 )}
               />
 
@@ -625,6 +673,12 @@ const chartMode = partner.partnerType === "CLIENT" ? "revenues" : "expenses";
               open={!!previewDocument}
               onClose={() => setPreviewDocument(null)}
               document={previewDocument}
+            />
+            <SendEmailModal
+               isOpen= {open}
+               onClose={()=>setOpen(false)}
+               defaultTo={partner.email}
+               recipientName={partner.name}
             />
     </div>
   );

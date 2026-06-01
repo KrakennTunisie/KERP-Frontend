@@ -27,6 +27,8 @@ import { invoiceStatusSchema } from "../types/invoiceStatus";
 import { nextNumber } from "../types/nextNumber";
 import { PaymentConditionSchema } from "../types/paymentCondition";
 import { paymentMethodSchema } from "../types/paymentMethod";
+import { generatePdfFile } from "@/shared/pdf/pdfGenerator";
+import { invoiceToPdfData } from "@/shared/pdf/documentAdapter";
 
 export type InvoiceFormClientProps = {
   mode: "create" | "edit"
@@ -602,11 +604,14 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
       const element = invoiceRef.current;
 
       if (!element) return;
+            const values = getValues();
+
       console.log(getValues("purchaseOrder"))
       const file = await handleSaveAsPDF(element, getValues("invoiceNumber"));
-      if (file) {
-        setValue("invoiceDocument", file, { shouldValidate: true, shouldDirty: true });
-        setPdfUrl(file);
+      const pdfFile = await generatePdfFile(invoiceToPdfData(values));
+      if (pdfFile) {
+        setValue("invoiceDocument", pdfFile, { shouldValidate: true, shouldDirty: true });
+        setPdfUrl(pdfFile);
       }
       setIsModalOpen(true);
     },
