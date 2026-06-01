@@ -50,10 +50,10 @@ export default function SuppliersTable({
                 onClick={() => router.push(`/billing/suppliers/${supplier.idPartner}`)}
                 className="text-xs font-bold text-blue-600 underline-offset-4 transition hover:text-blue-800 hover:underline cursor-pointer"
               >
-                {supplier.name}
+                {supplier.companyName}
               </button>
             <p className="text-[10px] font-bold text-gray-500 uppercase tracking-tighter">
-              {supplier.address}
+              {supplier?.billingAddress?.state}
             </p>
           </div>
         </div>
@@ -73,9 +73,9 @@ export default function SuppliersTable({
       header: "Localisation",
       cell: (supplier) => (
         <>
-          <p className="text-sm font-medium text-gray-900">{supplier.country}</p>
+          <p className="text-sm font-medium text-gray-900">{supplier?.billingAddress?.region || ''}</p>
           <p className="text-[10px] font-medium text-gray-500 uppercase tracking-tighter">
-            • {supplier.country}
+            • {supplier?.billingAddress?.city || ''}
           </p>
         </>
       ),
@@ -91,10 +91,10 @@ export default function SuppliersTable({
               <span>{supplier.email}</span>
             </div>
           )}
-          {supplier.phoneNumber && (
+          {supplier.professionnalPhoneNumber && (
             <div className="flex items-center gap-2 text-xs font-medium text-gray-600">
               <Phone className="w-3 h-3" />
-              <span>{supplier.phoneNumber}</span>
+              <span>{supplier.professionnalPhoneNumber}</span>
             </div>
           )}
         </div>

@@ -27,7 +27,7 @@ export function FiltersBar({
   cityOptions,
   onReset,
   searchPlaceholder = "Nom, MF ou email...",
-  cityLabel = "Ville",
+  cityLabel = "Pays",
 }: FiltersBarProps) {
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm font-[Inter,system-ui,sans-serif]">
@@ -63,7 +63,7 @@ export function FiltersBar({
               onChange={(e) => onCityChange(e.target.value)}
               className="h-10 w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 px-3 pr-9 text-xs font-medium text-slate-900 outline-none transition hover:bg-white focus:border-blue-300 focus:bg-white focus:ring-2 focus:ring-blue-100 cursor-pointer"
             >
-              <option value="all">Toutes les villes</option>
+              <option value="all">Toutes les pays</option>
 
               {cityOptions.map((option) => (
                 <option key={option.value} value={option.value}>

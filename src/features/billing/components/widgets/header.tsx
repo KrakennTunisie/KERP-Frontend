@@ -11,7 +11,6 @@ type PageHeaderProps = {
 };
 
 export function PageHeader({
-  eyebrow = "Gestion Commerciale",
   title,
   description,
   actionLabel,
@@ -23,14 +22,7 @@ export function PageHeader({
     <header className="bg-white border-b border-slate-100 px-6 py-5 font-[Inter,system-ui,sans-serif]">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          {eyebrow && (
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="bg-blue-600 w-1.5 h-1.5 rounded-full" />
-              <span className="text-[9px] font-extrabold text-blue-600 uppercase tracking-[0.18em]">
-                {eyebrow}
-              </span>
-            </div>
-          )}
+          
 
           <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight leading-tight">
             {title}

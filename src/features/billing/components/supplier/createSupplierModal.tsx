@@ -1,7 +1,6 @@
 "use client";
 
 import PartnerForm from "../partner/partnerForm";
-import {  CreateSupplierPartner, createSupplierPartnerSchema } from "../../models/partner";
 import { Modal } from "@/shared/components/ui/modal";
 
 
@@ -18,7 +17,7 @@ type SupplierCreateModalProps = {
 
 export default function SupplierCreateModal({ open, onClose, onCreated }: SupplierCreateModalProps) {
 
-      const onSubmit: SubmitHandler<CreateSupplierPartner> = async (values) => {
+ /*     const onSubmit: SubmitHandler<CreateSupplierPartner> = async (values) => {
         try {
           console.log("values", values)
           const formData = new FormData();
@@ -69,5 +68,5 @@ export default function SupplierCreateModal({ open, onClose, onCreated }: Suppli
         onSubmit={onSubmit}
       />
     </Modal>
-  );
+  );*/
 }

@@ -12,11 +12,11 @@ import {
   UserX,
   UserCheck,
 } from "lucide-react";
-import { Partner } from "../../models/partner";
 import { ActionMenu } from "@/shared/components/ui/actionMenuItem";
+import { Partner, PartnerAllDetails } from "../../models/partner";
 
 type PartnerHeaderProps = {
-  partner: Partial<Partner>;
+  partner:PartnerAllDetails;
 
   pageConfig: {
     backHref: string;
@@ -62,7 +62,7 @@ export default function PartnerHeader({
             <div>
               <div className="flex items-center gap-3 mb-1.5">
                 <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight leading-tight">
-                  {partner.name}
+                  {partner.companyName}
                 </h1>
               </div>
 
@@ -70,7 +70,7 @@ export default function PartnerHeader({
                 <div className="flex items-center gap-2 text-slate-500">
                   <MapPin className={`w-3.5 h-3.5 ${pageConfig.heroInfoIconClass}`} />
                   <span className="text-xs font-medium leading-5">
-                    {partner.address}, {partner.country}
+                    {partner.billingAddress?.region}, {partner.billingAddress?.city}
                   </span>
                 </div>
 
@@ -84,7 +84,7 @@ export default function PartnerHeader({
                 <div className="flex items-center gap-2 text-slate-500">
                   <Phone className={`w-3.5 h-3.5 ${pageConfig.heroInfoIconClass}`} />
                   <span className="text-xs font-medium leading-5">
-                    {partner.phoneNumber ?? "-"}
+                    {partner.professionnalPhoneNumber ?? "-"}
                   </span>
                 </div>
               </div>

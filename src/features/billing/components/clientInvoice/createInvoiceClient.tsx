@@ -132,31 +132,39 @@ export default function CreateInvoiceClient({ mode,
                                         render={({ field }) => (
                                             <input
                                                 type="date"
-                                                value={field.value
-                                                    ? new Date(new Date(field.value).getTime() + 24 * 60 * 60 * 1000)
-                                                        .toISOString().split("T")[0]
+                                                value={field.value ? (() => {
+                                                    const d = new Date(field.value);
+                                                    const year = d.getFullYear();
+                                                    const month = String(d.getMonth() + 1).padStart(2, "0");
+                                                    const day = String(d.getDate()).padStart(2, "0");
+                                                    return `${year}-${month}-${day}`;
+                                                })()
                                                     : ""
                                                 }
                                                 onChange={(e) => {
-                                                    field.onChange(new Date(e.target.value));
-                                                    calculateDueDate();
+                                                  field.onChange(new Date(e.target.value));
+                                                  calculateDueDate();
                                                 }}
                                                 min={new Date().toISOString().split("T")[0]}
                                                 max={
                                                     (() => {
-                                                        // Mode create — BC sélectionné
+                                                        let poDate: Date | null = null;
+
                                                         if (linkedToPO && selectedPO) {
-                                                            return new Date(new Date(selectedPO.issueDate).getTime() + 24 * 60 * 60 * 1000)
-                                                                .toISOString().split("T")[0];
-                                                        }
-                                                        else {
-                                                            // Mode edit — BC déjà lié
+                                                            poDate = new Date(selectedPO.issueDate);
+                                                        } else {
                                                             const editPODate = form.getValues("purchaseOrder.issueDate");
                                                             if (editPODate) {
-                                                                return new Date(new Date(editPODate).getTime() + 24 * 60 * 60 * 1000)
-                                                                    .toISOString().split("T")[0];
+                                                                poDate = new Date(editPODate);
                                                             }
+                                                        }
 
+                                                        if (poDate) {
+                                                            // Fix timezone: utiliser les valeurs locales
+                                                            const year = poDate.getFullYear();
+                                                            const month = String(poDate.getMonth() + 1).padStart(2, "0");
+                                                            const day = String(poDate.getDate()).padStart(2, "0");
+                                                            return `${year}-${month}-${day}`;
                                                         }
                                                     })()
                                                 }
@@ -235,7 +243,7 @@ export default function CreateInvoiceClient({ mode,
                                                         {selectedPO.purchaseOrderNumber}
                                                     </p>
                                                     <p className="text-xs text-blue-500 mt-0.5 truncate">
-                                                        {selectedPO.partner?.name}
+                                                        {selectedPO.partner?.partnerName}
                                                     </p>
                                                 </div>
 
@@ -291,8 +299,8 @@ export default function CreateInvoiceClient({ mode,
                                                 }}
                                                 className="w-full text-left px-4 py-3 hover:bg-blue-50 transition border-b border-slate-50 last:border-0"
                                             >
-                                                <p className="text-sm font-bold text-slate-800">{client.name}</p>
-                                                <p className="text-xs text-slate-400 mt-0.5">{client.address}</p>
+                                                <p className="text-sm font-bold text-slate-800">{client.partnerName}</p>
+                                                <p className="text-xs text-slate-400 mt-0.5">{client.billingAddress.region}</p>
                                             </button>
                                         ))}
                                     </div>
@@ -301,7 +309,7 @@ export default function CreateInvoiceClient({ mode,
                             {previewData.partner && (
                                 <div className="border-2 border-blue-100 bg-blue-50/40 rounded-xl p-4">
                                     <div className="flex items-start justify-between">
-                                        <p className="font-bold text-blue-700 text-sm">{previewData.partner.name}</p>
+                                        <p className="font-bold text-blue-700 text-sm">{previewData.partner.partnerName}</p>
                                         <button
                                             type="button"
                                             onClick={clearClient}
@@ -313,7 +321,7 @@ export default function CreateInvoiceClient({ mode,
                                             </svg>
                                         </button>
                                     </div>
-                                    <p className="text-xs text-blue-500 mt-0.5">{previewData.partner.address}</p>
+                                    <p className="text-xs text-blue-500 mt-0.5">{previewData.partner.billingAddress.region}</p>
                                     <div className="flex items-center gap-4 mt-2">
                                         <span className="flex items-center gap-1 text-[10px] font-bold text-blue-500 uppercase tracking-wide">
                                             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -325,7 +333,7 @@ export default function CreateInvoiceClient({ mode,
                                             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                                             </svg>
-                                            {previewData.partner.phoneNumber}
+                                            {previewData.partner.professionnalPhoneNumber}
                                         </span>
                                     </div>
                                 </div>
@@ -407,7 +415,7 @@ export default function CreateInvoiceClient({ mode,
                                     {/* Input désignation */}
                                     <input
                                         type="text"
-                                        readOnly={linkedToPO && !!selectedPO || invoice?.purchaseOrder!=null}
+                                        readOnly={linkedToPO && !!selectedPO || invoice?.purchaseOrder != null}
                                         value={item.description}
                                         onChange={(e) => updateItem(item.idInvoiceItem!, "description", e.target.value)}
                                         className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition mb-4"
@@ -420,7 +428,7 @@ export default function CreateInvoiceClient({ mode,
                                         </label>
                                         <select
                                             value={item.operationCategory}
-                                            disabled={linkedToPO && !!selectedPO || invoice?.purchaseOrder!=null}
+                                            disabled={linkedToPO && !!selectedPO || invoice?.purchaseOrder != null}
                                             onChange={(e) => updateItem(item.idInvoiceItem!, "operationCategory", e.target.value)}
                                             className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
                                         >
@@ -452,7 +460,7 @@ export default function CreateInvoiceClient({ mode,
                                             </label>
                                             <input
                                                 type="text"
-                                                readOnly={linkedToPO && !!selectedPO || invoice?.purchaseOrder!=null}
+                                                readOnly={linkedToPO && !!selectedPO || invoice?.purchaseOrder != null}
                                                 defaultValue={item.unityPriceEXclTax}
                                                 onBlur={(e) => updateItem(item.idInvoiceItem!, "unityPriceEXclTax", parseFloat(e.target.value))}
                                                 className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 text-center focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
@@ -464,7 +472,7 @@ export default function CreateInvoiceClient({ mode,
                                             </label>
                                             <select
                                                 value={item.vatRate}
-                                                disabled={linkedToPO && !!selectedPO ||  invoice?.purchaseOrder!=null}
+                                                disabled={linkedToPO && !!selectedPO || invoice?.purchaseOrder != null}
                                                 onChange={(e) => updateItem(item.idInvoiceItem!, "vatRate", Number(e.target.value))}
                                                 className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 text-center focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
                                             >

@@ -90,11 +90,11 @@ export default function ClientsTable({
                         onClick={() => router.push(`/billing/clients/${client.idPartner}`)}
                         className="text-xs font-bold text-blue-600 underline-offset-4 transition hover:text-blue-800 hover:underline cursor-pointer"
                       >
-                        {client.name}
+                        {client.companyName}
                       </button>
 
             <p className="mt-0.5 truncate text-[11px] font-medium text-slate-500">
-              {client.address || "Adresse non renseignée"}
+              {client.billingAddress.city || "Adresse non renseignée"}
             </p>
           </div>
         </div>
@@ -115,11 +115,7 @@ export default function ClientsTable({
       cell: (client) => (
         <div>
           <p className="text-xs font-semibold text-slate-800">
-            {client.country || "-"}
-          </p>
-
-          <p className="mt-0.5 text-[11px] font-medium text-slate-400">
-            Pays
+            {client.billingAddress.region || "-"}
           </p>
         </div>
       ),
@@ -138,10 +134,10 @@ export default function ClientsTable({
             <p className="text-xs font-medium text-slate-400">Email non renseigné</p>
           )}
 
-          {client.phoneNumber ? (
+          {client.partnerName ? (
             <div className="flex items-center gap-2 text-xs font-medium text-slate-600">
               <Phone className="h-3.5 w-3.5 shrink-0 text-slate-400" />
-              <span>{client.phoneNumber}</span>
+              <span>{client.professionnalPhoneNumber}</span>
             </div>
           ) : (
             <p className="text-xs font-medium text-slate-400">Téléphone non renseigné</p>

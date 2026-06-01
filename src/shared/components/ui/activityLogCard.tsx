@@ -1,17 +1,9 @@
 import SectionCard from "./sectionCard";
 import IconButton from "./iconButton";
 import { Activity, RefreshCw } from "lucide-react";
-
-type ActivityLog = {
-  id: string;
-  type: string;
-  description: string;
-  date: string;
-  user: string;
-};
-
+import { AuditLog } from "@/features/billing/models/AuditLogs";
 type ActivityLogCardProps = {
-  logs: ActivityLog[];
+  logs: AuditLog[];
   onRefresh: () => void;
   getActivityIcon: (type: string) => React.ElementType;
 };
@@ -39,11 +31,11 @@ export default function ActivityLogCard({
     >
       <div className="max-h-[340px] overflow-y-auto px-6 pb-4 space-y-1 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
         {logs.map((log) => {
-          const Icon = getActivityIcon(log.type);
+          const Icon = getActivityIcon(log.auditLogType!);
 
           return (
             <div
-              key={log.id}
+              key={log.idLog}
               className="flex items-start gap-3 py-3 border-b border-slate-50 last:border-0"
             >
               <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
@@ -57,13 +49,13 @@ export default function ActivityLogCard({
 
                 <div className="flex items-center gap-1.5 mt-1">
                   <p className="text-[11px] text-slate-400">
-                    {log.date}
+                 {new Date(log.logDate).toLocaleDateString('fr-FR')}
                   </p>
 
-                  <span className="text-slate-300">•</span>
+                  <span className="text-blue-300">•</span>
 
                   <p className="text-[11px] text-slate-400">
-                    Par {log.user}
+                    Par {log.triggeredBy}
                   </p>
                 </div>
               </div>

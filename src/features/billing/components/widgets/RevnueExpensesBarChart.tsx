@@ -2,7 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/sha
 import { RefreshCw } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-type ChartMode = "revenues" | "expenses" | "both";
+export type ChartMode = "revenues" | "expenses" | "both";
 
 type RevenueExpenseChartData = {
   month: string;
@@ -129,14 +129,13 @@ export default function RevenueExpenseBarChart({
                 fontSize: "13px",
                 fontWeight: 600,
               }}
-              formatter={(value: number, name: string) => {
+              formatter={(value, name) => {
                 const label = name === "revenus" ? "Revenus" : "Dépenses";
-                const colorClass =
-                  name === "revenus" ? "text-blue-400" : "text-red-400";
+                const colorClass = name === "revenus" ? "text-blue-400" : "text-red-400";
 
                 return [
-                  <span key={name} className={colorClass}>
-                    {value.toLocaleString()} {currency}
+                  <span key={String(name)} className={colorClass}>
+                    {Number(value ?? 0).toLocaleString()} {currency}
                   </span>,
                   label,
                 ];

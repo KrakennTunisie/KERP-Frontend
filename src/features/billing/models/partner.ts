@@ -6,73 +6,88 @@ import type { Invoice } from "./invoice";
 import { documentSchema } from "./document";
 import { $ZodAny } from "node_modules/zod/v4/core/schemas.cjs";
 import { PaymentConditionSchema } from "../types/paymentCondition";
-import { tvaRateStirngSchema } from "../types/tvaRate";
+import { tvaRateStringSchema } from "../types/tvaRate";
 import { currencyTypeSchema } from "../types/currency";
+import { addAddressSchema, addressSchema } from "./Address";
 
 export const partnerSchema = z.object({
   idPartner: z.uuid(),
-  name: z.string().min(1, "Le nom est obligatoire").min(3, "Le nom doit contenir au moins 3 caractères"),
+  active : z.boolean(),
+  enablePortal : z.boolean,
+  maritalStatus: z.string().min(1, "La salutation est obligatoire"),
+  partnerName: z.string().min(1, "Le nom est obligatoire").min(3, "Le nom doit contenir au moins 3 caractères"),
+  companyName: z.string().min(1, "Le nom est obligatoire").min(3, "Le nom doit contenir au moins 3 caractères"),
+  displayName: z.string().min(1, "Le nom est obligatoire").min(3, "Le nom doit contenir au moins 3 caractères"),
   email: z.email("Email invalide"),
-  phoneNumber: z.string().min(1, "Le téléphone est obligatoire").min(8, "Le numéro de téléphone est invalide"),
+  professionnalPhoneNumber: z.string().min(1, "Le téléphone est obligatoire").min(8, "Le numéro de téléphone est invalide"),
+  personnelPhoneNumber: z.string().min(1, "Le téléphone est obligatoire").min(8, "Le numéro de téléphone est invalide"),
   taxRegistrationNumber: z.string().min(1, "La matricule fiscale est obligatoire"),
-  country: z.string().min(1, "Le pays est obligatoire"),
-  address: z.string().min(1, "L'addresse est obligatoire"),
+  currency: currencyTypeSchema,
+  taxRate: tvaRateStringSchema,
+  paymentCondition: PaymentConditionSchema,
+  billingAddress : addAddressSchema,
+  shippingAddress : addAddressSchema,
+  language: z.string().min(1, "Language est obligatoire"),
   iban: z.string().min(1, "IBAN est obligatoire"),
-
   rne: fileSchema.nullable(),
   contract: fileSchema.nullable(),
   patente: fileSchema.nullable() ,
-
   partnerType: partnerTypeSchema,
   invoices: z.array(z.lazy(() => z.any())).optional(),
+  logs : z.array(z.lazy(() => z.any())).optional(),
+});
+export const createPartnerSchema = z.object({
+  idPartner: z.uuid(),
+  active : z.boolean(),
+  enablePortal : z.boolean,
+  maritalStatus: z.string(),
+  partnerName: z.string(),
+  companyName: z.string(),
+  displayName: z.string(),
+  email: z.email("Email invalide"),
+  professionnalPhoneNumber: z.string(),
+  personnelPhoneNumber: z.string(),
+  taxRegistrationNumber: z.string(),
+  currency: currencyTypeSchema,
+  taxRate: tvaRateStringSchema,
+  paymentCondition: PaymentConditionSchema,
+  billingAddress : addAddressSchema,
+  shippingAddress : addAddressSchema,
+  language: z.string().min(1, "Language est obligatoire"),
+  iban: z.string().min(1, "IBAN est obligatoire"),
+  rne: documentSchema.nullable(),
+  contract:  documentSchema.nullable(),
+  patente:  documentSchema.nullable() ,
+  partnerType: partnerTypeSchema,
 });
 
 export const partnerDetailsSchema = z.object({
-  idPartner: z.string(),
-
-  name: z.string(),
-
-  email: z.email().nullable().optional(),
-
-  phoneNumber: z.string().nullable().optional(),
-
-  taxRegistrationNumber: z.string().nullable().optional(),
-
-  country: z.string().nullable().optional(),
-
-  address: z.string().nullable().optional(),
-
-  iban: z.string().nullable().optional(),
-
-  partnerType: partnerTypeSchema,
-
-  rne: documentSchema.nullable().optional(),
-
-  contract: documentSchema.nullable().optional(),
-
-  patente: documentSchema.nullable().optional(),
-
-  createdAt: z.date(),
-
-  updatedAt: z.date(),
-});
-
-
-export const createPartnerSchema = z.object({
-  name: z.string().min(1, "Le nom est obligatoire").min(3, "Le nom doit contenir au moins 3 caractères"),
+  idPartner: z.uuid(),
+  active : z.boolean(),
+  enablePortal : z.boolean,
+  maritalStatus: z.string(),
+  partnerName: z.string(),
+  companyName: z.string(),
+  displayName: z.string(),
   email: z.email("Email invalide"),
-  phoneNumber: z.string().min(1, "Le téléphone est obligatoire").min(8, "Le numéro de téléphone est invalide"),
-  taxRegistrationNumber: z.string().min(1, "La matricule fiscale est obligatoire"),
-  country: z.string().min(1, "Le pays est obligatoire"),
-  address: z.string().min(1, "L'addresse est obligatoire"),
+  professionnalPhoneNumber: z.string(),
+  personnelPhoneNumber: z.string(),
+  taxRegistrationNumber: z.string(),
+  currency: currencyTypeSchema,
+  taxRate: tvaRateStringSchema,
+  paymentCondition: PaymentConditionSchema,
+  billingAddress : addAddressSchema,
+  shippingAddress : addAddressSchema,
+  language: z.string().min(1, "Language est obligatoire"),
   iban: z.string().min(1, "IBAN est obligatoire"),
-
+  rne: documentSchema.nullable(),
+  contract:  documentSchema.nullable(),
+  patente:  documentSchema.nullable() ,
   partnerType: partnerTypeSchema,
-
-  rne: fileSchema,
-  contract: fileSchema,
-  patente: fileSchema ,
 });
+
+
+
 
 export type Partner = z.infer<typeof partnerSchema> & {
   invoices?: Invoice[];
@@ -87,8 +102,8 @@ export const supplierPartnerSchema = partnerSchema.extend({
 });
 
 
-export type ClientPartner = z.infer<typeof clientPartnerSchema>;
-export type SupplierPartner = z.infer<typeof supplierPartnerSchema>;
+export type CreatePartner = z.infer<typeof partnerSchema>;
+
 
 export const clientPartnerDetailsSchema = partnerSchema.extend({
   partnerType: z.literal("CLIENT"),
@@ -100,8 +115,8 @@ export const supplierPartnerDetailsSchema = partnerSchema.extend({
 
 export const addPartnerSchema = z.object({
   partnerType: partnerTypeSchema,
-
-  salutation: z.string().min(1, "La salutation est obligatoire"),
+  active : z.boolean(),
+  maritalStatus: z.string().min(1, "La salutation est obligatoire"),
   firstName: z.string().min(1, "Le nom est obligatoire").min(3, "Le nom doit contenir au moins 3 caractères"),
   lastName: z.string().min(1, "Le nom est obligatoire").min(3, "Le nom doit contenir au moins 3 caractères"),
 
@@ -112,39 +127,29 @@ export const addPartnerSchema = z.object({
   email: z.email("Email invalide"),
   workPhone: z.string(),
   mobilePhone: z.string(),
+  language: z.string(),
 
   taxId: z.string().min(1, "Le matricule fiscal est obligatoire"),
   iban: z.string(),
-  taxRate: tvaRateStirngSchema,
+  taxRate: tvaRateStringSchema,
   paymentTerms: PaymentConditionSchema,
   enablePortal: z.boolean(),
-
-  billingCountry: z.string().min(1, "Le pays de facturation est obligatoire"),
-  billingStreet1: z.string().min(1, "L'adresse de facturation est obligatoire"),
-  billingStreet2: z.string(),
-  billingCity: z.string().min(1, "La ville de facturation est obligatoire"),
-  billingState: z.string(),
-  billingZip: z.string(),
-
-  shippingCountry: z.string(),
-  shippingStreet1: z.string(),
-  shippingStreet2: z.string(),
-  shippingCity: z.string(),
-  shippingState: z.string(),
-  shippingZip: z.string(),
-
-  rne: fileSchema,
-  contract: fileSchema,
-  patente: fileSchema,
+  billingAddress : addAddressSchema,
+  shippingAddress :addAddressSchema,
+  rne: fileSchema || undefined,
+  contract: fileSchema || undefined,
+  patente: fileSchema.nullable(),
 });
 
 export type AddPartnerFormData = z.infer<typeof addPartnerSchema>;
-
-
+export type PartnerAllDetails = z.infer<typeof partnerDetailsSchema>;
 export type ClientPartnerDetails = z.infer<typeof clientPartnerDetailsSchema>;
 export type SupplierPartnerDetails = z.infer<typeof supplierPartnerDetailsSchema>;
 
-export const partnerItemSchema = partnerSchema.omit({patente: true, rne: true, contract: true,  invoices: true})
+export const partnerItemSchema = partnerSchema.omit({
+  maritalStatus: true,displayName: true,currency:true, taxRate:true,logs:true,paymentCondition:true,shippingAddress:true,
+  personnelPhoneNumber : true,patente: true,enablePortal:true,active:true,language:true,
+   rne: true, contract: true,  invoices: true})
 
 export type PartnerItem = z.infer<typeof partnerItemSchema>
 
@@ -153,28 +158,39 @@ export type ClientPartnerItem = PartnerItem & { partnerType: "CLIENT" };
 export type SupplierPartnerItem = PartnerItem & { partnerType: "SUPPLIER" };
 
 
-export const createClientPartnerSchema = createPartnerSchema.extend({
-  partnerType: z.literal("CLIENT"),
-});
-
-export const createSupplierPartnerSchema = createPartnerSchema.extend({
-  partnerType: z.literal("SUPPLIER"),
-});
-
-export const updatePartnerSchema = createPartnerSchema
-  .omit({ taxRegistrationNumber: true, rne: true, contract: true, patente: true })
-  .partial();
 
 export const partnerSummarySchema = partnerSchema.pick({
   idPartner: true,
-  name: true,
+  partnerName: true,
+  companyName: true,
   email: true,
-  address: true,
-  phoneNumber: true,
+  billingAddress: true,
+  professionnalPhoneNumber: true,
+  taxRegistrationNumber: true,
   partnerType: true,
 });
+export const upadtePartnerSchema = addPartnerSchema.pick({
+  partnerType: true,
+  active : true,
+  maritalStatus: true,
+  firstName: true,
+  lastName:true,
+  companyName: true,
+  shortName: true,
+  currency : true,
+  email: true,
+  workPhone: true,
+  mobilePhone: true,
+  language: true,
+  taxId: true,
+  iban: true,
+  taxRate: true,
+  paymentTerms: true,
+  enablePortal: true,
+  billingAddress : true,
+  shippingAddress :true,
+});
+
+export type UpdatePartner = z.infer<typeof upadtePartnerSchema >;
 
 export type PartnerSummary = z.infer<typeof partnerSummarySchema>;
-export type CreateClientPartner = z.infer<typeof createClientPartnerSchema>;
-export type CreateSupplierPartner = z.infer<typeof createSupplierPartnerSchema>;
-export type UpdatePartner = z.infer<typeof updatePartnerSchema>;

@@ -35,23 +35,31 @@ export default function ClientsList() {
   const [formData, setFormData] = useState<ClientPartnerItem>({
     iban: '',
     taxRegistrationNumber: '',
-    name: '',
-    address: '',
-    country: '',
+    partnerName: '',
+    companyName: '',
+    billingAddress: {
+      street1: '',
+      street2: '',
+      region: '',
+      state: '',
+      zipCode: "",
+      city: "",
+      addressType: "",
+    },
     email: '',
-    phoneNumber: '',
+    professionnalPhoneNumber: '',
     partnerType: "CLIENT",
-    idPartner:'',
+    idPartner: '',
   });
 
-const [clients, setClients] = useState<ClientPartnerItem[]>([]);
-const [totalPages, setTotalPages] = useState(1);
-const [totalElements, setTotalElements] = useState(0);
-const [loading, setLoading] = useState(false);
+  const [clients, setClients] = useState<ClientPartnerItem[]>([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalElements, setTotalElements] = useState(0);
+  const [loading, setLoading] = useState(false);
 
-const debouncedSearchQuery = useDebounce(searchQuery, 400);
+  const debouncedSearchQuery = useDebounce(searchQuery, 400);
 
-const cities = useMemo(() => Array.from(new Set(clients.map((c) => c.country))), [clients]);
+  const cities = useMemo(() => Array.from(new Set(clients.map((c) => c.billingAddress.region))), [clients]);
 
   const fetchClients = async () => {
     try {
@@ -70,33 +78,33 @@ const cities = useMemo(() => Array.from(new Set(clients.map((c) => c.country))),
       setTotalPages(response.totalPages);
       setTotalElements(response.totalElements);
     } catch (error) {
-      appToast.error("Erreur de fetch clients: ",getApiErrorMessage(error))
+      appToast.error("Erreur de fetch clients: ", getApiErrorMessage(error))
     } finally {
       setLoading(false);
     }
   };
 
-useEffect(() => {
-  setCurrentPage(1);
-}, [debouncedSearchQuery, filterCity]);
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearchQuery, filterCity]);
 
-useEffect(() => {
+  useEffect(() => {
 
-  fetchClients();
-}, [debouncedSearchQuery, filterCity, currentPage]);
+    fetchClients();
+  }, [debouncedSearchQuery, filterCity, currentPage]);
 
 
 
-  const onUpdateRequest = (row : ClientPartnerItem)=>{
-        setFormData(row)
-        setShowUpdateModal(true)
+  const onUpdateRequest = (row: ClientPartnerItem) => {
+    setFormData(row)
+    setShowUpdateModal(true)
   }
 
 
   return (
     <div className="min-h-screen flex-1 flex flex-col min-h-0 bg-gray-50">
       {/* Header */}
-     <PageHeader
+      <PageHeader
         title="Mes Clients"
         description="Gérez votre portefeuille clients"
         actionLabel="Ajouter un client"
@@ -108,7 +116,7 @@ useEffect(() => {
       <main className="flex-1 overflow-y-auto p-8">
         <div className="max-w-7xl mx-auto space-y-8">
           {/* Filters Bar */}
-         <FiltersBar
+          <FiltersBar
             searchValue={searchQuery}
             onSearchChange={(value) => {
               setSearchQuery(value);
@@ -131,36 +139,24 @@ useEffect(() => {
           />
 
           {/* Table */}
-        <ClientsTable 
+          <ClientsTable
             rows={clients}
-            setCurrentPage= {setCurrentPage}
-            currentPage= {currentPage}
-            totalPages= {totalPages}
-            loading= {loading}
-            totalElements= {totalElements}
+            setCurrentPage={setCurrentPage}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            loading={loading}
+            totalElements={totalElements}
             onDeleteRequest={setDeleteConfirmId}
-            onUpdateRequest = {onUpdateRequest}
-            
-        />
+            onUpdateRequest={onUpdateRequest}
 
-                <ClientCreateModal
-                    open={showAddModal}
-                    onClose={() => setShowAddModal(false)}
-                    onCreated={fetchClients}
-                />
-                <ClientUpdateModal
-                  open ={showUpdateModal}
-                  onClose={()=> setShowUpdateModal(false)}
-                  onCreated={fetchClients}
-                  data={formData}
-                />
+          />
 
-                <ClientDeleteModal
-                    open={!!deleteConfirmId}
-                    onClose={() => setDeleteConfirmId('')} 
-                    onCreated={fetchClients}
-                    confirmDeleteId={deleteConfirmId}                
-                />
+          <ClientDeleteModal
+            open={!!deleteConfirmId}
+            onClose={() => setDeleteConfirmId('')}
+            onCreated={fetchClients}
+            confirmDeleteId={deleteConfirmId}
+          />
         </div>
       </main>
     </div>

@@ -5,72 +5,81 @@ import InfoField from "@/shared/components/ui/infoField";
 import InfoGrid from "@/shared/components/ui/infoGrid";
 import SectionCard from "@/shared/components/ui/sectionCard";
 import { Separator } from "@/shared/components/ui/separator";
+
+import { ClientPartnerDetails } from "../../models/partner";
+import { PaymentConditionLabels } from "../../types/paymentCondition";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { UserPen } from "lucide-react";
 
 type PartnerDetailsCardProps = {
-  partner: any;
-  mockPartner: any;
-  onEdit: () => void;
+  partner: ClientPartnerDetails;
   onOpenDocument: (document: any) => void;
 };
 
 export default function PartnerDetailsCard({
   partner,
-  mockPartner,
-  onEdit,
   onOpenDocument,
 }: PartnerDetailsCardProps) {
+  const router = useRouter();
   return (
     <SectionCard
       title="Détails du client"
       description="Informations complètes"
       action={
-        <IconButton
-          icon={UserPen}
-          title="Modifier"
-          onClick={onEdit}
-          variant="default"
-        />
+        <Link href={`/billing/clients/${partner.idPartner}/edit`}>
+          <IconButton
+            icon={UserPen}
+            title="Modifier"
+            variant="blue" onClick={function (): void {
+              throw new Error("Function not implemented.");
+            }} />
+        </Link>
       }
       contentClassName="space-y-4 max-h-[350px] overflow-y-auto pr-2"
     >
       <InfoGrid>
-        <InfoField label="Matricule Fiscal" value={mockPartner.taxId} />
+        <InfoField label="Matricule Fiscal" value={partner.taxRegistrationNumber} />
         <InfoField label="IBAN" value={partner.iban} breakWords />
       </InfoGrid>
 
       <InfoGrid>
-        <InfoField label="Devise" value={mockPartner.currency} />
+        <InfoField label="Devise" value={partner.currency} />
         <InfoField
           label="Conditions de paiement"
-          value={mockPartner.paymentTerms || "Net 30 jours"}
+          value={PaymentConditionLabels[partner.paymentCondition] || "-"}
         />
       </InfoGrid>
 
       <InfoGrid>
-        <InfoField label="Téléphone mobile" value={partner.phoneNumber} />
-        <InfoField label="Client depuis" value="-" />
+        <InfoField label="Téléphone professionnel" value={partner.professionnalPhoneNumber} />
+        <InfoField label="Téléphone personnel" value={partner.personnelPhoneNumber} />
+      </InfoGrid>
+      <InfoGrid>
+        <InfoField label="Pourcentage du Tax" value={partner.taxRate + "%"} />
+
       </InfoGrid>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <AddressBox
           title="Adresse de facturation"
-          street1={mockPartner.billingStreet1}
-          street2={mockPartner.billingStreet2}
-          zip={mockPartner.billingZip}
-          city={mockPartner.billingCity}
-          state={mockPartner.billingState}
-          country={mockPartner.billingCountry}
+          street1={partner.billingAddress.street1}
+          street2={partner.billingAddress.street2}
+          zip={partner.billingAddress.zipCode}
+          city={partner.billingAddress.city}
+          state={partner.billingAddress.state}
+          country={partner.billingAddress.region}
+          type={partner.billingAddress.addressType}
         />
-
         <AddressBox
           title="Adresse de livraison"
-          street1={mockPartner.shippingStreet1}
-          street2={mockPartner.shippingStreet2}
-          zip={mockPartner.shippingZip}
-          city={mockPartner.shippingCity}
-          state={mockPartner.shippingState}
-          country={mockPartner.shippingCountry}
+          street1={partner.shippingAddress.street1}
+          street2={partner.shippingAddress.street2}
+          zip={partner.shippingAddress.zipCode}
+          city={partner.shippingAddress.city}
+          state={partner.shippingAddress.state}
+          country={partner.shippingAddress.region}
+          type={partner.shippingAddress.addressType}
         />
       </div>
 

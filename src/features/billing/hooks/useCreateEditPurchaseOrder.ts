@@ -185,7 +185,7 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
 
   useEffect(() => {
     if (mode === "edit" && purchaseOrder) {
-      console.log("Status reçu:", purchaseOrder?.purchaseOrderStatus);
+     console.log("Status reçu:", purchaseOrder?.purchaseOrderStatus);
       reset({
         idPurchaseOrder: purchaseOrder.idPurchaseOrder,
         purchaseOrderNumber: purchaseOrder.purchaseOrderNumber,
@@ -356,7 +356,7 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
   // Sélection d'un client
   const selectClient = (client: PartnerSummary) => {
     setValue("partner", client, { shouldValidate: true, shouldDirty: true, });
-    setClientSearch(client.name);
+    setClientSearch(client.partnerName);
     setShowDropdown(false);
   };
 

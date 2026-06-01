@@ -2,39 +2,24 @@ import {  InvoiceCreate } from "@/features/billing/models/invoice";
 import { PdfDocumentData, PdfLineItem, PdfParty } from "./types";
 import { InvoiceCreditNote } from "@/features/billing/models/creditNote";
 import { PurchaseOrder } from "@/features/billing/models/purchaseOrder";
+import { PartnerSummary } from "@/features/billing/models/partner";
 
-type BackendPartner = {
-  firstName?: string | null;
-  lastName?: string | null;
-  companyName?: string | null;
-  email?: string | null;
-  workPhone?: string | null;
-  mobilePhone?: string | null;
-  taxId?: string | null;
-  billingStreet1?: string | null;
-  billingStreet2?: string | null;
-  billingCity?: string | null;
-  billingState?: string | null;
-  billingZip?: string | null;
-  billingCountry?: string | null;
-};
 
-export function mapPartnerToPdfParty(partner: BackendPartner): PdfParty {
-  const fullName = [partner.firstName, partner.lastName].filter(Boolean).join(" ");
+export function mapPartnerToPdfParty(partner: PartnerSummary): PdfParty {
 
   return {
-    name: fullName || partner.companyName || "-",
+    name: partner.partnerName || partner.companyName || "-",
     companyName: partner.companyName,
-    taxId: partner.taxId,
+    taxId: partner.taxRegistrationNumber,
     email: partner.email,
-    phone: partner.workPhone || partner.mobilePhone,
+    phone: partner.professionnalPhoneNumber ||"",
     address: {
-      street1: partner.billingStreet1,
-      street2: partner.billingStreet2,
-      city: partner.billingCity,
-      state: partner.billingState,
-      zip: partner.billingZip,
-      country: partner.billingCountry,
+      street1: partner.billingAddress.street1,
+      street2: partner.billingAddress.street2,
+      city: partner.billingAddress.city,
+      state: partner.billingAddress.state,
+      zip: partner.billingAddress.zipCode,
+      country: partner.billingAddress.city,
     },
   };
 }
@@ -45,7 +30,7 @@ export type InvoiceDto = {
   dueDate?: string | null;
   currency: string;
   invoiceStatus?: string | null;
-  partner?: BackendPartner | null;
+  partner?: PartnerSummary | null;
   items: PdfLineItem[];
   paymentTerms?: string | null;
   paymentMethod?: string | null;
@@ -58,7 +43,7 @@ export type CreditNoteDto = {
   issueDate: string;
   currency: string;
   status?: string | null;
-  partner?: BackendPartner | null;
+  partner?: PartnerSummary | null;
   items: PdfLineItem[];
   notes?: string | null;
 };
@@ -69,7 +54,7 @@ export type PurchaseOrderDto = {
   deliveryDate?: string | null;
   currency: string;
   purchaseOrderStatus?: string | null;
-  supplier?: BackendPartner | null;
+  supplier?: PartnerSummary | null;
   items: PdfLineItem[];
   notes?: string | null;
 };

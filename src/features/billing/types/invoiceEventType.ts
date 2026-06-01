@@ -3,6 +3,7 @@ import { z } from 'zod'
 export const InvoiceEventTypeSchema = z.enum([
   'CREATED',
   'UPDATED',
+  'DELETED',
   'STATUS_CHANGED',
   'PAYMENT_REGISTERED',
   'PAYMENT_METHOD_UPDATED',
@@ -24,6 +25,7 @@ export type InvoiceEventType = z.infer<typeof InvoiceEventTypeSchema>
 export const InvoiceEventLabels: Record<InvoiceEventType, string> = {
     CREATED: "Facture a été créée",
     UPDATED: "Mis à jour",
+    DELETED : "Supprimée",
     STATUS_CHANGED:"Status changée",
     PAYMENT_REGISTERED:"Paiement enregistrée",
     PAYMENT_METHOD_UPDATED:"Méthode de paiement mis à jour",
