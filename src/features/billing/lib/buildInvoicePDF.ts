@@ -70,6 +70,10 @@ export const handleSaveAsPDF = async (
     return null;
   }
 };
+
+
+
+
 // Permet la génération de la facture une fois remplie 
   /*const handlePrint = useReactToPrint({
   contentRef: invoiceRef,

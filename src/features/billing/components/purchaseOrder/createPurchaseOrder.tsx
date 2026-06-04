@@ -21,8 +21,8 @@ export default function CreatePurchaseOrder({
 }: PurchaseOrderFormClientProps) {
   const {
     addItem,
-    removeItem, updateItem, clientSearch, setClientSearch, showDropdown, setShowDropdown, canCreatePurchaseOrder, 
-    errors, selectClient, clearClient, clients,
+    removeItem, updateItem, supplierSearch, setSupplierSearch, showDropdown, setShowDropdown, canCreatePurchaseOrder, 
+    errors, selectSupplier, clearSupplier, clients,
       previewData, form, onSubmit, router, isModalOpen, createPurchaseOrder, pdfUrl, 
     onCloseDocumentModal, purchaseOrderRef,updatePurchaseOrder,
     loadingEdit,
@@ -140,21 +140,20 @@ export default function CreatePurchaseOrder({
             </div>
           </section>
 
-          {/* Section 02 — Client */}
+          {/* Section 02 — Supplier */}
           <section>
-            <SectionTitle number="02" label="CLIENT" invoiceType={invoiceTypeSchema.enum.SALE} />
+            <SectionTitle number="02" label="FOURNISSEUR" invoiceType={invoiceTypeSchema.enum.SALE} />
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex flex-col gap-3 mt-3">
               <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
-                Sélectionner un client
+                Sélectionner un fournisseur
               </label>
               <div className="relative">
                 <input
                   type="text"
                   disabled={mode == "edit"}
-                  //readOnly={mode=="edit"}
-                  placeholder="Rechercher un client..."
-                  value={clientSearch}
-                  onChange={(e) => { setClientSearch(e.target.value); setShowDropdown(true) }}
+                  placeholder="Rechercher un fournisseur..."
+                  value={supplierSearch}
+                  onChange={(e) => { setSupplierSearch(e.target.value); setShowDropdown(true) }}
                   onFocus={() => setShowDropdown(true)}
                   onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
                   className="w-full px-3 py-2.5 py-2.5 pr-9 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
@@ -178,7 +177,7 @@ export default function CreatePurchaseOrder({
                         type="button"
                         onMouseDown={(e) => {
                           e.preventDefault();
-                          selectClient(client);
+                          selectSupplier(client);
                         }}
                         className="w-full text-left px-4 py-3 hover:bg-blue-50 transition border-b border-slate-50 last:border-0"
                       >
@@ -196,7 +195,7 @@ export default function CreatePurchaseOrder({
                     <button
                       type="button"
                       disabled={mode == "edit"}
-                      onClick={clearClient}
+                      onClick={clearSupplier}
                       className={`transition ${mode == "edit"
                         ? "text-gray-300 cursor-not-allowed  pointer-events-none"
                         : "text-slate-300 hover:text-red-400 cursor-pointer"

@@ -61,7 +61,7 @@ export const purchaseOrderSummaryDTO = z.object({
     idPurchaseOrder: z.string(),
     purchaseOrderNumber: z.string(),
     issueDate: z.date(),
-    purchaseOrderStatus: purchaseOrderStatusSchema,
+    purchaseOrderStatus: purchaseOrderStatusWithoutAllSchema,
     currency: currencyTypeSchema,
 })
 
@@ -71,8 +71,6 @@ export const purchaseOrderPageItemSchema = z.object({
     issueDate: z.date(),
     purchaseOrderStatus: purchaseOrderStatusWithoutAllSchema,
     purchaseCurrency: currencyTypeSchema,
-    vatRate: z.number(),
-    appliedExchangeRate: z.number(),
     totalExclTaxEUR: z.number(),
     totalInclTaxEUR: z.number(),
     totalExclTaxTND: z.number(),
@@ -80,6 +78,22 @@ export const purchaseOrderPageItemSchema = z.object({
     totalExclTaxUSD: z.number(),
     totalInclTaxUSD: z.number(),
     partner: partnerSummarySchema,
+});
+export const purchaseOrderPartnerSummarySchema = z.object({
+    idPurchaseOrder: z.string(),
+    purchaseOrderNumber: z.string(),
+    issueDate: z.date(),
+    purchaseOrderStatus: purchaseOrderStatusWithoutAllSchema,
+    purchaseCurrency: currencyTypeSchema,
+    purchaseOrderType: z.string(),
+    totalExclTaxEUR: z.number(),
+    totalInclTaxEUR: z.number(),
+    totalExclTaxTND: z.number(),
+    totalInclTaxTND: z.number(),
+    totalExclTaxUSD: z.number(),
+    totalInclTaxUSD: z.number(),
+    partner: partnerSummarySchema,
+    purchaseOrderDocument: documentSchema.nullable(),
 });
 
 export const purchaseOrderDetailsSchema = z.object({
@@ -133,3 +147,4 @@ export type PurchaseOrderUpdate = z.infer<typeof purchaseOrderUpdateDTO>;
 export type PurchaseOrderPageItem = z.infer<typeof purchaseOrderPageItemSchema>;
 export type PurchaseOrderDetails = z.infer<typeof purchaseOrderDetailsSchema>;
 export type PurchaseOrderSummary = z.infer<typeof purchaseOrderSummaryDTO>;
+export type PurchaseOrderPartnerSummary = z.infer<typeof purchaseOrderPartnerSummarySchema>;

@@ -1,5 +1,5 @@
 "use client"
-import { ShieldIcon } from "lucide-react";
+import { Copy, Pencil, Send, Settings, ShieldIcon, Trash2 } from "lucide-react";
 import useCreditNoteDetails, { PropsCreditNote } from "../../hooks/useCreditNoteDetails";
 import Card from "../widgets/card";
 import { SendToTTNModal } from "../widgets/ttnConfirmationModal";
@@ -13,6 +13,7 @@ import { formatDateLong, formatDateLongWithTime } from "@/shared/utils/formatDat
 import PageLoader from "@/shared/components/ui/pageLoader";
 import { NotFound } from "@/shared/components/widgets/notFound";
 import { invoiceComplianceStatusSchema } from "../../types/invoiceComplianceStatus";
+import { DocumentTopBar } from "../widgets/documentTopBar";
 
 export default function CreditNoteDetails({ params }: PropsCreditNote) {
     const { updateStatus, previewDocument, setPreviewDocument, setStatusPaiement, invoice, sendToTTN, TtnModalOpen, setTtnModalOpen, loading, sent, successMessage, router } = useCreditNoteDetails({ params });
@@ -33,28 +34,55 @@ export default function CreditNoteDetails({ params }: PropsCreditNote) {
         <div className="min-h-screen bg-gray-50 font-sans">
 
             {/* TOP BAR */}
-            <div className="bg-white border-b border-gray-200 px-6 py-3.5 flex items-center justify-between sticky top-0 z-50 shadow-sm">
-                <div className="flex items-center gap-4">
-                    <button
-                        onClick={() => router.back()}
-                        className="w-9 h-9 rounded-xl border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors">
-                        <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                            <path d="M19 12H5M12 5l-7 7 7 7" />
-                        </svg>
-                    </button>
-                    <div>
-                        <div className="flex items-center gap-2.5">
-                            <span className="text-[22px] font-extrabold tracking-tight text-gray-900">{invoice?.invoiceCreditNoteNumber}</span>
-                            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-wide bg-amber-50 text-amber-600 border border-amber-200">
-                                {invoice?.invoiceCreditNoteStatus
-                                    ? invoiceStatusLabels[invoice.invoiceCreditNoteStatus]
-                                    : '-'}
-                            </span>
-                        </div>
-                        <p className="text-xs text-gray-400 mt-0.5">Emise le {formatDateLong(invoice?.issueDate)}</p>
-                    </div>
-                </div>
-            </div>
+            <DocumentTopBar
+                documentTypeLabel="Facture d’avoir"
+                documentNumber={invoice?.invoiceCreditNoteNumber}
+                statusLabel={
+                    invoice?.invoiceCreditNoteStatus
+                    ? invoiceStatusLabels[invoice.invoiceCreditNoteStatus]
+                    : "-"
+                }
+                statusVariant="danger"
+                issueDateLabel="Émise le"
+                issueDate={formatDateLong(invoice?.issueDate)}
+                onBack={() => router.back()}
+                actionItems={[
+                        {
+                        label: "Cloner",
+                        icon: Copy,
+                        onClick: () => console.log("Cloner", invoice?.idInvoiceCreditNote),
+                        },
+                        {
+                        label: "Mettre à jour statut",
+                        icon: Settings,
+                        onClick: () => console.log("Mettre à jour statut", invoice?.idInvoiceCreditNote),
+                        disabled: invoice?.invoiceCreditNoteStatus === "CANCELLED",
+                        },
+                        {
+                        label: "Envoyer",
+                        icon: Send,
+                        onClick: () => console.log("Envoyer", invoice?.idInvoiceCreditNote),
+                        disabled: invoice?.invoiceCreditNoteStatus === "CANCELLED",
+                        },
+                        {
+                        label: "Modifier",
+                        icon: Pencil,
+                        onClick: () =>
+                            router.push(`/billing/invoices/clients/${invoice?.idInvoiceCreditNote}/edit`),
+                        disabled:
+                            invoice?.invoiceCreditNoteStatus === "PAID" ||
+                            invoice?.invoiceCreditNoteStatus === "CANCELLED",
+                        },
+                        {
+                        label: "Supprimer",
+                        icon: Trash2,
+                        color: "text-rose-600",
+                        hover: "hover:bg-rose-50",
+                        onClick: () => console.log("Supprimer", invoice?.idInvoiceCreditNote),
+                        disabled: invoice?.invoiceCreditNoteStatus !== "DRAFT",
+                        },
+                    ]}
+            />
 
             {/* MAIN */}
             <div className="max-w-[1200px] mx-auto px-6 py-6 grid grid-cols-[1fr_300px] gap-5">

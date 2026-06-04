@@ -34,8 +34,7 @@ export default function PurchaseOrderList() {
             <BillingPageHeader
             title="Commande Clients"
             description="Gestion des Bons de commande"
-            createHref="/billing/purchaseOrder/clients/create"
-            createLabel="Nouvelle Commande"
+           
             />
 
             <DeleteInvoiceModal

@@ -9,11 +9,12 @@ import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 import PageLoader from "@/shared/components/ui/pageLoader";
 import PartnerDetails from "../partner/partnerDetails";
 import { PartnerInvoiceStats } from "../../types/partnersStats";
-import { InvoicePageItem } from "../../models/invoice";
+import { Invoice, InvoicePageItem, InvoicePageItemV2 } from "../../models/invoice";
 import { NotFound } from "@/shared/components/widgets/notFound";
 import { AuditLog } from "../../models/AuditLogs";
 import { partnerTypeSchema } from "../../types/partnerType";
 import { PartnerRevenueStats } from "../../types/partnerRevenueStats";
+import { PurchaseOrderPartnerSummary } from "../../models/purchaseOrder";
 
 
 export default function ClientDetails(){
@@ -41,6 +42,7 @@ export default function ClientDetails(){
   })
   const [loading, setLoading] = useState<boolean>();
   const [clientInvoices, setClientInvoices]= useState<InvoicePageItem[]|[]>([])
+  const [clientPurchaseOrder, setClientPurchaseOrder]= useState<PurchaseOrderPartnerSummary[]|[]>([])
   const [clientLogs, setClientLogs]= useState<AuditLog[]|[]>([])
   const [clientRevenueInitial, setClientRevenueInitial]= useState<PartnerRevenueStats[]|[]>([])
   const [supplierDespenses, setSupplierDespenses]= useState<PartnerRevenueStats[]|[]>([])
@@ -62,10 +64,22 @@ export default function ClientDetails(){
   const fetchClientInvoices = async () => {
       try {
         setLoading(true)
-        const invoices = await InvoicesAPI.getClientTopInvoices(clientId);
+        const invoices = await partnersApi.getClientsInvoicesById(clientId);
         setClientInvoices(invoices);
       } catch (error) {
         appToast.error("Erreur fetch des factures client: ",getApiErrorMessage(error));
+      }
+      finally{
+        setLoading(false)
+      }
+    };
+     const fetchClientPurchaseorder = async () => {
+      try {
+        setLoading(true)
+        const purchaseOrders = await partnersApi.getPurchaseOrderByPartnerId(clientId);
+        setClientPurchaseOrder(purchaseOrders);
+      } catch (error) {
+        appToast.error("Erreur fetch des bon de commande client: ",getApiErrorMessage(error));
       }
       finally{
         setLoading(false)
@@ -111,6 +125,7 @@ export default function ClientDetails(){
   useEffect(() => {
   fetchClient();
   fetchClientInvoices();
+  fetchClientPurchaseorder();
   fetchClientLogs();;
 }, [clientId]);
 

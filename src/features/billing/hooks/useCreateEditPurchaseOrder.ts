@@ -27,6 +27,8 @@ import { useDebounce } from "@/shared/hooks/useDebounce";
 import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 import { purchaseOrderTypeSchema } from "../types/PurchaseOrderType";
 import { ExchangeRate } from "../types/exchangeRate";
+import { generatePdfFile } from "@/shared/pdf/pdfGenerator";
+import { purchaseOrderToPdfData } from "@/shared/pdf/documentAdapter";
 
 export type PropsPurchaseOrder = {
   params: {
@@ -59,7 +61,7 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
       purchaseOrderNumber: nextNumber?.value,
       idPurchaseOrder: uuidv4(),
       purchaseOrderStatus: purchaseOrderStatusSchema.enum.DRAFT,
-      purchaseOrderType: purchaseOrderTypeSchema.enum.SALE,
+      purchaseOrderType: purchaseOrderTypeSchema.enum.PURCHASE,
       issueDate: new Date(),
       purchaseOrderItems: [defaultPurchaseOrderItem()],
       totalExclTax: 0,
@@ -83,14 +85,14 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
     name: "purchaseOrderItems",
   });
 
-  const fetchClientPurchaseOrder = async () => {
+  const fetchSupplierPurchaseOrder = async () => {
     try {
       setLoadingEdit(true)
       console.log(purchaseOrderId)
-      const po = await PurchaseOrderAPI.getClientPurchaseOrderById(purchaseOrderId);
+      const po = await PurchaseOrderAPI.getSupplierPurchaseOrderById(purchaseOrderId !);
       setPurchaseOrder(po);
     } catch (error) {
-      appToast.error("Erreur Fetch du client:", getApiErrorMessage(error));
+      appToast.error("Erreur Fetch du fournisseur:", getApiErrorMessage(error));
     }
     finally {
       setLoadingEdit(false)
@@ -104,7 +106,7 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
         setNextNumber(response);
       }
       else {
-        await fetchClientPurchaseOrder()
+        await fetchSupplierPurchaseOrder()
       }
     }
     catch (error: any) {
@@ -223,9 +225,9 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
   }, [mode, purchaseOrder, reset]);
 
   // UI state only
-  const [clientSearch, setClientSearch] = useState("");
+  const [supplierSearch, setSupplierSearch] = useState("");
   const [clients, setClients] = useState<PartnerSummary[] | []>([])
-  const [loadingClients, setLoadingClients] = useState(false)
+  const [loadingSuppliers, setLoadingSuppliers] = useState(false)
   const [showDropdown, setShowDropdown] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
@@ -256,31 +258,31 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
 
 
   //Filtrage de la liste des clients lors de la recherche 
-  const debouncedSearchQuery = useDebounce(clientSearch, 2000);
+  const debouncedSearchQuery = useDebounce(supplierSearch, 2000);
 
-  const getClients = async () => {
+  const getSuppliers = async () => {
     try {
-      setLoadingClients(true);
+      setLoadingSuppliers(true);
       const keyword =
         debouncedSearchQuery.trim().length >= 3
           ? debouncedSearchQuery.trim()
           : undefined;
 
-      const response = await partnersApi.getSummaryClients({
+      const response = await partnersApi.getSummarySuppliers({
         keyword: keyword,
       });
 
       setClients(response);
     } catch (error) {
-      appToast.error("Erreur de fetch clients: ", getApiErrorMessage(error))
+      appToast.error("Erreur de fetch fournisseurs: ", getApiErrorMessage(error))
     } finally {
-      setLoadingClients(false);
+      setLoadingSuppliers(false);
     }
   };
 
   useEffect(() => {
 
-    getClients();
+    getSuppliers();
   }, [debouncedSearchQuery]);
 
   //Synchronisation des items lors d'un nouveau item
@@ -351,18 +353,18 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
     syncItems(updatedItems);
   };
 
-  // Sélection d'un client
-  const selectClient = (client: PartnerSummary) => {
+  // Sélection d'un fournisseur
+  const selectSupplier = (client: PartnerSummary) => {
     setValue("partner", client, { shouldValidate: true, shouldDirty: true, });
-    setClientSearch(client.partnerName);
+    setSupplierSearch(client.partnerName);
     setShowDropdown(false);
   };
 
 
-  // Suppression de client selectionnée
-  const clearClient = () => {
+  // Suppression de fournisseur selectionnée
+  const clearSupplier = () => {
     setValue("partner", null, { shouldValidate: true, shouldDirty: true, });
-    setClientSearch("");
+    setSupplierSearch("");
   };
 
 
@@ -376,9 +378,11 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
 
       if (!element) return;
       const file = await handleSaveAsPDF(element, getValues("purchaseOrderNumber"));
-      if (file) {
-        setValue("purchaseOrderDocument", file, { shouldValidate: true, shouldDirty: true });
-        setPdfUrl(file);
+            const pdfFile = await generatePdfFile(purchaseOrderToPdfData(getValues()));
+      
+      if (pdfFile) {
+        setValue("purchaseOrderDocument", pdfFile, { shouldValidate: true, shouldDirty: true });
+        setPdfUrl(pdfFile);
       }
       setIsModalOpen(true);
     },
@@ -422,8 +426,7 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
       formData.append("vatRate", String(0));
       formData.append("paymentMethod", values.paymentMethod);
       formData.append("paymentCondition", values.paymentCondition);
-      formData.append(
-        "exchangeRateReferenceDate", values.exchangeRateReferenceDate.toISOString());
+      formData.append("exchangeRateReferenceDate", values.exchangeRateReferenceDate.toISOString());
       formData.append("appliedExchangeRate", String(values.appliedExchangeRate));
       formData.append("exchangeRateSource", values.exchangeRateSource);
 
@@ -439,7 +442,7 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
         console.log(pair[0], pair[1]);
       }
 
-      const createdInvoice = await PurchaseOrderAPI.createClientPurchaseOrder(formData);
+      const createdInvoice = await PurchaseOrderAPI.createSupplierPurchaseOrder(formData);
 
       if (createdInvoice) {
         appToast.success("Bon de commande créée avec succès");
@@ -511,15 +514,15 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
         for (const pair of formData.entries()) {
           console.log(pair[0], pair[1]);
         }
-        const createdInvoice = await PurchaseOrderAPI.updateClientPurchaseOrder(values.idPurchaseOrder, formData);
+        const createdInvoice = await PurchaseOrderAPI.updateSupplierPurchaseOrder(formData);
   
         if (createdInvoice) {
-          appToast.success("Facture mise à jour avec succès");
+          appToast.success("Bon de commande mise à jour avec succès");
           setIsModalOpen(false);
         }
       } catch (e: unknown) {
         const message = getApiErrorMessage(e);
-        appToast.error("Échec de création, veuillez réessayer.", message);
+        appToast.error("Échec de modification, veuillez réessayer.", message);
       }
       finally{
         setLoadingForm(false)
@@ -544,13 +547,13 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
     updateItem,
 
     // Client UI
-    clientSearch,
-    setClientSearch,
+    supplierSearch,
+    setSupplierSearch,
     clients,
     showDropdown,
     setShowDropdown,
-    selectClient,
-    clearClient,
+    selectSupplier,
+    clearSupplier,
 
     //data validation
 
@@ -576,7 +579,7 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
 
     loadingEdit,
     loadingForm,
-    loadingClients
+    loadingSuppliers
 
   };
 

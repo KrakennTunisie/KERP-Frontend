@@ -30,7 +30,7 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
 
     return (
         <div ref={ref} className="flex-1 p-6  bg-white">
-            <div className="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden max-w-[820px] mx-auto">
+            <div className="bg-white rounded-xl shadow-xl border border-slate-100 overflow-hidden max-w-[820px] mx-auto">
 
                 {/* Invoice Header */}
                 <div className="relative p-8 pb-6">

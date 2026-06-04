@@ -9,7 +9,7 @@ import { appToast } from "@/shared/lib/toast";
 import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 import PageLoader from "@/shared/components/ui/pageLoader";
 import { PartnerInvoiceStats } from "../../types/partnersStats";
-import { InvoicePageItem } from "../../models/invoice";
+import { Invoice, InvoicePageItem, InvoicePageItemV2 } from "../../models/invoice";
 import { NotFound } from "@/shared/components/widgets/notFound";
 import { AuditLog } from "../../models/AuditLogs";
 import { PartnerRevenueStats } from "../../types/partnerRevenueStats";
@@ -37,7 +37,7 @@ export default function SupplierDetails() {
   })
 
   const [supplier, setSupplier] = useState<PartnerAllDetails>();
-  const [supplierInvoices, setSupplierInvoices] = useState<InvoicePageItem[] | []>([])
+  const [supplierInvoices, setSupplierInvoices] = useState<InvoicePageItem[]|[]>([])
   const [loading, setLoading] = useState<boolean>(true);
   const [supplierLogs, setSupplierLogs] = useState<AuditLog[] | []>([])
   const [supplierDespensesInitial, setSupplierDespensesInitial] = useState<PartnerRevenueStats[] | []>([])
@@ -62,7 +62,7 @@ export default function SupplierDetails() {
   const fetchSupplierInvoices = async () => {
     try {
       setLoading(true)
-      const invoices = await InvoicesAPI.getSupplierTopInvoices(supplierId);
+      const invoices = await partnersApi.getSupplierInvoicesById(supplierId);
       setSupplierInvoices(invoices);
     } catch (error) {
       appToast.error("Erreur fetch des factures fournisser: ", getApiErrorMessage(error));
@@ -92,7 +92,6 @@ export default function SupplierDetails() {
       setLoading(true)
       const clientLogs = await AuditLogAPI.getAuditLogsBySupplier(supplierId)
       setSupplierLogs(clientLogs);
-      console.log(supplierLogs)
     } catch (error) {
       appToast.error("Erreur fetch les logs du fournisseur: ", getApiErrorMessage(error));
     }

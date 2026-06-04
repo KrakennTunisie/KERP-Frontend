@@ -17,30 +17,33 @@ import PageLoader from "@/shared/components/ui/pageLoader";
 import { BillingPageHeader } from "../widgets/billingHeader";
 import { PurchaseOrderTable } from "../widgets/purchaseOrderTable";
 import { StatusFilterBar } from "../widgets/billingFilterBar";
+import { SendInvoiceModal } from "../widgets/sendInvoiceModal";
 
 export default function SuppliersPurchaseOrderList() {
 
     const { router, search, setSearch, deleteOpen, setDeleteOpen, purchaseOrders, selectedPurchaseOrder, idPurchaseOrder, setUpdateOpen, updateLoading, updateOpen, setIdPurchaseOrder
-        , updateStatus, nextStatus, setNextStatus, setSelectedPurchaseOrder,deletePurchaseOrder,
+        , updateStatus, nextStatus, setNextStatus, setSelectedPurchaseOrder, deletePurchaseOrder,
         filtre, setFiltre, invoiceRef, setInvoiceRef, open, setOpen,
-        setCurrentPage,
-    currentPage,
-    totalElements,
-    totalPages,
-    loading } = useSupplierPurchaseOrderList();
+        setCurrentPage, openSendMail, setOpenSendMail,
+        currentPage,
+        totalElements,
+        totalPages,
+        loading } = useSupplierPurchaseOrderList();
 
-    
-            const purchaseOrderStatus = purchaseOrderStatusSchema.options
-            .map((status) => ({
-                value: status,
-                label: purchaseOrderStatusLabels[status],
-            }));
+
+    const purchaseOrderStatus = purchaseOrderStatusSchema.options
+        .map((status) => ({
+            value: status,
+            label: purchaseOrderStatusLabels[status],
+        }));
     return (
         <div className="min-h-screen bg-gray-50 p-8 font-sans">
             {/* Header */}
             <BillingPageHeader
-            title="Bon de commande Fournisseurs"
-            description="Consultation et suivi des bons de commandes d’achat"
+                title="Bon de commande Fournisseurs"
+                description="Consultation et suivi des bons de commandes d’achat"
+                createHref="/billing/purchaseOrder/suppliers/create"
+                createLabel="Nouvelle Commande"
             />
 
             <DeleteInvoiceModal
@@ -51,6 +54,11 @@ export default function SuppliersPurchaseOrderList() {
                     deletePurchaseOrder(idPurchaseOrder)
                     setDeleteOpen(false);
                 }} />
+            <SendInvoiceModal
+                invoice={selectedPurchaseOrder}
+                isOpen={openSendMail}
+                onClose={() => setOpenSendMail(false)}
+            />
             <SupplierPurchaseOrderModal
                 open={open}
                 title={`Bon de commande ${invoiceRef}`}
@@ -78,15 +86,15 @@ export default function SuppliersPurchaseOrderList() {
             />
 
             {/* Table card */}
-                <StatusFilterBar
-                    search={search}
-                    onSearchChange={setSearch}
-                    selectedStatus={filtre}
-                    onStatusChange={setFiltre}
-                    defaultStatus={purchaseOrderStatusSchema.enum.ALL}
-                    statuses={purchaseOrderStatus}
-                    searchPlaceholder="Référence ou client..."
-                />
+            <StatusFilterBar
+                search={search}
+                onSearchChange={setSearch}
+                selectedStatus={filtre}
+                onStatusChange={setFiltre}
+                defaultStatus={purchaseOrderStatusSchema.enum.ALL}
+                statuses={purchaseOrderStatus}
+                searchPlaceholder="Référence ou client..."
+            />
             <PurchaseOrderTable
                 type="SUPPLIER"
                 loading={loading}
@@ -100,6 +108,13 @@ export default function SuppliersPurchaseOrderList() {
                     setOpen(true);
                     setIdPurchaseOrder(purchaseOrder.idPurchaseOrder);
                     setInvoiceRef(purchaseOrder.purchaseOrderNumber);
+                }}
+                onEdit={(purchaseOrder) => {
+                    router.push(`/billing/purchaseOrder/suppliers/${purchaseOrder.idPurchaseOrder}/edit`);
+                }}
+                onSend={(purchaseOrder) => {
+                    setSelectedPurchaseOrder(purchaseOrder);
+                    setOpenSendMail(true);
                 }}
                 onUpdateStatus={(purchaseOrder) => {
                     setSelectedPurchaseOrder(purchaseOrder);

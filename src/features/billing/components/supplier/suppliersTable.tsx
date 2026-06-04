@@ -4,14 +4,15 @@ import { useRouter } from "next/navigation";
 import {
   Mail,
   Phone,
-  Eye,
   Edit,
   Trash2,
   Truck,
+  Eye,
 } from "lucide-react";
 import { DataTable, type DataTableColumn } from "@/shared/components/datatable";
 import { SupplierPartnerItem } from "../../models/partner";
 import { TableActionButton } from "../widgets/tableActionButton";
+import { ActionMenu } from "@/shared/components/ui/actionMenuItem";
 
 type SupplierTableProps = {
   rows: SupplierPartnerItem[];
@@ -21,7 +22,6 @@ type SupplierTableProps = {
   loading: boolean;
   totalElements: number;
   onDeleteRequest: (id: string) => void;
-  onUpdateRequest: (row: SupplierPartnerItem) => void;
 };
 
 export default function SuppliersTable({
@@ -32,7 +32,6 @@ export default function SuppliersTable({
   loading,
   totalElements,
   onDeleteRequest,
-  onUpdateRequest,
 }: SupplierTableProps) {
   const router = useRouter();
 
@@ -45,10 +44,17 @@ export default function SuppliersTable({
           <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center">
             <Truck className="w-5 h-5 text-emerald-600" />
           </div>
-          <div>
-            <p className="text-sm font-medium text-gray-900">{supplier.companyName}</p>
-            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-tighter">
-              {supplier.billingAddress.region}
+          <div className="min-w-0">
+            <button
+              type="button"
+              onClick={() => router.push(`/billing/suppliers/${supplier.idPartner}`)}
+              className="text-xs font-bold text-blue-600 underline-offset-4 transition hover:text-blue-800 hover:underline cursor-pointer"
+            >
+              {supplier.companyName}
+            </button>
+
+            <p className="mt-0.5 truncate text-[11px] font-medium text-slate-500">
+              {supplier.billingAddress.city || "Adresse non renseignée"}
             </p>
           </div>
         </div>
@@ -58,8 +64,8 @@ export default function SuppliersTable({
       key: "identifier",
       header: "Matricule Fiscal",
       cell: (supplier) => (
-        <p className="text-sm font-medium text-gray-900">
-          {supplier.taxRegistrationNumber}
+        <p className="text-xs font-semibold text-slate-700">
+          {supplier.taxRegistrationNumber || "-"}
         </p>
       ),
     },
@@ -68,10 +74,8 @@ export default function SuppliersTable({
       header: "Localisation",
       cell: (supplier) => (
         <>
-          <p className="text-sm font-medium text-gray-900">{supplier.billingAddress.region}</p>
-          <p className="text-[10px] font-medium text-gray-500 uppercase tracking-tighter">
-            • {supplier.billingAddress.city}
-          </p>
+          <p className="text-xs font-semibold text-slate-800">{supplier?.billingAddress?.region || '-'}</p>
+          
         </>
       ),
     },
@@ -96,34 +100,32 @@ export default function SuppliersTable({
       ),
     },
     {
-          key: "actions",
-          header: "Actions",
-          className: "text-right",
-          cell: (supplier) => (
-            <div className="flex items-center justify-end gap-1.5">
-              <TableActionButton
-                title="Voir"
-                icon={Eye}
-                variant="blue"
-                onClick={() => router.push(`/billing/suppliers/${supplier.idPartner}`)}
-              />
-    
-              <TableActionButton
-                title="Modifier"
-                icon={Edit}
-                variant="blue"
-                onClick={() => router.push(`/billing/suppliers/${supplier.idPartner}/edit`)}
-              />
-    
-              <TableActionButton
-                title="Supprimer"
-                icon={Trash2}
-                variant="blue"
-                onClick={() => onDeleteRequest(supplier.idPartner)}
-              />
-            </div>
-          ),
-        },
+      key: "actions",
+      header: "Actions",
+      className: "text-right",
+      cell: (supplier) => (
+        <ActionMenu
+          orientation="horizontal"
+          title="Actions client"
+          items={[
+            {
+              label: "Modifier",
+              icon: Edit,
+              color: "text-blue-600",
+              hover: "hover:bg-blue-50",
+              onClick: () => router.push(`/billing/suppliers/${supplier.idPartner}/edit`),
+            },
+            {
+              label: "Supprimer",
+              icon: Trash2,
+              color: "text-blue-600",
+              hover: "hover:bg-blue-50",
+              onClick: () => onDeleteRequest(supplier.idPartner),
+            },
+          ]}
+        />
+      ),
+    }
   ];
 
   return (

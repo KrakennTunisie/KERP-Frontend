@@ -28,7 +28,7 @@ export default function ConfirmDeleteModal({
 
   return (
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-4 z-50">
-      <div className="bg-white w-full max-w-md rounded-3xl p-6 shadow-xl border border-gray-100">
+      <div className="bg-white w-full max-w-md rounded-xl p-6 shadow-xl border border-gray-100">
         <p className="text-lg font-black text-gray-900">{title}</p>
 
         <p className="text-sm font-bold text-gray-600 mt-2">{message}</p>

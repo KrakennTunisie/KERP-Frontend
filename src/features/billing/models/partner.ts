@@ -166,6 +166,7 @@ export const partnerSummarySchema = partnerSchema.pick({
   email: true,
   billingAddress: true,
   professionnalPhoneNumber: true,
+  taxRegistrationNumber: true,
   partnerType: true,
 });
 export const upadtePartnerSchema = addPartnerSchema.pick({

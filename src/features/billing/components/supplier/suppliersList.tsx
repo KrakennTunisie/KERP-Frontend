@@ -1,7 +1,5 @@
 'use client';
 
-
-import { useEffect, useMemo, useState } from 'react';
 import {
   Search,
   Plus
@@ -9,101 +7,21 @@ import {
 
 
 import SuppliersTable from "./suppliersTable"
-import SupplierCreateModal from "./createSupplierModal";
-import {   SupplierPartnerItem } from '../../models/partner';
-import SupplierUpdateModal from "./updateSupplierModal";
+
 import SupplierDeleteModal from "./deleteSupplierModal";
-import { partnersApi } from "../../api/partners-api";
-import { getApiErrorMessage } from "@/shared/api/handle-api-error";
-import { appToast } from "@/shared/lib/toast";
-import { useDebounce } from "@/shared/hooks/useDebounce";
 import { useRouter } from 'next/navigation';
 import { PageHeader } from '../widgets/header';
 import { FiltersBar } from '@/shared/components/ui/filtreBar';
+import  { partnerListProps } from '../../hooks/usePartnerList';
+import { partnerTypeSchema } from '../../types/partnerType';
+import usePartnerList from '../../hooks/usePartnerList';
 
 
-export default function SuppliersList() {
+export default function SuppliersList({partnerType}: partnerListProps) {
+  const router = useRouter();
+  const { fetchPartner, filterCity, currentPage, cities, searchQuery, setCurrentPage, setDeleteConfirmId, setSearchQuery
+    , loading, suppliers, setFilterCity, deleteConfirmId, totalElements, totalPages } = usePartnerList({partnerType});
 
-  const router = useRouter()
-
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterCity, setFilterCity] = useState<string>('all');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [showAddModal, setShowAddModal] = useState<boolean>(false);
-  const [showUpdateModal, setShowUpdateModal] = useState<boolean>(false);
-  const [deleteConfirmId, setDeleteConfirmId] = useState<string>('');
-
-  const [formData, setFormData] = useState<SupplierPartnerItem>({
-    iban: '',
-    taxRegistrationNumber: '',
-    partnerName: '',
-    companyName: '',
-    billingAddress: {
-      street1: '',
-      street2: '',
-      region: '',
-      state: '',
-      zipCode: "",
-      city: "",
-      addressType: "",
-    },
-    email: '',
-    professionnalPhoneNumber: '',
-    partnerType: "SUPPLIER",
-    idPartner: '',
-
-  });
-
-  const [suppliers, setSuppliers] = useState<SupplierPartnerItem[]>([]);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalElements, setTotalElements] = useState(0);
-  const [loading, setLoading] = useState(false);
-  
-  const debouncedSearchQuery = useDebounce(searchQuery, 2000);
-
-const cities = useMemo(() => Array.from(new Set(suppliers.map((c) => c.billingAddress.region))), [suppliers]);
-
-const fetchClients = async () => {
-    try {
-      setLoading(true);
-      const keyword =
-        debouncedSearchQuery.trim().length >= 3
-          ? debouncedSearchQuery.trim()
-          : undefined;
-
-      const response = await partnersApi.getSuppliers({
-        keyword: keyword,
-        filter: filterCity !== "all" ? filterCity : undefined,
-        page: currentPage - 1,
-      });
-
-      setSuppliers(response.content);
-      setTotalPages(response.totalPages);
-      setTotalElements(response.totalElements);
-    } catch (error) {
-      appToast.error("Erreur de fetch clients: ",getApiErrorMessage(error))
-    } finally {
-      setLoading(false);
-    }
-  };
-
-
-useEffect(() => {
-  setCurrentPage(1);
-}, [debouncedSearchQuery, filterCity]);
-
-useEffect(() => {
-  
-  fetchClients();
-}, [debouncedSearchQuery, filterCity, currentPage]);
-
-
-
-
-  const onUpdateRequest = (row : SupplierPartnerItem)=>{
-          setFormData(row)
-          setShowUpdateModal(true)
-    }
 
   return (
     <div className=" min-h-screen flex-1 flex flex-col min-h-0 bg-gray-50">
@@ -143,24 +61,25 @@ useEffect(() => {
           />
 
           {/* Table */}
-        <SuppliersTable 
+          <SuppliersTable
             rows={suppliers}
-            setCurrentPage= {setCurrentPage}
-            currentPage= {currentPage}
-            totalPages= {totalPages}
-            loading= {loading}
-            totalElements= {totalElements} 
+            setCurrentPage={setCurrentPage}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            loading={loading}
+            totalElements={totalElements}
             onDeleteRequest={setDeleteConfirmId}
-            onUpdateRequest = {onUpdateRequest}
-        />
+          />
 
 
-                <SupplierDeleteModal
-                    open={!!deleteConfirmId}
-                    onClose={() => setDeleteConfirmId('')} 
-                    onCreated={fetchClients}
-                    confirmDeleteId={deleteConfirmId}                
-                />
+          <SupplierDeleteModal
+            open={!!deleteConfirmId}
+            onClose={() => setDeleteConfirmId('')}
+            onCreated={() => {
+              fetchPartner(partnerTypeSchema.enum.SUPPLIER);
+            }}
+            confirmDeleteId={deleteConfirmId}
+          />
         </div>
       </main>
     </div>

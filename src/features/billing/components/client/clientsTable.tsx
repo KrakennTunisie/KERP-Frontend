@@ -5,9 +5,9 @@ import {
   Building2,
   Mail,
   Phone,
-  Eye,
   Edit,
   Trash2,
+  Edit2Icon,
 } from "lucide-react";
 
 import {
@@ -16,6 +16,7 @@ import {
 } from "@/shared/components/datatable";
 
 import { ClientPartnerItem } from "../../models/partner";
+import { ActionMenu } from "@/shared/components/ui/actionMenuItem";
 
 type ClientsTableProps = {
   rows: ClientPartnerItem[];
@@ -25,42 +26,9 @@ type ClientsTableProps = {
   loading: boolean;
   totalElements: number;
   onDeleteRequest: (id: string) => void;
-  onUpdateRequest: (row: ClientPartnerItem) => void;
 };
 
-function TableActionButton({
-  title,
-  icon: Icon,
-  onClick,
-  variant = "default",
-}: {
-  title: string;
-  icon: React.ElementType;
-  onClick: () => void;
-  variant?: "default" | "blue" | "warning" | "danger";
-}) {
-  const variants = {
-    default:
-      "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 hover:text-slate-900",
-    blue:
-      "bg-blue-50 text-blue-600 border-blue-100 hover:bg-blue-100 hover:text-blue-700",
-    warning:
-      "bg-amber-50 text-amber-600 border-amber-100 hover:bg-amber-100 hover:text-amber-700",
-    danger:
-      "bg-rose-50 text-rose-600 border-rose-100 hover:bg-rose-100 hover:text-rose-700",
-  };
 
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      title={title}
-      className={`inline-flex h-8 w-8 items-center justify-center rounded-lg border transition-colors cursor-pointer ${variants[variant]}`}
-    >
-      <Icon className="h-3.5 w-3.5" />
-    </button>
-  );
-}
 
 export default function ClientsTable({
   rows,
@@ -70,7 +38,6 @@ export default function ClientsTable({
   loading,
   totalElements,
   onDeleteRequest,
-  onUpdateRequest,
 }: ClientsTableProps) {
   const router = useRouter();
 
@@ -85,8 +52,16 @@ export default function ClientsTable({
           </div>
 
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-slate-900">
-              {client.partnerName}
+            <button
+              type="button"
+              onClick={() => router.push(`/billing/clients/${client.idPartner}`)}
+              className="text-xs font-bold text-blue-600 underline-offset-4 transition hover:text-blue-800 hover:underline cursor-pointer"
+            >
+              {client.companyName}
+            </button>
+
+            <p className="mt-0.5 truncate text-[11px] font-medium text-slate-500">
+              {client.billingAddress.city || "Adresse non renseignée"}
             </p>
           </div>
         </div>
@@ -142,30 +117,28 @@ export default function ClientsTable({
       header: "Actions",
       className: "text-right",
       cell: (client) => (
-        <div className="flex items-center justify-end gap-1.5">
-          <TableActionButton
-            title="Voir"
-            icon={Eye}
-            variant="blue"
-            onClick={() => router.push(`/billing/clients/${client.idPartner}`)}
-          />
-
-          <TableActionButton
-            title="Modifier"
-            icon={Edit}
-            variant="blue"
-            onClick={() => router.push(`/billing/clients/${client.idPartner}/edit`)}
-          />
-
-          <TableActionButton
-            title="Supprimer"
-            icon={Trash2}
-            variant="blue"
-            onClick={() => onDeleteRequest(client.idPartner)}
-          />
-        </div>
+        <ActionMenu
+          orientation="horizontal"
+          title="Actions client"
+          items={[
+            {
+              label: "Modifier",
+              icon: Edit2Icon,
+              color: "text-blue-600",
+              hover: "hover:bg-blue-50",
+              onClick: () => router.push(`/billing/clients/${client.idPartner}/edit`),
+            },
+            {
+              label: "Supprimer",
+              icon: Trash2,
+              color: "text-blue-600",
+              hover: "hover:bg-blue-50",
+              onClick: () => onDeleteRequest(client.idPartner),
+            },
+          ]}
+        />
       ),
-    },
+    }
   ];
 
   return (

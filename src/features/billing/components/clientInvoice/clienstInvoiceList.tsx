@@ -12,30 +12,28 @@ import { BillingInvoicesTable } from "../widgets/billingTable";
 export default function ClientsInvoiceList() {
 
     const { router, search, setSearch, open, setOpen, deleteOpen, setDeleteOpen,
-        filtre, setFiltre, invoiceRef, setInvoiceRef, clientsInvoices,
+        filtre, setFiltre, invoiceRef, clientsInvoices,
         currentPage,
         setCurrentPage,
         totalElements,
         totalPages,
         deleteLoading,
-        invoiceId,
+
         setInvoiceId,
         deleteClientInvoice,
         setUpdateOpen,
-        updateOpen,
-        updateLoading,
-        updateStatus,
+
         selectedInvoice, setSelectedInvoice,
-        nextStatus, setNextStatus,
+
         loading, clientInvoiceStats } = useClientInvoiceList();
 
-        const invoiceStatuses = invoiceStatusSchema.options
+    const invoiceStatuses = invoiceStatusSchema.options
         .filter(
             (status) =>
-            status !== invoiceStatusSchema.enum.REFUNDED &&
-            status !== invoiceStatusSchema.enum.NOT_REFUNDED &&
-            status !== invoiceStatusSchema.enum.IN_PROGRESS &&
-            status !== invoiceStatusSchema.enum.TO_PAY
+                status !== invoiceStatusSchema.enum.REFUNDED &&
+                status !== invoiceStatusSchema.enum.NOT_REFUNDED &&
+                status !== invoiceStatusSchema.enum.IN_PROGRESS &&
+                status !== invoiceStatusSchema.enum.TO_PAY
         )
         .map((status) => ({
             value: status,
@@ -50,10 +48,10 @@ export default function ClientsInvoiceList() {
             />
             {/* Header */}
             <BillingPageHeader
-            title="Factures Clients"
-            description="Gestion des factures de vente"
-            createHref="/billing/invoices/clients/create"
-            createLabel="Nouvelle facture client"
+                title="Factures Clients"
+                description="Gestion des factures de vente"
+                createHref="/billing/invoices/clients/create"
+                createLabel="Nouvelle facture client"
             />
             {/* Stats */}
             <div className="flex gap-4 mb-8">
@@ -99,8 +97,8 @@ export default function ClientsInvoiceList() {
                     open={deleteOpen}
                     onClose={() => setDeleteOpen(false)}
                     invoiceRef={invoiceRef}
-                    onConfirm={deleteClientInvoice} 
-                    loading={deleteLoading}/>
+                    onConfirm={deleteClientInvoice}
+                    loading={deleteLoading} />
             </div>
 
             {/* Table card */}
@@ -114,7 +112,7 @@ export default function ClientsInvoiceList() {
                 searchPlaceholder="Référence ou client..."
             />
             {/* Table */}
-                <BillingInvoicesTable
+            <BillingInvoicesTable
                 invoices={clientsInvoices}
                 partnerColumnLabel="Client"
                 currentPage={currentPage}
@@ -146,8 +144,9 @@ export default function ClientsInvoiceList() {
                 onDelete={(invoice) => {
                     console.log("Supprimer facture client", invoice.idInvoice);
                 }}
-                />
+            />
         </div>
+
 
     );
 }

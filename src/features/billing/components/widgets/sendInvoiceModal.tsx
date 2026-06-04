@@ -7,7 +7,7 @@ import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 import { appToast } from "@/shared/lib/toast";
 
 import { MailingAPI } from "../../api/partners-api";
-import { InvoicePageItem } from "../../models/invoice";
+import { InvoicePageItem, InvoicePageItemV2 } from "../../models/invoice";
 import { InvoiceCreditNotePageItem } from "../../models/creditNote";
 import { PurchaseOrderPageItem } from "../../models/purchaseOrder";
 
@@ -78,14 +78,14 @@ const getDocumentPartnerName = (document: SendableInvoice | null) => {
   if (!document) return "";
 
   if (isCreditNote(document)) {
-    return document.invoice.partner.name;
+    return document.invoice.partner.companyName;
   }
 
   if (isPurchaseOrder(document)) {
-    return document.partner.name;
+    return document.partner.companyName;
   }
 
-  return document.partner.name;
+  return document.partner.companyName;
 };
 
 const getDocumentId = (document: SendableInvoice | null) => {

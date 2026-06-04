@@ -11,7 +11,7 @@ type PurchaseOrderPreviewProps = {
 const PurchaseOrderPreview = forwardRef<HTMLDivElement, PurchaseOrderPreviewProps>(({ data }, ref) => {
     return (
         <div ref={ref} className="flex-1 p-6  bg-white">
-            <div className="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden max-w-[820px] mx-auto">
+            <div className="bg-white rounded-xl shadow-xl border border-slate-100 overflow-hidden max-w-[820px] mx-auto">
 
                 {/* Invoice Header */}
                 <div className="relative p-8 pb-6">
@@ -80,8 +80,8 @@ const PurchaseOrderPreview = forwardRef<HTMLDivElement, PurchaseOrderPreviewProp
                             </p>
                             {data.partner ? (
                                 <>
-                                    <p className="text-base font-bold text-slate-900">{data.partner.name}</p>
-                                    <p className="text-sm text-slate-500 mt-0.5">{data.partner.address}</p>
+                                    <p className="text-base font-bold text-slate-900">{data.partner.companyName}</p>
+                                    <p className="text-sm text-slate-500 mt-0.5">{data.partner.billingAddress.region}</p>
                                     <p className="text-sm font-bold text-black mt-2">{data.partner.email}</p>
                                 </>
                             ) : (

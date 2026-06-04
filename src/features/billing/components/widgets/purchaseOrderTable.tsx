@@ -11,6 +11,7 @@ import { PurchaseOrderPageItem } from "../../models/purchaseOrder";
 import { purchaseOrderStatus, purchaseOrderStatusColors, purchaseOrderStatusLabels } from "../../types/purchaseOrderStatus";
 import { formatDateLong } from "@/shared/utils/formatDate";
 import { TableActionButton } from "./tableActionButton";
+import { PurchaseOrderRow } from "./purchaseOrderRaw";
 
 type PurchaseOrderType = "CLIENT" | "SUPPLIER";
 
@@ -64,7 +65,7 @@ export function PurchaseOrderTable({
   onDelete,
   getAllowedNextStatuses,
 }: PurchaseOrderTableProps) {
-  const isClientPurchaseOrder = type === "CLIENT";
+  const isSupplierPurchaseOrder = type === "SUPPLIER";
 
   const partnerColumnLabel =
     type === "CLIENT" ? "Client" : "Fournisseur";
@@ -114,103 +115,20 @@ export function PurchaseOrderTable({
                 </td>
               </tr>
             ) : (
-                purchaseOrders.map((purchaseOrder) => {
-                const canUpdateStatus =
-                    getAllowedNextStatuses(purchaseOrder.purchaseOrderStatus).length > 0;
-
-                const canDelete = purchaseOrder.purchaseOrderStatus === "DRAFT";
-
-                const canSend = purchaseOrder.purchaseOrderStatus !== "DRAFT";
-
-                return (
-                    <tr
-                    key={purchaseOrder.idPurchaseOrder}
-                    className="transition-colors hover:bg-slate-50/70"
-                    >
-                    <td className="whitespace-nowrap px-5 py-4 text-center">
-                        <span className="font-semibold tracking-tight text-slate-900">
-                        {purchaseOrder.purchaseOrderNumber}
-                        </span>
-                    </td>
-
-                    <td className="px-5 py-4 text-center">
-                        <span className="font-medium text-slate-700">
-                        {purchaseOrder.partner.name}
-                        </span>
-                    </td>
-
-                    <td className="px-5 py-4 text-center">
-                        <span className="font-medium text-slate-700">
-                        {formatDateLong(purchaseOrder.issueDate)}
-                        </span>
-                    </td>
-
-                    <td className="px-5 py-4 text-center">
-                        <span
-                        className={`
-                            inline-flex items-center justify-center rounded-full px-2.5 py-1
-                            text-xs font-medium ring-1 ring-inset
-                            ${purchaseOrderStatusColors[purchaseOrder.purchaseOrderStatus]}
-                        `}
-                        >
-                        {purchaseOrderStatusLabels[purchaseOrder.purchaseOrderStatus]}
-                        </span>
-                    </td>
-
-                    <td className="whitespace-nowrap px-5 py-4 text-center">
-                        <span className="font-semibold tabular-nums text-slate-900">
-                        {formatPurchaseOrderAmount(purchaseOrder)}
-                        </span>
-                    </td>
-
-                    <td className="px-5 py-4 text-center">
-                        <div className="flex items-center justify-center gap-1.5">
-                        <TableActionButton
-                            title="Voir"
-                            variant="blue"
-                            icon={Eye}
-                            onClick={() => onView(purchaseOrder)}
-                        />
-
-                        {isClientPurchaseOrder && (
-                            <TableActionButton
-                            title="Modifier"
-                            variant="amber"
-                            icon={Pencil}
-                            onClick={() => onEdit?.(purchaseOrder)}
-                            />
-                        )}
-
-                        <TableActionButton
-                            title="Mettre à jour le statut"
-                            variant="violet"
-                            disabled={!canUpdateStatus}
-                            icon={Settings}
-                            onClick={() => onUpdateStatus(purchaseOrder)}
-                        />
-
-                        {isClientPurchaseOrder && (
-                            <TableActionButton
-                            title="Envoyer"
-                            variant="emerald"
-                            disabled={!canSend}
-                            icon={Send}
-                            onClick={() => onSend?.(purchaseOrder)}
-                            />
-                        )}
-
-                        <TableActionButton
-                            title="Supprimer"
-                            variant="danger"
-                            disabled={!canDelete}
-                            icon={Trash2}
-                            onClick={() => onDelete(purchaseOrder)}
-                        />
-                        </div>
-                    </td>
-                    </tr>
-                );
-                })
+                purchaseOrders.map((purchaseOrder) => (
+                    <PurchaseOrderRow
+                        key={purchaseOrder.idPurchaseOrder}
+                        purchaseOrder={purchaseOrder}
+                        isSupplierPurchaseOrder={isSupplierPurchaseOrder}
+                        onView={onView}
+                        onEdit={onEdit}
+                        onSend={onSend}
+                        onUpdateStatus={onUpdateStatus}
+                        onDelete={onDelete}
+                        getAllowedNextStatuses={getAllowedNextStatuses}
+                        formatPurchaseOrderAmount={formatPurchaseOrderAmount}
+                    />
+                    ))
             )}
           </tbody>
         </table>

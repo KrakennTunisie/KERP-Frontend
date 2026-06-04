@@ -12,10 +12,15 @@ import {
   UserX,
   UserCheck,
 } from "lucide-react";
+import { ActionMenu } from "@/shared/components/ui/actionMenuItem";
 import { Partner, PartnerAllDetails } from "../../models/partner";
+import ClientDeleteModal from "../client/deleteClientModal";
+import { partnerTypeSchema } from "../../types/partnerType";
+import SupplierDeleteModal from "../supplier/deleteSupplierModal";
+import usePartnerList from "../../hooks/usePartnerList";
 
 type PartnerHeaderProps = {
-  partner:PartnerAllDetails;
+  partner: PartnerAllDetails;
 
   pageConfig: {
     backHref: string;
@@ -25,7 +30,7 @@ type PartnerHeaderProps = {
     heroIconClass: string;
     heroInfoIconClass: string;
   };
-
+  partnerType: string
   setOpen: () => void;
   icon: LucideIcon;
 };
@@ -34,11 +39,28 @@ export default function PartnerHeader({
   partner,
   pageConfig,
   icon: Icon,
+  partnerType,
   setOpen,
 }: PartnerHeaderProps) {
+  const { fetchPartner, updatePartnerStatus, setDeleteConfirmId, deleteConfirmId } = usePartnerList({ partnerType });
   return (
     <div className="bg-white border-b border-slate-100 px-8 py-6 font-[Inter,system-ui,sans-serif]">
       <div className="max-w-7xl mx-auto">
+        {partnerType == partnerTypeSchema.enum.CLIENT ? <ClientDeleteModal
+          open={!!deleteConfirmId}
+          onClose={() => setDeleteConfirmId('')}
+          onCreated={() => {
+            fetchPartner(partner.partnerType);
+          }}
+          confirmDeleteId={deleteConfirmId}
+        /> : <SupplierDeleteModal
+          open={!!deleteConfirmId}
+          onClose={() => setDeleteConfirmId('')}
+          onCreated={() => {
+            fetchPartner(partner.partnerType);
+          }}
+          confirmDeleteId={deleteConfirmId}
+        />}
         {/* Back Button */}
         <Link
           href={pageConfig.backHref}
@@ -59,10 +81,23 @@ export default function PartnerHeader({
 
             {/* Partner Info */}
             <div>
-              <div className="flex items-center gap-3 mb-1.5">
+              <div className="flex flex-wrap items-center gap-3 mb-1.5">
                 <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight leading-tight">
                   {partner.companyName}
                 </h1>
+
+                <span
+                  className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold ring-1 ${partner.active
+                    ? "bg-emerald-50 text-emerald-700 ring-emerald-200"
+                    : "bg-rose-50 text-rose-700 ring-rose-200"
+                    }`}
+                >
+                  <span
+                    className={`h-1.5 w-1.5 rounded-full ${partner.active ? "bg-emerald-500" : "bg-rose-500"
+                      }`}
+                  />
+                  {partner.active ? "Activé" : "Désactivé"}
+                </span>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-2 mt-3">
@@ -90,56 +125,40 @@ export default function PartnerHeader({
             </div>
           </div>
 
-          {/* Actions */}
-          <div className="grid grid-cols-2 gap-1.5 self-start shrink-0">
-            <button
-              onClick={setOpen}
-              title="Envoyer un e-mail"
-              className="group relative inline-flex items-center justify-center w-8 h-8 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-100 hover:border-blue-200 transition cursor-pointer"
-            >
-              <Send className="w-3.5 h-3.5" />
-
-              <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-slate-900 px-2 py-1 text-[10px] font-semibold text-white opacity-0 shadow-lg transition group-hover:opacity-100">
-                Envoyer un e-mail
-              </span>
-            </button>
-
-            <button
-              onClick={() => console.log("Activate")}
-              title="Activate"
-              className="group relative inline-flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-100 hover:border-emerald-200 transition cursor-pointer"
-            >
-              <UserCheck className="w-3.5 h-3.5" />
-
-              <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-slate-900 px-2 py-1 text-[10px] font-semibold text-white opacity-0 shadow-lg transition group-hover:opacity-100">
-                Activer
-              </span>
-            </button>
-
-            <button
-              onClick={() => console.log("Deactivate")}
-              title="Deactivate"
-              className="group relative inline-flex items-center justify-center w-8 h-8 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-100 hover:border-amber-200 transition cursor-pointer"
-            >
-              <UserX className="w-3.5 h-3.5" />
-
-              <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-slate-900 px-2 py-1 text-[10px] font-semibold text-white opacity-0 shadow-lg transition group-hover:opacity-100">
-                Désactiver
-              </span>
-            </button>
-
-            <button
-              onClick={() => console.log("Supprimer")}
-              title="Supprimer"
-              className="group relative inline-flex items-center justify-center w-8 h-8 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-100 hover:border-rose-200 transition cursor-pointer"
-            >
-              <UserMinus className="w-3.5 h-3.5" />
-
-              <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-slate-900 px-2 py-1 text-[10px] font-semibold text-white opacity-0 shadow-lg transition group-hover:opacity-100">
-                Supprimer
-              </span>
-            </button>
-          </div>
+          <ActionMenu
+            orientation="vertical"
+            items={[
+              {
+                label: "Envoyer un e-mail",
+                icon: Send,
+                color: "text-blue-600",
+                hover: "hover:bg-blue-50",
+                onClick: setOpen,
+              },
+              partner.active == false ? {
+                label: "Activer",
+                icon: UserCheck,
+                color: "text-emerald-600",
+                hover: "hover:bg-emerald-50",
+                onClick: () =>
+                  updatePartnerStatus(partner, true)
+              } :
+                {
+                  label: "Désactiver",
+                  icon: UserX,
+                  color: "text-amber-600",
+                  hover: "hover:bg-amber-50",
+                  onClick: () => updatePartnerStatus(partner, false),
+                },
+              {
+                label: "Supprimer",
+                icon: UserMinus,
+                color: "text-rose-600",
+                hover: "hover:bg-rose-50",
+                onClick: () => setDeleteConfirmId(partner.idPartner),
+              },
+            ]}
+          />
         </div>
       </div>
     </div>

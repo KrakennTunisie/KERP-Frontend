@@ -126,7 +126,7 @@ export function DocumentPreviewModal({
     >
       <div className="w-full">
         {documentType === "image" && (
-          <div className="rounded-3xl overflow-hidden border border-gray-100 bg-gray-50">
+          <div className="rounded-xl overflow-hidden border border-gray-100 bg-gray-50">
             <img
               src={url ?? undefined}
               alt={fileName ?? "Document image"}
@@ -136,7 +136,7 @@ export function DocumentPreviewModal({
         )}
 
         {documentType === "pdf" && (
-          <div className="rounded-3xl overflow-hidden border border-gray-100 bg-gray-50">
+          <div className="rounded-xl overflow-hidden border border-gray-100 bg-gray-50">
             <iframe
               src={url ?? undefined}
               title={fileName ?? "Prévisualisation PDF"}
@@ -146,7 +146,7 @@ export function DocumentPreviewModal({
         )}
 
         {documentType === "word" && (
-          <div className="rounded-3xl border border-gray-100 bg-gray-50 p-8 flex flex-col items-center text-center">
+          <div className="rounded-xl border border-gray-100 bg-gray-50 p-8 flex flex-col items-center text-center">
             <div className="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center mb-4">
               <FileText className="w-8 h-8 text-blue-600" />
             </div>
@@ -167,7 +167,7 @@ export function DocumentPreviewModal({
         )}
 
         {documentType === "unknown" && (
-          <div className="rounded-3xl border border-gray-100 bg-gray-50 p-8 flex flex-col items-center text-center">
+          <div className="rounded-xl border border-gray-100 bg-gray-50 p-8 flex flex-col items-center text-center">
             <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mb-4">
               <FileIcon className="w-8 h-8 text-gray-600" />
             </div>

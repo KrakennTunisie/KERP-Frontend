@@ -3,11 +3,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/sha
 import { ChevronDown, ChevronRight, Plus } from 'lucide-react';
 import { Badge } from '@/shared/components/ui/badge';
 import React from 'react';
+import { partnerTypeSchema } from '../../types/partnerType';
 
 
 type PartnerCollapsibleSectionProps<T> = {
   title: string;
   addLabel: string;
+  partnerType?: string;
+  transactionType?: string;
   count: number;
   open: boolean;
   onToggle: () => void;
@@ -20,6 +23,8 @@ type PartnerCollapsibleSectionProps<T> = {
 export default function PartnerCollapsibleSection<T>({
   title,
   addLabel,
+  partnerType,
+  transactionType,
   count,
   open,
   onToggle,
@@ -44,18 +49,20 @@ export default function PartnerCollapsibleSection<T>({
               </CardTitle>
 
               <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onAdd?.();
-                  }}
-                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold border border-blue-100 hover:border-blue-200 transition cursor-pointer"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  {addLabel}
-                </button>
-
+                {partnerType == partnerTypeSchema.enum.CLIENT &&
+                  (transactionType == "Facture" || transactionType == "Avoir") && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onAdd?.();
+                      }}
+                      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold border border-blue-100 hover:border-blue-200 transition cursor-pointer"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      {addLabel}
+                    </button>
+                  )}
                 <Badge variant="secondary" className="font-bold">
                   {count}
                 </Badge>

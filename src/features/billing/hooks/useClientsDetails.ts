@@ -2,19 +2,19 @@ import { TrendingDown, TrendingUp, Truck, Users, CheckCircle, Clock, AlertCircle
 import { useState, Activity, useMemo } from "react";
 import { PreviewDocument } from "../components/partner/partnerInfoCard";
 import { MOCK_INVOICES } from "../mocks/invoice-mocks";
-import { InvoicePageItem } from "../models/invoice";
+import { Invoice, InvoicePageItem, InvoicePageItemV2 } from "../models/invoice";
 import { ClientPartnerDetails, Partner, PartnerAllDetails, SupplierPartnerDetails } from "../models/partner";
 import { InvoiceStatusWithoutAll, invoiceStatusColors, invoiceStatusLabels } from "../types/invoiceStatus";
 import { PartnerInvoiceStats } from "../types/partnersStats";
 import { ChartMode } from "../components/widgets/RevnueExpensesBarChart";
 import { AuditLog } from "../models/AuditLogs";
 import { PartnerRevenueStats } from "../types/partnerRevenueStats";
-import { DashboardAPI, partnersApi } from "../api/partners-api";
+import { DashboardAPI, InvoicesAPI, partnersApi } from "../api/partners-api";
 import { appToast } from "@/shared/lib/toast";
 import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 import { partnerTypeSchema } from "../types/partnerType";
 
-interface Payment {
+export interface Payment {
   id: string;
   number: string;
   date: string;
@@ -23,7 +23,7 @@ interface Payment {
   invoiceNumber: string;
 }
 
-interface EmailLog {
+export interface EmailLog {
   id: string;
   subject: string;
   date: string;
@@ -82,6 +82,12 @@ export default function UseClientsDetails({ partner, partnerStats, partnerInvoic
     payments: false,
     purchaseOrders: false,
   });
+  const [deleteLoading, setDeleteLoading]= useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [sendeMailOpen, setSendMailOpen] = useState(false);
+  const [selectedInvoice, setSelectedInvoice] = useState<InvoicePageItem|null>();
+  const [invoiceRef ,setInvoiceRef] = useState("");
+  const [invoiceId ,setInvoiceId] = useState("");
   const clientPayments: Payment[] = [
     {
       id: '1',
@@ -101,16 +107,7 @@ export default function UseClientsDetails({ partner, partnerStats, partnerInvoic
     },
   ];
 
-  // Mock chart data
-  const chartData = [
-    { month: 'Jan 2025', revenus: 12500, depenses: 8200 },
-    { month: 'Fév 2025', revenus: 8750, depenses: 6100 },
-    { month: 'Mar 2025', revenus: 15200, depenses: 9800 },
-    { month: 'Avr 2025', revenus: 9800, depenses: 7400 },
-    { month: 'Mai 2025', revenus: 11200, depenses: 8600 },
-    { month: 'Juin 2025', revenus: 0, depenses: 0 },
-  ];
-
+ 
   // Mock emails
   const emailLogs: EmailLog[] = [
     {
@@ -184,11 +181,25 @@ export default function UseClientsDetails({ partner, partnerStats, partnerInvoic
     }
   };
 
+  const deleteClientInvoice = async ()=>{
+          try {
+            setDeleteLoading(true);
+            await InvoicesAPI.deleteClientInvoice(invoiceId);
+            appToast.success('Facture supprimée avec succès.')
+            setDeleteOpen(false)
+            setInvoiceId("")
+            window.location.reload()
+          } catch (error) {
+            appToast.error("Erreur de suppresion: ",getApiErrorMessage(error))
+          } finally {
+            setDeleteLoading(false);
+          }
+      }
+
   const [previewDocument, setPreviewDocument] = useState<PreviewDocument>(null);
   const [selectedPeriod, setSelectedPeriod] = useState(6);
 
-  const totalRevenueLastSixMonths = chartData.reduce((sum, item) => sum + item.revenus, 0);
-
+  
   const toggleSection = (section: string) => {
     setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
   };
@@ -240,8 +251,9 @@ export default function UseClientsDetails({ partner, partnerStats, partnerInvoic
 
   const chartMode: ChartMode = partner.partnerType === "CLIENT" ? "revenues" : "expenses";
   return {
+    deleteClientInvoice,deleteLoading,setDeleteLoading,setDeleteOpen,invoiceRef,deleteOpen,setInvoiceId,
     getStatusLabel, getEmailStatusColor, chartMode, getStatusIcon, getLabelColor, getStatusColor, toggleSection ,refresh,setRefresed
     , previewDocument, setPreviewDocument, selectedPeriod, setSelectedPeriod, emailLogs, clientPayments, activeTab, setActiveTab, supplierDespenses,totalDespenses
-    , TotalIcon, HeaderIcon, open, setOpen, totalRevenueLastSixMonths, openSections, chartData, pageConfig, fetchPartnerStats,clientRevenue, totalRevenue
+    , TotalIcon, HeaderIcon, open, setOpen, openSections, pageConfig, fetchPartnerStats,clientRevenue, totalRevenue ,sendeMailOpen, setSendMailOpen,selectedInvoice,setSelectedInvoice
   };
 }
