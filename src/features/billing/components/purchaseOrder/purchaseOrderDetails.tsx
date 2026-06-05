@@ -50,13 +50,12 @@ export default function PurchaseOrderModal({ open, title, onClose, children, foo
 
 
 export function PurchaseOrderModalContent({
-  client,
-  items,
+  
+ 
   purchaseOrderId,
   onClose,
 }: {
-  client: Partner;
-  items: InvoiceItem[];
+
   purchaseOrderId: string
   onClose: () => void;
 }) {
@@ -247,7 +246,7 @@ export function PurchaseOrderModalContent({
           {purchaseOrder?.purchaseOrderItems!.map((item, index) => (
             <div
               key={item.idPurchaseOrderItem}
-              className={`grid grid-cols-[1fr_70px_90px_100px] gap-2 py-3.5 items-center ${index < items.length - 1 ? "border-b border-gray-50" : ""
+              className={`grid grid-cols-[1fr_70px_90px_100px] gap-2 py-3.5 items-center ${index < purchaseOrder?.purchaseOrderItems!.length - 1 ? "border-b border-gray-50" : ""
                 }`}
             >
               <div>

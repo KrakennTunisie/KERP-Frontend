@@ -48,13 +48,14 @@ import { useRouter } from "next/navigation";
 import { DeleteInvoiceModal } from "../widgets/deleteInvoiceModal";
 import { SendInvoiceModal } from "../widgets/sendInvoiceModal";
 import { currencyTypeSchema } from "../../types/currency";
+import PurchaseOrderModal, { PurchaseOrderModalContent } from "../purchaseOrder/purchaseOrderDetails";
 
 
-export default function PartnerDetails({ partner, clientRevenueInitial, supplierDespensesInitial, totalRevenueInitial, totalDespensesInitial, partnerStats, partnerInvoices, partnerLogs, onRefresh }: PartnerDetailsProps) {
+export default function PartnerDetails({ partner, clientRevenueInitial, supplierDespensesInitial, totalRevenueInitial, totalDespensesInitial, partnerStats, partnerInvoices, partnerLogs, purchaseOrders, onRefresh }: PartnerDetailsProps) {
 
-  const { getStatusLabel, getEmailStatusColor, toggleSection, open, clientRevenue, fetchPartnerStats, totalRevenue, totalDespenses, selectedInvoice, setSelectedInvoice, sendeMailOpen, setSendMailOpen
-    , previewDocument, setPreviewDocument, selectedPeriod, setSelectedPeriod, emailLogs, clientPayments, activeTab, setActiveTab, refresh, setRefresed, supplierDespenses
-    , HeaderIcon, setOpen, pageConfig, openSections, deleteOpen, deleteLoading, deleteClientInvoice, setInvoiceId, invoiceRef, setDeleteOpen } = UseClientsDetails({ partner, partnerStats, clientRevenueInitial, supplierDespensesInitial, totalRevenueInitial, totalDespensesInitial, partnerInvoices, partnerLogs, onRefresh });
+  const { getStatusLabel, getEmailStatusColor, toggleSection, open, clientRevenue, fetchPartnerStats, totalRevenue, totalDespenses, selectedInvoice, setSelectedInvoice, sendeMailOpen, setSendMailOpen, modalPurchaseOrderOpen, setModalPurchaseOrderOpen
+    , previewDocument, setPreviewDocument, selectedPeriod, setSelectedPeriod, emailLogs, clientPayments, activeTab, setActiveTab, refresh, setRefresed, supplierDespenses, purchaseOrderId, setPurchaseOrderId, deletePOrderOpen, setDeletePOrderOpen, deletePurchaseOrder
+    , HeaderIcon, setOpen, pageConfig, openSections, deleteOpen, deleteLoading, deleteClientInvoice, setInvoiceId, invoiceRef, setDeleteOpen } = UseClientsDetails({ partner, partnerStats, clientRevenueInitial, supplierDespensesInitial, totalRevenueInitial, totalDespensesInitial, partnerInvoices, partnerLogs, purchaseOrders, onRefresh });
   const router = useRouter();
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-gray-50">
@@ -68,8 +69,12 @@ export default function PartnerDetails({ partner, clientRevenueInitial, supplier
       <DeleteInvoiceModal
         open={deleteOpen}
         onClose={() => setDeleteOpen(false)}
-        invoiceRef={invoiceRef}
         onConfirm={deleteClientInvoice}
+        loading={deleteLoading} />
+      <DeleteInvoiceModal
+        open={deletePOrderOpen}
+        onClose={() => setDeletePOrderOpen(false)}
+        onConfirm={() => deletePurchaseOrder(purchaseOrderId)}
         loading={deleteLoading} />
 
       <SendInvoiceModal
@@ -77,6 +82,15 @@ export default function PartnerDetails({ partner, clientRevenueInitial, supplier
         isOpen={sendeMailOpen}
         onClose={() => setSendMailOpen(false)}
       />
+      <PurchaseOrderModal
+        open={modalPurchaseOrderOpen}
+        title={`Bon de commande ${invoiceRef}`}
+        onClose={() => setModalPurchaseOrderOpen(false)}>
+        <PurchaseOrderModalContent
+          purchaseOrderId={purchaseOrderId}
+          onClose={() => setModalPurchaseOrderOpen(false)}
+        />
+      </PurchaseOrderModal>
       {/* Main Content with Tabs */}
       <main className="flex-1 overflow-y-auto p-8">
         <div className="max-w-7xl mx-auto space-y-6">
@@ -265,15 +279,15 @@ export default function PartnerDetails({ partner, clientRevenueInitial, supplier
                         : []
                       ),
                       ...(partner.partnerType == partnerTypeSchema.enum.CLIENT
-                        ? [ {
-                        label: "Envoyer",
-                        icon: Send,
-                        onClick: () => {
-                          setSelectedInvoice(invoice)
-                          setSendMailOpen(true)
-                        },
-                        disabled: invoice.invoiceStatus === "CANCELLED",
-                      }] :[]),
+                        ? [{
+                          label: "Envoyer",
+                          icon: Send,
+                          onClick: () => {
+                            setSelectedInvoice(invoice)
+                            setSendMailOpen(true)
+                          },
+                          disabled: invoice.invoiceStatus === "CANCELLED",
+                        }] : []),
                       {
                         label: "Supprimer",
                         icon: Trash2,
@@ -340,23 +354,23 @@ export default function PartnerDetails({ partner, clientRevenueInitial, supplier
                 addLabel="Ajouter bon commande"
                 transactionType="Bon de commande"
                 partnerType={partner.partnerType}
-                count={mockPurchaseOrders.length}
+                count={purchaseOrders.length}
                 open={openSections.purchaseOrders}
                 onToggle={() => toggleSection("purchaseOrders")}
-                items={mockPurchaseOrders}
+                items={purchaseOrders}
                 getKey={(order) => order.idPurchaseOrder}
                 onAdd={() => console.log("Ajouter bon de commande")}
-                renderItem={(creditNote) => (
+                renderItem={(PurchaseOrder) => (
                   <DocumentListItem
-                    item={creditNote}
-                    variant="creditNote"
+                    item={PurchaseOrder}
+                    variant="purchaseOrder"
                     icon={ReceiptText}
-                    title="facture d'avoir"
-                    menuTitle="Actions facture d'avoir"
+                    title="Bon de commande"
+                    menuTitle="Actions bon de commande"
                     getNumber={(item) => item.purchaseOrderNumber}
                     getDate={(item) => item.issueDate}
-                    getAmount={(item) => item.totalInclTax}
-                    getCurrency={() => "TND"}
+                    getAmount={(item) => item.purchaseCurrency == currencyTypeSchema.enum.EUR ? item.totalInclTaxEUR : item.purchaseCurrency == currencyTypeSchema.enum.USD ? item.totalInclTaxUSD : item.totalInclTaxTND}
+                    getCurrency={(item) => item.purchaseCurrency}
                     getStatus={(item) => item.purchaseOrderStatus}
                     statusLabels={purchaseOrderStatusLabels}
                     statusColors={purchaseOrderStatusColors}
@@ -364,33 +378,39 @@ export default function PartnerDetails({ partner, clientRevenueInitial, supplier
                       {
                         label: "Voir le détail",
                         icon: Eye,
-                        onClick: () =>
-                          console.log("Voir facture d'avoir", creditNote.idPurchaseOrder),
+                        onClick: () => {
+                          console.log("Voir bon de commande", PurchaseOrder.idPurchaseOrder),
+                            setPurchaseOrderId(PurchaseOrder.idPurchaseOrder)
+                          setModalPurchaseOrderOpen(true)
+                        }
                       },
                       ...(partner.partnerType == partnerTypeSchema.enum.SUPPLIER
-                        ? [ {
-                        label: "Modifier",
-                        icon: Pencil,
-                        onClick: () =>
-                          console.log("Modifier facture d'avoir", creditNote.idPurchaseOrder),
-                        disabled: creditNote.purchaseOrderStatus === "CANCELLED",
-                      }]:[]) ,
+                        ? [{
+                          label: "Modifier",
+                          icon: Pencil,
+                          onClick: () =>
+                            console.log("Modifier un bon de commande", PurchaseOrder.idPurchaseOrder),
+                          disabled: PurchaseOrder.purchaseOrderStatus === "CANCELLED",
+                        }] : []),
                       ...(partner.partnerType == partnerTypeSchema.enum.SUPPLIER
-                        ? [ {
-                        label: "Envoyer",
-                        icon: Send,
-                        onClick: () =>
-                          console.log("Envoyer facture d'avoir", creditNote.idPurchaseOrder),
-                        disabled: creditNote.purchaseOrderStatus === "CANCELLED",
-                      }]:[]),
+                        ? [{
+                          label: "Envoyer",
+                          icon: Send,
+                          onClick: () =>
+                            console.log("Envoyer un bon de commande", PurchaseOrder.idPurchaseOrder),
+                          disabled: PurchaseOrder.purchaseOrderStatus === "CANCELLED",
+                        }] : []),
                       {
                         label: "Supprimer",
                         icon: Trash2,
                         color: "text-rose-600",
                         hover: "hover:bg-rose-50",
-                        onClick: () =>
-                          console.log("Supprimer facture d'avoir", creditNote.idPurchaseOrder),
-                        disabled: creditNote.purchaseOrderStatus !== "DRAFT",
+                        onClick: () => {
+                          setPurchaseOrderId(PurchaseOrder.idPurchaseOrder); setDeletePOrderOpen(true);
+                          console.log("Supprimer un bon de commande", PurchaseOrder.idPurchaseOrder)
+                        }
+                        ,
+                        disabled: PurchaseOrder.purchaseOrderStatus !== "DRAFT",
                       },
                     ]}
                   />
@@ -429,29 +449,31 @@ export default function PartnerDetails({ partner, clientRevenueInitial, supplier
                         onClick: () =>
                           console.log("Voir facture d'avoir", creditNote.idPurchaseOrder),
                       },
-                     ...(partner.partnerType == partnerTypeSchema.enum.CLIENT
-                        ? [  {
-                        label: "Modifier",
-                        icon: Pencil,
-                        onClick: () =>
-                          console.log("Modifier facture d'avoir", creditNote.idPurchaseOrder),
-                        disabled: creditNote.purchaseOrderStatus === "CANCELLED",
-                      }]:[]),
-                    ...(partner.partnerType == partnerTypeSchema.enum.CLIENT
-                        ? [   {
-                        label: "Envoyer",
-                        icon: Send,
-                        onClick: () =>
-                          console.log("Envoyer facture d'avoir", creditNote.idPurchaseOrder),
-                        disabled: creditNote.purchaseOrderStatus === "CANCELLED",
-                      }]:[]),
+                      ...(partner.partnerType == partnerTypeSchema.enum.CLIENT
+                        ? [{
+                          label: "Modifier",
+                          icon: Pencil,
+                          onClick: () =>
+                            console.log("Modifier facture d'avoir", creditNote.idPurchaseOrder),
+                          disabled: creditNote.purchaseOrderStatus === "CANCELLED",
+                        }] : []),
+                      ...(partner.partnerType == partnerTypeSchema.enum.CLIENT
+                        ? [{
+                          label: "Envoyer",
+                          icon: Send,
+                          onClick: () =>
+                            console.log("Envoyer facture d'avoir", creditNote.idPurchaseOrder),
+                          disabled: creditNote.purchaseOrderStatus === "CANCELLED",
+                        }] : []),
                       {
                         label: "Supprimer",
                         icon: Trash2,
                         color: "text-rose-600",
                         hover: "hover:bg-rose-50",
-                        onClick: () =>
-                          console.log("Supprimer facture d'avoir", creditNote.idPurchaseOrder),
+                        onClick: () => {
+                          console.log("Supprimer facture d'avoir", creditNote.idPurchaseOrder)
+                        },
+
                         disabled: creditNote.purchaseOrderStatus !== "DRAFT",
                       },
                     ]}

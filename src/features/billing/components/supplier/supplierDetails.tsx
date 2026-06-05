@@ -13,6 +13,7 @@ import { Invoice, InvoicePageItem, InvoicePageItemV2 } from "../../models/invoic
 import { NotFound } from "@/shared/components/widgets/notFound";
 import { AuditLog } from "../../models/AuditLogs";
 import { PartnerRevenueStats } from "../../types/partnerRevenueStats";
+import { PurchaseOrderPartnerSummary } from "../../models/purchaseOrder";
 
 export default function SupplierDetails() {
   const params = useParams();
@@ -37,8 +38,9 @@ export default function SupplierDetails() {
   })
 
   const [supplier, setSupplier] = useState<PartnerAllDetails>();
-  const [supplierInvoices, setSupplierInvoices] = useState<InvoicePageItem[]|[]>([])
+  const [supplierInvoices, setSupplierInvoices] = useState<InvoicePageItem[] | []>([])
   const [loading, setLoading] = useState<boolean>(true);
+  const [supplierPurchaseOrder, setSupplierPurchaseOrder] = useState<PurchaseOrderPartnerSummary[] | []>([])
   const [supplierLogs, setSupplierLogs] = useState<AuditLog[] | []>([])
   const [supplierDespensesInitial, setSupplierDespensesInitial] = useState<PartnerRevenueStats[] | []>([])
   const fetchSupplier = async () => {
@@ -110,12 +112,12 @@ export default function SupplierDetails() {
   useEffect(() => {
     fetchSupplierRevenue();
   }, [supplier]);
-  
 
-  const totalDespensesInitial = useMemo(() => 
+
+  const totalDespensesInitial = useMemo(() =>
     supplierDespensesInitial.reduce((sum, item) => sum + (item.revenueTTC ?? 0), 0),
-  [supplierDespensesInitial]);
-  
+    [supplierDespensesInitial]);
+
 
   if (loading) {
     return (
@@ -130,13 +132,14 @@ export default function SupplierDetails() {
   else {
     return (
       <PartnerDetails
-                partner={supplier}
-                partnerStats={supplierInvoiceStats}
-                partnerInvoices={supplierInvoices}
-                partnerLogs={supplierLogs}
-                onRefresh = {fetchSupplierLogs}
-                supplierDespensesInitial={supplierDespensesInitial}
-                totalDespensesInitial={totalDespensesInitial} 
+        partner={supplier}
+        partnerStats={supplierInvoiceStats}
+        partnerInvoices={supplierInvoices}
+        partnerLogs={supplierLogs}
+        purchaseOrders={supplierPurchaseOrder}
+        onRefresh={fetchSupplierLogs}
+        supplierDespensesInitial={supplierDespensesInitial}
+        totalDespensesInitial={totalDespensesInitial}
       />
     )
   }

@@ -9,10 +9,11 @@ import { PartnerInvoiceStats } from "../types/partnersStats";
 import { ChartMode } from "../components/widgets/RevnueExpensesBarChart";
 import { AuditLog } from "../models/AuditLogs";
 import { PartnerRevenueStats } from "../types/partnerRevenueStats";
-import { DashboardAPI, InvoicesAPI, partnersApi } from "../api/partners-api";
+import { DashboardAPI, InvoicesAPI, partnersApi, PurchaseOrderAPI } from "../api/partners-api";
 import { appToast } from "@/shared/lib/toast";
 import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 import { partnerTypeSchema } from "../types/partnerType";
+import { PurchaseOrderPartnerSummary } from "../models/purchaseOrder";
 
 export interface Payment {
   id: string;
@@ -38,6 +39,7 @@ export type PartnerDetailsProps = {
   supplierDespensesInitial?: PartnerRevenueStats[] | []
   partnerInvoices: InvoicePageItem[] | []
   partnerLogs: AuditLog[] | []
+  purchaseOrders :PurchaseOrderPartnerSummary[]|[],
   totalRevenueInitial?: number,
   totalDespensesInitial?: number
   onRefresh: () => void;
@@ -84,10 +86,13 @@ export default function UseClientsDetails({ partner, partnerStats, partnerInvoic
   });
   const [deleteLoading, setDeleteLoading]= useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deletePOrderOpen, setDeletePOrderOpen] = useState(false);
+  const [modalPurchaseOrderOpen, setModalPurchaseOrderOpen] = useState(false);
   const [sendeMailOpen, setSendMailOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<InvoicePageItem|null>();
   const [invoiceRef ,setInvoiceRef] = useState("");
   const [invoiceId ,setInvoiceId] = useState("");
+  const [purchaseOrderId ,setPurchaseOrderId] = useState("");
   const clientPayments: Payment[] = [
     {
       id: '1',
@@ -195,6 +200,19 @@ export default function UseClientsDetails({ partner, partnerStats, partnerInvoic
             setDeleteLoading(false);
           }
       }
+   async function deletePurchaseOrder(idPurchaseOrder: string) {
+       try {
+         setDeleteLoading(true);
+         await PurchaseOrderAPI.deleteClientPurchaseOrder(idPurchaseOrder);
+         appToast.success('Bon de commande supprimée avec succès.')
+         setDeletePOrderOpen(false)
+       } catch (error) {
+         appToast.error("Erreur de suppresion: ", getApiErrorMessage(error))
+       } finally {
+         setDeleteLoading(false);
+       }
+       //setPurchaseOrder(idPurchaseOrder);
+     }
 
   const [previewDocument, setPreviewDocument] = useState<PreviewDocument>(null);
   const [selectedPeriod, setSelectedPeriod] = useState(6);
@@ -251,8 +269,8 @@ export default function UseClientsDetails({ partner, partnerStats, partnerInvoic
 
   const chartMode: ChartMode = partner.partnerType === "CLIENT" ? "revenues" : "expenses";
   return {
-    deleteClientInvoice,deleteLoading,setDeleteLoading,setDeleteOpen,invoiceRef,deleteOpen,setInvoiceId,
-    getStatusLabel, getEmailStatusColor, chartMode, getStatusIcon, getLabelColor, getStatusColor, toggleSection ,refresh,setRefresed
+    deleteClientInvoice,deleteLoading,setDeleteLoading,setDeleteOpen,invoiceRef,deleteOpen,setInvoiceId,purchaseOrderId,setPurchaseOrderId,setDeletePOrderOpen,deletePOrderOpen , deletePurchaseOrder,
+    getStatusLabel, getEmailStatusColor, chartMode, getStatusIcon, getLabelColor, getStatusColor, toggleSection ,refresh,setRefresed,modalPurchaseOrderOpen,setModalPurchaseOrderOpen
     , previewDocument, setPreviewDocument, selectedPeriod, setSelectedPeriod, emailLogs, clientPayments, activeTab, setActiveTab, supplierDespenses,totalDespenses
     , TotalIcon, HeaderIcon, open, setOpen, openSections, pageConfig, fetchPartnerStats,clientRevenue, totalRevenue ,sendeMailOpen, setSendMailOpen,selectedInvoice,setSelectedInvoice
   };

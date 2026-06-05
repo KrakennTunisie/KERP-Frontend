@@ -54,9 +54,9 @@ const variantStyles: Record<
     iconRing: "ring-blue-100",
   },
   purchaseOrder: {
-    iconBg: "bg-violet-50",
-    iconText: "text-violet-600",
-    iconRing: "ring-violet-100",
+    iconBg: "bg-blue-50",
+    iconText: "text-blue-600",
+    iconRing: "ring-blue-100",
   },
   creditNote: {
     iconBg: "bg-rose-50",
@@ -84,7 +84,7 @@ export function DocumentListItem<T>({
   statusLabels,
   statusColors,
   actions = [],
-  amountLabel = "Total HT",
+  amountLabel = "Total TTC",
   secondaryLabel,
   getSecondaryText,
 }: DocumentListItemProps<T>) {

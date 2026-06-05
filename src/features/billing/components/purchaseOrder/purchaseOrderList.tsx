@@ -50,8 +50,6 @@ export default function PurchaseOrderList() {
                 title={`Bon de commande ${invoiceRef}`}
                 onClose={() => setOpen(false)}>
                 <PurchaseOrderModalContent
-                    client={MOCK_PARTNERS[1]}
-                    items={mockInvoiceItems}
                     purchaseOrderId={idPurchaseOrder}
                     onClose={() => setOpen(false)}
                 />
