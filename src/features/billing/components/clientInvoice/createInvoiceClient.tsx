@@ -95,7 +95,7 @@ export default function CreateInvoiceClient({ mode,
                 successMessage={successMessage} />
 
             {/* ── Body ── */}
-            <div className="flex gap-0 bg-white max-w-[1700px] ">
+            <div className="flex gap-0 bg-white ">
 
                 {/* ── Left Panel ── */}
                 <div className="w-[440px] min-w-[440px] flex flex-col gap-6 p-6 border-r border-slate-300/40"

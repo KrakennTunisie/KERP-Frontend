@@ -4,11 +4,10 @@ import { fileSchema } from "../types/pdfSchema";
 
 import type { Invoice } from "./invoice";
 import { documentSchema } from "./document";
-import { $ZodAny } from "node_modules/zod/v4/core/schemas.cjs";
 import { PaymentConditionSchema } from "../types/paymentCondition";
 import { tvaRateStringSchema } from "../types/tvaRate";
 import { currencyTypeSchema } from "../types/currency";
-import { addAddressSchema, addressSchema } from "./Address";
+import { addAddressSchema } from "./Address";
 
 export const partnerSchema = z.object({
   idPartner: z.uuid(),

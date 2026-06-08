@@ -1,6 +1,6 @@
 "use client";
 
-import { Download, Eye } from "lucide-react";
+import {  Eye } from "lucide-react";
 import { PdfDocumentData } from "./types";
 import { openPdfInNewTab } from "./pdfGenerator";
 

@@ -14,9 +14,18 @@ import PageLoader from "@/shared/components/ui/pageLoader";
 import { NotFound } from "@/shared/components/widgets/notFound";
 import { invoiceComplianceStatusSchema } from "../../types/invoiceComplianceStatus";
 import { DocumentTopBar } from "../widgets/documentTopBar";
+import { SendDocumentModal } from "../widgets/sendInvoiceModal";
+import { DeleteInvoiceModal } from "../widgets/deleteInvoiceModal";
 
 export default function CreditNoteDetails({ params }: PropsCreditNote) {
-    const { updateStatus, previewDocument, setPreviewDocument, setStatusPaiement, invoice, sendToTTN, TtnModalOpen, setTtnModalOpen, loading, sent, successMessage, router } = useCreditNoteDetails({ params });
+    const { updateStatus, previewDocument, setPreviewDocument, setStatusPaiement, invoice, 
+        sendToTTN, TtnModalOpen, setTtnModalOpen, loading, sent, successMessage, router,
+            sendOpen,
+        setSendOpen,
+        deleteLoading,
+        setDeleteLoading,
+        deleteOpen,deleteCreditNote,
+        setDeleteOpen } = useCreditNoteDetails({ params });
     
     
             if(loading){
@@ -52,19 +61,19 @@ export default function CreditNoteDetails({ params }: PropsCreditNote) {
                         icon: Copy,
                         onClick: () => console.log("Cloner", invoice?.idInvoiceCreditNote),
                         },
-                        {
+/*                         {
                         label: "Mettre à jour statut",
                         icon: Settings,
                         onClick: () => console.log("Mettre à jour statut", invoice?.idInvoiceCreditNote),
                         disabled: invoice?.invoiceCreditNoteStatus === "CANCELLED",
-                        },
+                        }, */
                         {
                         label: "Envoyer",
                         icon: Send,
-                        onClick: () => console.log("Envoyer", invoice?.idInvoiceCreditNote),
+                        onClick: () => setSendOpen(true),
                         disabled: invoice?.invoiceCreditNoteStatus === "CANCELLED",
                         },
-                        {
+/*                         {
                         label: "Modifier",
                         icon: Pencil,
                         onClick: () =>
@@ -72,20 +81,20 @@ export default function CreditNoteDetails({ params }: PropsCreditNote) {
                         disabled:
                             invoice?.invoiceCreditNoteStatus === "PAID" ||
                             invoice?.invoiceCreditNoteStatus === "CANCELLED",
-                        },
+                        }, */
                         {
                         label: "Supprimer",
                         icon: Trash2,
                         color: "text-rose-600",
                         hover: "hover:bg-rose-50",
-                        onClick: () => console.log("Supprimer", invoice?.idInvoiceCreditNote),
+                        onClick: () => setDeleteOpen(true),
                         disabled: invoice?.invoiceCreditNoteStatus !== "DRAFT",
                         },
                     ]}
             />
 
             {/* MAIN */}
-            <div className="max-w-[1200px] mx-auto px-6 py-6 grid grid-cols-[1fr_300px] gap-5">
+            <div className=" mx-auto px-6 py-6 grid grid-cols-[1fr_300px] gap-5">
 
                 {/* LEFT */}
                 <div className="flex flex-col gap-4">
@@ -155,7 +164,7 @@ export default function CreditNoteDetails({ params }: PropsCreditNote) {
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                                 <div className="bg-gray-50 dark:bg-neutral-800 rounded-lg p-3">
                                     <p className="text-[11px] font-medium tracking-wide uppercase text-gray-400 mb-1">Client</p>
-                                    <p className="text-sm font-medium text-gray-900 dark:text-white">—</p>
+                                    <p className="text-sm font-medium text-gray-900 dark:text-white">{invoice?.invoice.partner.partnerName}</p>
                                 </div>
                                 <div className="bg-gray-50 dark:bg-neutral-800 rounded-lg p-3">
                                     <p className="text-[11px] font-medium tracking-wide uppercase text-gray-400 mb-1">N° Facture originale</p>
@@ -406,7 +415,7 @@ export default function CreditNoteDetails({ params }: PropsCreditNote) {
                                     </svg>
                                 </div>
                                 <div>
-                                    <p className="text-sm font-semibold text-gray-900">Facture_FAC-2025-001.pdf</p>
+                                    <p className="text-sm font-semibold text-gray-900">{invoice?.invoiceCreditNoteDocument.fileName}</p>
                                     <p className="text-[11px] text-gray-400 mt-0.5">245 KB · 2025-01-15</p>
                                 </div>
                             </div>
@@ -422,6 +431,19 @@ export default function CreditNoteDetails({ params }: PropsCreditNote) {
                 open={!!previewDocument}
                 onClose={() => setPreviewDocument(null)}
                 document={previewDocument}
+            />
+            <SendDocumentModal
+                document={invoice}
+                variant="invoiceCreditNote"
+                isOpen={sendOpen}
+                onClose={() => setSendOpen(false)}
+            />
+
+            <DeleteInvoiceModal 
+                open={deleteOpen} 
+                onClose={()=> setDeleteOpen(false)} 
+                onConfirm={deleteCreditNote}
+                loading={deleteLoading}      
             />
         </div>
     );

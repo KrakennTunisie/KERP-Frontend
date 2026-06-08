@@ -19,7 +19,7 @@ import { invoiceTypeSchema } from "../types/invoiceType";
 
 export interface Payment {
   id: string;
-  number: string;
+  paymentNumber: string;
   date: string;
   amount: number;
   method: string;
@@ -103,7 +103,7 @@ export default function UseClientsDetails({ partner, partnerStats, partnerInvoic
   const clientPayments: Payment[] = [
     {
       id: '1',
-      number: 'PAY-2025-001',
+      paymentNumber: 'PAY-2025-001',
       date: '2025-02-14',
       amount: 12500,
       method: 'Virement bancaire',
@@ -111,7 +111,7 @@ export default function UseClientsDetails({ partner, partnerStats, partnerInvoic
     },
     {
       id: '2',
-      number: 'PAY-2025-012',
+      paymentNumber: 'PAY-2025-012',
       date: '2025-03-15',
       amount: 5000,
       method: 'Chèque',

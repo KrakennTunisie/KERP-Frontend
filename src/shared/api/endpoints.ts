@@ -35,6 +35,7 @@ export const INVOICES_ENDPOINTS={
   suppliersInvoices: "/invoices/supplier-invoices",
   nextNumber: "/invoices/next-number",
   getClientsInvoices: (query? : GetListParams)=> `/invoices/client-invoices${buildQueryString(query)}`,
+  getClientsInvoicesToPay: (keyword? : string)=> `/invoices/client-invoices/to-pay?${keyword}`,
   getClientTopInvoices: (id: string)=>`/invoices/client-invoices/client/${id}`,
   getSuppliersInvoices: (query? : GetListParams)=> `/invoices/supplier-invoices${buildQueryString(query)}`,
   getSupplierTopInvoices: (id: string)=>`/invoices/supplier-invoices/supplier/${id}`,
@@ -86,8 +87,16 @@ export const EXCHANGE_RATE_ENDPOINTS = {
 
 }
 
-export const DASHBOARD_ENDPOINTS = {
-  dashboard: '/dashboard',
+export const PAYMENT_ENDPIONTS={
+  payment:"/payments/",
+  nextNumber: "/payments/next-number",
+  getPayments: (query?: GetListParams)=>`/payments${buildQueryString(query)}`,
+  getPaymentsByIdInvoice: (id: string, query?: GetListParams)=>`/payments/invoice/${id}${buildQueryString(query)}`,
+  paymentById: (id: string)=>`/payments/${id}`
+}
+
+export const DASHBOARD_ENDPOINTS={
+  dashboard : '/dashboard',
   statsClientsInvoices: '/dashboard/clients-invoices',
   statsSuppliersInvoices: '/dashboard/suppliers-invoices',
   getClientRevenue: (idPartner: string, period: string) => `/dashboard/client-revenue/${idPartner}?period=${period}`,
@@ -101,6 +110,7 @@ export const MAILING_ENDPOINTS={
   sendEmailInvoice:(id: string )=>`/mailing/invoice/${id}/send-email`,
   sendEmailCreditNote:(id: string )=>`/mailing/creditNote/${id}/send-email`,
   sendEmailPurchaseOrder:(id: string )=>`/mailing/purchase-order/${id}/send-email`,
+  sendEmailPayment: (id: string )=>`/mailing/payment/${id}/send-email`,
 
 }
 export const  AUDITLOGS_ENDPOINTS = {

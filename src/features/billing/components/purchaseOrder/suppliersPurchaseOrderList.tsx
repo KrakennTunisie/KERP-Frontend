@@ -17,7 +17,7 @@ import PageLoader from "@/shared/components/ui/pageLoader";
 import { BillingPageHeader } from "../widgets/billingHeader";
 import { PurchaseOrderTable } from "../widgets/purchaseOrderTable";
 import { StatusFilterBar } from "../widgets/billingFilterBar";
-import { SendInvoiceModal } from "../widgets/sendInvoiceModal";
+import { SendDocumentModal } from "../widgets/sendInvoiceModal";
 
 export default function SuppliersPurchaseOrderList() {
 
@@ -54,11 +54,12 @@ export default function SuppliersPurchaseOrderList() {
                     deletePurchaseOrder(idPurchaseOrder)
                     setDeleteOpen(false);
                 }} />
-            <SendInvoiceModal
-                invoice={selectedPurchaseOrder}
-                isOpen={openSendMail}
-                onClose={() => setOpenSendMail(false)}
-            />
+            <SendDocumentModal
+                    document={selectedPurchaseOrder}
+                    variant="purchaseOrder"
+                    isOpen={openSendMail}
+                    onClose={() => setOpenSendMail(false)}
+                />
             <SupplierPurchaseOrderModal
                 open={open}
                 title={`Bon de commande ${invoiceRef}`}

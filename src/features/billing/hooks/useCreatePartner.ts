@@ -153,6 +153,7 @@ export default function UseCreatePartner({ type, mode, partnerId }: pageProps) {
             })
         };
     }, [partner])
+    
     const {
         register,
         handleSubmit,

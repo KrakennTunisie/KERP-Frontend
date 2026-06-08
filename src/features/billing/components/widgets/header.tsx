@@ -20,7 +20,7 @@ export function PageHeader({
 }: PageHeaderProps) {
   return (
     <header className="bg-white border-b border-slate-100 px-6 py-5 font-[Inter,system-ui,sans-serif]">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className=" mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           
 

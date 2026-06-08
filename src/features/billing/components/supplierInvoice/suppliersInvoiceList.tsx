@@ -8,7 +8,8 @@ import { ChevronLeft, ChevronRight, Settings } from "lucide-react";
 import { UpdateInvoiceStatusModal } from "../widgets/updateStatusModal";
 import { BillingPageHeader } from "../widgets/billingHeader";
 import { StatusFilterBar } from "../widgets/billingFilterBar";
-import { BillingInvoicesTable } from "../widgets/billingTable";
+import {  BillingTable } from "../widgets/billingTable";
+import { InvoicePageItem } from "../../models/invoice";
 
 
 export default function SuppliersInvoiceList() {
@@ -113,30 +114,46 @@ export default function SuppliersInvoiceList() {
             />
 
             {/* Table */}
-            <BillingInvoicesTable
-                invoices={suppliersInvoices}
-                partnerColumnLabel="Fournisseur"
-                currentPage={currentPage}
-                totalPages={totalPages}
-                totalElements={totalElements}
-                loading={loading}
-                onPageChange={setCurrentPage}
-                getStatusLabel={(status) => invoiceStatusLabels[status]}
-                getStatusColor={(status) =>
-                    status !== "ALL" ? invoiceStatusColors[status] : ""
-                }
-                onView={(invoice) => {
-                    router.push(`/billing/invoices/suppliers/details/${invoice.idInvoice}`);
-                }}
-                onUpdateStatus={(invoice) => {
-                    setSelectedInvoice(invoice);
-                    setInvoiceId(invoice.idInvoice);
-                    setUpdateOpen(true);
-                }}
-                canUpdateStatus={(invoice) =>
-                    getSupplierInvoiceAllowedNextStatuses(invoice.invoiceStatus).length > 0
-                }
-            />
+                                <BillingTable<InvoicePageItem>
+                                    items={suppliersInvoices}
+                                    variant="invoice"
+                                    secondColumnLabel="Client"
+                                    currentPage={currentPage}
+                                    totalPages={totalPages}
+                                    totalElements={totalElements}
+                                    loading={loading}
+                                    onPageChange={setCurrentPage}
+                                    onView={(invoice) => {
+                                        router.push(`/billing/invoices/clients/${invoice.idInvoice}/details/`);
+                                    }}
+                                    onUpdateStatus={(invoice) => {
+                                        setSelectedInvoice(invoice);
+                                        setInvoiceId(invoice.idInvoice);
+                                        setUpdateOpen(true);
+                                    }}
+                                    canUpdateStatus={(invoice) =>
+                                        getSupplierInvoiceAllowedNextStatuses(invoice.invoiceStatus).length > 0
+                                    }
+                                    onEdit={(invoice) => {
+                                        router.push(`/billing/invoices/clients/update/${invoice.idInvoice}`);
+                                    }}
+                                    onSend={(invoice) => {
+                                        console.log("Envoyer facture client", invoice.idInvoice);
+                                    }}
+                                    onDelete={(invoice) => {
+                                        console.log("Supprimer facture client", invoice.idInvoice);
+                                    }}
+                                    getNumber={(invoice) => invoice.invoiceNumber}
+                                    getPartnerName={(invoice) => invoice.partner?.partnerName}
+                                    getStatus={(invoice) => invoice.invoiceStatus}
+                                    getAmountEUR={(invoice) => invoice.totalInclTaxEUR}
+                                    getAmountTND={(invoice) => invoice.totalInclTaxTND}
+                                    getDate={(invoice) => invoice.dueDate ?? invoice.issueDate}
+                                    getStatusLabel={(status) => invoiceStatusLabels[status]}
+                                    getStatusColor={(status) =>
+                                        status !== "ALL" ? invoiceStatusColors[status] : ""
+                                    }
+                                />
         </div>
 
     );

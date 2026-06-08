@@ -1,26 +1,17 @@
 "use client";
 
-import {
-  ChevronLeft,
-  ChevronRight,
-  CheckCircle2,
-  Circle,
-  Eye,
-  Settings,
-  Trash2,
-  Send,
-  Edit,
-} from "lucide-react";
-import { InvoicePageItem } from "../../models/invoice";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+
 import { InvoiceStatus } from "../../types/invoiceStatus";
 import { InvoiceTableRow } from "./invoiceTableRow";
 
+type BillingTableVariant = "invoice" | "payment" | "invoiceCreditNotes";
 
+type BillingTableProps<T> = {
+  items: T[];
+  variant: BillingTableVariant;
 
-type BillingInvoicesTableProps<T extends InvoicePageItem> = {
-  invoices: T[];
-
-  partnerColumnLabel: string;
+  secondColumnLabel: string;
 
   currentPage: number;
   totalPages: number;
@@ -28,26 +19,36 @@ type BillingInvoicesTableProps<T extends InvoicePageItem> = {
   loading?: boolean;
   onPageChange: (page: number) => void;
 
-  onView: (invoice: T) => void;
+  onView: (item: T) => void;
+  onEdit?: (item: T) => void;
+  onDelete?: (item: T) => void;
+  onSend?: (item: T) => void;
 
-  onEdit?: (invoice: T) => void;
-  onDelete?: (invoice: T) => void;
-  onSend?: (invoice: T) => void;
+  onUpdateStatus?: (item: T) => void;
+  canUpdateStatus?: (item: T) => boolean;
 
-  onUpdateStatus?: (invoice: T) => void;
-  canUpdateStatus?: (invoice: T) => boolean;
+  getNumber: (item: T) => string;
+  getDate: (item: T) =>  Date| undefined;
 
-  getStatusLabel: (status: InvoiceStatus) => string;
-  getStatusColor: (status: InvoiceStatus) => string;
+  getPartnerName?: (item: T) => string | null | undefined;
+  getStatus?: (item: T) => InvoiceStatus | null | undefined;
+
+  getAmountEUR?: (item: T) => number | null | undefined;
+  getAmountTND?: (item: T) => number | null | undefined;
+
+  getPaymentMethod?: (item: T) => string | null | undefined;
+  getRelatedInvoiceNumber?: (item: T) => string | null | undefined;
+
+  getStatusLabel?: (status: InvoiceStatus) => string;
+  getStatusColor?: (status: InvoiceStatus) => string;
 
   emptyMessage?: string;
 };
 
-
-
-export function BillingInvoicesTable<T extends InvoicePageItem>({
-  invoices,
-  partnerColumnLabel,
+export function BillingTable<T>({
+  items,
+  variant,
+  secondColumnLabel,
   currentPage,
   totalPages,
   totalElements,
@@ -59,29 +60,65 @@ export function BillingInvoicesTable<T extends InvoicePageItem>({
   onSend,
   onUpdateStatus,
   canUpdateStatus,
+  getNumber,
+  getDate,
+  getPartnerName,
+  getStatus,
+  getAmountEUR,
+  getAmountTND,
+  getPaymentMethod,
+  getRelatedInvoiceNumber,
   getStatusLabel,
   getStatusColor,
-  emptyMessage = "Aucune facture trouvée.",
-}: BillingInvoicesTableProps<T>) {
+  emptyMessage,
+}: BillingTableProps<T>) {
   const canGoPrevious = currentPage > 1;
   const canGoNext = currentPage < totalPages;
 
+  const isPayment = variant === "payment";
+  const isInvoiceCreditNote = variant === "invoiceCreditNotes";
+
+  const columns = isPayment
+    ? [
+        "Référence",
+        secondColumnLabel,
+        "Méthode",
+        "Montant EUR",
+        "Montant TND",
+        "Date",
+        "Conforme",
+        "Actions",
+      ]
+    : [
+        "Référence",
+        secondColumnLabel,
+        "Statut",
+        isInvoiceCreditNote ? "Montant avoir EUR" : "Montant TTC EUR",
+        isInvoiceCreditNote ? "Montant avoir TND" : "Montant TTC TND",
+        "Date",
+        "Conforme",
+        "Actions",
+      ];
+
+  const defaultEmptyMessage = isPayment
+    ? "Aucun paiement trouvé."
+    : isInvoiceCreditNote
+      ? "Aucune facture d'avoir trouvée."
+      : "Aucune facture trouvée.";
+
+  const totalLabel = isPayment
+    ? "paiement"
+    : isInvoiceCreditNote
+      ? "facture d'avoir"
+      : "facture";
+
   return (
-    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white mt-5 shadow-sm font-[Inter,system-ui,sans-serif]">
+    <div className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white font-[Inter,system-ui,sans-serif] shadow-sm">
       <div className="overflow-x-auto">
         <table className="w-full min-w-[980px] border-collapse">
           <thead className="bg-slate-50">
             <tr>
-              {[
-                "Référence",
-                partnerColumnLabel,
-                "Statut",
-                "Montant TTC EUR",
-                "Montant TTC TND",
-                "Date",
-                "Conforme",
-                "Actions",
-              ].map((column) => (
+              {columns.map((column) => (
                 <th
                   key={column}
                   className="px-5 py-3 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500"
@@ -93,12 +130,12 @@ export function BillingInvoicesTable<T extends InvoicePageItem>({
           </thead>
 
           <tbody className="divide-y divide-slate-100">
-            {invoices.length === 0 ? (
+            {items.length === 0 ? (
               <tr>
                 <td colSpan={8} className="px-5 py-12">
                   <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/70 p-6 text-center">
                     <p className="text-sm font-semibold text-slate-500">
-                      {emptyMessage}
+                      {emptyMessage ?? defaultEmptyMessage}
                     </p>
                     <p className="mt-1 text-xs text-slate-400">
                       Essayez de modifier vos filtres ou votre recherche.
@@ -107,20 +144,30 @@ export function BillingInvoicesTable<T extends InvoicePageItem>({
                 </td>
               </tr>
             ) : (
-                invoices.map((invoice) => (
-                    <InvoiceTableRow<T>
-                        key={invoice.idInvoice}
-                        invoice={invoice}
-                        onView={onView}
-                        onEdit={onEdit}
-                        onSend={onSend}
-                        onUpdateStatus={onUpdateStatus}
-                        onDelete={onDelete}
-                        canUpdateStatus={canUpdateStatus}
-                        getStatusLabel={getStatusLabel}
-                        getStatusColor={getStatusColor}
-                    />
-                )))}
+              items.map((item) => (
+                <InvoiceTableRow<T>
+                  key={getNumber(item)}
+                  item={item}
+                  variant={variant}
+                  onView={onView}
+                  onEdit={onEdit}
+                  onDelete={onDelete}
+                  onSend={onSend}
+                  onUpdateStatus={onUpdateStatus}
+                  canUpdateStatus={canUpdateStatus}
+                  getNumber={getNumber}
+                  getPartnerName={getPartnerName}
+                  getStatus={getStatus}
+                  getAmountEUR={getAmountEUR}
+                  getAmountTND={getAmountTND}
+                  getDate={getDate}
+                  getPaymentMethod={getPaymentMethod}
+                  getRelatedInvoiceNumber={getRelatedInvoiceNumber}
+                  getStatusLabel={getStatusLabel}
+                  getStatusColor={getStatusColor}
+                />
+              ))
+            )}
           </tbody>
         </table>
       </div>
@@ -171,7 +218,8 @@ export function BillingInvoicesTable<T extends InvoicePageItem>({
 
           {totalElements > 0 && (
             <p className="text-xs font-semibold text-slate-500">
-              {totalElements} facture{totalElements > 1 ? "s" : ""}
+              {totalElements} {totalLabel}
+              {totalElements > 1 ? "s" : ""}
             </p>
           )}
         </div>

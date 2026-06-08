@@ -12,6 +12,10 @@ export async function openPdfInNewTab(data: PdfDocumentData): Promise<void> {
   window.open(url, "_blank", "noopener,noreferrer");
 }
 
+export async function openDocumentInNewTab(url: string): Promise<void> {
+  window.open(url, "_blank", "noopener,noreferrer");
+}
+
 export async function generatePdfFile(
   data: PdfDocumentData,
   fileName?: string

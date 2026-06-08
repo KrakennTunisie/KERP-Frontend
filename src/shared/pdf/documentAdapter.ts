@@ -1,8 +1,9 @@
 import {  InvoiceCreate } from "@/features/billing/models/invoice";
 import { PdfDocumentData, PdfLineItem, PdfParty } from "./types";
-import { InvoiceCreditNote } from "@/features/billing/models/creditNote";
+import { InvoiceCreditNote, InvoiceCreditNoteCreate } from "@/features/billing/models/creditNote";
 import { PurchaseOrder } from "@/features/billing/models/purchaseOrder";
 import { PartnerSummary } from "@/features/billing/models/partner";
+import { CreatePaymentFormValues, PaymentDetails } from "@/features/billing/models/payment";
 
 
 export function mapPartnerToPdfParty(partner: PartnerSummary): PdfParty {
@@ -24,40 +25,7 @@ export function mapPartnerToPdfParty(partner: PartnerSummary): PdfParty {
   };
 }
 
-export type InvoiceDto = {
-  invoiceNumber: string;
-  issueDate: string;
-  dueDate?: string | null;
-  currency: string;
-  invoiceStatus?: string | null;
-  partner?: PartnerSummary | null;
-  items: PdfLineItem[];
-  paymentTerms?: string | null;
-  paymentMethod?: string | null;
-  notes?: string | null;
-};
 
-export type CreditNoteDto = {
-  creditNoteNumber: string;
-  originalInvoiceNumber?: string | null;
-  issueDate: string;
-  currency: string;
-  status?: string | null;
-  partner?: PartnerSummary | null;
-  items: PdfLineItem[];
-  notes?: string | null;
-};
-
-export type PurchaseOrderDto = {
-  purchaseOrderNumber: string;
-  issueDate: string;
-  deliveryDate?: string | null;
-  currency: string;
-  purchaseOrderStatus?: string | null;
-  supplier?: PartnerSummary | null;
-  items: PdfLineItem[];
-  notes?: string | null;
-};
 
 const defaultSeller: PdfParty = {
   name: "KRAKENN SARL",
@@ -92,7 +60,7 @@ export function invoiceToPdfData(invoice: InvoiceCreate): PdfDocumentData {
   };
 }
 
-export function creditNoteToPdfData(creditNote: InvoiceCreditNote): PdfDocumentData {
+export function creditNoteToPdfData(creditNote: InvoiceCreditNoteCreate): PdfDocumentData {
   return {
     type: "CREDIT_NOTE",
     number: creditNote.invoiceCreditNoteNumber,
@@ -124,6 +92,84 @@ export function purchaseOrderToPdfData(purchaseOrder: PurchaseOrder): PdfDocumen
     payment: {
       paymentTerms: "NET_30",
       paymentMethod: "BANK_TRANSFER",
+    },
+  };
+}
+
+type PaymentPdfInput = PaymentDetails | CreatePaymentFormValues;
+
+
+function getPaymentDate(payment: PaymentPdfInput):  Date | undefined {
+  if ("paymentDate" in payment && payment.paymentDate) {
+    return payment.paymentDate;
+  }
+
+  if ("date" in payment && payment.date) {
+    return new Date(payment.date);
+  }
+
+
+}
+
+function getPaymentReference(payment: PaymentPdfInput): string {
+  if ("reference" in payment && payment.reference) {
+    return payment.reference;
+  }
+
+  if ("paymentNumber" in payment && payment.paymentNumber) {
+    return payment.paymentNumber;
+  }
+
+  return "";
+}
+
+function getPaymentCurrency(payment: PaymentPdfInput): string {
+  if ( payment.invoice?.invoiceCurrency) {
+    return payment.invoice.invoiceCurrency;
+  }
+
+  if ("currency" in payment && payment.currency) {
+    return payment.currency;
+  }
+
+  return "TND";
+}
+
+function getInvoiceNumber(payment: PaymentPdfInput): string {
+  if ( payment.invoice?.invoiceNumber) {
+    return payment.invoice.invoiceNumber;
+  }
+
+  if ("invoiceNumber" in payment && payment.invoiceNumber) {
+    return payment.invoiceNumber;
+  }
+
+  return "";
+}
+
+export function paymentToPdfData(
+  payment: PaymentPdfInput
+): PdfDocumentData {
+  const paymentDate = getPaymentDate(payment);
+  const invoiceNumber = getInvoiceNumber(payment);
+
+  return {
+    type: "PAYMENT",
+    number: getPaymentReference(payment),
+    issueDate: paymentDate ?? "",
+    currency: getPaymentCurrency(payment),
+    seller: defaultSeller,
+    buyer:
+       payment.invoice?.partner
+        ? mapPartnerToPdfParty(payment.invoice.partner)
+        : null,
+    originalInvoiceNumber: invoiceNumber,
+    items: [],
+    payment: {
+      paymentMethod: payment.method,
+      paymentDate,
+      paidAmount: payment.amount,
+      invoiceNumber,
     },
   };
 }

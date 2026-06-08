@@ -32,7 +32,7 @@ export default function AddPartnerPage({ type, mode, partnerId }: pageProps) {
         <div className=" bg-gray-50">
 
             <header className="bg-white border-b border-gray-100 px-8 py-6">
-                <div className="max-w-5xl mx-auto">
+                <div className=" mx-auto">
                     <button
                         onClick={() => router.push(type === "CLIENT" ? "/billing/clients" : "/billing/suppliers")}
                         className="flex items-center gap-2 text-gray-600 hover:text-gray-900 font-bold mb-4 transition-colors group"
@@ -67,7 +67,7 @@ export default function AddPartnerPage({ type, mode, partnerId }: pageProps) {
                     onSubmit={handleSubmit(onSubmit, (errors) => {
                         console.log("Validation échouée:", errors);
                     })}
-                    className="mx-auto max-w-6xl space-y-6 pb-10"
+                    className="mx-auto  space-y-6 pb-10"
                     id="form-partner"
                 >
 

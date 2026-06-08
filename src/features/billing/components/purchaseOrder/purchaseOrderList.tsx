@@ -1,19 +1,15 @@
 'use client';
 
-import Link from "next/link";
 import { DeleteInvoiceModal } from "../widgets/deleteInvoiceModal";
-import { getClientPurchaseOrderAllowedNextStatuses, purchaseOrderStatusColors, purchaseOrderStatusLabels, purchaseOrderStatusSchema } from "../../types/purchaseOrderStatus";
+import { getClientPurchaseOrderAllowedNextStatuses, purchaseOrderStatusLabels, purchaseOrderStatusSchema } from "../../types/purchaseOrderStatus";
 import { usePurchaseOrderList } from "../../hooks/usePurchaseOrderList";
 import PurchaseOrderModal, { PurchaseOrderModalContent } from "./purchaseOrderDetails";
 import { MOCK_PARTNERS } from "../../mocks/clients-mocks";
 import { mockInvoiceItems } from "../../mocks/invoice-items-mocks";
-import { ChevronLeft, ChevronRight, Settings } from "lucide-react";
 import { UpdateInvoiceStatusModal } from "../widgets/updateStatusModal";
-import PageLoader from "@/shared/components/ui/pageLoader";
-import { SendInvoiceModal } from "../widgets/sendInvoiceModal";
+import { SendDocumentModal } from "../widgets/sendInvoiceModal";
 import { BillingPageHeader } from "../widgets/billingHeader";
 import { StatusFilterBar } from "../widgets/billingFilterBar";
-import { invoiceStatusSchema } from "../../types/invoiceStatus";
 import { PurchaseOrderTable } from "../widgets/purchaseOrderTable";
 
 export default function PurchaseOrderList() {
@@ -71,8 +67,9 @@ export default function PurchaseOrderList() {
                 isSubmitting={updateLoading}
             />
 
-            <SendInvoiceModal
-                invoice={selectedPurchaseOrder}
+            <SendDocumentModal
+                document={selectedPurchaseOrder}
+                variant="purchaseOrder"
                 isOpen={openSendMail}
                 onClose={() => setOpenSendMail(false)}
             />

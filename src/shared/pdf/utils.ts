@@ -138,18 +138,13 @@ export function getDocumentTitle(type: PdfDocumentType): string {
       return "AVOIR";
     case "PURCHASE_ORDER":
       return "COMMANDE";
+    case "PAYMENT":
+      return "Paiement";
   }
 }
 
 export function getDocumentNumberPrefix(type: PdfDocumentType): string {
-  switch (type) {
-    case "INVOICE":
-      return "N°";
-    case "CREDIT_NOTE":
-      return "N°";
-    case "PURCHASE_ORDER":
-      return "N°";
-  }
+  return "N°";
 }
 
 export function getBuyerLabel(type: PdfDocumentType): string {
@@ -169,6 +164,8 @@ export function getMainTotalLabel(type: PdfDocumentType): string {
       return "Total crédité";
     case "PURCHASE_ORDER":
       return "Total";
+    case "PAYMENT":
+      return "Total Payé";
   }
 }
 
@@ -182,6 +179,8 @@ export function getAccentColor(type: PdfDocumentType, accentColor?: string): str
       return "#DC2626";
     case "PURCHASE_ORDER":
       return "#059669";
+    case "PAYMENT":
+      return "#059669";
   }
 }
 
@@ -192,6 +191,8 @@ export function getDocumentSoftColor(type: PdfDocumentType): string {
     case "CREDIT_NOTE":
       return "#FEF2F2";
     case "PURCHASE_ORDER":
+      return "#ECFDF5";
+    case "PAYMENT":
       return "#ECFDF5";
   }
 }

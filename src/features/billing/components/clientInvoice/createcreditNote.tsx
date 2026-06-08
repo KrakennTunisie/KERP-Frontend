@@ -63,7 +63,7 @@ export function CreateCreditNote({invoiceId}: InvoiceDetailsProps) {
             {/* Modal pour demander au user s'il veut envoyer la Facture au TTN */}
             <SendToTTNModal
                 open={TtnModalOpen}
-                onClose={() => setTtnModalOpen(false)}
+                onClose={() => {setTtnModalOpen(false); router.back()}}
                 onConfirm={() => { sendToTTN() }}
                 loading={loadingTTN}
                 invoiceSent={sent}
@@ -73,7 +73,7 @@ export function CreateCreditNote({invoiceId}: InvoiceDetailsProps) {
 
             {/* Main Content - Two Column Layout */}
             <main className="flex-1 overflow-y-auto p-8">
-                <div className="max-w-7xl mx-auto">
+                <div className="mx-auto">
 
                     <SummaryOriginalInvoice data={previewData} />
                     {/* Two Column Grid: Form + Preview */}

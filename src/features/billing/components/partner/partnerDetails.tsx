@@ -46,16 +46,16 @@ import { invoiceStatusColors, invoiceStatusLabels } from "../../types/invoiceSta
 import { partnerTypeSchema } from "../../types/partnerType";
 import { useRouter } from "next/navigation";
 import { DeleteInvoiceModal } from "../widgets/deleteInvoiceModal";
-import { SendInvoiceModal } from "../widgets/sendInvoiceModal";
 import { currencyTypeSchema } from "../../types/currency";
 import PurchaseOrderModal, { PurchaseOrderModalContent } from "../purchaseOrder/purchaseOrderDetails";
 import SupplierPurchaseOrderModal, { SupplierPurchaseOrderModalContent } from "../purchaseOrder/supplierPurchaseOrderDetails";
 import { invoiceTypeSchema } from "../../types/invoiceType";
+import { SendDocumentModal } from "../widgets/sendInvoiceModal";
 
 
 export default function PartnerDetails({ partner, clientRevenueInitial, supplierDespensesInitial, totalRevenueInitial, totalDespensesInitial, partnerStats, partnerInvoices, partnerLogs, purchaseOrders, partnerCreditNotes, onRefresh }: PartnerDetailsProps) {
 
-  const { getStatusLabel, getEmailStatusColor, toggleSection, open, clientRevenue, fetchPartnerStats, totalRevenue, totalDespenses, selected, setSelected, sendeMailOpen, setSendMailOpen, modalPurchaseOrderOpen, setModalPurchaseOrderOpen,invoiceType, setInvoiceType,setDeleteCNoteOpen,deleteCNoteOpen,creditNoteId,setCreditNoteId,deleteCreditInvoice
+  const { getStatusLabel, getEmailStatusColor, toggleSection, open, clientRevenue, fetchPartnerStats, totalRevenue, totalDespenses, selected, setSelected, sendeMailOpen, setSendMailOpen, modalPurchaseOrderOpen, setModalPurchaseOrderOpen, invoiceType, setInvoiceType, setDeleteCNoteOpen, deleteCNoteOpen, creditNoteId, setCreditNoteId, deleteCreditInvoice
     , previewDocument, setPreviewDocument, selectedPeriod, setSelectedPeriod, emailLogs, clientPayments, activeTab, setActiveTab, refresh, setRefresed, supplierDespenses, purchaseOrderId, setPurchaseOrderId, deletePOrderOpen, setDeletePOrderOpen, deletePurchaseOrder, modalSupplierPurchaseOrderOpen, setModalSupplierPurchaseOrderOpen
     , HeaderIcon, setOpen, pageConfig, openSections, deleteOpen, deleteLoading, deleteClientInvoice, setInvoiceId, invoiceRef, setDeleteOpen } = UseClientsDetails({ partner, partnerStats, clientRevenueInitial, supplierDespensesInitial, totalRevenueInitial, totalDespensesInitial, partnerInvoices, partnerLogs, purchaseOrders, partnerCreditNotes, onRefresh });
   const router = useRouter();
@@ -71,7 +71,7 @@ export default function PartnerDetails({ partner, clientRevenueInitial, supplier
       <DeleteInvoiceModal
         open={deleteOpen}
         onClose={() => setDeleteOpen(false)}
-        onConfirm={()=>deleteClientInvoice(invoiceType)}
+        onConfirm={() => deleteClientInvoice(invoiceType)}
         loading={deleteLoading} />
 
       <DeleteInvoiceModal
@@ -80,16 +80,16 @@ export default function PartnerDetails({ partner, clientRevenueInitial, supplier
         onConfirm={() => deletePurchaseOrder(purchaseOrderId)}
         loading={deleteLoading} />
 
-        <DeleteInvoiceModal
+      <DeleteInvoiceModal
         open={deleteCNoteOpen}
         onClose={() => setDeleteCNoteOpen(false)}
         onConfirm={() => deleteCreditInvoice()}
         loading={deleteLoading} />
-
-      <SendInvoiceModal
-        invoice={selected ?? null}
-        isOpen={sendeMailOpen}
-        onClose={() => setSendMailOpen(false)}
+      <SendDocumentModal
+        document={selected}
+        variant="invoice"
+        isOpen={open}
+        onClose={() => setOpen(false)}
       />
 
       <PurchaseOrderModal
@@ -112,7 +112,7 @@ export default function PartnerDetails({ partner, clientRevenueInitial, supplier
       </SupplierPurchaseOrderModal>
       {/* Main Content with Tabs */}
       <main className="flex-1 overflow-y-auto p-8">
-        <div className="max-w-7xl mx-auto space-y-6">
+        <div className="mx-auto space-y-6">
 
           {/* Statistics Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -314,8 +314,9 @@ export default function PartnerDetails({ partner, clientRevenueInitial, supplier
                         hover: "hover:bg-rose-50",
                         onClick: () => {
                           setInvoiceType(invoice.invoiceType);
-                           setInvoiceId(invoice.idInvoice);
-                            setDeleteOpen(true) },
+                          setInvoiceId(invoice.idInvoice);
+                          setDeleteOpen(true)
+                        },
                         disabled: invoice.invoiceStatus !== "DRAFT",
                       },
                     ]}
@@ -341,7 +342,7 @@ export default function PartnerDetails({ partner, clientRevenueInitial, supplier
                     icon={CreditCard}
                     title="paiement"
                     menuTitle="Actions paiement"
-                    getNumber={(item) => item.number}
+                    getNumber={(item) => item.paymentNumber}
                     getDate={(item) => new Date(item.date)}
                     getAmount={(item) => item.amount}
                     getCurrency={() => "TND"}

@@ -7,178 +7,301 @@ import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 import { appToast } from "@/shared/lib/toast";
 
 import { MailingAPI } from "../../api/partners-api";
-import { InvoicePageItem, InvoicePageItemV2 } from "../../models/invoice";
-import { InvoiceCreditNotePageItem } from "../../models/creditNote";
+
+import { Invoice, InvoicePageItem } from "../../models/invoice";
 import { PurchaseOrderPageItem } from "../../models/purchaseOrder";
+import { InvoiceCreditNotePageItem } from "../../models/creditNote";
+import {  PaymentDetails } from "../../models/payment";
 
-type SendableInvoice = InvoicePageItem | InvoiceCreditNotePageItem| PurchaseOrderPageItem;
+type SendDocumentVariant =
+  | "invoice"
+  | "purchaseOrder"
+  | "payment"
+  | "invoiceCreditNote";
 
-interface SendInvoiceModalProps {
-  invoice: SendableInvoice | null;
+type SendableDocument =
+  | Invoice
+  | InvoicePageItem
+  | PurchaseOrderPageItem
+  | InvoiceCreditNotePageItem
+  | PaymentDetails;
+
+type SendDocumentModalProps = {
+  document: SendableDocument | null | undefined;
+  variant: SendDocumentVariant;
   isOpen: boolean;
   onClose: () => void;
-}
-
-const isCreditNote = (
-  invoice: SendableInvoice | null,
-): invoice is InvoiceCreditNotePageItem => {
-  return !!invoice && "invoiceCreditNoteNumber" in invoice;
 };
 
+const formatMoney = (
+  value?: number | null,
+  currency: "EUR" | "TND" | "USD" = "TND"
+) => {
+  if (value === null || value === undefined) return "-";
 
-const isPurchaseOrder = (
-  document: SendableInvoice | null,
-): document is PurchaseOrderPageItem => {
-  return !!document && "purchaseOrderNumber" in document;
+  return new Intl.NumberFormat("fr-FR", {
+    style: "currency",
+    currency,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value);
 };
 
-const getDocumentNumber = (document: SendableInvoice | null) => {
+const getDocumentLabel = (variant: SendDocumentVariant) => {
+  switch (variant) {
+    case "invoice":
+      return "facture";
+    case "purchaseOrder":
+      return "bon de commande";
+    case "payment":
+      return "paiement";
+    case "invoiceCreditNote":
+      return "facture d’avoir";
+    default:
+      return "document";
+  }
+};
+
+const getDocumentNumber = (
+  document: SendableDocument | null | undefined,
+  variant: SendDocumentVariant
+) => {
   if (!document) return "";
 
-  if (isCreditNote(document)) {
-    return document.invoiceCreditNoteNumber;
-  }
+  switch (variant) {
+    case "invoice":
+      return (document as Invoice | InvoicePageItem).invoiceNumber;
 
-  if (isPurchaseOrder(document)) {
-    return document.purchaseOrderNumber;
-  }
+    case "purchaseOrder":
+      return (document as PurchaseOrderPageItem).purchaseOrderNumber;
 
-  return document.invoiceNumber;
-};
+    case "payment":
+      return (document as PaymentDetails).reference;
 
-const getDocumentCurrency = (document: SendableInvoice | null) => {
-  if (!document) return "";
+    case "invoiceCreditNote":
+      return (document as InvoiceCreditNotePageItem).invoiceCreditNoteNumber;
 
-  if (isCreditNote(document)) {
-    return document.invoice.invoiceCurrency;
-  }
-
-  if (isPurchaseOrder(document)) {
-    return document.purchaseCurrency;
-  }
-
-  return document.invoiceCurrency;
-};
-
-const getDocumentEmail = (document: SendableInvoice | null) => {
-  if (!document) return "";
-
-  if (isCreditNote(document)) {
-    return document.invoice.partner.email;
-  }
-
-  if (isPurchaseOrder(document)) {
-    return document.partner.email;
-  }
-
-  return document.partner.email;
-};
-
-const getDocumentPartnerName = (document: SendableInvoice | null) => {
-  if (!document) return "";
-
-  if (isCreditNote(document)) {
-    return document.invoice.partner.companyName;
-  }
-
-  if (isPurchaseOrder(document)) {
-    return document.partner.companyName;
-  }
-
-  return document.partner.companyName;
-};
-
-const getDocumentId = (document: SendableInvoice | null) => {
-  if (!document) return "";
-
-  if (isCreditNote(document)) {
-    return document.idInvoiceCreditNote;
-  }
-
-  if (isPurchaseOrder(document)) {
-    return document.idPurchaseOrder;
-  }
-
-  return document.idInvoice;
-};
-
-export const formatAmount = (invoice: SendableInvoice | null) => {
-  if (!invoice) return "";
-
-  switch (getDocumentCurrency(invoice)) {
-    case "EUR":
-      return `${invoice.totalInclTaxEUR?.toLocaleString("fr-FR")} €`;
-    case "TND":
-      return `${invoice.totalInclTaxTND?.toLocaleString("fr-FR")} TND`;
-    case "USD":
-      return `${invoice.totalInclTaxUSD?.toLocaleString("fr-FR")} $`;
     default:
       return "";
   }
 };
 
-export function SendInvoiceModal({
-  invoice,
+const getDocumentId = (
+  document: SendableDocument | null | undefined,
+  variant: SendDocumentVariant
+) => {
+  if (!document) return "";
+
+  switch (variant) {
+    case "invoice":
+      return (document as Invoice | InvoicePageItem).idInvoice;
+
+    case "purchaseOrder":
+      return (document as PurchaseOrderPageItem).idPurchaseOrder;
+
+    case "payment":
+      return (document as PaymentDetails).idPayment;
+
+    case "invoiceCreditNote":
+      return (document as InvoiceCreditNotePageItem).idInvoiceCreditNote;
+
+    default:
+      return "";
+  }
+};
+
+const getDocumentPartnerName = (
+  document: SendableDocument | null | undefined,
+  variant: SendDocumentVariant
+) => {
+  if (!document) return "";
+
+  switch (variant) {
+    case "invoice":
+      return (document as Invoice | InvoicePageItem).partner?.partnerName ?? "";
+
+    case "purchaseOrder":
+      return (document as PurchaseOrderPageItem).partner?.partnerName ?? "";
+
+    case "payment":
+      return (
+        (document as PaymentDetails).invoice?.partner?.partnerName ??
+        ""
+      );
+
+    case "invoiceCreditNote":
+      return (
+        (document as InvoiceCreditNotePageItem).invoice?.partner?.partnerName ??
+        ""
+      );
+
+    default:
+      return "";
+  }
+};
+
+const getDocumentEmail = (
+  document: SendableDocument | null | undefined,
+  variant: SendDocumentVariant
+) => {
+  if (!document) return "";
+
+  switch (variant) {
+    case "invoice":
+      return (document as Invoice | InvoicePageItem).partner?.email ?? "";
+
+    case "purchaseOrder":
+      return (document as PurchaseOrderPageItem).partner?.email ?? "";
+
+    case "payment":
+      return (
+        (document as PaymentDetails).invoice?.partner?.email ??
+        ""
+      );
+
+    case "invoiceCreditNote":
+      return (
+        (document as InvoiceCreditNotePageItem).invoice?.partner?.email ?? ""
+      );
+
+    default:
+      return "";
+  }
+};
+
+const getDocumentCurrency = (
+  document: SendableDocument | null | undefined,
+  variant: SendDocumentVariant
+): "EUR" | "TND" | "USD" => {
+  if (!document) return "TND";
+
+  switch (variant) {
+    case "invoice":
+      return (
+        (document as Invoice | InvoicePageItem).invoiceCurrency ?? "TND"
+      ) as "EUR" | "TND" | "USD";
+
+    case "purchaseOrder":
+      return (
+        (document as PurchaseOrderPageItem).purchaseCurrency ?? "TND"
+      ) as "EUR" | "TND" | "USD";
+
+    case "payment":
+      return (
+        (document as PaymentDetails).currency ??
+        (document as PaymentDetails).invoice?.invoiceCurrency ??
+        "TND"
+      ) as "EUR" | "TND" | "USD";
+
+    case "invoiceCreditNote":
+      return (
+        (document as InvoiceCreditNotePageItem).invoice?.invoiceCurrency ?? "TND"
+      ) as "EUR" | "TND" | "USD";
+
+    default:
+      return "TND";
+  }
+};
+
+const getDocumentAmount = (
+  document: SendableDocument | null | undefined,
+  variant: SendDocumentVariant
+) => {
+  if (!document) return "-";
+
+  const currency = getDocumentCurrency(document, variant);
+
+  if (variant === "payment") {
+    const payment = document as PaymentDetails;
+
+    return payment.amount +" "+ payment.currency;
+  }
+
+  const item = document as Invoice | InvoicePageItem | PurchaseOrderPageItem;
+
+  if (currency === "EUR") return formatMoney(item.totalInclTaxEUR, "EUR");
+  if (currency === "USD") return formatMoney(item.totalInclTaxUSD, "USD");
+
+  return formatMoney(item.totalInclTaxTND, "TND");
+};
+
+export function SendDocumentModal({
+  document,
+  variant,
   isOpen,
   onClose,
-}: SendInvoiceModalProps) {
+}: SendDocumentModalProps) {
   const [to, setTo] = useState("");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
 
-  const documentNumber = useMemo(() => getDocumentNumber(invoice), [invoice]);
+  const documentLabel = useMemo(() => getDocumentLabel(variant), [variant]);
 
-  const documentLabel = isCreditNote(invoice)
-    ? "facture d'avoir"
-    : "facture";
+  const documentNumber = useMemo(
+    () => getDocumentNumber(document, variant),
+    [document, variant]
+  );
+
+  const partnerName = useMemo(
+    () => getDocumentPartnerName(document, variant),
+    [document, variant]
+  );
+
+  const amount = useMemo(
+    () => getDocumentAmount(document, variant),
+    [document, variant]
+  );
 
   useEffect(() => {
-    if (!invoice) return;
-  const documentLabel = isCreditNote(invoice)
-    ? "facture d'avoir"
-    : isPurchaseOrder(invoice)
-      ? "bon de commande"
-      : "facture";
-    setTo(getDocumentEmail(invoice) ?? "");
+    if (!document) return;
+
+    setTo(getDocumentEmail(document, variant));
     setSubject(`${documentLabel} ${documentNumber}`);
 
-    setMessage(`Bonjour ${getDocumentPartnerName(invoice)},
+    setMessage(`Bonjour ${partnerName},
 
-Veuillez trouver ci-joint la ${documentLabel} ${documentNumber} pour un montant de ${formatAmount(invoice)}.
+        Veuillez trouver ci-joint le document suivant : ${documentLabel} ${documentNumber}, pour un montant de ${amount}.
 
-Cordialement,`);
-  }, [invoice, documentNumber, documentLabel]);
+        Cordialement,`
+    );
+  }, [document, variant, documentLabel, documentNumber, partnerName, amount]);
 
   if (!isOpen) return null;
 
   const handleSend = async () => {
-    if (!invoice) return;
+    if (!document) return;
 
     try {
       setSending(true);
 
-      if (isCreditNote(invoice)) {
-        await MailingAPI.sendEmailWithCreditNote(getDocumentId(invoice),{
+      const documentId = getDocumentId(document, variant);
+
+      const payload = {
         toEmail: to,
         subject,
-        body: message
-      });
-      } else if (isPurchaseOrder(invoice)) {
-        await MailingAPI.sendEmailWithPurchaseOrder(getDocumentId(invoice),{
-        toEmail: to,
-        subject,
-        body: message
-      });
-      } else {
-        await MailingAPI.sendEmailWithInvoice(getDocumentId(invoice),{
-        toEmail: to,
-        subject,
-        body: message
-      });
+        body: message,
+      };
+
+      switch (variant) {
+        case "invoice":
+          await MailingAPI.sendEmailWithInvoice(documentId, payload);
+          break;
+
+        case "purchaseOrder":
+          await MailingAPI.sendEmailWithPurchaseOrder(documentId, payload);
+          break;
+
+        case "invoiceCreditNote":
+          await MailingAPI.sendEmailWithCreditNote(documentId, payload);
+          break;
+
+        case "payment":
+          await MailingAPI.sendEmailWithPayment(documentId, payload);
+          break;
       }
 
-      appToast.success(`${documentLabel} envoyée avec succès.`);
+      appToast.success("Mail envoyé avec succès.");
       onClose();
     } catch (error) {
       appToast.error("Erreur d'envoi : ", getApiErrorMessage(error));
@@ -204,10 +327,10 @@ Cordialement,`);
 
             <div>
               <p className="m-0 text-[15px] font-bold tracking-wide text-white">
-                Envoyer la {documentLabel}
+                Envoyer le document
               </p>
               <p className="mt-0.5 text-xs uppercase tracking-wider text-white/70">
-                À {getDocumentPartnerName(invoice)}
+                À {partnerName || "-"}
               </p>
             </div>
           </div>
@@ -225,7 +348,7 @@ Cordialement,`);
           <div className="flex items-center justify-between rounded-[14px] border border-blue-100 bg-gradient-to-br from-blue-50 to-slate-100 px-5 py-4">
             <div className="flex flex-col gap-1">
               <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-blue-700">
-                {isCreditNote(invoice) ? "Facture d'avoir" : "Facture"}
+                {documentLabel}
               </span>
               <span className="text-[19px] font-extrabold tracking-tight text-slate-900">
                 {documentNumber}
@@ -237,68 +360,61 @@ Cordialement,`);
                 Montant
               </span>
               <span className="text-[19px] font-extrabold tracking-tight text-blue-900">
-                {formatAmount(invoice)}
+                {amount}
               </span>
             </div>
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <div className="flex items-center gap-1.5">
-              <Mail size={13} className="text-slate-500" />
-              <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-500">
+          <div className="space-y-3">
+            <label className="block">
+              <span className="mb-1.5 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-slate-500">
+                <Mail className="h-3.5 w-3.5" />
                 Destinataire
               </span>
-            </div>
+              <input
+                value={to}
+                onChange={(event) => setTo(event.target.value)}
+                placeholder="email@exemple.com"
+                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-800 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+              />
+            </label>
 
-            <input
-              value={to}
-              onChange={(event) => setTo(event.target.value)}
-              className="w-full rounded-[10px] border-[1.5px] border-blue-50 bg-slate-50 px-3.5 py-[11px] text-sm leading-relaxed text-slate-900 outline-none transition focus:border-blue-600 focus:bg-white focus:shadow-[0_0_0_3px_rgba(37,99,235,0.12)]"
-            />
+            <label className="block">
+              <span className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-500">
+                Objet
+              </span>
+              <input
+                value={subject}
+                onChange={(event) => setSubject(event.target.value)}
+                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-800 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+              />
+            </label>
+
+            <label className="block">
+              <span className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-500">
+                Message
+              </span>
+              <textarea
+                value={message}
+                onChange={(event) => setMessage(event.target.value)}
+                rows={7}
+                className="w-full resize-none rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium leading-6 text-slate-800 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+              />
+            </label>
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-500">
-              Sujet
-            </span>
-
-            <input
-              value={subject}
-              onChange={(event) => setSubject(event.target.value)}
-              className="w-full rounded-[10px] border-[1.5px] border-blue-50 bg-slate-50 px-3.5 py-[11px] text-sm leading-relaxed text-slate-900 outline-none transition focus:border-blue-600 focus:bg-white focus:shadow-[0_0_0_3px_rgba(37,99,235,0.12)]"
-            />
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-500">
-              Message
-            </span>
-
-            <textarea
-              value={message}
-              onChange={(event) => setMessage(event.target.value)}
-              rows={7}
-              className="w-full resize-none rounded-[10px] border-[1.5px] border-blue-50 bg-slate-50 px-3.5 py-[11px] text-sm leading-relaxed text-slate-900 outline-none transition focus:border-blue-600 focus:bg-white focus:shadow-[0_0_0_3px_rgba(37,99,235,0.12)]"
-            />
-          </div>
-        <div className="flex items-center gap-3 rounded-xl border-[1.5px] border-[#d6e8f8] bg-[#f4f9ff] px-4 py-[13px]">
-          <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
-            <Paperclip size={14} />
-          </div>
-          <div>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-              {"Pièce ointe"}
-            </p>
-            <p className="text-sm font-semibold text-blue-800">{getDocumentNumber(invoice)}</p>
-          </div>
+          <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-semibold text-slate-600">
+            <Paperclip className="h-4 w-4 text-slate-500" />
+            Le PDF du document sera ajouté automatiquement en pièce jointe.
           </div>
         </div>
 
-        <div className="flex justify-end gap-3 border-t border-slate-100 px-[22px] py-4">
+        <div className="flex items-center justify-end gap-2 border-t border-slate-100 bg-slate-50 px-[22px] py-4">
           <button
             type="button"
             onClick={onClose}
-            className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-600 transition hover:bg-slate-50"
+            disabled={sending}
+            className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-600 shadow-sm transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
           >
             Annuler
           </button>
@@ -306,10 +422,10 @@ Cordialement,`);
           <button
             type="button"
             onClick={handleSend}
-            disabled={sending}
-            className="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+            disabled={sending || !to || !subject || !message}
+            className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            <Send size={16} />
+            <Send className="h-4 w-4" />
             {sending ? "Envoi..." : "Envoyer"}
           </button>
         </div>

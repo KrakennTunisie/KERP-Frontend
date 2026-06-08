@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Document,
   Page,
@@ -441,6 +440,116 @@ const styles = StyleSheet.create({
     color: "#A0ABC1",
     fontSize: 7.5,
   },
+
+ paymentDetailsBox: {
+  marginTop: 18,
+  borderRadius: 10,
+  border: "1 solid #E7ECF5",
+  overflow: "hidden",
+},
+
+paymentDetailsHeader: {
+  paddingVertical: 7,
+  paddingHorizontal: 10,
+  borderBottom: "1 solid #07142E",
+},
+
+paymentDetailsHeaderText: {
+  fontSize: 7,
+  fontWeight: 700,
+  letterSpacing: 0.8,
+  color: "#41516F",
+  textTransform: "uppercase",
+},
+
+paymentDetailsRow: {
+  flexDirection: "row",
+  paddingVertical: 10,
+  paddingHorizontal: 10,
+  borderBottom: "1 solid #EEF2F7",
+},
+
+paymentDetailsCell: {
+  width: "50%",
+},
+
+paymentDetailsLabel: {
+  fontSize: 7,
+  color: "#8795B4",
+  fontWeight: 700,
+  letterSpacing: 0.9,
+  textTransform: "uppercase",
+  marginBottom: 4,
+},
+
+paymentDetailsValue: {
+  fontSize: 9,
+  color: "#07142E",
+  fontWeight: 700,
+},
+
+paymentDetailsMuted: {
+  fontSize: 7.8,
+  color: "#64748B",
+  lineHeight: 1.35,
+},
+
+paymentAmountBox: {
+  marginTop: 12,
+  marginHorizontal: 10,
+  marginBottom: 10,
+  padding: 12,
+  borderRadius: 10,
+  backgroundColor: "#F8FAFC",
+  border: "1 solid #E7ECF5",
+},
+
+paymentAmountLabel: {
+  fontSize: 7,
+  color: "#8795B4",
+  fontWeight: 700,
+  letterSpacing: 0.9,
+  textTransform: "uppercase",
+  marginBottom: 5,
+},
+
+paymentAmountValue: {
+  fontSize: 21,
+  color: "#1E3358",
+  fontWeight: 700,
+},
+
+paymentAmountCurrency: {
+  fontSize: 10,
+  color: "#1E3358",
+  fontWeight: 700,
+},
+
+paymentNoticeBox: {
+  marginTop: 10,
+  padding: 9,
+  borderRadius: 9,
+  backgroundColor: "#F8FAFC",
+  border: "1 solid #E7ECF5",
+},
+
+paymentNoticeText: {
+  fontSize: 7.5,
+  color: "#64748B",
+  lineHeight: 1.35,
+},
+
+paymentTotalsZone: {
+  width: "36%",
+  paddingTop: 10,
+},
+
+paymentTotalCard: {
+  padding: 10,
+  borderRadius: 10,
+  backgroundColor: "#F8FAFC",
+  border: "1 solid #E7ECF5",
+},
 });
 
 type ProfessionalDocumentPdfProps = {
@@ -667,16 +776,186 @@ function SignatureAndNotes({ data, accent }: { data: PdfDocumentData; accent: st
   );
 }
 
+function PaymentInfoBar({ data }: { data: PdfDocumentData }) {
+  return (
+    <View style={styles.infoBar}>
+      <View style={styles.infoCell}>
+        <Text style={styles.infoLabel}>Date paiement</Text>
+        <Text style={styles.infoValue}>
+          {formatPdfDate(data.payment?.paymentDate || data.issueDate)}
+        </Text>
+      </View>
+
+      <View style={styles.infoCell}>
+        <Text style={styles.infoLabel}>Facture liée</Text>
+        <Text style={styles.infoValue}>
+          {data.payment?.invoiceNumber || data.originalInvoiceNumber || "—"}
+        </Text>
+      </View>
+
+      <View style={styles.infoCell}>
+        <Text style={styles.infoLabel}>Mode</Text>
+        <Text style={styles.infoValue}>
+          {getPaymentLabel(data.payment?.paymentMethod)}
+        </Text>
+      </View>
+
+      <View style={styles.infoCellLast}>
+        <Text style={styles.infoLabel}>Statut</Text>
+        <Text style={styles.infoValue}>{data.status || "Payé"}</Text>
+      </View>
+    </View>
+  );
+}
+
+function PaymentDetails({ data }: { data: PdfDocumentData }) {
+  const paidAmount = data.payment?.paidAmount ?? 0;
+  const invoiceNumber =
+    data.payment?.invoiceNumber || data.originalInvoiceNumber || "—";
+
+  return (
+    <View style={styles.paymentDetailsBox}>
+      <View style={styles.paymentDetailsHeader}>
+        <Text style={styles.paymentDetailsHeaderText}>
+          Détails du paiement
+        </Text>
+      </View>
+
+      <View style={styles.paymentDetailsRow}>
+        <View style={styles.paymentDetailsCell}>
+          <Text style={styles.paymentDetailsLabel}>Référence paiement</Text>
+          <Text style={styles.paymentDetailsValue}>{data.number}</Text>
+        </View>
+
+        <View style={styles.paymentDetailsCell}>
+          <Text style={styles.paymentDetailsLabel}>Date paiement</Text>
+          <Text style={styles.paymentDetailsValue}>
+            {formatPdfDate(data.payment?.paymentDate || data.issueDate)}
+          </Text>
+        </View>
+      </View>
+
+      <View style={styles.paymentDetailsRow}>
+        <View style={styles.paymentDetailsCell}>
+          <Text style={styles.paymentDetailsLabel}>Facture associée</Text>
+          <Text style={styles.paymentDetailsValue}>{invoiceNumber}</Text>
+        </View>
+
+        <View style={styles.paymentDetailsCell}>
+          <Text style={styles.paymentDetailsLabel}>Méthode de paiement</Text>
+          <Text style={styles.paymentDetailsValue}>
+            {getPaymentLabel(data.payment?.paymentMethod)}
+          </Text>
+        </View>
+      </View>
+
+      <View style={styles.paymentAmountBox}>
+        <Text style={styles.paymentAmountLabel}>Montant reçu</Text>
+
+        <Text style={styles.paymentAmountValue}>
+          {formatNumber(paidAmount)}{" "}
+          <Text style={styles.paymentAmountCurrency}>{data.currency}</Text>
+        </Text>
+
+        <Text style={styles.paymentDetailsMuted}>
+          Ce reçu confirme l’enregistrement du paiement relatif à la facture{" "}
+          {invoiceNumber}.
+        </Text>
+      </View>
+    </View>
+  );
+}
+
+function PaymentTotals({ data }: { data: PdfDocumentData }) {
+  const paidAmount = data.payment?.paidAmount ?? 0;
+
+  return (
+    <View style={styles.paymentTotalsZone}>
+      <View style={styles.paymentTotalCard}>
+        <View style={styles.totalLine}>
+          <Text style={styles.totalLabel}>Montant payé</Text>
+          <Text style={styles.totalValue}>
+            {formatMoney(paidAmount, data.currency)}
+          </Text>
+        </View>
+
+        <View style={styles.totalLine}>
+          <Text style={styles.totalLabel}>TVA</Text>
+          <Text style={styles.totalValue}>Non applicable</Text>
+        </View>
+
+        <View style={styles.totalSeparator} />
+
+        <View style={styles.grandTotalLine}>
+          <Text style={styles.grandTotalLabel}>Total reçu</Text>
+
+          <Text style={styles.grandTotalValue}>
+            {formatNumber(paidAmount)}{" "}
+            <Text style={styles.grandTotalCurrency}>{data.currency}</Text>
+          </Text>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+function PaymentNotice({ data }: { data: PdfDocumentData }) {
+  const invoiceNumber =
+    data.payment?.invoiceNumber || data.originalInvoiceNumber || "—";
+
+  return (
+    <View style={styles.paymentNoticeBox}>
+      <Text style={styles.paymentNoticeText}>
+        Ce document est un reçu de paiement. Il atteste que le montant indiqué a
+        été enregistré pour la facture {invoiceNumber}. Il ne remplace pas la
+        facture originale.
+      </Text>
+    </View>
+  );
+}
 export function ProfessionalDocumentPdf({ data }: ProfessionalDocumentPdfProps) {
   const accent = getAccentColor(data.type, data.accentColor);
+
+  if (data.type === "PAYMENT") {
+    return (
+      <Document>
+        <Page size="A4" style={styles.page}>
+          <View style={styles.sheet}>
+            <Header data={data} accent={accent} />
+
+            <Parties data={data} />
+
+            <PaymentInfoBar data={data} />
+
+            <PaymentDetails data={data} />
+
+            <PaymentNotice data={data} />
+
+
+            <View style={styles.footer} fixed>
+              <Text>{data.seller.companyName || data.seller.name}</Text>
+              <Text
+                render={({ pageNumber, totalPages }) =>
+                  `Page ${pageNumber} / ${totalPages}`
+                }
+              />
+            </View>
+          </View>
+        </Page>
+      </Document>
+    );
+  }
 
   return (
     <Document>
       <Page size="A4" style={styles.page}>
         <View style={styles.sheet}>
           <Header data={data} accent={accent} />
+
           <Parties data={data} />
+
           <InfoBar data={data} />
+
           <ItemsTable data={data} />
 
           <View style={styles.bottomArea}>
@@ -686,7 +965,11 @@ export function ProfessionalDocumentPdf({ data }: ProfessionalDocumentPdfProps) 
 
           <View style={styles.footer} fixed>
             <Text>{data.seller.companyName || data.seller.name}</Text>
-            <Text render={({ pageNumber, totalPages }) => `Page ${pageNumber} / ${totalPages}`} />
+            <Text
+              render={({ pageNumber, totalPages }) =>
+                `Page ${pageNumber} / ${totalPages}`
+              }
+            />
           </View>
         </View>
       </Page>
