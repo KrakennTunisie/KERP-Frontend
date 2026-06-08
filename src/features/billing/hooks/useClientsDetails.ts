@@ -9,11 +9,13 @@ import { PartnerInvoiceStats } from "../types/partnersStats";
 import { ChartMode } from "../components/widgets/RevnueExpensesBarChart";
 import { AuditLog } from "../models/AuditLogs";
 import { PartnerRevenueStats } from "../types/partnerRevenueStats";
-import { DashboardAPI, InvoicesAPI, partnersApi, PurchaseOrderAPI } from "../api/partners-api";
+import { DashboardAPI, InvoicesAPI, InvoicesCreditNoteAPI, partnersApi, PurchaseOrderAPI } from "../api/partners-api";
 import { appToast } from "@/shared/lib/toast";
 import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 import { partnerTypeSchema } from "../types/partnerType";
-import { PurchaseOrderPartnerSummary } from "../models/purchaseOrder";
+import { PurchaseOrderPageItem, PurchaseOrderPartnerSummary } from "../models/purchaseOrder";
+import { InvoiceCreditNoteDetails, InvoiceCreditNotePageItem } from "../models/creditNote";
+import { invoiceTypeSchema } from "../types/invoiceType";
 
 export interface Payment {
   id: string;
@@ -38,8 +40,9 @@ export type PartnerDetailsProps = {
   clientRevenueInitial?: PartnerRevenueStats[] | []
   supplierDespensesInitial?: PartnerRevenueStats[] | []
   partnerInvoices: InvoicePageItem[] | []
+  partnerCreditNotes: InvoiceCreditNotePageItem[] | []
   partnerLogs: AuditLog[] | []
-  purchaseOrders :PurchaseOrderPartnerSummary[]|[],
+  purchaseOrders: PurchaseOrderPartnerSummary[] | [],
   totalRevenueInitial?: number,
   totalDespensesInitial?: number
   onRefresh: () => void;
@@ -84,15 +87,19 @@ export default function UseClientsDetails({ partner, partnerStats, partnerInvoic
     payments: false,
     purchaseOrders: false,
   });
-  const [deleteLoading, setDeleteLoading]= useState(false)
+  const [deleteLoading, setDeleteLoading] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deletePOrderOpen, setDeletePOrderOpen] = useState(false);
+  const [deleteCNoteOpen, setDeleteCNoteOpen] = useState(false);
   const [modalPurchaseOrderOpen, setModalPurchaseOrderOpen] = useState(false);
+  const [modalSupplierPurchaseOrderOpen, setModalSupplierPurchaseOrderOpen] = useState(false);
   const [sendeMailOpen, setSendMailOpen] = useState(false);
-  const [selectedInvoice, setSelectedInvoice] = useState<InvoicePageItem|null>();
-  const [invoiceRef ,setInvoiceRef] = useState("");
-  const [invoiceId ,setInvoiceId] = useState("");
-  const [purchaseOrderId ,setPurchaseOrderId] = useState("");
+  const [selected, setSelected] = useState<InvoicePageItem | InvoiceCreditNotePageItem | PurchaseOrderPageItem | null>();
+  const [invoiceRef, setInvoiceRef] = useState("");
+  const [invoiceId, setInvoiceId] = useState("");
+  const [creditNoteId, setCreditNoteId] = useState("");
+  const [invoiceType, setInvoiceType] = useState("");
+  const [purchaseOrderId, setPurchaseOrderId] = useState("");
   const clientPayments: Payment[] = [
     {
       id: '1',
@@ -112,7 +119,7 @@ export default function UseClientsDetails({ partner, partnerStats, partnerInvoic
     },
   ];
 
- 
+
   // Mock emails
   const emailLogs: EmailLog[] = [
     {
@@ -159,19 +166,19 @@ export default function UseClientsDetails({ partner, partnerStats, partnerInvoic
   const [totalDespenses, setTotalDespenses] = useState<number>()
   const fetchPartnerStats = async (partner: PartnerAllDetails, period: string) => {
     try {
-      
+
       if (period != " ") {
         setLoading(true)
         if (partner?.partnerType == partnerTypeSchema.enum.CLIENT) {
           const clientRevenue = await DashboardAPI.clientRevenueStats(partner.idPartner, period)
           setClientRevenue(clientRevenue);
-           const total =  clientRevenue.slice(-selectedPeriod).reduce((sum, item) => sum + (item.revenueTTC ?? 0), 0);
-           setTotalRevenue(total);
+          const total = clientRevenue.slice(-selectedPeriod).reduce((sum, item) => sum + (item.revenueTTC ?? 0), 0);
+          setTotalRevenue(total);
         }
         else {
           const supplierDespenses = await DashboardAPI.supplierRevenueStats(partner?.idPartner, period)
           setSupplierDespenses(supplierDespenses);
-          const total =  supplierDespenses.slice(-selectedPeriod).reduce((sum, item) => sum + (item.revenueTTC ?? 0), 0);
+          const total = supplierDespenses.slice(-selectedPeriod).reduce((sum, item) => sum + (item.revenueTTC ?? 0), 0);
           setTotalDespenses(total);
         }
       } else {
@@ -186,38 +193,57 @@ export default function UseClientsDetails({ partner, partnerStats, partnerInvoic
     }
   };
 
-  const deleteClientInvoice = async ()=>{
-          try {
-            setDeleteLoading(true);
-            await InvoicesAPI.deleteClientInvoice(invoiceId);
-            appToast.success('Facture supprimée avec succès.')
-            setDeleteOpen(false)
-            setInvoiceId("")
-            window.location.reload()
-          } catch (error) {
-            appToast.error("Erreur de suppresion: ",getApiErrorMessage(error))
-          } finally {
-            setDeleteLoading(false);
-          }
+  const deleteClientInvoice = async (invoiceType: string) => {
+    try {
+      setDeleteLoading(true);
+      if (invoiceType == invoiceTypeSchema.enum.SALE) {
+        await InvoicesAPI.deleteClientInvoice(invoiceId);
+      } else {
+        await InvoicesAPI.deleteSupplierInvoice(invoiceId);
       }
-   async function deletePurchaseOrder(idPurchaseOrder: string) {
-       try {
-         setDeleteLoading(true);
-         await PurchaseOrderAPI.deleteClientPurchaseOrder(idPurchaseOrder);
-         appToast.success('Bon de commande supprimée avec succès.')
-         setDeletePOrderOpen(false)
-       } catch (error) {
-         appToast.error("Erreur de suppresion: ", getApiErrorMessage(error))
-       } finally {
-         setDeleteLoading(false);
-       }
-       //setPurchaseOrder(idPurchaseOrder);
-     }
+      appToast.success('Facture supprimée avec succès.')
+      setDeleteOpen(false)
+      setInvoiceId("")
+      window.location.reload()
+    } catch (error) {
+      appToast.error("Erreur de suppresion: ", getApiErrorMessage(error))
+    } finally {
+      setDeleteLoading(false);
+    }
+  }
+  async function deletePurchaseOrder(idPurchaseOrder: string) {
+    try {
+      setDeleteLoading(true);
+      await PurchaseOrderAPI.deleteClientPurchaseOrder(idPurchaseOrder);
+      appToast.success('Bon de commande supprimée avec succès.')
+      setDeletePOrderOpen(false)
+    } catch (error) {
+      appToast.error("Erreur de suppresion: ", getApiErrorMessage(error))
+    } finally {
+      setDeleteLoading(false);
+    }
+
+  }
+
+  const deleteCreditInvoice = async () => {
+    try {
+      setDeleteLoading(true);
+      await InvoicesCreditNoteAPI.deleteInvoiceCreditNote(creditNoteId);
+      appToast.success('Facture d avoir supprimée avec succès.')
+      setCreditNoteId(" ");
+      setDeleteCNoteOpen(false)
+      window.location.reload();
+    } catch (error) {
+      appToast.error("Erreur de suppresion: ", getApiErrorMessage(error))
+    } finally {
+      setDeleteLoading(false);
+    }
+  }
 
   const [previewDocument, setPreviewDocument] = useState<PreviewDocument>(null);
   const [selectedPeriod, setSelectedPeriod] = useState(6);
 
-  
+
   const toggleSection = (section: string) => {
     setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
   };
@@ -269,9 +295,9 @@ export default function UseClientsDetails({ partner, partnerStats, partnerInvoic
 
   const chartMode: ChartMode = partner.partnerType === "CLIENT" ? "revenues" : "expenses";
   return {
-    deleteClientInvoice,deleteLoading,setDeleteLoading,setDeleteOpen,invoiceRef,deleteOpen,setInvoiceId,purchaseOrderId,setPurchaseOrderId,setDeletePOrderOpen,deletePOrderOpen , deletePurchaseOrder,
-    getStatusLabel, getEmailStatusColor, chartMode, getStatusIcon, getLabelColor, getStatusColor, toggleSection ,refresh,setRefresed,modalPurchaseOrderOpen,setModalPurchaseOrderOpen
-    , previewDocument, setPreviewDocument, selectedPeriod, setSelectedPeriod, emailLogs, clientPayments, activeTab, setActiveTab, supplierDespenses,totalDespenses
-    , TotalIcon, HeaderIcon, open, setOpen, openSections, pageConfig, fetchPartnerStats,clientRevenue, totalRevenue ,sendeMailOpen, setSendMailOpen,selectedInvoice,setSelectedInvoice
+    deleteClientInvoice, deleteLoading, setDeleteLoading, setDeleteOpen, invoiceRef, deleteOpen, setInvoiceId, purchaseOrderId, setPurchaseOrderId, setDeletePOrderOpen, deletePOrderOpen, deletePurchaseOrder,deleteCreditInvoice,
+    getStatusLabel, getEmailStatusColor, chartMode, getStatusIcon, getLabelColor, getStatusColor, toggleSection, refresh, setRefresed, modalPurchaseOrderOpen, setModalPurchaseOrderOpen, setDeleteCNoteOpen,deleteCNoteOpen,creditNoteId,setCreditNoteId
+    , previewDocument, setPreviewDocument, selectedPeriod, setSelectedPeriod, emailLogs, clientPayments, activeTab, setActiveTab, supplierDespenses, totalDespenses, modalSupplierPurchaseOrderOpen, setModalSupplierPurchaseOrderOpen
+    , TotalIcon, HeaderIcon, open, setOpen, openSections, pageConfig, fetchPartnerStats, clientRevenue, totalRevenue, sendeMailOpen, setSendMailOpen, selected, setSelected, invoiceType, setInvoiceType
   };
 }

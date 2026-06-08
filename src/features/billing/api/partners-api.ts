@@ -62,7 +62,7 @@ export const partnersApi = {
   getClientsInvoicesById: (id: string) =>
     apiClient.get<InvoicePageItem[]>(BILLING_ENDPOINTS.getClientsInvoices(id)),
 
-  getPurchaseOrderByPartnerId:(id :string) => apiClient.get<[PurchaseOrderPartnerSummary]>(BILLING_ENDPOINTS.getPurchaseOrderByIdPartner(id)),
+  getPurchaseOrderByPartnerId:(id :string , partnerType :string) => apiClient.get<[PurchaseOrderPartnerSummary]>(BILLING_ENDPOINTS.getPurchaseOrderByIdPartner(id,partnerType)),
 };
 
 export const InvoicesAPI = {
@@ -133,6 +133,12 @@ export const InvoicesCreditNoteAPI = {
 
   deleteInvoiceCreditNote: (id: string) =>
     apiClient.delete<void>(INVOICES_CREDIT_NOTE_ENDPOINTS.invoiceCreditNoteById(id)),
+
+   getInvoiceCreditNoteByIdClient: (id: string,partnerType : string) =>
+    apiClient.get<InvoiceCreditNotePageItem[]>(INVOICES_CREDIT_NOTE_ENDPOINTS.getInvoiceCreditNoteByIdPartner(id,partnerType)),
+
+   getInvoiceCreditNoteByIdSupplier: (id: string,partnerType : string) =>
+    apiClient.get<InvoiceCreditNotePageItem[]>(INVOICES_CREDIT_NOTE_ENDPOINTS.getInvoiceCreditNoteByIdPartner(id,partnerType)),
 
   updateInvoiceCreditNoteStatus : 
   (id: string, payload: FormData) => apiClient.patch<InvoiceCreditNoteDetails>(INVOICES_CREDIT_NOTE_ENDPOINTS.updateStatusInvoiceCreditNote(id), payload),

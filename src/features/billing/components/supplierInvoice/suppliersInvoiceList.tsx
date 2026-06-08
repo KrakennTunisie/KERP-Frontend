@@ -2,7 +2,7 @@
 
 import StatClientInvoiceCard from "@/shared/components/ui/statClientInvoiceCard";
 import useSupplierInvoiceList from "../../hooks/useSupplierInvoiceList";
-import {  getSupplierInvoiceAllowedNextStatuses, invoiceStatusColors, invoiceStatusLabels, invoiceStatusSchema } from "../../types/invoiceStatus";
+import { getSupplierInvoiceAllowedNextStatuses, invoiceStatusColors, invoiceStatusLabels, invoiceStatusSchema } from "../../types/invoiceStatus";
 import { formatDateLong } from "@/shared/utils/formatDate";
 import { ChevronLeft, ChevronRight, Settings } from "lucide-react";
 import { UpdateInvoiceStatusModal } from "../widgets/updateStatusModal";
@@ -13,7 +13,7 @@ import { BillingInvoicesTable } from "../widgets/billingTable";
 
 export default function SuppliersInvoiceList() {
 
-    const { router, search, setSearch, filtre, setFiltre, suppliersInvoices, 
+    const { router, search, setSearch, filtre, setFiltre, suppliersInvoices,
         currentPage, setCurrentPage, totalElements, totalPages,
         setInvoiceId,
         setUpdateOpen,
@@ -23,24 +23,24 @@ export default function SuppliersInvoiceList() {
         selectedInvoice, setSelectedInvoice,
         nextStatus, setNextStatus,
         loading, suppliersInvoiceStats } = useSupplierInvoiceList();
-const invoiceStatuses = invoiceStatusSchema.options
-  .filter(
-    (status) =>
-      status !== invoiceStatusSchema.enum.REFUNDED &&
-      status !== invoiceStatusSchema.enum.NOT_REFUNDED &&
-      status !== invoiceStatusSchema.enum.IN_PROGRESS &&
-      status !== invoiceStatusSchema.enum.TO_PAY
-  )
-  .map((status) => ({
-    value: status,
-    label: invoiceStatusLabels[status],
-  }));
+    const invoiceStatuses = invoiceStatusSchema.options
+        .filter(
+            (status) =>
+                status !== invoiceStatusSchema.enum.REFUNDED &&
+                status !== invoiceStatusSchema.enum.NOT_REFUNDED &&
+                status !== invoiceStatusSchema.enum.IN_PROGRESS &&
+                status !== invoiceStatusSchema.enum.TO_PAY
+        )
+        .map((status) => ({
+            value: status,
+            label: invoiceStatusLabels[status],
+        }));
     return (
         <div className="min-h-screen bg-gray-50 p-8 font-sans">
             {/* Header */}
             <BillingPageHeader
-            title="Factures Fournisseurs"
-            description="Consultation et suivi des factures d’achat"
+                title="Factures Fournisseurs"
+                description="Consultation et suivi des factures d’achat"
             />
             {/* Stats */}
             <div className="flex gap-4 mb-8">
@@ -84,19 +84,36 @@ const invoiceStatuses = invoiceStatusSchema.options
                 />
             </div>
 
-                {/* Search + Filters */}
-                            <StatusFilterBar
-                                search={search}
-                                onSearchChange={setSearch}
-                                selectedStatus={filtre}
-                                onStatusChange={setFiltre}
-                                defaultStatus={invoiceStatusSchema.enum.TO_COLLECT}
-                                statuses={invoiceStatuses}
-                                searchPlaceholder="Référence ou client..."
-                            />
+            {/* Search + Filters */}
+            <StatusFilterBar
+                search={search}
+                onSearchChange={setSearch}
+                selectedStatus={filtre}
+                onStatusChange={setFiltre}
+                defaultStatus={invoiceStatusSchema.enum.TO_COLLECT}
+                statuses={invoiceStatuses}
+                searchPlaceholder="Référence ou client..."
+            />
+
+            <UpdateInvoiceStatusModal
+                open={updateOpen}
+                onClose={() => setUpdateOpen(false)}
+                onConfirm={updateStatus}
+                invoiceNumber={selectedInvoice?.invoiceNumber}
+                currentStatus={selectedInvoice?.invoiceStatus}
+                nextStatus={nextStatus}
+                type="invoice"
+                onNextStatusChange={setNextStatus}
+                allowedStatuses={
+                    selectedInvoice
+                        ? getSupplierInvoiceAllowedNextStatuses(selectedInvoice.invoiceStatus)
+                        : []
+                }
+                isSubmitting={updateLoading}
+            />
 
             {/* Table */}
-                <BillingInvoicesTable
+            <BillingInvoicesTable
                 invoices={suppliersInvoices}
                 partnerColumnLabel="Fournisseur"
                 currentPage={currentPage}
@@ -119,7 +136,7 @@ const invoiceStatuses = invoiceStatusSchema.options
                 canUpdateStatus={(invoice) =>
                     getSupplierInvoiceAllowedNextStatuses(invoice.invoiceStatus).length > 0
                 }
-                />
+            />
         </div>
 
     );

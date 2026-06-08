@@ -3,7 +3,7 @@
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { ClientPartnerDetails, PartnerAllDetails } from "../../models/partner";
-import { AuditLogAPI, DashboardAPI, InvoicesAPI, partnersApi } from "../../api/partners-api";
+import { AuditLogAPI, DashboardAPI, InvoicesAPI, InvoicesCreditNoteAPI, partnersApi } from "../../api/partners-api";
 import { appToast } from "@/shared/lib/toast";
 import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 import PageLoader from "@/shared/components/ui/pageLoader";
@@ -15,6 +15,7 @@ import { AuditLog } from "../../models/AuditLogs";
 import { partnerTypeSchema } from "../../types/partnerType";
 import { PartnerRevenueStats } from "../../types/partnerRevenueStats";
 import { PurchaseOrderPartnerSummary } from "../../models/purchaseOrder";
+import { InvoiceCreditNoteDetails, InvoiceCreditNotePageItem } from "../../models/creditNote";
 
 
 export default function ClientDetails() {
@@ -45,7 +46,7 @@ export default function ClientDetails() {
   const [clientPurchaseOrder, setClientPurchaseOrder] = useState<PurchaseOrderPartnerSummary[] | []>([])
   const [clientLogs, setClientLogs] = useState<AuditLog[] | []>([])
   const [clientRevenueInitial, setClientRevenueInitial] = useState<PartnerRevenueStats[] | []>([])
-  const [supplierDespenses, setSupplierDespenses] = useState<PartnerRevenueStats[] | []>([])
+ const [clientCreditNotes, setClientCreditNotes] = useState<InvoiceCreditNotePageItem[] | []>([])
   const fetchClient = async () => {
     try {
       setLoading(true)
@@ -76,10 +77,22 @@ export default function ClientDetails() {
   const fetchClientPurchaseorder = async () => {
     try {
       setLoading(true)
-      const purchaseOrders = await partnersApi.getPurchaseOrderByPartnerId(clientId);
+      const purchaseOrders = await partnersApi.getPurchaseOrderByPartnerId(clientId ,partnerTypeSchema.enum.CLIENT);
       setClientPurchaseOrder(purchaseOrders);
     } catch (error) {
       appToast.error("Erreur fetch des bon de commande client: ", getApiErrorMessage(error));
+    }
+    finally {
+      setLoading(false)
+    }
+  };
+   const fetchClientCreditNotes = async () => {
+    try {
+      setLoading(true)
+      const crediNotes = await InvoicesCreditNoteAPI.getInvoiceCreditNoteByIdClient(clientId,partnerTypeSchema.enum.CLIENT);
+      setClientCreditNotes(crediNotes);
+    } catch (error) {
+      appToast.error("Erreur fetch des factures d'avoir de ce client: ", getApiErrorMessage(error));
     }
     finally {
       setLoading(false)
@@ -122,7 +135,8 @@ export default function ClientDetails() {
     fetchClient();
     fetchClientInvoices();
     fetchClientPurchaseorder();
-    fetchClientLogs();;
+    fetchClientLogs();
+    fetchClientCreditNotes();
   }, [clientId]);
 
   useEffect(() => {
@@ -151,6 +165,7 @@ export default function ClientDetails() {
         partnerInvoices={clientInvoices}
         partnerLogs={clientLogs}
         purchaseOrders={clientPurchaseOrder}
+        partnerCreditNotes={clientCreditNotes}
         onRefresh={fetchClientLogs}
         clientRevenueInitial={clientRevenueInitial}
         totalRevenueInitial={totalRevenueInitial}

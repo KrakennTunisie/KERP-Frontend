@@ -60,6 +60,7 @@ export function PurchaseOrderModalContent({
   onClose: () => void;
 }) {
   const { router, purchaseOrder, purchaseOrderItems, successMessage, setPreviewDocument, previewDocument, loadingDetails } = usePurchaseOrderDetails({ purchaseOrderId })
+  
 
   if (loadingDetails) {
     return (

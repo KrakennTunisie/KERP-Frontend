@@ -50,7 +50,7 @@ export default function PartnerCollapsibleSection<T>({
 
               <div className="flex items-center gap-2">
                 {partnerType == partnerTypeSchema.enum.CLIENT &&
-                  (transactionType == "Facture" || transactionType == "Avoir") && (
+                  (transactionType == "Facture" ) && (
                     <button
                       type="button"
                       onClick={(e) => {

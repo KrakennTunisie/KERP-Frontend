@@ -8,6 +8,7 @@ import { SendInvoiceModal } from "../widgets/sendInvoiceModal";
 import { BillingPageHeader } from "../widgets/billingHeader";
 import { StatusFilterBar } from "../widgets/billingFilterBar";
 import { BillingInvoicesTable } from "../widgets/billingTable";
+import { UpdateInvoiceStatusModal } from "../widgets/updateStatusModal";
 
 export default function ClientsInvoiceList() {
 
@@ -18,7 +19,11 @@ export default function ClientsInvoiceList() {
         totalElements,
         totalPages,
         deleteLoading,
-
+        updateLoading,
+        updateOpen,
+        nextStatus,
+        setNextStatus,
+        updateStatus,
         setInvoiceId,
         deleteClientInvoice,
         setUpdateOpen,
@@ -96,10 +101,25 @@ export default function ClientsInvoiceList() {
                 <DeleteInvoiceModal
                     open={deleteOpen}
                     onClose={() => setDeleteOpen(false)}
-                    invoiceRef={invoiceRef}
                     onConfirm={deleteClientInvoice}
                     loading={deleteLoading} />
             </div>
+            <UpdateInvoiceStatusModal
+                open={updateOpen}
+                onClose={() => setUpdateOpen(false)}
+                onConfirm={updateStatus}
+                invoiceNumber={selectedInvoice?.invoiceNumber}
+                currentStatus={selectedInvoice?.invoiceStatus}
+                nextStatus={nextStatus}
+                type="invoice"
+                onNextStatusChange={setNextStatus}
+                allowedStatuses={
+                    selectedInvoice
+                        ? getClientInvoiceAllowedNextStatuses(selectedInvoice.invoiceStatus)
+                        : []
+                }
+                isSubmitting={updateLoading}
+            />
 
             {/* Table card */}
             <StatusFilterBar
@@ -136,12 +156,16 @@ export default function ClientsInvoiceList() {
                     getClientInvoiceAllowedNextStatuses(invoice.invoiceStatus).length > 0
                 }
                 onEdit={(invoice) => {
-                    router.push(`/billing/invoices/clients/update/${invoice.idInvoice}`);
+                    router.push(`/billing/invoices/clients/${invoice.idInvoice}/edit/`);
                 }}
                 onSend={(invoice) => {
+                    setSelectedInvoice(invoice)
+                    setOpen(true)
                     console.log("Envoyer facture client", invoice.idInvoice);
                 }}
                 onDelete={(invoice) => {
+                    setInvoiceId(invoice.idInvoice)
+                    setDeleteOpen(true)
                     console.log("Supprimer facture client", invoice.idInvoice);
                 }}
             />

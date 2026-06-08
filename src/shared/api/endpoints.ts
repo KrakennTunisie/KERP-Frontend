@@ -25,7 +25,7 @@ export const BILLING_ENDPOINTS = {
   purchaseOrder: "/purchase-orders",
   getPurchaseOrders:(query? : GetListParams)=> `/purchase-orders/${buildQueryString(query)}`,
   purchaseOrderById: (id : string) => `/purchase-orders/${id}`,
-  getPurchaseOrderByIdPartner:(id: string) => `/purchase-orders/partner/${id}`,
+  getPurchaseOrderByIdPartner:(id: string,partnerType:string) => `/purchase-orders/partner/${id}?partnerType=${partnerType}`,
  
   uploadDocument: "/documents/upload",
 };
@@ -60,6 +60,7 @@ export const INVOICES_CREDIT_NOTE_ENDPOINTS={
   getInvoiceCreditNotes: (id : string, query?:GetListParams)=> `/credit-note-invoices/invoice/${id}${buildQueryString(query)}`,
   invoiceCreditNoteById: (id?: string) => `/credit-note-invoices/${id}`,
   updateStatusInvoiceCreditNote: (id: string)=> `/credit-note-invoices/${id}/status`,
+  getInvoiceCreditNoteByIdPartner: (idPartner?: string, partnerType?:string) => `/credit-note-invoices/getPartnerCreditNote/${idPartner}?partnerType=${partnerType}`,
 }
 
 export const PURCHASE_ORDER_ENDPOINTS = {
