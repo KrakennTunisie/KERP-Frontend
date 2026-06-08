@@ -20,6 +20,8 @@ import { CreditNoteTypeSchema } from "../types/creditNoteType";
 import { invoiceComplianceStatusSchema } from "../types/invoiceComplianceStatus";
 import { invoiceStatusSchema } from "../types/invoiceStatus";
 import { nextNumber } from "../types/nextNumber";
+import { generatePdfFile } from "@/shared/pdf/pdfGenerator";
+import { creditNoteToPdfData } from "@/shared/pdf/documentAdapter";
 
 type creditNoteFormValues = z.infer<typeof invoiceCreditNoteCreateSchema>;
 export type InvoiceDetailsProps = {
@@ -281,9 +283,10 @@ export default function useCreateCreditNote({ invoiceId }: InvoiceDetailsProps) 
 
             if (!element) return;
             const file = await handleSaveAsPDF(element, getValues("invoiceCreditNoteNumber"));
-            if (file) {
-                setValue("invoiceCreditNoteDocument", file, { shouldValidate: true, shouldDirty: true });
-                setPdfUrl(file);
+            const pdfFile = await generatePdfFile(creditNoteToPdfData(getValues()))
+            if (pdfFile) {
+                setValue("invoiceCreditNoteDocument", pdfFile, { shouldValidate: true, shouldDirty: true });
+                setPdfUrl(pdfFile);
             }
             setIsModalOpen(true);
         },
@@ -364,6 +367,7 @@ export default function useCreateCreditNote({ invoiceId }: InvoiceDetailsProps) 
             seloadingTTN(false)
             setSuccessMessage("La facture a été envoyée avec succès au TTN.")
             setSent(true)
+            router.back()
         }, 10000);
     }
 

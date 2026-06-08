@@ -25,7 +25,7 @@ const detailsInvoiceCreditNoteItemSchema = z.object({
   totalExclTax: z.number(),
   totalInclTax: z.number(),
   vatAmount: z.number(),
-  invoice: invoiceSummarySchema,
+  invoice: invoiceDetailedSummarySchema,
   invoiceCreditNoteEvents: z.array(InvoiceCreditNoteEventSchema).nullable(),
   invoiceCreditNoteDocument: documentSchema,
   totalExclTaxEUR: z.number(),

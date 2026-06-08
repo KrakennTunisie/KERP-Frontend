@@ -23,6 +23,11 @@ export default function useCreditNoteDetails({ params }: PropsCreditNote) {
     const [creditNoteId, setcreditNoteId]=useState(params.creditNoteId)
     const [invoiceItems, setInvoiceItems] = useState<InvoiceItem>();
     const [TtnModalOpen, setTtnModalOpen] = useState(false);
+
+    const [deleteLoading, setDeleteLoading]= useState(false)
+    const [deleteOpen, setDeleteOpen] = useState(false);
+    const [sendOpen, setSendOpen] = useState(false);
+
     const [loading, setLoading] = useState(false);
     const [sent, setSent] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
@@ -82,6 +87,24 @@ export default function useCreditNoteDetails({ params }: PropsCreditNote) {
     setSent(true)
   }, 10000);
  }
+
+         const deleteCreditNote = async ()=>{
+            try {
+              if(invoice){
+
+              setDeleteLoading(true);
+              await InvoicesCreditNoteAPI.deleteInvoiceCreditNote(invoice?.idInvoiceCreditNote);
+              appToast.success("Facture d'avoir supprimée avec succès.")
+              setDeleteOpen(false)
+              router.back()
+              }
+            } catch (error) {
+              appToast.error("Erreur de suppresion: ",getApiErrorMessage(error))
+            } finally {
+              setDeleteLoading(false);
+            }
+        }
+    
     return ({
         marked,
         setMarked,
@@ -98,6 +121,14 @@ export default function useCreditNoteDetails({ params }: PropsCreditNote) {
         sendToTTN,
         setStatusPaiement,
         updateStatus,
+        sendOpen,
+        setSendOpen,
+        deleteLoading,
+        setDeleteLoading,
+        deleteOpen,
+        setDeleteOpen,
+        deleteCreditNote,
 previewDocument, setPreviewDocument,
+
     })
 }

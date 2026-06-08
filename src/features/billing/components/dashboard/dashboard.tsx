@@ -175,7 +175,7 @@ console.log("suppliersByMonth: ",suppliersByMonth)
   return (
     <div className="flex min-h-screen flex-col bg-gray-50/30">
     <header className="border-b border-slate-200 bg-white px-6 py-6">
-      <div className="mx-auto max-w-[1600px]">
+      <div className="mx-auto">
         <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
 
@@ -236,7 +236,7 @@ console.log("suppliersByMonth: ",suppliersByMonth)
     </header>
 
       <main className="flex-1 p-8">
-        <div className="mx-auto max-w-[1600px] space-y-8">
+        <div className="mx-auto space-y-8">
           <RevenueExpenseBarChart
             mode="both"
             data={chartData}

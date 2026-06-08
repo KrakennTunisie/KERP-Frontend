@@ -1,6 +1,6 @@
 // src/features/billing/api/partners.api.ts
 import { apiClient } from "@/shared/api/api-client";
-import { AUDITLOGS_ENDPOINTS, BILLING_ENDPOINTS, DASHBOARD_ENDPOINTS, EXCHANGE_RATE_ENDPOINTS, INVOICES_CREDIT_NOTE_ENDPOINTS, INVOICES_ENDPOINTS, MAILING_ENDPOINTS, PURCHASE_ORDER_ENDPOINTS } from "@/shared/api/endpoints";
+import { AUDITLOGS_ENDPOINTS, BILLING_ENDPOINTS, DASHBOARD_ENDPOINTS, EXCHANGE_RATE_ENDPOINTS, INVOICES_CREDIT_NOTE_ENDPOINTS, INVOICES_ENDPOINTS, MAILING_ENDPOINTS, PAYMENT_ENDPIONTS, PURCHASE_ORDER_ENDPOINTS } from "@/shared/api/endpoints";
 import { ExchangeRateParams, GetListParams, PageResponse } from "@/shared/api/types";
 import { InvoiceCreditNoteCreate, InvoiceCreditNoteDetails, InvoiceCreditNotePageItem } from "../models/creditNote";
 import { Invoice, InvoiceCreate, InvoicePageItem } from "../models/invoice";
@@ -12,6 +12,7 @@ import { PartnerInvoiceStats } from "../types/partnersStats";
 import { ClientInvoiceDashboardStats } from "../types/clientDashboardStats";
 import { SendMail } from "../types/sendEmail";
 import { AuditLog } from "../models/AuditLogs";
+import { CreatePaymentFormValues, Payment, PaymentDetails, PaymentListItem } from "../models/payment";
 
 export const partnersApi = {
 
@@ -52,6 +53,9 @@ export const InvoicesAPI = {
 
   getClientsInvoices: (query? : GetListParams) => 
     apiClient.get<PageResponse<InvoicePageItem>>(INVOICES_ENDPOINTS.getClientsInvoices(query)),
+
+  getClientsInvoicesToPay: (query? : string) => 
+    apiClient.get<InvoicePageItem[]>(INVOICES_ENDPOINTS.getClientsInvoicesToPay(query)),
 
   getClientTopInvoices: (idClient: string)=> apiClient.get<InvoicePageItem[]>(INVOICES_ENDPOINTS.getClientTopInvoices(idClient)),
 
@@ -160,6 +164,27 @@ export const PurchaseOrderAPI = {
     apiClient.delete<void>(PURCHASE_ORDER_ENDPOINTS.supplierPurchaseOrderById(id)),
 };
 
+export const paymentsAPI = {
+  getNextPaymentNumber :()=> apiClient.get<nextNumber>(PAYMENT_ENDPIONTS.nextNumber),
+
+  getPayments: (query? : GetListParams) => 
+    apiClient.get<PageResponse<PaymentListItem>>(PAYMENT_ENDPIONTS.getPayments(query)),
+
+  getPaymentsByInvoivce: (id:string, query? : GetListParams)=> 
+    apiClient.get<PageResponse<PaymentListItem>>(PAYMENT_ENDPIONTS.getPaymentsByIdInvoice(id, query)),
+
+  createPayment : (data: FormData)=>
+    apiClient.post<Payment>(PAYMENT_ENDPIONTS.payment, data),
+
+  updatePayment: (id: string, payload: FormData) => apiClient.patch<Payment>(PAYMENT_ENDPIONTS.paymentById(id), payload),
+
+  deletePayment: (id: string)=> 
+    apiClient.delete<void>(PAYMENT_ENDPIONTS.paymentById(id)),
+
+  getPaymentDetails: (id: string)=> 
+    apiClient.get<PaymentDetails>(PAYMENT_ENDPIONTS.paymentById(id))
+}
+
 export const ExchangeRateAPI = {
   getExchangeRate: (query? : ExchangeRateParams) => 
     apiClient.get<ExchangeRate>(EXCHANGE_RATE_ENDPOINTS.getExchangeRate(query)),
@@ -178,6 +203,8 @@ export const MailingAPI ={
   sendEmailWithCreditNote : (idInvoice: string, payload: SendMail)=> apiClient.post(MAILING_ENDPOINTS.sendEmailCreditNote(idInvoice), payload),
 
   sendEmailWithPurchaseOrder : (idInvoice: string, payload: SendMail)=> apiClient.post(MAILING_ENDPOINTS.sendEmailPurchaseOrder(idInvoice), payload),
+
+  sendEmailWithPayment : (idInvoice: string, payload: SendMail)=> apiClient.post(MAILING_ENDPOINTS.sendEmailPayment(idInvoice), payload),
 
   sendEmail : (payload: SendMail)=> apiClient.post(MAILING_ENDPOINTS.sendSimpleEmail, payload),
 

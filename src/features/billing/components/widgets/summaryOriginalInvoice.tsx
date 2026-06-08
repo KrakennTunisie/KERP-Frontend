@@ -34,7 +34,7 @@ export default function SummaryOriginalInvoice({ data }: InvoicePreviewProps) {
 
     <div className="px-5">
       <p className="text-[9px] font-black text-red-300 uppercase tracking-widest mb-1">Client</p>
-      <p className="text-sm font-black text-red-900">{data.originalInvoice?.partner?.name ?? "—"}</p>
+      <p className="text-sm font-black text-red-900">{data.originalInvoice?.partner?.partnerName ?? "—"}</p>
       <p className="text-[10px] text-red-300 mt-0.5">{data.originalInvoice?.partner?.email ?? ""}</p>
     </div>
 

@@ -121,6 +121,7 @@ export default function UseCreatePartner({ type, mode, clientId }: pageProps) {
     useEffect(() => {
         fetchPartner();
     }, [clientId]);
+
     useEffect(() => {
         if (mode === "edit" && partner) {
             const fullName = partner.partnerName?.trim() ?? "";
@@ -148,6 +149,7 @@ export default function UseCreatePartner({ type, mode, clientId }: pageProps) {
             })
         };
     }, [partner])
+    
     const {
         register,
         handleSubmit,

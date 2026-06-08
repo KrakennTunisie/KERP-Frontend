@@ -95,6 +95,7 @@ export const invoiceSchema = withDueDateValidation(
    totalInclTaxTND: z.number(),
    totalExclTaxUSD: z.number(),
    totalInclTaxUSD: z.number(),
+   remainingAmount: z.number(),
    invoiceEvents: z.array(z.lazy(()=> InvoiceEventSchema)).optional(),
    hasInvoiceCreditNotes: z.boolean().nullable(),
   })
@@ -119,6 +120,7 @@ export const invoicePageItemSchema = invoiceObjectSchema.pick({
   totalInclTaxTND: z.number(),
   totalExclTaxUSD: z.number(),
   totalInclTaxUSD: z.number(),
+  remainingAmount: z.number(),
   partner: z.lazy(() => partnerSummarySchema)
 });
 
@@ -176,6 +178,7 @@ export const invoiceSummarySchema = z.object({
   totalInclTaxTND: z.number(),
   totalExclTaxUSD: z.number(),
   totalInclTaxUSD: z.number(),
+  remainingAmount: z.number(),
 })
 
 export const invoiceDetailedSummarySchema = invoiceSummarySchema.extend({

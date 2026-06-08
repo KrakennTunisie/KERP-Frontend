@@ -378,7 +378,7 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
 
       if (!element) return;
       const file = await handleSaveAsPDF(element, getValues("purchaseOrderNumber"));
-            const pdfFile = await generatePdfFile(purchaseOrderToPdfData(values));
+            const pdfFile = await generatePdfFile(purchaseOrderToPdfData(getValues()));
       
       if (file) {
         setValue("purchaseOrderDocument", file, { shouldValidate: true, shouldDirty: true });

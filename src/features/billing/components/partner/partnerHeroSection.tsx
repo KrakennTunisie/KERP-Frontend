@@ -39,7 +39,7 @@ export default function PartnerHeader({
 }: PartnerHeaderProps) {
   return (
     <div className="bg-white border-b border-slate-100 px-8 py-6 font-[Inter,system-ui,sans-serif]">
-      <div className="max-w-7xl mx-auto">
+      <div className=" mx-auto">
         {/* Back Button */}
         <Link
           href={pageConfig.backHref}

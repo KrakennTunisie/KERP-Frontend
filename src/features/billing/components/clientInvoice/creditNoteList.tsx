@@ -1,7 +1,6 @@
 'use client';
 import { getCreditNoteAllowedNextStatuses, invoiceStatusColors, invoiceStatusLabels, invoiceStatusSchema } from "../../types/invoiceStatus";
 import Link from "next/link";
-import { SendInvoiceModal } from "../widgets/sendInvoiceModal";
 import { invoiceComplianceStatusSchema } from "../../types/invoiceComplianceStatus";
 import useCreditNoteList from "../../hooks/useCreditNoteList";
 
@@ -11,6 +10,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { formatDateLong } from "@/shared/utils/formatDate";
 import PageLoader from "@/shared/components/ui/pageLoader";
 import { InvoiceDetailsProps } from "../../hooks/useClientInvoiceDetails";
+import { SendDocumentModal } from "../widgets/sendInvoiceModal";
 
 export default function CreditNoteList({ invoiceId, type }: InvoiceDetailsProps) {
 
@@ -66,8 +66,9 @@ export default function CreditNoteList({ invoiceId, type }: InvoiceDetailsProps)
                 invoiceRef={creditNoteRef}
                 onConfirm={deleteClientInvoice} />
             
-            <SendInvoiceModal
-                invoice={selectedCreditNote ?? null}
+            <SendDocumentModal
+                document={selectedCreditNote ?? null}
+                variant="invoiceCreditNote"
                 isOpen={open}
                 onClose={() => setOpen(false)}
             />

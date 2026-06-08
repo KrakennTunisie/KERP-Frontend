@@ -1,6 +1,6 @@
 import { BaseItem } from "@/features/billing/models/invoiceItem";
 
-export type PdfDocumentType = "INVOICE" | "CREDIT_NOTE" | "PURCHASE_ORDER";
+export type PdfDocumentType = "INVOICE" | "CREDIT_NOTE" | "PURCHASE_ORDER" | "PAYMENT";
 
 export type PdfParty = {
   name: string;
@@ -32,6 +32,9 @@ export type PdfLineItem = {
 export type PdfPaymentInfo = {
   paymentTerms?: string | null;
   paymentMethod?: string | null;
+  paymentDate?: Date;
+  paidAmount?: number;
+  invoiceNumber?: string;
   iban?: string | null;
   bankName?: string | null;
   dueDate?: Date | string | null;

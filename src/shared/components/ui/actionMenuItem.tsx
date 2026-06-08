@@ -132,13 +132,11 @@ export function ActionMenu({
 
     document.addEventListener("mousedown", handleClickOutside);
     document.addEventListener("keydown", handleEscape);
-    window.addEventListener("scroll", handleScrollOrResize, true);
     window.addEventListener("resize", handleScrollOrResize);
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("keydown", handleEscape);
-      window.removeEventListener("scroll", handleScrollOrResize, true);
       window.removeEventListener("resize", handleScrollOrResize);
     };
   }, [openMenu]);
@@ -154,9 +152,9 @@ export function ActionMenu({
         aria-expanded={openMenu}
         className="
           inline-flex h-8 w-8 items-center justify-center
-          rounded-lg border border-slate-200 bg-white
-          text-slate-500 shadow-sm
-          transition hover:bg-slate-50 hover:text-slate-800
+          rounded-lg border border-blue-200 bg-white
+          text-blue-600 shadow-sm
+          transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700
           focus:outline-none focus:ring-2 focus:ring-blue-500/20
           cursor-pointer
           disabled:cursor-not-allowed disabled:opacity-50

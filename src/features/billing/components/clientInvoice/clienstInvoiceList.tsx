@@ -4,10 +4,12 @@ import StatClientInvoiceCard from "@/shared/components/ui/statClientInvoiceCard"
 import { useClientInvoiceList } from "../../hooks/useClientsInvoiveList";
 import { getClientInvoiceAllowedNextStatuses, invoiceStatusColors, invoiceStatusLabels, invoiceStatusSchema } from "../../types/invoiceStatus";
 import { DeleteInvoiceModal } from "../widgets/deleteInvoiceModal";
-import { SendInvoiceModal } from "../widgets/sendInvoiceModal";
+import { SendDocumentModal } from "../widgets/sendInvoiceModal";
 import { BillingPageHeader } from "../widgets/billingHeader";
 import { StatusFilterBar } from "../widgets/billingFilterBar";
-import { BillingInvoicesTable } from "../widgets/billingTable";
+import {  BillingTable } from "../widgets/billingTable";
+import { InvoicePageItem } from "../../models/invoice";
+import { UpdateInvoiceStatusModal } from "../widgets/updateStatusModal";
 
 export default function ClientsInvoiceList() {
 
@@ -43,17 +45,18 @@ export default function ClientsInvoiceList() {
         }));
     return (
         <div className="min-h-screen bg-gray-50 p-8 font-sans">
-            <SendInvoiceModal
-                invoice={selectedInvoice}
+            <SendDocumentModal
+                document={selectedInvoice}
+                variant="invoice"
                 isOpen={open}
                 onClose={() => setOpen(false)}
             />
             {/* Header */}
             <BillingPageHeader
-            title="Factures Clients"
-            description="Gestion des factures de vente"
-            createHref="/billing/invoices/clients/create"
-            createLabel="Nouvelle facture client"
+                title="Factures Clients"
+                description="Gestion des factures de vente"
+                createHref="/billing/invoices/clients/create"
+                createLabel="Nouvelle facture client"
             />
             {/* Stats */}
             <div className="flex gap-4 mb-8">
@@ -101,6 +104,7 @@ export default function ClientsInvoiceList() {
                     invoiceRef={invoiceRef}
                     onConfirm={deleteClientInvoice} 
                     loading={deleteLoading}/>
+                
             </div>
 
             {/* Table card */}
@@ -114,38 +118,68 @@ export default function ClientsInvoiceList() {
                 searchPlaceholder="Référence ou client..."
             />
             {/* Table */}
-                <BillingInvoicesTable
-                invoices={clientsInvoices}
-                partnerColumnLabel="Client"
-                currentPage={currentPage}
-                totalPages={totalPages}
-                totalElements={totalElements}
-                loading={loading}
-                onPageChange={setCurrentPage}
-                getStatusLabel={(status) => invoiceStatusLabels[status]}
-                getStatusColor={(status) =>
-                    status !== "ALL" ? invoiceStatusColors[status] : ""
+
+                <BillingTable<InvoicePageItem>
+                    items={clientsInvoices}
+                    variant="invoice"
+                    secondColumnLabel="Client"
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    totalElements={totalElements}
+                    loading={loading}
+                    onPageChange={setCurrentPage}
+                    onView={(invoice) => {
+                        router.push(`/billing/invoices/clients/${invoice.idInvoice}/details/`);
+                    }}
+                    onUpdateStatus={(invoice) => {
+                        setSelectedInvoice(invoice);
+                        setInvoiceId(invoice.idInvoice);
+                        setUpdateOpen(true);
+                    }}
+                    canUpdateStatus={(invoice) =>
+                        getClientInvoiceAllowedNextStatuses(invoice.invoiceStatus).length > 0
+                    }
+                    onEdit={(invoice) => {
+                        router.push(`/billing/invoices/clients/${invoice.idInvoice}/edit`);
+                    }}
+                    onSend={(invoice) => {
+                        
+                        setSelectedInvoice(invoice);
+                        setInvoiceId(invoice.idInvoice);
+                        setOpen(true);
+                    }}
+                    onDelete={(invoice) => {
+                        setSelectedInvoice(invoice);
+                        setInvoiceId(invoice.idInvoice);
+                        setDeleteOpen(true);
+                    }}
+                    getNumber={(invoice) => invoice.invoiceNumber}
+                    getPartnerName={(invoice) => invoice.partner?.partnerName}
+                    getStatus={(invoice) => invoice.invoiceStatus}
+                    getAmountEUR={(invoice) => invoice.totalInclTaxEUR}
+                    getAmountTND={(invoice) => invoice.totalInclTaxTND}
+                    getDate={(invoice) => invoice.dueDate ?? invoice.issueDate}
+                    getStatusLabel={(status) => invoiceStatusLabels[status]}
+                    getStatusColor={(status) =>
+                        status !== "ALL" ? invoiceStatusColors[status] : ""
+                    }
+                />
+
+             <UpdateInvoiceStatusModal
+                open={updateOpen}
+                onClose={()=> setUpdateOpen(false)}
+                onConfirm={updateStatus}
+                invoiceNumber={selectedInvoice?.invoiceNumber}
+                currentStatus={selectedInvoice?.invoiceStatus}
+                type="invoice"
+                nextStatus={nextStatus}
+                onNextStatusChange={setNextStatus}
+                allowedStatuses={
+                    selectedInvoice
+                    ? getClientInvoiceAllowedNextStatuses(selectedInvoice.invoiceStatus)
+                    : []
                 }
-                onView={(invoice) => {
-                    router.push(`/billing/invoices/clients/${invoice.idInvoice}/details/`);
-                }}
-                onUpdateStatus={(invoice) => {
-                    setSelectedInvoice(invoice);
-                    setInvoiceId(invoice.idInvoice);
-                    setUpdateOpen(true);
-                }}
-                canUpdateStatus={(invoice) =>
-                    getClientInvoiceAllowedNextStatuses(invoice.invoiceStatus).length > 0
-                }
-                onEdit={(invoice) => {
-                    router.push(`/billing/invoices/clients/update/${invoice.idInvoice}`);
-                }}
-                onSend={(invoice) => {
-                    console.log("Envoyer facture client", invoice.idInvoice);
-                }}
-                onDelete={(invoice) => {
-                    console.log("Supprimer facture client", invoice.idInvoice);
-                }}
+                isSubmitting={updateLoading}
                 />
         </div>
 

@@ -55,6 +55,7 @@ export default function PartnerDetails({ partner, partnerStats, partnerInvoices 
     , previewDocument, setPreviewDocument, selectedPeriod, setSelectedPeriod, emailLogs, clientPayments, activeTab, setActiveTab
     , chartData, HeaderIcon, setOpen, pageConfig, totalRevenueLastSixMonths, openSections } = UseClientsDetails({ partner, partnerStats, partnerInvoices,partnerLogs,onRefresh });
   console.log(chartMode)
+  
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-gray-50">
       <PartnerHeader
@@ -65,7 +66,7 @@ export default function PartnerDetails({ partner, partnerStats, partnerInvoices 
       />
       {/* Main Content with Tabs */}
       <main className="flex-1 overflow-y-auto p-8">
-        <div className="max-w-7xl mx-auto space-y-6">
+        <div className="mx-auto space-y-6">
 
           {/* Statistics Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -258,7 +259,7 @@ export default function PartnerDetails({ partner, partnerStats, partnerInvoices 
                     icon={CreditCard}
                     title="paiement"
                     menuTitle="Actions paiement"
-                    getNumber={(item) => item.number}
+                    getNumber={(item) => item.paymentNumber}
                     getDate={(item) => new Date(item.date)}
                     getAmount={(item) => item.amount}
                     getCurrency={() => "TND"}
