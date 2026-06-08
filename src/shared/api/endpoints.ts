@@ -6,6 +6,7 @@ export const BILLING_ENDPOINTS = {
   suppliers: "/partners/suppliers",
   getClients: (query? : GetListParams)=> `/partners/clients${buildQueryString(query)}`,
   getClientsSummary: (query? : GetListParams)=> `/partners/clients-summary${buildQueryString(query)}`,
+  getSuppliersSummary: (query? : GetListParams)=> `/partners/suppliers-summary${buildQueryString(query)}`,
   getSuppliers: (query? : GetListParams)=> `/partners/suppliers${buildQueryString(query)}`,
   clientById: (id: string) => `/partners/clients/${id}`,
   supplierById: (id: string) => `/partners/suppliers/${id}`,
@@ -14,11 +15,18 @@ export const BILLING_ENDPOINTS = {
   supplierInvoices: "/invoices/suppliers",
   clientInvoiceById: (id: string) => `/invoices/clients/${id}`,
   supplierInvoiceById: (id: string) => `/invoices/suppliers/${id}`,
+  getClientsInvoices: (idClient:string) => `/invoices/last/client-invoices/${idClient}`,
+  getSuppliersInvoices: (idSupplier:string) => `/invoices/last/supplier-invoices/${idSupplier}`,
+
+
+  updatestatus: (id: string, statusClient: boolean) => `/partners/clients/updateStatus/${id}?statusClient=${statusClient}`,
+  updateSupplierstatus: (id: string, statusClient: boolean) => `/partners/suppliers/updateStatus/${id}?statusClient=${statusClient}`,
 
   purchaseOrder: "/purchase-orders",
   getPurchaseOrders:(query? : GetListParams)=> `/purchase-orders/${buildQueryString(query)}`,
   purchaseOrderById: (id : string) => `/purchase-orders/${id}`,
-
+  getPurchaseOrderByIdPartner:(id: string) => `/purchase-orders/partner/${id}`,
+ 
   uploadDocument: "/documents/upload",
 };
 
@@ -59,6 +67,7 @@ export const PURCHASE_ORDER_ENDPOINTS = {
   purchaseOrders: "/purchase-orders/",
   nextNumber: "/purchase-orders/next-number",
   summary:"/purchase-orders/summary",
+  updateSupplierPurchaseOrder : "/purchase-orders/supplier",
   getPurchaseOrders: (query? : GetListParams)=> `/purchase-orders/${buildQueryString(query)}`,
   purchaseOrderById: (id?: string) => `/purchase-orders/${id}`, 
   updateStatusPurchaseOrder: (id: string)=> `/purchase-orders/${id}/status`,
@@ -68,6 +77,7 @@ export const PURCHASE_ORDER_ENDPOINTS = {
   getSupplierPurchaseOrders: (query? : GetListParams)=> `/purchase-orders/supplier${buildQueryString(query)}`,
   supplierPurchaseOrderById: (id: string) => `/purchase-orders/supplier/${id}`, 
   supplierupdateStatusPurchaseOrder: (id: string)=> `/purchase-orders/supplier/${id}/status`,
+ 
 }
 
 export const EXCHANGE_RATE_ENDPOINTS = {
@@ -87,7 +97,10 @@ export const PAYMENT_ENDPIONTS={
 export const DASHBOARD_ENDPOINTS={
   dashboard : '/dashboard',
   statsClientsInvoices: '/dashboard/clients-invoices',
-  statsSuppliersInvoices: '/dashboard/suppliers-invoices'
+  statsSuppliersInvoices: '/dashboard/suppliers-invoices',
+  getClientRevenue: (idPartner: string, period: string) => `/dashboard/client-revenue/${idPartner}?period=${period}`,
+  getSupplierRevune: (idPartner: string, period : string) => `/dashboard/supplier-despenses/${idPartner}?period=${period}`,
+  getAllClientReveune: '/dashboard/all-client-revenue',
 }
 
 export const MAILING_ENDPOINTS={
@@ -101,4 +114,5 @@ export const MAILING_ENDPOINTS={
 }
 export const  AUDITLOGS_ENDPOINTS = {
  getAuditLogsByIdClient: (id: string) => `/logs/logs-clients/${id}`, 
+ getAuditLogsByIdSupplier: (id: string) => `/logs/logs-suppliers/${id}`, 
 }  

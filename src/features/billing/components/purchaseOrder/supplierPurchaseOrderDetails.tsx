@@ -75,7 +75,7 @@ export function SupplierPurchaseOrderModalContent({
               </svg>
             </div>
             <div>
-              <p className="font-bold text-gray-900 text-sm">{purchaseOrder?.partner?.partnerName}</p>
+              <p className="font-bold text-gray-900 text-sm">{purchaseOrder?.partner?.companyName}</p>
               <p className="text-xs text-blue-500 font-medium">Client</p>
             </div>
           </div>
@@ -133,7 +133,6 @@ export function SupplierPurchaseOrderModalContent({
             </div>
           </div>
         </Card>
-        {/* Admin details */}
         {/* Admin details */}
         <Card>
           <SectionLabel>Détails administratifs</SectionLabel>

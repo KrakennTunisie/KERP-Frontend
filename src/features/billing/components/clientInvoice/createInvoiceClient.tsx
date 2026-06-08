@@ -145,7 +145,7 @@ export default function CreateInvoiceClient({ mode,
                                                   field.onChange(new Date(e.target.value));
                                                   calculateDueDate();
                                                 }}
-                                                min={new Date().toISOString().split("T")[0]}
+                                                //min={new Date().toISOString().split("T")[0]}
                                                 max={
                                                     (() => {
                                                         let poDate: Date | null = null;
@@ -300,7 +300,7 @@ export default function CreateInvoiceClient({ mode,
                                                 className="w-full text-left px-4 py-3 hover:bg-blue-50 transition border-b border-slate-50 last:border-0"
                                             >
                                                 <p className="text-sm font-bold text-slate-800">{client.partnerName}</p>
-                                                <p className="text-xs text-slate-400 mt-0.5">{client.billingAddress.region}</p>
+                                                <p className="text-xs text-slate-400 mt-0.5">{client.billingAddress.city}</p>
                                             </button>
                                         ))}
                                     </div>

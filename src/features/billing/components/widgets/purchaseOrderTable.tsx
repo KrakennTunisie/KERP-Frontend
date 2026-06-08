@@ -65,7 +65,7 @@ export function PurchaseOrderTable({
   onDelete,
   getAllowedNextStatuses,
 }: PurchaseOrderTableProps) {
-  const isClientPurchaseOrder = type === "CLIENT";
+  const isSupplierPurchaseOrder = type === "SUPPLIER";
 
   const partnerColumnLabel =
     type === "CLIENT" ? "Client" : "Fournisseur";
@@ -119,7 +119,7 @@ export function PurchaseOrderTable({
                     <PurchaseOrderRow
                         key={purchaseOrder.idPurchaseOrder}
                         purchaseOrder={purchaseOrder}
-                        isClientPurchaseOrder={isClientPurchaseOrder}
+                        isSupplierPurchaseOrder={isSupplierPurchaseOrder}
                         onView={onView}
                         onEdit={onEdit}
                         onSend={onSend}

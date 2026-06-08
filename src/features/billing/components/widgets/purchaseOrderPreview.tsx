@@ -80,8 +80,8 @@ const PurchaseOrderPreview = forwardRef<HTMLDivElement, PurchaseOrderPreviewProp
                             </p>
                             {data.partner ? (
                                 <>
-                                    <p className="text-base font-bold text-slate-900">{data.partner.partnerName}</p>
-                                    <p className="text-sm text-slate-500 mt-0.5">{data.partner.billingAddress.city}</p>
+                                    <p className="text-base font-bold text-slate-900">{data.partner.companyName}</p>
+                                    <p className="text-sm text-slate-500 mt-0.5">{data.partner.billingAddress.region}</p>
                                     <p className="text-sm font-bold text-black mt-2">{data.partner.email}</p>
                                 </>
                             ) : (

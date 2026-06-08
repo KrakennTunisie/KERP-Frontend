@@ -11,6 +11,7 @@ import { PaymentConditionLabels } from "../../types/paymentCondition";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { UserPen } from "lucide-react";
+import { partnerTypeSchema } from "../../types/partnerType";
 
 type PartnerDetailsCardProps = {
   partner: ClientPartnerDetails;
@@ -24,14 +25,15 @@ export default function PartnerDetailsCard({
   const router = useRouter();
   return (
     <SectionCard
-      title="Détails du client"
+      title={partner.partnerType == partnerTypeSchema.enum.CLIENT ? "Détails du client" : "Détails du fournisseur"  }
       description="Informations complètes"
       action={
         <Link href={`/billing/clients/${partner.idPartner}/edit`}>
           <IconButton
             icon={UserPen}
             title="Modifier"
-            variant="blue" onClick={function (): void {
+            variant="blue"
+            onClick={function (): void {
               throw new Error("Function not implemented.");
             }} />
         </Link>

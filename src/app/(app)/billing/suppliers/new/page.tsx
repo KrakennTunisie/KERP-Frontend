@@ -3,5 +3,5 @@ import AddPartnerPage from "@/features/billing/components/partner/addPartner";
 
 
 export default function CreateSupplier() {
-  return <AddPartnerPage type={"SUPPLIER"}/>
+  return <AddPartnerPage mode="create" type={"SUPPLIER"}/>
 }

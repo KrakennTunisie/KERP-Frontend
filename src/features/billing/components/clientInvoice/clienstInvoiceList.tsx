@@ -14,30 +14,28 @@ import { UpdateInvoiceStatusModal } from "../widgets/updateStatusModal";
 export default function ClientsInvoiceList() {
 
     const { router, search, setSearch, open, setOpen, deleteOpen, setDeleteOpen,
-        filtre, setFiltre, invoiceRef, setInvoiceRef, clientsInvoices,
+        filtre, setFiltre, invoiceRef, clientsInvoices,
         currentPage,
         setCurrentPage,
         totalElements,
         totalPages,
         deleteLoading,
-        invoiceId,
+
         setInvoiceId,
         deleteClientInvoice,
         setUpdateOpen,
-        updateOpen,
-        updateLoading,
-        updateStatus,
-        selectedInvoice, setSelectedInvoice,
-        nextStatus, setNextStatus,
-        loading, clientInvoiceStats } = useClientInvoiceList();
 
-        const invoiceStatuses = invoiceStatusSchema.options
+        selectedInvoice, setSelectedInvoice,
+
+        loading, clientInvoiceStats, updateLoading, nextStatus, setNextStatus, updateStatus, updateOpen } = useClientInvoiceList();
+
+    const invoiceStatuses = invoiceStatusSchema.options
         .filter(
             (status) =>
-            status !== invoiceStatusSchema.enum.REFUNDED &&
-            status !== invoiceStatusSchema.enum.NOT_REFUNDED &&
-            status !== invoiceStatusSchema.enum.IN_PROGRESS &&
-            status !== invoiceStatusSchema.enum.TO_PAY
+                status !== invoiceStatusSchema.enum.REFUNDED &&
+                status !== invoiceStatusSchema.enum.NOT_REFUNDED &&
+                status !== invoiceStatusSchema.enum.IN_PROGRESS &&
+                status !== invoiceStatusSchema.enum.TO_PAY
         )
         .map((status) => ({
             value: status,
@@ -182,6 +180,7 @@ export default function ClientsInvoiceList() {
                 isSubmitting={updateLoading}
                 />
         </div>
+
 
     );
 }

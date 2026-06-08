@@ -11,7 +11,7 @@ import { ActionMenu, ActionMenuItem } from "@/shared/components/ui/actionMenuIte
 type PurchaseOrderRowProps<TPurchaseOrder extends PurchaseOrderPageItem> = {
   purchaseOrder: TPurchaseOrder;
 
-  isClientPurchaseOrder?: boolean;
+  isSupplierPurchaseOrder?: boolean;
 
   onView: (purchaseOrder: TPurchaseOrder) => void;
   onEdit?: (purchaseOrder: TPurchaseOrder) => void;
@@ -30,7 +30,7 @@ type PurchaseOrderRowProps<TPurchaseOrder extends PurchaseOrderPageItem> = {
 
 export function PurchaseOrderRow<TPurchaseOrder extends PurchaseOrderPageItem>({
   purchaseOrder,
-  isClientPurchaseOrder = false,
+  isSupplierPurchaseOrder = true,
   onView,
   onEdit,
   onSend,
@@ -48,7 +48,7 @@ export function PurchaseOrderRow<TPurchaseOrder extends PurchaseOrderPageItem>({
 
   const purchaseOrderActions: ActionMenuItem[] = [];
 
-  if (isClientPurchaseOrder) {
+  if (isSupplierPurchaseOrder) {
     purchaseOrderActions.push({
       label: "Modifier",
       icon: Pencil,
@@ -67,7 +67,7 @@ export function PurchaseOrderRow<TPurchaseOrder extends PurchaseOrderPageItem>({
     onClick: () => onUpdateStatus(purchaseOrder),
   });
 
-  if (isClientPurchaseOrder) {
+  if (isSupplierPurchaseOrder) {
     purchaseOrderActions.push({
       label: "Envoyer",
       icon: Send,
@@ -104,7 +104,7 @@ export function PurchaseOrderRow<TPurchaseOrder extends PurchaseOrderPageItem>({
 
       <td className="px-5 py-4 text-center">
         <span className="font-medium text-slate-700">
-          {purchaseOrder.partner?.name ?? "—"}
+          {purchaseOrder.partner?.companyName ?? "—"}
         </span>
       </td>
 

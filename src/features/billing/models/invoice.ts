@@ -112,6 +112,7 @@ export const invoicePageItemSchema = invoiceObjectSchema.pick({
   invoiceCurrency: true,
   vatRate: true,
   appliedExchangeRate: true,
+  
 }).extend({
   
   totalExclTaxEUR: z.number(),
@@ -121,7 +122,19 @@ export const invoicePageItemSchema = invoiceObjectSchema.pick({
   totalExclTaxUSD: z.number(),
   totalInclTaxUSD: z.number(),
   remainingAmount: z.number(),
+  invoiceDocument: documentSchema.nullable(), 
   partner: z.lazy(() => partnerSummarySchema)
+});
+
+export const invoicePageItemSchema2 = invoiceObjectSchema.pick({
+  idInvoice: true,
+  invoiceNumber: true,
+  issueDate: true,
+  dueDate: true,
+  invoiceType: true,
+  invoiceStatus: true,
+  invoiceCurrency: true,
+  totalInclTax:true
 });
 
 export const invoiceCreateSchema = withDueDateValidation(
@@ -188,5 +201,6 @@ export const invoiceDetailedSummarySchema = invoiceSummarySchema.extend({
 
 export type Invoice = z.infer<typeof invoiceSchema>;
 export type InvoicePageItem = z.infer<typeof invoicePageItemSchema>;
+export type InvoicePageItemV2 = z.infer<typeof invoicePageItemSchema2>;
 export type InvoiceCreate = z.infer<typeof invoiceCreateSchema>;
 export type InvoiceUpdate = z.infer<typeof invoiceCreateSchema>;

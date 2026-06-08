@@ -26,12 +26,12 @@ export function useSupplierPurchaseOrderList() {
   const [totalElements, setTotalElements] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [updateOpen, setUpdateOpen] = useState(false);
+  const [openSendMail, setOpenSendMail] = useState(false);
   const [nextStatus, setNextStatus]=useState("")
   const [selectedPurchaseOrder, setSelectedPurchaseOrder]= useState<PurchaseOrderPageItem|null>(null)
   const debouncedSearchQuery = useDebounce(search, 2000);
   async function deletePurchaseOrder(idPurchaseOrder: string) {
     try {
-        console.log("hi,lkl",idPurchaseOrder)
       setDeleteLoading(true);
       await PurchaseOrderAPI.deleteSupplierPurchaseOrder(idPurchaseOrder);
       appToast.success('Bon de commande supprimée avec succès.')
@@ -61,7 +61,7 @@ export function useSupplierPurchaseOrderList() {
       setTotalPages(response.totalPages);
       setTotalElements(response.totalElements);
     } catch (error) {
-      appToast.error("Erreur de fetch clients: ", getApiErrorMessage(error))
+      appToast.error("Erreur de fetch suppliers: ", getApiErrorMessage(error))
     } finally {
       setLoading(false);
     }
@@ -127,7 +127,9 @@ export function useSupplierPurchaseOrderList() {
     setNextStatus,
     updateLoading,
     setUpdateLoading,
-    updateStatus
+    updateStatus,
+    openSendMail,
+    setOpenSendMail
   }
 }
 
