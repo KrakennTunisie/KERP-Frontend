@@ -1,15 +1,13 @@
 "use client";
 
-import React from "react";
-import { InvoiceItem } from "../../models/invoiceItem";
-import { Partner } from "../../models/partner";
-import Card from "../widgets/card";
-import { SectionLabel } from "../widgets/sectionLabel";
-import usePurchaseOrderDetails from "../../hooks/usePurchaseOrderDetails";
-import { paymentMethodLabels } from "../../types/paymentMethod";
-import { PaymentConditionLabels } from "../../types/paymentCondition";
 import { DocumentPreviewModal } from "@/shared/components/ui/documentPreviewModal";
 import PageLoader from "@/shared/components/ui/pageLoader";
+import React from "react";
+import usePurchaseOrderDetails from "../../hooks/usePurchaseOrderDetails";
+import { PaymentConditionLabels } from "../../types/paymentCondition";
+import { paymentMethodLabels } from "../../types/paymentMethod";
+import Card from "../widgets/card";
+import { SectionLabel } from "../widgets/sectionLabel";
 
 
 type ModalProps = {
@@ -25,7 +23,7 @@ export default function PurchaseOrderModal({ open, title, onClose, children, foo
 
   return (
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-4 z-50">
-      <div className="bg-white w-full max-w-3xl rounded-3xl p-6 shadow-xl border border-gray-100">
+      <div className="bg-white w-full max-w-3xl rounded-xl p-6 shadow-xl border border-gray-100">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           {title && <p className="text-lg font-black text-gray-900">{title}</p>}
@@ -50,17 +48,17 @@ export default function PurchaseOrderModal({ open, title, onClose, children, foo
 
 
 export function PurchaseOrderModalContent({
-  client,
-  items,
+  
+ 
   purchaseOrderId,
   onClose,
 }: {
-  client: Partner;
-  items: InvoiceItem[];
+
   purchaseOrderId: string
   onClose: () => void;
 }) {
   const { router, purchaseOrder, purchaseOrderItems, successMessage, setPreviewDocument, previewDocument, loadingDetails } = usePurchaseOrderDetails({ purchaseOrderId })
+  
 
   if (loadingDetails) {
     return (
@@ -84,7 +82,7 @@ export function PurchaseOrderModalContent({
               </svg>
             </div>
             <div>
-              <p className="font-bold text-gray-900 text-sm">{purchaseOrder?.partner?.name}</p>
+              <p className="font-bold text-gray-900 text-sm">{purchaseOrder?.partner?.companyName}</p>
               <p className="text-xs text-blue-500 font-medium">Client</p>
             </div>
           </div>
@@ -102,7 +100,7 @@ export function PurchaseOrderModalContent({
                   <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.67A2 2 0 012 1h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z" />
                 </svg>
               </div>
-              <p className="text-xs text-gray-700">{purchaseOrder?.partner?.phoneNumber}</p>
+              <p className="text-xs text-gray-700">{purchaseOrder?.partner?.professionnalPhoneNumber}</p>
             </div>
 
             <div className="flex items-center gap-2.5 py-2.5">
@@ -122,7 +120,7 @@ export function PurchaseOrderModalContent({
                   <circle cx="12" cy="10" r="3" />
                 </svg>
               </div>
-              <p className="text-xs text-gray-700">{purchaseOrder?.partner?.address}</p>
+              <p className="text-xs text-gray-700">{purchaseOrder?.partner?.billingAddress.region}</p>
             </div>
           </div>
 
@@ -247,7 +245,7 @@ export function PurchaseOrderModalContent({
           {purchaseOrder?.purchaseOrderItems!.map((item, index) => (
             <div
               key={item.idPurchaseOrderItem}
-              className={`grid grid-cols-[1fr_70px_90px_100px] gap-2 py-3.5 items-center ${index < items.length - 1 ? "border-b border-gray-50" : ""
+              className={`grid grid-cols-[1fr_70px_90px_100px] gap-2 py-3.5 items-center ${index < purchaseOrder?.purchaseOrderItems!.length - 1 ? "border-b border-gray-50" : ""
                 }`}
             >
               <div>

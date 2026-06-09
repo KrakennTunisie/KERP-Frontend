@@ -1,17 +1,21 @@
-
 "use client";
 
-import { useRouter } from "next/navigation";
 import {
   Building2,
+  Edit2Icon,
   Mail,
   Phone,
-  Eye,
-  Edit,
-  Trash2,
+  Trash2
 } from "lucide-react";
-import { DataTable, type DataTableColumn } from '@/shared/components/datatable';
-import {  ClientPartnerItem } from "../../models/partner";
+import { useRouter } from "next/navigation";
+
+import {
+  DataTable,
+  type DataTableColumn,
+} from "@/shared/components/datatable";
+
+import { ActionMenu } from "@/shared/components/ui/actionMenuItem";
+import { ClientPartnerItem } from "../../models/partner";
 
 type ClientsTableProps = {
   rows: ClientPartnerItem[];
@@ -21,8 +25,9 @@ type ClientsTableProps = {
   loading: boolean;
   totalElements: number;
   onDeleteRequest: (id: string) => void;
-  onUpdateRequest: (row: ClientPartnerItem) => void;
 };
+
+
 
 export default function ClientsTable({
   rows,
@@ -32,7 +37,6 @@ export default function ClientsTable({
   loading,
   totalElements,
   onDeleteRequest,
-  onUpdateRequest,
 }: ClientsTableProps) {
   const router = useRouter();
 
@@ -41,14 +45,22 @@ export default function ClientsTable({
       key: "client",
       header: "Client",
       cell: (client) => (
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
-            <Building2 className="w-5 h-5 text-blue-600" />
+        <div className="flex items-center gap-3 min-w-[220px]">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-50 ring-1 ring-blue-100">
+            <Building2 className="h-4 w-4 text-blue-600" />
           </div>
-          <div>
-            <p className="text-sm font-black text-gray-900">{client.name}</p>
-            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-tighter">
-              {client.address}
+
+          <div className="min-w-0">
+            <button
+              type="button"
+              onClick={() => router.push(`/billing/clients/${client.idPartner}`)}
+              className="text-xs font-bold text-blue-600 underline-offset-4 transition hover:text-blue-800 hover:underline cursor-pointer"
+            >
+              {client.companyName}
+            </button>
+
+            <p className="mt-0.5 truncate text-[11px] font-medium text-slate-500">
+              {client.billingAddress.city || "Adresse non renseignée"}
             </p>
           </div>
         </div>
@@ -56,39 +68,45 @@ export default function ClientsTable({
     },
     {
       key: "identifier",
-      header: "Matricule Fiscal",
+      header: "Matricule fiscal",
       cell: (client) => (
-        <p className="text-sm font-black text-gray-900">{client.taxRegistrationNumber}</p>
+        <p className="text-xs font-semibold text-slate-700">
+          {client.taxRegistrationNumber || "-"}
+        </p>
       ),
     },
     {
       key: "location",
       header: "Localisation",
       cell: (client) => (
-        <>
-          <p className="text-sm font-bold text-gray-900">{client.country}</p>
-          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-tighter">
-            • {client.country}
+        <div>
+          <p className="text-xs font-semibold text-slate-800">
+            {client.billingAddress.region || "-"}
           </p>
-        </>
+        </div>
       ),
     },
     {
       key: "contact",
       header: "Contact",
       cell: (client) => (
-        <div className="space-y-1">
-          {client.email && (
-            <div className="flex items-center gap-2 text-xs font-bold text-gray-600">
-              <Mail className="w-3 h-3" />
-              <span>{client.email}</span>
+        <div className="space-y-1.5">
+          {client.email ? (
+            <div className="flex items-center gap-2 text-xs font-medium text-slate-600">
+              <Mail className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+              <span className="max-w-[220px] truncate">{client.email}</span>
             </div>
+          ) : (
+            <p className="text-xs font-medium text-slate-400">Email non renseigné</p>
           )}
-          {client.phoneNumber && (
-            <div className="flex items-center gap-2 text-xs font-bold text-gray-600">
-              <Phone className="w-3 h-3" />
-              <span>{client.phoneNumber}</span>
+
+          {client.partnerName ? (
+            <div className="flex items-center gap-2 text-xs font-medium text-slate-600">
+              <Phone className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+              <span>{client.professionnalPhoneNumber}</span>
             </div>
+          ) : (
+            <p className="text-xs font-medium text-slate-400">Téléphone non renseigné</p>
           )}
         </div>
       ),
@@ -96,35 +114,30 @@ export default function ClientsTable({
     {
       key: "actions",
       header: "Actions",
-      className: "text-center",
+      className: "text-right",
       cell: (client) => (
-        <div className="flex items-center justify-center gap-2">
-          <button
-            onClick={() => router.push(`/billing/clients/${client.idPartner}`)}
-            className="p-2.5 bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 rounded-xl shadow-sm transition-all cursor-pointer"
-            title="Voir"
-          >
-            <Eye className="w-4 h-4" />
-          </button>
-
-          <button
-            onClick={() => onUpdateRequest(client)}
-            className="p-2.5 bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 rounded-xl shadow-sm transition-all cursor-pointer"
-            title="Modifier"
-          >
-            <Edit className="w-4 h-4" />
-          </button>
-
-          <button
-            onClick={() => onDeleteRequest(client.idPartner)}
-            className="p-2.5 bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 rounded-xl shadow-sm transition-all cursor-pointer"
-            title="Supprimer"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
-        </div>
+        <ActionMenu
+          orientation="horizontal"
+          title="Actions client"
+          items={[
+            {
+              label: "Modifier",
+              icon: Edit2Icon,
+              color: "text-blue-600",
+              hover: "hover:bg-blue-50",
+              onClick: () => router.push(`/billing/clients/${client.idPartner}/edit`),
+            },
+            {
+              label: "Supprimer",
+              icon: Trash2,
+              color: "text-blue-600",
+              hover: "hover:bg-blue-50",
+              onClick: () => onDeleteRequest(client.idPartner),
+            },
+          ]}
+        />
       ),
-    },
+    }
   ];
 
   return (

@@ -1,44 +1,43 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import PartnerDetails from "../partner/partnerDetails";
 import { useParams } from "next/navigation";
-import { SupplierPartnerDetails } from "../../models/partner";
-import { InvoicesAPI, partnersApi } from "../../api/partners-api";
+import { PartnerAllDetails } from "../../models/partner";
+import {  DashboardAPI, InvoicesAPI,  partnersApi } from "../../api/partners-api";
 import { appToast } from "@/shared/lib/toast";
 import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 import PageLoader from "@/shared/components/ui/pageLoader";
 import { PartnerInvoiceStats } from "../../types/partnersStats";
-import { InvoicePageItem } from "../../models/invoice";
 import { NotFound } from "@/shared/components/widgets/notFound";
+import { PartnerRevenueStats } from "../../types/partnerRevenueStats";
 
-export default function SupplierDetails(){
+export default function SupplierDetails() {
   const params = useParams();
 
   const supplierId = params?.supplierId as string;
-    const [supplierInvoiceStats, setSupplierInvoiceStats]=useState<PartnerInvoiceStats>({
+  const [supplierInvoiceStats, setSupplierInvoiceStats] = useState<PartnerInvoiceStats>({
     totalAmountTND: 0,
     totalAmountEUR: 0,
     totalAmountUSD: 0,
-  
+
     totalInvoices: 0,
     paidInvoices: 0,
     pendingInvoices: 0,
-  
+
     pendingAmountTND: 0,
     pendingAmountEUR: 0,
     pendingAmountUSD: 0,
-  
+
     averageInvoiceTND: 0,
     averageInvoiceEUR: 0,
     averageInvoiceUSD: 0,
-    })
+  })
 
-  const [supplier, setSupplier] = useState<SupplierPartnerDetails>();
-  const [supplierInvoices, setSupplierInvoices]= useState<InvoicePageItem[]|[]>([])
+  const [supplier, setSupplier] = useState<PartnerAllDetails>();
   const [loading, setLoading] = useState<boolean>(true);
-
-    const fetchSupplier = async () => {
+  const [supplierDespensesInitial, setSupplierDespensesInitial] = useState<PartnerRevenueStats[] | []>([])
+  const fetchSupplier = async () => {
     try {
       setLoading(true)
       const supplier = await partnersApi.getSupplierById(supplierId);
@@ -48,49 +47,66 @@ export default function SupplierDetails(){
       setSupplierInvoiceStats(clientStats);
 
     } catch (error) {
-      appToast.error("Erreur fetch du fournisseur: ",getApiErrorMessage(error));
+      appToast.error("Erreur fetch du fournisseur: ", getApiErrorMessage(error));
     }
-    finally{
+    finally {
       setLoading(false)
     }
   };
 
 
-  const fetchSupplierInvoices = async () => {
+
+  const fetchSupplierRevenue = async () => {
+    if (!supplier) return;
+
     try {
       setLoading(true)
-      const invoices = await InvoicesAPI.getSupplierTopInvoices(supplierId);
-      setSupplierInvoices(invoices);
+      const supplierDespenses = await DashboardAPI.supplierRevenueStats(supplier?.idPartner, "6")
+      setSupplierDespensesInitial(supplierDespenses);
     } catch (error) {
-      appToast.error("Erreur fetch des factures fournisseur: ",getApiErrorMessage(error));
+      appToast.error("Erreur fetch des stats du  fournisseur: ", getApiErrorMessage(error));
     }
-    finally{
+    finally {
       setLoading(false)
     }
   };
+
+
+
   useEffect(() => {
-  fetchSupplier();
-  fetchSupplierInvoices();
-}, [supplierId]);
+    fetchSupplier();
+  }, [supplierId]);
 
-      if(loading){
-        return(
-            <PageLoader label="Chargement du fournisseur ..."/>            
+  useEffect(() => {
+    fetchSupplierRevenue();
+  }, [supplier]);
 
-        )
-      }
-      else if(!supplier){
-        return <NotFound resource="Fournisseur" />;
-      }
 
-      else{   
-        return(
-            <PartnerDetails
-                partner={supplier}
-                partnerStats={supplierInvoiceStats}
-                partnerInvoices={supplierInvoices}
-            />
-        )
-      }
+  const totalDespensesInitial = useMemo(() =>
+    supplierDespensesInitial.reduce((sum, item) => sum + (item.revenueTTC ?? 0), 0),
+    [supplierDespensesInitial]);
+
+
+  if (loading) {
+    return (
+      <PageLoader label="Chargement du fournisseur ..." />
+
+    )
+  }
+  else if (!supplier) {
+    return <NotFound resource="Fournisseur" />;
+  }
+
+  else {
+    return (
+      <PartnerDetails
+        partner={supplier}
+        partnerStats={supplierInvoiceStats}
+        onRefresh={fetchSupplier}
+        supplierDespensesInitial={supplierDespensesInitial}
+        totalDespensesInitial={totalDespensesInitial}
+      />
+    )
+  }
 
 }

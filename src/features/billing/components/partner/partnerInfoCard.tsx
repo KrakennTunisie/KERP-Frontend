@@ -1,10 +1,10 @@
 "use client";
 
-import {  useState } from "react";
-import { DocumentPreviewModal } from "@/shared/components/ui/documentPreviewModal";
-import { BadgeCheck, CalendarDays, CreditCard, ReceiptText } from "lucide-react";
-import InfoItem from "@/shared/components/ui/infoItem";
 import DocumentItem from "@/shared/components/ui/documentItem";
+import { DocumentPreviewModal } from "@/shared/components/ui/documentPreviewModal";
+import InfoItem from "@/shared/components/ui/infoItem";
+import { BadgeCheck } from "lucide-react";
+import { useState } from "react";
 import { Document } from "../../models/document";
 import { Partner } from "../../models/partner";
 
@@ -15,7 +15,7 @@ type PartnerInfoCardProps = {
   typeLabel: string;
 };
 
-type PreviewDocument = Document | File | null;
+export type PreviewDocument = Document | File | null;
 
 export default function PartnerInfoCard({
   partner,
@@ -48,25 +48,21 @@ export default function PartnerInfoCard({
             <InfoItem
               label="Matricule fiscal"
               value={partner.taxRegistrationNumber}
-              icon={<ReceiptText className="w-5 h-5 text-gray-700" />}
             />
 
             <InfoItem
               label="Type"
               value={typeLabel}
-              icon={<BadgeCheck className="w-5 h-5 text-gray-700" />}
             />
 
             <InfoItem
               label="IBAN"
               value={partner.iban}
-              icon={<CreditCard className="w-5 h-5 text-gray-700" />}
             />
 
             <InfoItem
               label="Partenaire depuis"
               value={"2024-05-02"}
-              icon={<CalendarDays className="w-5 h-5 text-gray-700" />}
             />
           </div>
 

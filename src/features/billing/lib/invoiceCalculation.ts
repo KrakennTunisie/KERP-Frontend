@@ -1,4 +1,4 @@
-import { BaseItem, InvoiceItem, PurchaseOrderItem } from "../models/invoiceItem"
+import { BaseItem,  PurchaseOrderItem } from "../models/invoiceItem"
 import { CurrencyType } from "../types/currency";
 
 

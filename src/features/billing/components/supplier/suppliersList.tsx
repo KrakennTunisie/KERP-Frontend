@@ -1,200 +1,83 @@
 'use client';
 
-
-import { useEffect, useMemo, useState } from 'react';
 import {
-  Search,
   Plus
 } from 'lucide-react';
 
 
-import SuppliersTable from "./suppliersTable"
-import SupplierCreateModal from "./createSupplierModal";
-import {   SupplierPartnerItem } from '../../models/partner';
-import SupplierUpdateModal from "./updateSupplierModal";
+import SuppliersTable from "./suppliersTable";
+
+import { FiltersBar } from '@/shared/components/ui/filtreBar';
+import { useRouter } from 'next/navigation';
+import usePartnerList, { partnerListProps } from '../../hooks/usePartnerList';
+import { partnerTypeSchema } from '../../types/partnerType';
+import { PageHeader } from '../widgets/header';
 import SupplierDeleteModal from "./deleteSupplierModal";
-import { partnersApi } from "../../api/partners-api";
-import { getApiErrorMessage } from "@/shared/api/handle-api-error";
-import { appToast } from "@/shared/lib/toast";
-import { useDebounce } from "@/shared/hooks/useDebounce";
 
 
-export default function SuppliersList() {
+export default function SuppliersList({partnerType}: partnerListProps) {
+  const router = useRouter();
+  const { fetchPartner, filterCity, currentPage, cities, searchQuery, setCurrentPage, setDeleteConfirmId, setSearchQuery
+    , loading, suppliers, setFilterCity, deleteConfirmId, totalElements, totalPages } = usePartnerList({partnerType});
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterCity, setFilterCity] = useState<string>('all');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [showAddModal, setShowAddModal] = useState<boolean>(false);
-  const [showUpdateModal, setShowUpdateModal] = useState<boolean>(false);
-  const [deleteConfirmId, setDeleteConfirmId] = useState<string>('');
-
-  const [formData, setFormData] = useState<SupplierPartnerItem>({
-    iban:'',
-    taxRegistrationNumber: '',
-    name: '',
-    address: '',
-    country: '',
-    email: '',
-    phoneNumber: '',
-    partnerType: "SUPPLIER",
-    idPartner:'',
-
-  });
-
-  const [suppliers, setSuppliers] = useState<SupplierPartnerItem[]>([]);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalElements, setTotalElements] = useState(0);
-  const [loading, setLoading] = useState(false);
-  
-  const debouncedSearchQuery = useDebounce(searchQuery, 2000);
-
-const cities = useMemo(() => Array.from(new Set(suppliers.map((c) => c.country))), [suppliers]);
-
-const fetchClients = async () => {
-    try {
-      setLoading(true);
-      const keyword =
-        debouncedSearchQuery.trim().length >= 3
-          ? debouncedSearchQuery.trim()
-          : undefined;
-
-      const response = await partnersApi.getSuppliers({
-        keyword: keyword,
-        filter: filterCity !== "all" ? filterCity : undefined,
-        page: currentPage - 1,
-      });
-
-      setSuppliers(response.content);
-      setTotalPages(response.totalPages);
-      setTotalElements(response.totalElements);
-    } catch (error) {
-      appToast.error("Erreur de fetch clients: ",getApiErrorMessage(error))
-    } finally {
-      setLoading(false);
-    }
-  };
-
-
-useEffect(() => {
-  setCurrentPage(1);
-}, [debouncedSearchQuery, filterCity]);
-
-useEffect(() => {
-  
-  fetchClients();
-}, [debouncedSearchQuery, filterCity, currentPage]);
-
-
-
-
-  const onUpdateRequest = (row : SupplierPartnerItem)=>{
-          setFormData(row)
-          setShowUpdateModal(true)
-    }
 
   return (
     <div className=" min-h-screen flex-1 flex flex-col min-h-0 bg-gray-50">
       {/* Header */}
-      <header className="bg-white border-b border-gray-100 px-8 py-8">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="bg-emerald-600 w-2 h-2 rounded-full" />
-              <span className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em]">Gestion des Achats</span>
-            </div>
-            <h1 className="text-4xl font-black text-gray-900 tracking-tighter">Mes Fournisseurs</h1>
-            <p className="text-gray-700 font-bold mt-1">Gérez votre réseau de fournisseurs</p>
-          </div>
-          
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 px-8 py-4 bg-gray-900 text-white rounded-[20px] hover:bg-black transition-all font-black text-sm shadow-xl shadow-gray-200 cursor-pointer"
-          >
-            <Plus className="w-5 h-5" />
-            Ajouter un fournisseur
-          </button>
-        </div>
-      </header>
+      <PageHeader
+        title="Mes Fournisseurs"
+        description="Gérez vos fournisseurs et leurs documents"
+        actionLabel="Ajouter un fournisseur"
+        actionIcon={Plus}
+        onAction={() => router.push("/billing/suppliers/new")}
+      />
 
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto p-8">
-        <div className="max-w-7xl mx-auto space-y-8">
+        <div className="mx-auto space-y-8">
           {/* Filters Bar */}
-          <div className="bg-white rounded-[32px] p-8 border border-gray-100 shadow-sm">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest px-1">
-                  Recherche
-                </label>
-                <div className="relative group">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600 group-focus-within:text-blue-600 transition-colors" />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => {
-                      setSearchQuery(e.target.value);
-                      setCurrentPage(1);
-                    }}
-                    placeholder="Nom, MF ou Email..."
-                    className="w-full pl-12 pr-4 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 text-sm font-bold transition-all text-gray-900 placeholder:text-gray-400"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest px-1">
-                  Ville
-                </label>
-                <select
-                  value={filterCity}
-                  onChange={(e) => {
-                    setFilterCity(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  className="w-full px-5 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 text-sm font-bold cursor-pointer transition-all appearance-none text-gray-900"
-                >
-                  <option value="all">Toutes les villes</option>
-                  {cities.map((city) => (
-                    <option key={city} value={city}>
-                      {city}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </div>
+          <FiltersBar
+            searchValue={searchQuery}
+            onSearchChange={(value) => {
+              setSearchQuery(value);
+              setCurrentPage(1);
+            }}
+            cityValue={filterCity}
+            onCityChange={(value) => {
+              setFilterCity(value);
+              setCurrentPage(1);
+            }}
+            cityOptions={cities.map((city) => ({
+              label: city,
+              value: city,
+            }))}
+            onReset={() => {
+              setSearchQuery("");
+              setFilterCity("all");
+              setCurrentPage(1);
+            }}
+          />
 
           {/* Table */}
-        <SuppliersTable 
+          <SuppliersTable
             rows={suppliers}
-            setCurrentPage= {setCurrentPage}
-            currentPage= {currentPage}
-            totalPages= {totalPages}
-            loading= {loading}
-            totalElements= {totalElements} 
+            setCurrentPage={setCurrentPage}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            loading={loading}
+            totalElements={totalElements}
             onDeleteRequest={setDeleteConfirmId}
-            onUpdateRequest = {onUpdateRequest}
-        />
+          />
 
-                <SupplierCreateModal
-                    open={showAddModal}
-                    onClose={() => setShowAddModal(false)}
-                    onCreated={fetchClients}
-                    />
-                
-                <SupplierUpdateModal
-                  open ={showUpdateModal}
-                  onClose={()=> setShowUpdateModal(false)}
-                  onCreated={fetchClients}
-                  data={formData}
-                />
 
-                <SupplierDeleteModal
-                    open={!!deleteConfirmId}
-                    onClose={() => setDeleteConfirmId('')} 
-                    onCreated={fetchClients}
-                    confirmDeleteId={deleteConfirmId}                
-                />
+          <SupplierDeleteModal
+            open={!!deleteConfirmId}
+            onClose={() => setDeleteConfirmId('')}
+            onCreated={() => {
+              fetchPartner(partnerTypeSchema.enum.SUPPLIER);
+            }}
+            confirmDeleteId={deleteConfirmId}
+          />
         </div>
       </main>
     </div>

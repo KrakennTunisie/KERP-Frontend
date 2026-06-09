@@ -21,8 +21,8 @@ export default function CreatePurchaseOrder({
 }: PurchaseOrderFormClientProps) {
   const {
     addItem,
-    removeItem, updateItem, clientSearch, setClientSearch, showDropdown, setShowDropdown, canCreatePurchaseOrder, 
-    errors, selectClient, clearClient, clients,
+    removeItem, updateItem, supplierSearch, setSupplierSearch, showDropdown, setShowDropdown, canCreatePurchaseOrder, 
+    errors, selectSupplier, clearSupplier, clients,
       previewData, form, onSubmit, router, isModalOpen, createPurchaseOrder, pdfUrl, 
     onCloseDocumentModal, purchaseOrderRef,updatePurchaseOrder,
     loadingEdit,
@@ -140,21 +140,20 @@ export default function CreatePurchaseOrder({
             </div>
           </section>
 
-          {/* Section 02 — Client */}
+          {/* Section 02 — Supplier */}
           <section>
-            <SectionTitle number="02" label="CLIENT" invoiceType={invoiceTypeSchema.enum.SALE} />
+            <SectionTitle number="02" label="FOURNISSEUR" invoiceType={invoiceTypeSchema.enum.SALE} />
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex flex-col gap-3 mt-3">
               <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
-                Sélectionner un client
+                Sélectionner un fournisseur
               </label>
               <div className="relative">
                 <input
                   type="text"
                   disabled={mode == "edit"}
-                  //readOnly={mode=="edit"}
-                  placeholder="Rechercher un client..."
-                  value={clientSearch}
-                  onChange={(e) => { setClientSearch(e.target.value); setShowDropdown(true) }}
+                  placeholder="Rechercher un fournisseur..."
+                  value={supplierSearch}
+                  onChange={(e) => { setSupplierSearch(e.target.value); setShowDropdown(true) }}
                   onFocus={() => setShowDropdown(true)}
                   onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
                   className="w-full px-3 py-2.5 py-2.5 pr-9 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
@@ -178,12 +177,12 @@ export default function CreatePurchaseOrder({
                         type="button"
                         onMouseDown={(e) => {
                           e.preventDefault();
-                          selectClient(client);
+                          selectSupplier(client);
                         }}
                         className="w-full text-left px-4 py-3 hover:bg-blue-50 transition border-b border-slate-50 last:border-0"
                       >
-                        <p className="text-sm font-bold text-slate-800">{client.name}</p>
-                        <p className="text-xs text-slate-400 mt-0.5">{client.address}</p>
+                        <p className="text-sm font-bold text-slate-800">{client.partnerName}</p>
+                        <p className="text-xs text-slate-400 mt-0.5">{client.billingAddress.region}</p>
                       </button>
                     ))}
                   </div>
@@ -192,11 +191,11 @@ export default function CreatePurchaseOrder({
               {previewData.partner && (
                 <div className="border-2 border-blue-100 bg-blue-50/40 rounded-xl p-4">
                   <div className="flex items-start justify-between">
-                    <p className="font-bold text-blue-700 text-sm">{previewData.partner.name}</p>
+                    <p className="font-bold text-blue-700 text-sm">{previewData.partner.partnerName}</p>
                     <button
                       type="button"
                       disabled={mode == "edit"}
-                      onClick={clearClient}
+                      onClick={clearSupplier}
                       className={`transition ${mode == "edit"
                         ? "text-gray-300 cursor-not-allowed  pointer-events-none"
                         : "text-slate-300 hover:text-red-400 cursor-pointer"
@@ -207,7 +206,7 @@ export default function CreatePurchaseOrder({
                       </svg>
                     </button>
                   </div>
-                  <p className="text-xs text-blue-500 mt-0.5">{previewData.partner.address}</p>
+                  <p className="text-xs text-blue-500 mt-0.5">{previewData.partner.billingAddress?.region}</p>
                   <div className="flex items-center gap-4 mt-2">
                     <span className="flex items-center gap-1 text-[10px] font-bold text-blue-500 uppercase tracking-wide">
                       <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -219,7 +218,7 @@ export default function CreatePurchaseOrder({
                       <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                       </svg>
-                      {previewData.partner.phoneNumber}
+                      {previewData.partner.professionnalPhoneNumber}
                     </span>
                   </div>
                 </div>

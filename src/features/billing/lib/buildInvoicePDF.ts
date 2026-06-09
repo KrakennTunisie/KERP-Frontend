@@ -1,7 +1,5 @@
 import { toPng } from "html-to-image";
 import jsPDF from "jspdf";
-import { useReactToPrint } from "react-to-print";
-import { fileSchema } from "../types/pdfSchema";
 
 export const handleSaveAsPDF = async (
   element: HTMLElement,
@@ -70,6 +68,10 @@ export const handleSaveAsPDF = async (
     return null;
   }
 };
+
+
+
+
 // Permet la génération de la facture une fois remplie 
   /*const handlePrint = useReactToPrint({
   contentRef: invoiceRef,

@@ -1,11 +1,12 @@
+import SupplierDetails from "@/features/billing/components/supplier/supplierDetails";
 import lazyComponent from "@/shared/utils/lazyComponent";
 
 
-const SupplierDtails = lazyComponent(
-  () => import("@/features/billing/components/supplier/supplierDetails"),
-  "Chargement de détails fournisseur..."
+const ClientDetails = lazyComponent(
+  () => import("@/features/billing/components/client/clientDetails"),
+  "Chargement de détails client..."
 );
 
 export default function Page() {
-  return <SupplierDtails />;
+  return <SupplierDetails />;
 }

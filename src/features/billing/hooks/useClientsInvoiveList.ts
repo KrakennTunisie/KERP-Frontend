@@ -17,7 +17,7 @@ export function useClientInvoiceList () {
       const value = searchParams.get("client") ?? "";
 
     const [search, setSearch] = useState(value);
-    const [filtre, setFiltre] = useState<InvoiceStatus>();
+    const [filtre, setFiltre] = useState<InvoiceStatus>("ALL");
     const [loading, setLoading]= useState(false)
     const [deleteLoading, setDeleteLoading]= useState(false)
     const [updateLoading, setUpdateLoading]= useState(false)
@@ -128,7 +128,7 @@ export function useClientInvoiceList () {
             
           formData.append("status",  nextStatus);
           await InvoicesAPI.updateClientInvoiceStatus(invoiceId, formData);
-          appToast.success('Statut mise à jour avec succès avec succès.')
+          appToast.success('Statut mise à jour avec succès.')
           setUpdateOpen(false)
           await fetchClientsInvoices()
         } catch (error) {
@@ -168,6 +168,7 @@ export function useClientInvoiceList () {
      loading,
      nextStatus, setNextStatus,
      selectedInvoice, setSelectedInvoice,
-     clientInvoiceStats
+     clientInvoiceStats,
+
     }
 }

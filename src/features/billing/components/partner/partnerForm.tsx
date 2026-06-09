@@ -121,13 +121,13 @@ export default function PartnerForm<TSchema extends AnyZodObject>({
               { field: fields.patente, label: "Patente" },
             ].map(({ field, label }) => (
               <FilePicker
+                id={label} 
                 key={field}
                 label={label}
                 file={watch(field) as File | undefined}
                 error={getError(field)}
                 onPick={(file) => setValueAny(field, file, { shouldValidate: true, shouldDirty: true })}
-                onRemove={() => setValueAny(field, undefined, { shouldValidate: true, shouldDirty: true })}
-              />
+                onRemove={() => setValueAny(field, undefined, { shouldValidate: true, shouldDirty: true })}              />
             ))}
           </div>
         </div>

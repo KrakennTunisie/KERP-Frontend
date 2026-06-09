@@ -1,21 +1,21 @@
 import { z } from "zod";
-import { PaymentConditionSchema } from "../types/paymentCondition";
-import { paymentMethodSchema } from "../types/paymentMethod";
-import { partnerSchema, partnerSummarySchema } from "./partner";
-import { purchaseOrderItemSchema } from "./invoiceItem";
-import { purchaseOrderStatusSchema } from "../types/purchaseOrderStatus";
 import { currencyTypeSchema } from "../types/currency";
 import { exchangeRateSourceSchema } from "../types/exchangeRateSource";
+import { PaymentConditionSchema } from "../types/paymentCondition";
+import { paymentMethodSchema } from "../types/paymentMethod";
 import { fileSchema } from "../types/pdfSchema";
-import { documentSchema } from "./document";
+import { purchaseOrderStatusWithoutAllSchema } from "../types/purchaseOrderStatus";
 import { purchaseOrderTypeSchema } from "../types/PurchaseOrderType";
+import { documentSchema } from "./document";
+import { purchaseOrderItemSchema } from "./invoiceItem";
+import { partnerSchema, partnerSummarySchema } from "./partner";
 
 
 // champs de base partagés
 const purchaseOrderBaseFields = {
     purchaseOrderNumber: z.string(),
     issueDate: z.date(),
-    purchaseOrderStatus: purchaseOrderStatusSchema,
+    purchaseOrderStatus: purchaseOrderStatusWithoutAllSchema,
     purchaseOrderType: purchaseOrderTypeSchema,
     currency: currencyTypeSchema,
     vatAmount: z.number(),
@@ -61,7 +61,7 @@ export const purchaseOrderSummaryDTO = z.object({
     idPurchaseOrder: z.string(),
     purchaseOrderNumber: z.string(),
     issueDate: z.date(),
-    purchaseOrderStatus: purchaseOrderStatusSchema,
+    purchaseOrderStatus: purchaseOrderStatusWithoutAllSchema,
     currency: currencyTypeSchema,
 })
 
@@ -69,10 +69,8 @@ export const purchaseOrderPageItemSchema = z.object({
     idPurchaseOrder: z.string(),
     purchaseOrderNumber: z.string(),
     issueDate: z.date(),
-    purchaseOrderStatus: purchaseOrderStatusSchema,
+    purchaseOrderStatus: purchaseOrderStatusWithoutAllSchema,
     purchaseCurrency: currencyTypeSchema,
-    vatRate: z.number(),
-    appliedExchangeRate: z.number(),
     totalExclTaxEUR: z.number(),
     totalInclTaxEUR: z.number(),
     totalExclTaxTND: z.number(),
@@ -81,12 +79,28 @@ export const purchaseOrderPageItemSchema = z.object({
     totalInclTaxUSD: z.number(),
     partner: partnerSummarySchema,
 });
+export const purchaseOrderPartnerSummarySchema = z.object({
+    idPurchaseOrder: z.string(),
+    purchaseOrderNumber: z.string(),
+    issueDate: z.date(),
+    purchaseOrderStatus: purchaseOrderStatusWithoutAllSchema,
+    purchaseCurrency: currencyTypeSchema,
+    purchaseOrderType: z.string(),
+    totalExclTaxEUR: z.number(),
+    totalInclTaxEUR: z.number(),
+    totalExclTaxTND: z.number(),
+    totalInclTaxTND: z.number(),
+    totalExclTaxUSD: z.number(),
+    totalInclTaxUSD: z.number(),
+    partner: partnerSummarySchema,
+    purchaseOrderDocument: documentSchema.nullable(),
+});
 
 export const purchaseOrderDetailsSchema = z.object({
     idPurchaseOrder: z.string(),
     purchaseOrderNumber: z.string(),
     issueDate: z.date(),
-    purchaseOrderStatus: purchaseOrderStatusSchema,
+    purchaseOrderStatus: purchaseOrderStatusWithoutAllSchema,
     purchaseOrderType :purchaseOrderTypeSchema,
     purchaseCurrency: currencyTypeSchema,
     vatRate: z.number(),
@@ -133,3 +147,4 @@ export type PurchaseOrderUpdate = z.infer<typeof purchaseOrderUpdateDTO>;
 export type PurchaseOrderPageItem = z.infer<typeof purchaseOrderPageItemSchema>;
 export type PurchaseOrderDetails = z.infer<typeof purchaseOrderDetailsSchema>;
 export type PurchaseOrderSummary = z.infer<typeof purchaseOrderSummaryDTO>;
+export type PurchaseOrderPartnerSummary = z.infer<typeof purchaseOrderPartnerSummarySchema>;

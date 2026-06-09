@@ -1,5 +1,24 @@
 // StatClientInvoiceCard.tsx
-import { StatCardVariant,STAT_CARD_STYLES } from "@/shared/utils/statCardConfig";
+
+import type { ReactNode } from "react";
+import {
+  StatCardVariant,
+  STAT_CARD_STYLES,
+} from "@/shared/utils/statCardConfig";
+
+type StatClientInvoiceCardProps = {
+  icon: ReactNode;
+  label: string;
+  eur: number;
+  tnd: number;
+  sub?: string;
+  variant: StatCardVariant;
+};
+
+const formatAmount = (value: number) =>
+  value.toLocaleString("fr-FR", {
+    maximumFractionDigits: 2,
+  });
 
 export default function StatClientInvoiceCard({
   icon,
@@ -8,37 +27,61 @@ export default function StatClientInvoiceCard({
   tnd,
   sub,
   variant,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  eur: number;
-  tnd: number;
-  sub: string;
-  variant: StatCardVariant; // "blue" | "amber" | "emerald"
-}) {
+}: StatClientInvoiceCardProps) {
   const styles = STAT_CARD_STYLES[variant];
 
   return (
-    <div className={`rounded-2xl p-6 flex-1 min-w-0 ${styles.bg} ${styles.border}`}>
-      <div className="flex items-center gap-3 mb-4">
-        <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${styles.iconBg}`}>
+    <div
+      className={`
+        flex-1 min-w-0 rounded-2xl border p-4
+        font-[Inter,system-ui,sans-serif]
+        transition-all duration-200
+        hover:-translate-y-0.5 hover:shadow-sm
+        ${styles.bg} ${styles.border}
+      `}
+    >
+      <div className="flex items-center gap-3 mb-3">
+        <div
+          className={`
+            flex h-9 w-9 shrink-0 items-center justify-center
+            rounded-xl shadow-sm
+            ${styles.iconBg}
+          `}
+        >
           {icon}
         </div>
-        <span className={`text-xs font-bold tracking-widest uppercase ${styles.labelColor}`}>
+
+        <span
+          className={`
+            text-[10px] font-extrabold uppercase tracking-[0.14em]
+            ${styles.labelColor}
+          `}
+        >
           {label}
         </span>
       </div>
-      <div className="text-3xl font-black text-slate-800">
-        {eur.toLocaleString("fr-FR")}{" "}
-        <span className="text-base font-semibold text-slate-500">EUR</span>
+
+      <div className="space-y-1">
+        <p className="text-2xl font-extrabold tracking-tight text-slate-900">
+          {formatAmount(eur)}
+          <span className="ml-1 text-xs font-semibold text-slate-400">
+            EUR
+          </span>
+        </p>
+
+        <p className="text-sm font-semibold text-slate-500">
+          {formatAmount(tnd)}
+          <span className="ml-1 text-[11px] font-medium text-slate-400">
+            TND
+          </span>
+        </p>
       </div>
-      <div className="text-xl font-bold text-slate-600 mt-1">
-        {tnd.toLocaleString("fr-FR")}{" "}
-        <span className="text-sm font-semibold text-slate-400">TND</span>
-      </div>
-      <div className="mt-2 text-xs font-semibold tracking-widest uppercase text-slate-500">
-        {sub}
-      </div>
+
+      {sub && (
+        <p className="mt-3 text-[11px] font-medium leading-4 text-slate-500">
+          {sub}
+        </p>
+      )}
     </div>
   );
 }

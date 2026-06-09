@@ -1,4 +1,4 @@
-import { Bell, User, LogOut, Building2 } from 'lucide-react';
+import { Bell, User, LogOut, Building2, Settings } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -82,6 +82,11 @@ export function Navbar() {
               <DropdownMenuItem className="px-4 py-3 rounded-[16px] cursor-pointer focus:bg-gray-50">
                 <User className="mr-3 h-4 w-4 text-gray-500" />
                 <span className="font-bold text-sm text-gray-700">Mon Profil</span>
+              </DropdownMenuItem>
+
+               <DropdownMenuItem className="px-4 py-3 rounded-[16px] cursor-pointer focus:bg-gray-50">
+                <Settings className="mr-3 h-4 w-4 text-gray-500" />
+                <span className="font-bold text-sm text-gray-700">Parmètres</span>
               </DropdownMenuItem>
 
               <DropdownMenuItem className="px-4 py-3 rounded-[16px] cursor-pointer focus:bg-red-50 text-red-600">

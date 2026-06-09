@@ -2,8 +2,11 @@
 
 import { Modal } from "@/shared/components/ui/modal";
 import { InvoiceStatus, invoiceStatusLabels } from "../../types/invoiceStatus";
-import { purchaseOrderStatus, purchaseOrderStatusLabels } from "../../types/purchaseOrderStatus";
-
+import {
+  purchaseOrderStatus,
+  purchaseOrderStatusLabels,
+} from "../../types/purchaseOrderStatus";
+import { ArrowRight, CheckCircle2, FileText } from "lucide-react";
 
 type UpdateInvoiceStatusModalProps = {
   open: boolean;
@@ -12,12 +15,11 @@ type UpdateInvoiceStatusModalProps = {
   invoiceNumber?: string;
   currentStatus?: InvoiceStatus | purchaseOrderStatus;
   nextStatus: string | " ";
-  type: string
+  type: string;
   onNextStatusChange: (status: InvoiceStatus) => void;
   allowedStatuses: InvoiceStatus[] | purchaseOrderStatus[];
   isSubmitting?: boolean;
 };
-
 
 export function UpdateInvoiceStatusModal({
   open,
@@ -31,6 +33,26 @@ export function UpdateInvoiceStatusModal({
   allowedStatuses,
   isSubmitting = false,
 }: UpdateInvoiceStatusModalProps) {
+  const isInvoice = type === "invoice";
+
+  const documentLabel = isInvoice ? "facture" : "bon de commande";
+  const documentNumberLabel = isInvoice
+    ? "Numéro de facture"
+    : "Numéro de bon de commande";
+
+  const currentStatusLabel = currentStatus
+    ? isInvoice
+      ? invoiceStatusLabels[currentStatus as InvoiceStatus]
+      : purchaseOrderStatusLabels[currentStatus as purchaseOrderStatus]
+    : "-";
+
+  const getStatusLabel = (status: InvoiceStatus | purchaseOrderStatus) => {
+    return isInvoice
+      ? invoiceStatusLabels[status as InvoiceStatus]
+      : purchaseOrderStatusLabels[status as purchaseOrderStatus];
+  };
+
+  const hasAllowedStatuses = allowedStatuses.length > 0;
 
   return (
     <Modal
@@ -38,11 +60,19 @@ export function UpdateInvoiceStatusModal({
       onClose={onClose}
       title="Mettre à jour le statut"
       footer={
-        <>
+        <div className="flex w-full items-center justify-end gap-2">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 cursor-pointer"
+            disabled={isSubmitting}
+            className="
+              inline-flex items-center justify-center rounded-xl
+              border border-slate-200 bg-white px-4 py-2
+              text-sm font-medium text-slate-700
+              transition-colors hover:bg-slate-50
+              cursor-pointer
+              disabled:cursor-not-allowed disabled:opacity-50
+            "
           >
             Annuler
           </button>
@@ -50,60 +80,106 @@ export function UpdateInvoiceStatusModal({
           <button
             type="button"
             onClick={onConfirm}
-            disabled={!nextStatus || isSubmitting}
-            className="px-4 py-2 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 cursor-pointer"
+            disabled={!nextStatus || !hasAllowedStatuses || isSubmitting}
+            className="
+              inline-flex items-center justify-center gap-2 rounded-xl
+              bg-blue-600 px-4 py-2
+              text-sm font-semibold text-white shadow-sm
+              transition-colors hover:bg-blue-700
+              cursor-pointer
+              disabled:cursor-not-allowed disabled:bg-blue-300
+            "
           >
+            <CheckCircle2 className="h-4 w-4" />
             {isSubmitting ? "Mise à jour..." : "Confirmer"}
           </button>
-        </>
+        </div>
       }
     >
       <div className="space-y-5">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
-            <p className="text-sm text-gray-500 mb-1">Numéro de facture</p>
-            <p className="text-base font-bold text-gray-900">
-              {invoiceNumber || "-"}
-            </p>
+        <div className="rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 via-white to-white p-4">
+          <div className="mb-4 flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm shadow-blue-100">
+              <FileText className="h-5 w-5" />
+            </div>
+
+            <div>
+              <p className="text-sm font-semibold tracking-tight text-slate-900">
+                Changement de statut
+              </p>
+              <p className="text-xs font-medium text-slate-500">
+                Mise à jour du statut de la {documentLabel}
+              </p>
+            </div>
           </div>
 
-          <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
-            <p className="text-sm text-gray-500 mb-1">Statut actuel</p>
-            <p className="text-base font-bold text-gray-900">
-              {type === "invoice" && currentStatus
-                ? invoiceStatusLabels[currentStatus as InvoiceStatus]
-                : purchaseOrderStatusLabels[currentStatus as purchaseOrderStatus]}
-            </p>
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <div className="rounded-xl border border-blue-100 bg-white p-3 shadow-sm shadow-blue-50">
+              <p className="mb-1 text-[11px] font-medium uppercase tracking-[0.12em] text-blue-500">
+                {documentNumberLabel}
+              </p>
+              <p className="truncate text-sm font-semibold text-slate-900">
+                {invoiceNumber || "-"}
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-blue-100 bg-white p-3 shadow-sm shadow-blue-50">
+              <p className="mb-1 text-[11px] font-medium uppercase tracking-[0.12em] text-blue-500">
+                Statut actuel
+              </p>
+              <p className="truncate text-sm font-semibold text-slate-900">
+                {currentStatusLabel}
+              </p>
+            </div>
           </div>
         </div>
 
         <div>
           <label
             htmlFor="nextStatus"
-            className="block text-sm font-semibold text-gray-700 mb-2"
+            className="mb-2 block text-sm font-semibold text-slate-800"
           >
             Nouveau statut
           </label>
 
-          <select
-            id="nextStatus"
-            value={nextStatus}
-            onChange={(e) => onNextStatusChange(e.target.value as InvoiceStatus)}
-            className="w-full rounded-2xl border border-gray-300 px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-black"
-          >
-            <option value="">Sélectionner un statut</option>
-            {allowedStatuses.map((status) => (
-              <option key={status} value={status}>
-                {type === "invoice" && nextStatus
-                  ? invoiceStatusLabels[status as InvoiceStatus]
-                  : purchaseOrderStatusLabels[status as purchaseOrderStatus]}
-              </option>
-            ))}
-          </select>
+          <div className="relative">
+            <select
+              id="nextStatus"
+              value={nextStatus}
+              disabled={!hasAllowedStatuses || isSubmitting}
+              onChange={(e) =>
+                onNextStatusChange(e.target.value as InvoiceStatus)
+              }
+              className="
+                w-full appearance-none rounded-2xl
+                border border-blue-100 bg-white px-4 py-3 pr-10
+                text-sm font-medium text-slate-900 shadow-sm
+                outline-none transition-all
+                focus:border-blue-400 focus:ring-4 focus:ring-blue-100
+                disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400
+              "
+            >
+              <option value="">Sélectionner un statut</option>
 
-          {allowedStatuses.length === 0 && (
-            <p className="mt-2 text-sm text-red-500">
-              Aucun changement de statut autorisé pour cette facture.
+              {allowedStatuses.map((status) => (
+                <option key={status} value={status}>
+                  {getStatusLabel(status)}
+                </option>
+              ))}
+            </select>
+
+            <ArrowRight className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-400" />
+          </div>
+
+          {hasAllowedStatuses && nextStatus && (
+            <p className="mt-2 text-xs font-medium text-blue-600">
+              Le nouveau statut sélectionné sera appliqué après confirmation.
+            </p>
+          )}
+
+          {!hasAllowedStatuses && (
+            <p className="mt-2 rounded-xl border border-red-100 bg-red-50 px-3 py-2 text-sm font-medium text-red-600">
+              Aucun changement de statut autorisé pour cette {documentLabel}.
             </p>
           )}
         </div>
