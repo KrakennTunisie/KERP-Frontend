@@ -2,12 +2,9 @@
 
 import Link from "next/link";
 import { DeleteInvoiceModal } from "../widgets/deleteInvoiceModal";
-import { mockPurchaseOrders } from "../../mocks/purchase-order-mocks";
 import { getClientPurchaseOrderAllowedNextStatuses, purchaseOrderStatusColors, purchaseOrderStatusLabels, purchaseOrderStatusSchema } from "../../types/purchaseOrderStatus";
 import { usePurchaseOrderList } from "../../hooks/usePurchaseOrderList";
 import PurchaseOrderModal, { PurchaseOrderModalContent } from "./purchaseOrderDetails";
-import { MOCK_PARTNERS } from "../../mocks/clients-mocks";
-import { mockInvoiceItems } from "../../mocks/invoice-items-mocks";
 import { useSupplierPurchaseOrderList } from "../../hooks/useSupplierPurchaseOrderList";
 import { currencyTypeSchema } from "../../types/currency";
 import { UpdateInvoiceStatusModal } from "../widgets/updateStatusModal";

@@ -4,8 +4,6 @@ import { DeleteInvoiceModal } from "../widgets/deleteInvoiceModal";
 import { getClientPurchaseOrderAllowedNextStatuses, purchaseOrderStatusLabels, purchaseOrderStatusSchema } from "../../types/purchaseOrderStatus";
 import { usePurchaseOrderList } from "../../hooks/usePurchaseOrderList";
 import PurchaseOrderModal, { PurchaseOrderModalContent } from "./purchaseOrderDetails";
-import { MOCK_PARTNERS } from "../../mocks/clients-mocks";
-import { mockInvoiceItems } from "../../mocks/invoice-items-mocks";
 import { UpdateInvoiceStatusModal } from "../widgets/updateStatusModal";
 import { SendDocumentModal } from "../widgets/sendInvoiceModal";
 import { BillingPageHeader } from "../widgets/billingHeader";

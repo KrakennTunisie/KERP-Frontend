@@ -24,8 +24,6 @@ import PartnerHeader from "./partnerHeroSection";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
 import { Badge } from '@/shared/components/ui/badge';
 import { formatDateLong } from "@/shared/utils/formatDate";
-import { mockPurchaseOrders } from "../../mocks/purchase-order-mocks";
-import { mockPartner } from "../../mocks/partner-mocks";
 import { DocumentPreviewModal } from "@/shared/components/ui/documentPreviewModal";
 import PartnerCollapsibleSection from "../widgets/collapseSection";
 import RowActions from "../widgets/rowActions";

@@ -1,7 +1,6 @@
 import { TrendingDown, TrendingUp, Truck, Users, CheckCircle, Clock, AlertCircle, FileText, User, Mail, Paperclip } from "lucide-react";
 import { useState, Activity, useMemo } from "react";
 import { PreviewDocument } from "../components/partner/partnerInfoCard";
-import { MOCK_INVOICES } from "../mocks/invoice-mocks";
 import { Invoice, InvoicePageItem, InvoicePageItemV2 } from "../models/invoice";
 import { ClientPartnerDetails, Partner, PartnerAllDetails, SupplierPartnerDetails } from "../models/partner";
 import { InvoiceStatusWithoutAll, invoiceStatusColors, invoiceStatusLabels } from "../types/invoiceStatus";
