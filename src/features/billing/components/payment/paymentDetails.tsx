@@ -1,19 +1,17 @@
 "use client";
 
 import {
-  ArrowLeft,
   CalendarDays,
   Copy,
   CreditCard,
-  Currency,
   DollarSign,
   Download,
   FileText,
   Hash,
+  Info,
   Pencil,
   ReceiptText,
   Send,
-  Settings,
   Trash2,
   User,
   Wallet,
@@ -24,17 +22,15 @@ import Card from "../widgets/card";
 import { SectionLabel } from "../widgets/sectionLabel";
 import PageLoader from "@/shared/components/ui/pageLoader";
 import { formatDateLong } from "@/shared/utils/formatDate";
-import { BillingPageHeader } from "../widgets/billingHeader";
 import { DocumentTopBar } from "../widgets/documentTopBar";
 import usePaymentDetails from "../../hooks/usePaymentDetails";
 import { invoiceStatusLabels } from "../../types/invoiceStatus";
-import { openPdfInNewTab } from "@/shared/pdf/pdfGenerator";
-import { paymentToPdfData } from "@/shared/pdf/documentAdapter";
 import { AmountLine, InfoCard, MiniInfo, SummaryRow } from "@/shared/components/ui/amountRow";
 import { DeleteInvoiceModal } from "../widgets/deleteInvoiceModal";
 import { SendDocumentModal } from "../widgets/sendInvoiceModal";
 import { InvoiceDocumentsCard } from "../widgets/invoiceDocumentCard";
 import { DocumentPreviewModal } from "@/shared/components/ui/documentPreviewModal";
+import { partnerTypeSchema } from "../../types/partnerType";
 
 type Payment = {
   id: string;
@@ -246,7 +242,7 @@ return (
                       `/billing/invoices/clients/${relatedInvoice.idInvoice}/details`
                     )
                   }
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-blue-100 bg-blue-50 px-4 py-2.5 text-sm font-black text-blue-700 transition hover:bg-blue-100"
+                  className="inline-flex items-center gap-2 rounded-xl border border-blue-200 cursor-pointer bg-white px-3 py-2 text-xs font-bold text-blue-600 transition hover:bg-blue-50"
                 >
                   <FileText className="h-4 w-4" />
                   Ouvrir la facture
@@ -298,11 +294,26 @@ return (
 
           {/* Client / fournisseur */}
           <Card>
-            <div className="mb-5">
-              <SectionLabel>Client / fournisseur</SectionLabel>
-              <p className="mt-1 text-xs font-medium text-slate-400">
-                Partie associée à la facture réglée
-              </p>
+            <div className="mb-5 flex items-start justify-between gap-4">
+              <div>
+                <SectionLabel>Client / fournisseur</SectionLabel>
+                <p className="mt-1 text-xs font-medium text-slate-400">
+                  Partie associée à la facture réglée
+                </p>
+              </div>
+
+              {partner?.idPartner && (
+                <button
+                  type="button"
+                  onClick={() => partner.partnerType == partnerTypeSchema.enum.CLIENT ?
+                     router.push(`/billing/clients/${partner.idPartner}`)
+                    : router.push(`/billing/suppliers/${partner.idPartner}`)}
+                  className="inline-flex items-center gap-2 rounded-xl border border-blue-200 cursor-pointer bg-white px-3 py-2 text-xs font-bold text-blue-600 transition hover:bg-blue-50"
+                >
+                  <Info className="h-3.5 w-3.5" />
+                  Consulter
+                </button>
+              )}
             </div>
 
             <div className="rounded-3xl border border-slate-100 bg-slate-50/80 p-5">
@@ -439,11 +450,12 @@ return (
                     isOpen={sendOpen}
                     onClose={() => setSendOpen(false)}
                 />
-                        <DocumentPreviewModal
-                        open={!!previewDocument}
-                        onClose={() => setPreviewDocument(null)}
-                        document={previewDocument}
-                        />
+                
+                <DocumentPreviewModal
+                  open={!!previewDocument}
+                  onClose={() => setPreviewDocument(null)}
+                  document={previewDocument}
+                />
   </div>
 );
 }

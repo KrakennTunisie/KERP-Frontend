@@ -6,12 +6,11 @@ import InfoGrid from "@/shared/components/ui/infoGrid";
 import SectionCard from "@/shared/components/ui/sectionCard";
 import { Separator } from "@/shared/components/ui/separator";
 
-import { ClientPartnerDetails } from "../../models/partner";
-import { PaymentConditionLabels } from "../../types/paymentCondition";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { UserPen } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ClientPartnerDetails } from "../../models/partner";
 import { partnerTypeSchema } from "../../types/partnerType";
+import { PaymentConditionLabels } from "../../types/paymentCondition";
 
 type PartnerDetailsCardProps = {
   partner: ClientPartnerDetails;
@@ -28,15 +27,11 @@ export default function PartnerDetailsCard({
       title={partner.partnerType == partnerTypeSchema.enum.CLIENT ? "Détails du client" : "Détails du fournisseur"  }
       description="Informations complètes"
       action={
-        <Link href={`/billing/clients/${partner.idPartner}/edit`}>
           <IconButton
             icon={UserPen}
             title="Modifier"
-            variant="blue"
-            onClick={function (): void {
-              throw new Error("Function not implemented.");
-            }} />
-        </Link>
+            variant="blue" 
+            onClick={()=> router.push(`/billing/clients/${partner.idPartner}/edit`)}/>
       }
       contentClassName="space-y-4 max-h-[350px] overflow-y-auto pr-2"
     >

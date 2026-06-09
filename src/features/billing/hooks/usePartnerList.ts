@@ -118,6 +118,7 @@ export default function usePartnerList({ partnerType }: partnerListProps) {
 
         fetchPartner(partnerType);
     }, [debouncedSearchQuery, filterCity, currentPage]);
+    
     return {
         fetchPartner, debouncedSearchQuery, filterCity, currentPage, updatePartnerStatus, cities, searchQuery, setCurrentPage, setDeleteConfirmId, setSearchQuery
         , setTotalElements, setTotalPages, setFilterCity, deleteConfirmId, totalElements, totalPages, loading, clients, suppliers

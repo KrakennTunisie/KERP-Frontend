@@ -6,41 +6,6 @@ type FormInputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   error?: string;
 };
 
-const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
-  ({ label, icon, error, className, ...props }, ref) => {
-    return (
-      <div>
-        <label className="mb-2 block text-xs font-black uppercase tracking-[0.14em] text-slate-500">
-          {label}
-        </label>
-
-        <div
-          className={`flex items-center gap-3 rounded-2xl border bg-white px-4 py-3 shadow-sm transition focus-within:border-emerald-300 focus-within:ring-4 focus-within:ring-emerald-50 ${
-            error ? "border-rose-200" : "border-slate-200"
-          }`}
-        >
-          {icon && (
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-slate-50">
-              {icon}
-            </div>
-          )}
-
-          <input
-            ref={ref}
-            className={`w-full bg-transparent text-sm font-bold text-slate-900 outline-none placeholder:text-slate-300 ${className ?? ""}`}
-            {...props}
-          />
-        </div>
-
-        {error && (
-          <p className="mt-1.5 text-xs font-semibold text-rose-500">
-            {error}
-          </p>
-        )}
-      </div>
-    );
-  }
-);
 
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/shared/utils/cn";

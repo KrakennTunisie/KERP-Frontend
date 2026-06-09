@@ -51,6 +51,10 @@ export const INVOICES_ENDPOINTS={
 
   clientInvoicesById: (id: string) => `/invoices/clients/${id}`,
   supplierInvoicesById: (id: string) => `/invoices/suppliers/${id}`,
+
+  clientInvoicesByIdPartner: (id: string, query? : GetListParams) => `/invoices/last/client-invoices/${id}${buildQueryString(query)}`,
+
+  supplierInvoicesByIdPartner: (id: string, query? : GetListParams) => `/invoices/last/supplier-invoices/${id}${buildQueryString(query)}`,
 }
 
 export const INVOICES_CREDIT_NOTE_ENDPOINTS={
@@ -61,7 +65,8 @@ export const INVOICES_CREDIT_NOTE_ENDPOINTS={
   getInvoiceCreditNotes: (id : string, query?:GetListParams)=> `/credit-note-invoices/invoice/${id}${buildQueryString(query)}`,
   invoiceCreditNoteById: (id?: string) => `/credit-note-invoices/${id}`,
   updateStatusInvoiceCreditNote: (id: string)=> `/credit-note-invoices/${id}/status`,
-  getInvoiceCreditNoteByIdPartner: (idPartner?: string, partnerType?:string) => `/credit-note-invoices/getPartnerCreditNote/${idPartner}?partnerType=${partnerType}`,
+
+  getInvoiceCreditNoteByIdPartner: (idPartner?: string, partnerType?:string, query? : GetListParams) => `/credit-note-invoices/getPartnerCreditNote/${idPartner}${buildQueryString(query)}&partnerType=${partnerType}`,
 }
 
 export const PURCHASE_ORDER_ENDPOINTS = {
@@ -78,6 +83,9 @@ export const PURCHASE_ORDER_ENDPOINTS = {
   getSupplierPurchaseOrders: (query? : GetListParams)=> `/purchase-orders/supplier${buildQueryString(query)}`,
   supplierPurchaseOrderById: (id: string) => `/purchase-orders/supplier/${id}`, 
   supplierupdateStatusPurchaseOrder: (id: string)=> `/purchase-orders/supplier/${id}/status`,
+
+  getPurchaseOrderByIdPartner:(id: string,  partnerType:string, query? : GetListParams) => `/purchase-orders/partner/${id}${buildQueryString(query)}&partnerType=${partnerType}`,
+
  
 }
 
@@ -92,6 +100,7 @@ export const PAYMENT_ENDPIONTS={
   nextNumber: "/payments/next-number",
   getPayments: (query?: GetListParams)=>`/payments${buildQueryString(query)}`,
   getPaymentsByIdInvoice: (id: string, query?: GetListParams)=>`/payments/invoice/${id}${buildQueryString(query)}`,
+  getPaymentsByIdParner: (id: string, query?: GetListParams)=>`/payments/partner/${id}${buildQueryString(query)}`,
   paymentById: (id: string)=>`/payments/${id}`
 }
 

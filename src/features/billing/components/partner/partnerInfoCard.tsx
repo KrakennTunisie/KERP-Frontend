@@ -1,10 +1,10 @@
 "use client";
 
-import {  useState } from "react";
-import { DocumentPreviewModal } from "@/shared/components/ui/documentPreviewModal";
-import { BadgeCheck, CalendarDays, CreditCard, ReceiptText } from "lucide-react";
-import InfoItem from "@/shared/components/ui/infoItem";
 import DocumentItem from "@/shared/components/ui/documentItem";
+import { DocumentPreviewModal } from "@/shared/components/ui/documentPreviewModal";
+import InfoItem from "@/shared/components/ui/infoItem";
+import { BadgeCheck } from "lucide-react";
+import { useState } from "react";
 import { Document } from "../../models/document";
 import { Partner } from "../../models/partner";
 

@@ -33,7 +33,6 @@ import { DashboardAPI } from "../../api/partners-api";
 import { appToast } from "@/shared/lib/toast";
 import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 import RevenueExpenseBarChart from "../widgets/RevnueExpensesBarChart";
-import { PartnerRevenueStats } from "../../types/partnerRevenueStats";
 
 export function BillingDashboard() {
   const currentYear = new Date().getFullYear();
@@ -159,15 +158,20 @@ console.log("suppliersByMonth: ",suppliersByMonth)
     { month: 'Mai 2025', revenus: 11200, depenses: 8600 },
     { month: 'Juin 2025', revenus: 0, depenses: 0 },
   ];
-    const [partnerDespenses, setPartnerDespenses] = useState<PartnerRevenueStats[] | []>([])
-  //a changer
+
   const [selectedPeriod, setSelectedPeriod] = useState(6);
   
   // Calculate statistics
-
     const totalRevenueLastSixMonths = chartData.reduce((sum, item) => sum + item.revenus, 0);
     const totalExpensesLastSixMonths = chartData.reduce((sum, item) => sum + item.depenses, 0);
-  
+  const monthlyData = chartData.map(item => ({
+          period: item.month,
+          monthLabel: item.month,
+          revenueHT: item.revenus,
+          revenueTVA: 0,
+          revenueTTC: item.revenus,
+          nombreFactures: 0,
+      }));
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-50/30">
@@ -236,7 +240,7 @@ console.log("suppliersByMonth: ",suppliersByMonth)
         <div className="mx-auto space-y-8">
           <RevenueExpenseBarChart
             mode="both"
-            data={partnerDespenses}
+            data={monthlyData}
             selectedPeriod={selectedPeriod}
             onPeriodChange={setSelectedPeriod}
             onRefresh={() => console.log("Refresh revenus et dépenses")}

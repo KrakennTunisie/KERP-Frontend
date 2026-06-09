@@ -13,11 +13,10 @@ import {
   UserCheck,
 } from "lucide-react";
 import { ActionMenu } from "@/shared/components/ui/actionMenuItem";
-import { Partner, PartnerAllDetails } from "../../models/partner";
+import {  PartnerAllDetails } from "../../models/partner";
 import ClientDeleteModal from "../client/deleteClientModal";
 import { partnerTypeSchema } from "../../types/partnerType";
 import SupplierDeleteModal from "../supplier/deleteSupplierModal";
-import usePartnerList from "../../hooks/usePartnerList";
 
 type PartnerHeaderProps = {
   partner: PartnerAllDetails;
@@ -32,7 +31,11 @@ type PartnerHeaderProps = {
   };
   partnerType: string
   setOpen: () => void;
+  setDeleteOpen: (status: boolean)=> void,
+  deleteOpen: boolean,
   icon: LucideIcon;
+  onRefresh: ()=> void,
+  updatePartnerStatus: (staus: boolean)=>void
 };
 
 export default function PartnerHeader({
@@ -41,25 +44,29 @@ export default function PartnerHeader({
   icon: Icon,
   partnerType,
   setOpen,
+  onRefresh,
+  updatePartnerStatus,
+  deleteOpen,
+  setDeleteOpen
 }: PartnerHeaderProps) {
-  const { fetchPartner, updatePartnerStatus, setDeleteConfirmId, deleteConfirmId } = usePartnerList({ partnerType });
-  return (
+/*   const { fetchPartner, updatePartnerStatus, setDeleteConfirmId, deleteConfirmId } = use({ partnerType });
+ */ 
+
+  
+ return (
     <div className="bg-white border-b border-slate-100 px-8 py-6 font-[Inter,system-ui,sans-serif]">
       <div className=" mx-auto">
-        {partnerType == partnerTypeSchema.enum.CLIENT ? <ClientDeleteModal
-          open={!!deleteConfirmId}
-          onClose={() => setDeleteConfirmId('')}
-          onCreated={() => {
-            fetchPartner(partner.partnerType);
-          }}
-          confirmDeleteId={deleteConfirmId}
+        {partnerType == partnerTypeSchema.enum.CLIENT ? 
+        <ClientDeleteModal
+          open={deleteOpen}
+          onClose={() => setDeleteOpen(false)}
+          onCreated={onRefresh}
+          confirmDeleteId={partner.idPartner}
         /> : <SupplierDeleteModal
-          open={!!deleteConfirmId}
-          onClose={() => setDeleteConfirmId('')}
-          onCreated={() => {
-            fetchPartner(partner.partnerType);
-          }}
-          confirmDeleteId={deleteConfirmId}
+          open={deleteOpen}
+          onClose={() => setDeleteOpen(false)}
+          onCreated={onRefresh}
+          confirmDeleteId={partner.idPartner}
         />}
         {/* Back Button */}
         <Link
@@ -140,22 +147,21 @@ export default function PartnerHeader({
                 icon: UserCheck,
                 color: "text-emerald-600",
                 hover: "hover:bg-emerald-50",
-                onClick: () =>
-                  updatePartnerStatus(partner, true)
+                onClick: ()=> updatePartnerStatus(true)
               } :
                 {
                   label: "Désactiver",
                   icon: UserX,
                   color: "text-amber-600",
                   hover: "hover:bg-amber-50",
-                  onClick: () => updatePartnerStatus(partner, false),
+                  onClick: () => {updatePartnerStatus(false)},
                 },
               {
                 label: "Supprimer",
                 icon: UserMinus,
                 color: "text-rose-600",
                 hover: "hover:bg-rose-50",
-                onClick: () => setDeleteConfirmId(partner.idPartner),
+                onClick: () => setDeleteOpen(true),
               },
             ]}
           />

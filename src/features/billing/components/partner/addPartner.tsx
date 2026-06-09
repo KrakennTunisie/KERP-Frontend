@@ -454,10 +454,10 @@ export default function AddPartnerPage({ type, mode, partnerId }: pageProps) {
                                                     htmlFor="enablePortal"
                                                     className="cursor-pointer text-sm font-semibold text-slate-800"
                                                 >
-                                                    Activer l'accès au portail client
+                                                    {"Activer l'accès au portail client"}
                                                 </Label>
                                                 <p className="mt-1 text-xs text-slate-500">
-                                                    Le client pourra accéder à son espace dédié.
+                                                   {" Le client pourra accéder à son espace dédié."}
                                                 </p>
                                             </div>
                                         </div>

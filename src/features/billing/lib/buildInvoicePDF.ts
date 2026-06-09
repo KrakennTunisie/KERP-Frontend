@@ -1,7 +1,5 @@
 import { toPng } from "html-to-image";
 import jsPDF from "jspdf";
-import { useReactToPrint } from "react-to-print";
-import { fileSchema } from "../types/pdfSchema";
 
 export const handleSaveAsPDF = async (
   element: HTMLElement,

@@ -3,19 +3,14 @@
 import { useEffect, useMemo, useState } from "react";
 import PartnerDetails from "../partner/partnerDetails";
 import { useParams } from "next/navigation";
-import { PartnerAllDetails, SupplierPartnerDetails } from "../../models/partner";
-import { AuditLogAPI, DashboardAPI, InvoicesAPI, InvoicesCreditNoteAPI, partnersApi } from "../../api/partners-api";
+import { PartnerAllDetails } from "../../models/partner";
+import {  DashboardAPI, InvoicesAPI,  partnersApi } from "../../api/partners-api";
 import { appToast } from "@/shared/lib/toast";
 import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 import PageLoader from "@/shared/components/ui/pageLoader";
 import { PartnerInvoiceStats } from "../../types/partnersStats";
-import { Invoice, InvoicePageItem, InvoicePageItemV2 } from "../../models/invoice";
 import { NotFound } from "@/shared/components/widgets/notFound";
-import { AuditLog } from "../../models/AuditLogs";
 import { PartnerRevenueStats } from "../../types/partnerRevenueStats";
-import { PurchaseOrderPartnerSummary } from "../../models/purchaseOrder";
-import { InvoiceCreditNotePageItem } from "../../models/creditNote";
-import { partnerTypeSchema } from "../../types/partnerType";
 
 export default function SupplierDetails() {
   const params = useParams();
@@ -40,12 +35,8 @@ export default function SupplierDetails() {
   })
 
   const [supplier, setSupplier] = useState<PartnerAllDetails>();
-  const [supplierInvoices, setSupplierInvoices] = useState<InvoicePageItem[] | []>([])
   const [loading, setLoading] = useState<boolean>(true);
-  const [supplierPurchaseOrder, setSupplierPurchaseOrder] = useState<PurchaseOrderPartnerSummary[] | []>([])
-  const [supplierLogs, setSupplierLogs] = useState<AuditLog[] | []>([])
   const [supplierDespensesInitial, setSupplierDespensesInitial] = useState<PartnerRevenueStats[] | []>([])
-  const [supplierCreditNotes, setSupplierCreditNotes] = useState<InvoiceCreditNotePageItem[] | []>([])
   const fetchSupplier = async () => {
     try {
       setLoading(true)
@@ -64,30 +55,6 @@ export default function SupplierDetails() {
   };
 
 
-  const fetchSupplierInvoices = async () => {
-    try {
-      setLoading(true)
-      const invoices = await partnersApi.getSupplierInvoicesById(supplierId);
-      setSupplierInvoices(invoices);
-    } catch (error) {
-      appToast.error("Erreur fetch des factures fournisser: ", getApiErrorMessage(error));
-    }
-    finally {
-      setLoading(false)
-    }
-  };
-  const fetchSupplierPurchaseorder = async () => {
-      try {
-        setLoading(true)
-        const purchaseOrders = await partnersApi.getPurchaseOrderByPartnerId(supplierId,partnerTypeSchema.enum.SUPPLIER);
-        setSupplierPurchaseOrder(purchaseOrders);
-      } catch (error) {
-        appToast.error("Erreur fetch des bon de commande fournisseur: ", getApiErrorMessage(error));
-      }
-      finally {
-        setLoading(false)
-      }
-    };
 
   const fetchSupplierRevenue = async () => {
     if (!supplier) return;
@@ -104,40 +71,10 @@ export default function SupplierDetails() {
     }
   };
 
-  const fetchSupplierCreditNotes = async () => {
-      try {
-        setLoading(true)
-        const crediNotes = await InvoicesCreditNoteAPI.getInvoiceCreditNoteByIdSupplier(supplierId,partnerTypeSchema.enum.SUPPLIER);
-        setSupplierCreditNotes(crediNotes);
-        console.log(crediNotes);
-      } catch (error) {
-        appToast.error("Erreur fetch des factures d'avoir de ce client: ", getApiErrorMessage(error));
-      }
-      finally {
-        setLoading(false)
-      }
-    };
-
-  const fetchSupplierLogs = async () => {
-    try {
-      setLoading(true)
-      const clientLogs = await AuditLogAPI.getAuditLogsBySupplier(supplierId)
-      setSupplierLogs(clientLogs);
-    } catch (error) {
-      appToast.error("Erreur fetch les logs du fournisseur: ", getApiErrorMessage(error));
-    }
-    finally {
-      setLoading(false)
-    }
-  };
 
 
   useEffect(() => {
     fetchSupplier();
-    fetchSupplierInvoices();
-    fetchSupplierLogs();
-    fetchSupplierCreditNotes ();
-    fetchSupplierPurchaseorder();
   }, [supplierId]);
 
   useEffect(() => {
@@ -165,11 +102,7 @@ export default function SupplierDetails() {
       <PartnerDetails
         partner={supplier}
         partnerStats={supplierInvoiceStats}
-        partnerInvoices={supplierInvoices}
-        partnerLogs={supplierLogs}
-        purchaseOrders={supplierPurchaseOrder}
-        onRefresh={fetchSupplierLogs}
-        partnerCreditNotes={supplierCreditNotes}
+        onRefresh={fetchSupplier}
         supplierDespensesInitial={supplierDespensesInitial}
         totalDespensesInitial={totalDespensesInitial}
       />

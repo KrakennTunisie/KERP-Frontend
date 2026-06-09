@@ -1,16 +1,13 @@
 "use client";
 
+import { DocumentPreviewModal } from "@/shared/components/ui/documentPreviewModal";
 import React from "react";
-import { InvoiceItem } from "../../models/invoiceItem";
-import { Partner } from "../../models/partner";
-import Card from "../widgets/card";
-import { SectionLabel } from "../widgets/sectionLabel";
-import usePurchaseOrderDetails from "../../hooks/usePurchaseOrderDetails";
-import { paymentMethodLabels } from "../../types/paymentMethod";
+import useSupplierPurchaseOrderDetails from "../../hooks/useSupplierPurchaseOrderDetails";
 import { currencyTypeSchema } from "../../types/currency";
 import { PaymentConditionLabels } from "../../types/paymentCondition";
-import { DocumentPreviewModal } from "@/shared/components/ui/documentPreviewModal";
-import useSupplierPurchaseOrderDetails from "../../hooks/useSupplierPurchaseOrderDetails";
+import { paymentMethodLabels } from "../../types/paymentMethod";
+import Card from "../widgets/card";
+import { SectionLabel } from "../widgets/sectionLabel";
 
 
 type ModalProps = {

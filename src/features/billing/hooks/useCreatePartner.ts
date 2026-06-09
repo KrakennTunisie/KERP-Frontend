@@ -8,7 +8,6 @@ import { appToast } from "@/shared/lib/toast";
 import { partnersApi } from "../api/partners-api";
 import { partnerTypeSchema } from "../types/partnerType";
 import { useEffect, useState } from "react";
-import { Form } from "lucide-react";
 export interface pageProps {
     type: string
     mode: string
@@ -126,6 +125,7 @@ export default function UseCreatePartner({ type, mode, partnerId }: pageProps) {
     useEffect(() => {
         fetchPartner();
     }, [partnerId]);
+    
     useEffect(() => {
         if (mode === "edit" && partner) {
             const fullName = partner.partnerName?.trim() ?? "";

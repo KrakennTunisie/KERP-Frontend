@@ -1,20 +1,18 @@
 'use client';
 
 import {
-  Search,
   Plus
 } from 'lucide-react';
 
 
-import SuppliersTable from "./suppliersTable"
+import SuppliersTable from "./suppliersTable";
 
-import SupplierDeleteModal from "./deleteSupplierModal";
-import { useRouter } from 'next/navigation';
-import { PageHeader } from '../widgets/header';
 import { FiltersBar } from '@/shared/components/ui/filtreBar';
-import  { partnerListProps } from '../../hooks/usePartnerList';
+import { useRouter } from 'next/navigation';
+import usePartnerList, { partnerListProps } from '../../hooks/usePartnerList';
 import { partnerTypeSchema } from '../../types/partnerType';
-import usePartnerList from '../../hooks/usePartnerList';
+import { PageHeader } from '../widgets/header';
+import SupplierDeleteModal from "./deleteSupplierModal";
 
 
 export default function SuppliersList({partnerType}: partnerListProps) {

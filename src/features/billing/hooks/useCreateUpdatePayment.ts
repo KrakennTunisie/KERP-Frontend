@@ -243,7 +243,9 @@ const fetchPaymentDetails = async () => {
   const buildFormData = async (data: CreatePaymentFormValues) => {
     const formData = new FormData();
 
-    formData.append("invoiceNumber", selectedInvoice?.idInvoice!);
+    if(!selectedInvoice) return;
+
+    formData.append("invoiceNumber", selectedInvoice?.idInvoice);
     formData.append("paymentNumber", data.reference);
     formData.append("date", data.date);
     formData.append("amount", String(data.amount));
@@ -257,11 +259,14 @@ const fetchPaymentDetails = async () => {
   };
 
   const createPayment = async (data: CreatePaymentFormValues ) => {
+    if(!selectedInvoice) return ;
     try {
       setCreateLoading(true);
 
       const formData = await buildFormData(data);
 
+      if(!formData) return;
+      
       const createdPayment = await paymentsAPI.createPayment(formData);
 
       if (createdPayment) {
@@ -285,6 +290,7 @@ const fetchPaymentDetails = async () => {
       setUpdateLoading(true);
 
       const formData = await buildFormData(data);
+      if(!formData) return;
       formData.append('idPayment', paymentId)
 
 

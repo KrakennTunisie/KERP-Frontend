@@ -137,51 +137,51 @@ export default function ClientsInvoiceList() {
             />
             {/* Table */}
 
-            <BillingTable<InvoicePageItem>
-                items={clientsInvoices}
-                variant="invoice"
-                secondColumnLabel="Client"
-                currentPage={currentPage}
-                totalPages={totalPages}
-                totalElements={totalElements}
-                loading={loading}
-                onPageChange={setCurrentPage}
-                onView={(invoice) => {
-                    router.push(`/billing/invoices/clients/${invoice.idInvoice}/details/`);
-                }}
-                onUpdateStatus={(invoice) => {
-                    setSelectedInvoice(invoice);
-                    setInvoiceId(invoice.idInvoice);
-                    setUpdateOpen(true);
-                }}
-                canUpdateStatus={(invoice) =>
-                    getClientInvoiceAllowedNextStatuses(invoice.invoiceStatus).length > 0
-                }
-                onEdit={(invoice) => {
-                    router.push(`/billing/invoices/clients/${invoice.idInvoice}/edit`);
-                }}
-                onSend={(invoice) => {
-
-                    setSelectedInvoice(invoice);
-                    setInvoiceId(invoice.idInvoice);
-                    setOpen(true);
-                }}
-                onDelete={(invoice) => {
-                    setSelectedInvoice(invoice);
-                    setInvoiceId(invoice.idInvoice);
-                    setDeleteOpen(true);
-                }}
-                getNumber={(invoice) => invoice.invoiceNumber}
-                getPartnerName={(invoice) => invoice.partner?.partnerName}
-                getStatus={(invoice) => invoice.invoiceStatus}
-                getAmountEUR={(invoice) => invoice.totalInclTaxEUR}
-                getAmountTND={(invoice) => invoice.totalInclTaxTND}
-                getDate={(invoice) => invoice.dueDate ?? invoice.issueDate}
-                getStatusLabel={(status) => invoiceStatusLabels[status]}
-                getStatusColor={(status) =>
-                    status !== "ALL" ? invoiceStatusColors[status] : ""
-                }
-            />
+                <BillingTable<InvoicePageItem>
+                    items={clientsInvoices}
+                    variant="invoice"
+                    secondColumnLabel="Client"
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    totalElements={totalElements}
+                    loading={loading}
+                    onPageChange={setCurrentPage}
+                    onView={(invoice) => {
+                        router.push(`/billing/invoices/clients/${invoice.idInvoice}/details/`);
+                    }}
+                    onUpdateStatus={(invoice) => {
+                        setSelectedInvoice(invoice);
+                        setInvoiceId(invoice.idInvoice);
+                        setUpdateOpen(true);
+                    }}
+                    canUpdateStatus={(invoice) =>
+                        getClientInvoiceAllowedNextStatuses(invoice.invoiceStatus).length > 0
+                    }
+                    onEdit={(invoice) => {
+                        router.push(`/billing/invoices/clients/${invoice.idInvoice}/edit`);
+                    }}
+                    onSend={(invoice) => {
+                        
+                        setSelectedInvoice(invoice);
+                        setInvoiceId(invoice.idInvoice);
+                        setOpen(true);
+                    }}
+                    onDelete={(invoice) => {
+                        setSelectedInvoice(invoice);
+                        setInvoiceId(invoice.idInvoice);
+                        setDeleteOpen(true);
+                    }}
+                    getNumber={(invoice) => invoice.invoiceNumber}
+                    getPartnerName={(invoice) => invoice.partner?.companyName}
+                    getStatus={(invoice) => invoice.invoiceStatus}
+                    getAmountEUR={(invoice) => invoice.totalInclTaxEUR}
+                    getAmountTND={(invoice) => invoice.totalInclTaxTND}
+                    getDate={(invoice) => invoice.dueDate ?? invoice.issueDate}
+                    getStatusLabel={(status) => invoiceStatusLabels[status]}
+                    getStatusColor={(status) =>
+                        status !== "ALL" ? invoiceStatusColors[status] : ""
+                    }
+                />
 
             <UpdateInvoiceStatusModal
                 open={updateOpen}

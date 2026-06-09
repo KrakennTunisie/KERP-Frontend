@@ -1,61 +1,57 @@
 "use client";
 
+import ActivityLogCard from "@/shared/components/ui/activityLogCard";
+import { DocumentPreviewModal } from "@/shared/components/ui/documentPreviewModal";
+import EmailHistoryCard from "@/shared/components/ui/emailHistoryLog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
+import { SendEmailModal } from "@/shared/components/widgets/sendEmailModal";
 import {
-  Truck,
-  Users,
-  TrendingDown,
-  TrendingUp,
-  FileText,
   Clock,
-  CircleDollarSign,
+  CreditCard,
+  Euro,
+  Eye,
+  FileText,
+  Mail,
   Pencil,
-  Plus,
+  Receipt,
+  ReceiptText,
   Send,
   Trash2,
-  UserPen,
-  RefreshCw,
-  ReceiptText,
-  Eye,
-  CreditCard,
+  TrendingUp,
 } from "lucide-react";
-import { Receipt, Mail, CheckCircle, Package, Euro, } from "lucide-react";
-import PartnerStatCard from "../widgets/partnerStatCard";
-import PartnerHeader from "./partnerHeroSection";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
-import { Badge } from '@/shared/components/ui/badge';
-import { formatDateLong } from "@/shared/utils/formatDate";
-import { DocumentPreviewModal } from "@/shared/components/ui/documentPreviewModal";
-import PartnerCollapsibleSection from "../widgets/collapseSection";
-import RowActions from "../widgets/rowActions";
-import PartnerDetailsCard from "../widgets/partnerDetailsCard";
-import ActivityLogCard from "@/shared/components/ui/activityLogCard";
-import RevenueExpenseBarChart from "../widgets/RevnueExpensesBarChart";
-import EmailHistoryCard from "@/shared/components/ui/emailHistoryLog";
-import { purchaseOrderStatusColors, purchaseOrderStatusLabels } from "../../types/purchaseOrderStatus";
-import { DocumentListItem } from "../widgets/documentListItem";
-import { useState } from "react";
-import { SendEmailModal } from "@/shared/components/widgets/sendEmailModal";
-import { ClientPartnerDetails, SupplierPartnerDetails } from "../../models/partner";
-import { PartnerInvoiceStats } from "../../types/partnersStats";
-import { InvoicePageItem } from "../../models/invoice";
-import { getActivityIcon } from "../../types/logsIcons";
-import UseClientsDetails, { PartnerDetailsProps, Payment } from "../../hooks/useClientsDetails";
-import { invoiceStatusColors, invoiceStatusLabels } from "../../types/invoiceStatus";
-import { partnerTypeSchema } from "../../types/partnerType";
 import { useRouter } from "next/navigation";
-import { DeleteInvoiceModal } from "../widgets/deleteInvoiceModal";
+import UseClientsDetails, { PartnerDetailsProps } from "../../hooks/useClientsDetails";
+import { InvoiceCreditNotePageItem } from "../../models/creditNote";
+import { InvoicePageItem } from "../../models/invoice";
+import { ClientPartnerDetails } from "../../models/partner";
+import { PaymentListItem } from "../../models/payment";
+import { PurchaseOrderPageItem } from "../../models/purchaseOrder";
 import { currencyTypeSchema } from "../../types/currency";
+import { invoiceStatusColors, invoiceStatusLabels } from "../../types/invoiceStatus";
+import { getActivityIcon } from "../../types/logsIcons";
+import { partnerTypeSchema } from "../../types/partnerType";
+import { purchaseOrderStatusColors, purchaseOrderStatusLabels } from "../../types/purchaseOrderStatus";
 import PurchaseOrderModal, { PurchaseOrderModalContent } from "../purchaseOrder/purchaseOrderDetails";
 import SupplierPurchaseOrderModal, { SupplierPurchaseOrderModalContent } from "../purchaseOrder/supplierPurchaseOrderDetails";
-import { invoiceTypeSchema } from "../../types/invoiceType";
+import PartnerCollapsibleSection from "../widgets/collapseSection";
+import { DeleteInvoiceModal } from "../widgets/deleteInvoiceModal";
+import { DocumentListItem } from "../widgets/documentListItem";
+import PartnerDetailsCard from "../widgets/partnerDetailsCard";
+import PartnerStatCard from "../widgets/partnerStatCard";
+import RevenueExpenseBarChart from "../widgets/RevnueExpensesBarChart";
 import { SendDocumentModal } from "../widgets/sendInvoiceModal";
+import PartnerHeader from "./partnerHeroSection";
 
 
-export default function PartnerDetails({ partner, clientRevenueInitial, supplierDespensesInitial, totalRevenueInitial, totalDespensesInitial, partnerStats, partnerInvoices, partnerLogs, purchaseOrders, partnerCreditNotes, onRefresh }: PartnerDetailsProps) {
+export default function PartnerDetails({ partner, clientRevenueInitial, supplierDespensesInitial, totalRevenueInitial, totalDespensesInitial, partnerStats, onRefresh }: PartnerDetailsProps) {
 
-  const { getStatusLabel, getEmailStatusColor, toggleSection, open, clientRevenue, fetchPartnerStats, totalRevenue, totalDespenses, selected, setSelected, sendeMailOpen, setSendMailOpen, modalPurchaseOrderOpen, setModalPurchaseOrderOpen, invoiceType, setInvoiceType, setDeleteCNoteOpen, deleteCNoteOpen, creditNoteId, setCreditNoteId, deleteCreditInvoice
-    , previewDocument, setPreviewDocument, selectedPeriod, setSelectedPeriod, emailLogs, clientPayments, activeTab, setActiveTab, refresh, setRefresed, supplierDespenses, purchaseOrderId, setPurchaseOrderId, deletePOrderOpen, setDeletePOrderOpen, deletePurchaseOrder, modalSupplierPurchaseOrderOpen, setModalSupplierPurchaseOrderOpen
-    , HeaderIcon, setOpen, pageConfig, openSections, deleteOpen, deleteLoading, deleteClientInvoice, setInvoiceId, invoiceRef, setDeleteOpen } = UseClientsDetails({ partner, partnerStats, clientRevenueInitial, supplierDespensesInitial, totalRevenueInitial, totalDespensesInitial, partnerInvoices, partnerLogs, purchaseOrders, partnerCreditNotes, onRefresh });
+  const {     deleteClientInvoice,deleteLoading,setDeleteLoading,setDeleteOpen,invoiceRef,deleteOpen,setInvoiceId,purchaseOrderId,setPurchaseOrderId,setDeletePOrderOpen,deletePOrderOpen , deletePurchaseOrder,
+    getStatusLabel, getEmailStatusColor, chartMode, getStatusIcon, getLabelColor, getStatusColor, toggleSection ,refresh,setRefresed,modalPurchaseOrderOpen,setModalPurchaseOrderOpen
+    , previewDocument, setPreviewDocument, selectedPeriod, setSelectedPeriod, emailLogs, activeTab, setActiveTab, supplierDespenses,totalDespenses
+    , TotalIcon, HeaderIcon, open, setOpen, openSections, pageConfig, fetchPartnerStats,clientRevenue, totalRevenue ,sendeMailOpen, setSendMailOpen,
+    updatePartnerStatus, deletePartnerOpen, setDeletePartnerOpen, updatePartnerStatusOpen, setUpdatePartnerStatusOpen,deleteCreditInvoice,
+     setDeleteCNoteOpen,deleteCNoteOpen,creditNoteId,setCreditNoteId, modalSupplierPurchaseOrderOpen, setModalSupplierPurchaseOrderOpen, selected, setSelected, invoiceType, setInvoiceType
+     } = UseClientsDetails({ partner, partnerStats, clientRevenueInitial, supplierDespensesInitial, totalRevenueInitial, totalDespensesInitial, onRefresh});
   const router = useRouter();
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-gray-50">
@@ -65,7 +61,11 @@ export default function PartnerDetails({ partner, clientRevenueInitial, supplier
         pageConfig={pageConfig}
         icon={HeaderIcon}
         setOpen={() => setOpen(true)}
-      />
+        onRefresh={onRefresh} 
+        setDeleteOpen={setDeletePartnerOpen} 
+        deleteOpen={deletePartnerOpen} 
+        updatePartnerStatus={updatePartnerStatus} 
+        />
       <DeleteInvoiceModal
         open={deleteOpen}
         onClose={() => setDeleteOpen(false)}
@@ -83,6 +83,7 @@ export default function PartnerDetails({ partner, clientRevenueInitial, supplier
         onClose={() => setDeleteCNoteOpen(false)}
         onConfirm={() => deleteCreditInvoice()}
         loading={deleteLoading} />
+
       <SendDocumentModal
         document={selected}
         variant="invoice"
@@ -99,6 +100,8 @@ export default function PartnerDetails({ partner, clientRevenueInitial, supplier
           onClose={() => setModalPurchaseOrderOpen(false)}
         />
       </PurchaseOrderModal>
+
+
       <SupplierPurchaseOrderModal
         open={modalSupplierPurchaseOrderOpen}
         title={`Bon de commande ${invoiceRef}`}
@@ -107,6 +110,8 @@ export default function PartnerDetails({ partner, clientRevenueInitial, supplier
           purchaseOrderId={purchaseOrderId}
           onClose={() => setModalSupplierPurchaseOrderOpen(false)}
         />
+
+        
       </SupplierPurchaseOrderModal>
       {/* Main Content with Tabs */}
       <main className="flex-1 overflow-y-auto p-8">
@@ -171,7 +176,7 @@ export default function PartnerDetails({ partner, clientRevenueInitial, supplier
                   className="flex flex-1 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold text-slate-500 transition-all data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm cursor-pointer "
                 >
                   <TrendingUp className="w-4 h-4" />
-                  Vue d'ensemble
+                  {"Vue d'ensemble"}
                 </TabsTrigger>
 
                 <TabsTrigger
@@ -238,8 +243,8 @@ export default function PartnerDetails({ partner, clientRevenueInitial, supplier
 
                 {/* Activity Log — scrollable after 5 items */}
                 <ActivityLogCard
-                  logs={partnerLogs}
-                  onRefresh={onRefresh}
+                  partnerId={partner.idPartner}
+                  partnerType={partner.partnerType}
                   getActivityIcon={getActivityIcon}
 
                 />
@@ -249,15 +254,15 @@ export default function PartnerDetails({ partner, clientRevenueInitial, supplier
             {/* ── Transactions Tab ───────────────────────────────── */}
             <TabsContent value="transactions" className="space-y-4">
 
-              <PartnerCollapsibleSection
+              <PartnerCollapsibleSection<InvoicePageItem>
                 title="Factures"
                 addLabel="Ajouter facture"
+                partnerId={partner.idPartner}
                 partnerType={partner.partnerType}
                 transactionType="Facture"
-                count={partnerInvoices.length}
+                count={0}
                 open={openSections.invoices}
                 onToggle={() => toggleSection("invoices")}
-                items={partnerInvoices}
                 getKey={(invoice) => invoice.idInvoice}
                 onAdd={() => partner.partnerType == partnerTypeSchema.enum.CLIENT ? router.push(`/billing/invoices/clients/create/`) : null}
                 renderItem={(invoice) => (
@@ -274,6 +279,11 @@ export default function PartnerDetails({ partner, clientRevenueInitial, supplier
                     getStatus={(item) => item.invoiceStatus}
                     statusLabels={invoiceStatusLabels}
                     statusColors={invoiceStatusColors}
+                    onView={(item) => {
+                          partner.partnerType == partnerTypeSchema.enum.CLIENT ?
+                            router.push(`/billing/invoices/clients/${item.idInvoice}/details/`) :
+                            router.push(`/billing/invoices/suppliers/${item.idInvoice}/details/`);
+                          }}
                     actions={[
                       {
                         label: "Voir le détail",
@@ -289,7 +299,7 @@ export default function PartnerDetails({ partner, clientRevenueInitial, supplier
                           label: "Modifier",
                           icon: Pencil,
                           onClick: () => {
-                            router.push(`/billing/invoices/clients/${invoice.idInvoice}/edit/`)
+                            router.push(`/billing/invoices/clients/${invoice.idInvoice}/edit/`);
                           },
                           disabled: invoice.invoiceStatus === "CANCELLED",
                         }]
@@ -300,8 +310,8 @@ export default function PartnerDetails({ partner, clientRevenueInitial, supplier
                           label: "Envoyer",
                           icon: Send,
                           onClick: () => {
-                            setSelected(invoice)
-                            setSendMailOpen(true)
+                            setSelected(invoice);
+                            setSendMailOpen(true);
                           },
                           disabled: invoice.invoiceStatus === "CANCELLED",
                         }] : []),
@@ -317,68 +327,63 @@ export default function PartnerDetails({ partner, clientRevenueInitial, supplier
                         },
                         disabled: invoice.invoiceStatus !== "DRAFT",
                       },
-                    ]}
-                  />
-                )}
-              />
+                    ]} />
+                  )}             
+                />
 
-              <PartnerCollapsibleSection
+              <PartnerCollapsibleSection<PaymentListItem>
+                partnerId={partner.idPartner}
                 title="Paiements clients"
                 addLabel="Ajouter paiement"
                 transactionType="Paiement"
                 partnerType={partner.partnerType}
-                count={clientPayments.length}
+                count={0}
                 open={openSections.payments}
                 onToggle={() => toggleSection("payments")}
-                items={clientPayments}
-                getKey={(payment) => payment.id}
+                getKey={(payment) => payment.idPayment}
                 onAdd={() => console.log("Ajouter paiement")}
                 renderItem={(payment) => (
-                  <DocumentListItem<Payment>
+                  <DocumentListItem<PaymentListItem>
                     item={payment}
                     variant="payment"
                     icon={CreditCard}
                     title="paiement"
                     menuTitle="Actions paiement"
-                    getNumber={(item) => item.paymentNumber}
-                    getDate={(item) => new Date(item.date)}
+                    getNumber={(item) => item.reference}
+                    getDate={(item) => new Date(item.paymentDate)}
                     getAmount={(item) => item.amount}
                     getCurrency={() => "TND"}
                     amountLabel="Montant payé"
                     secondaryLabel="Facture"
-                    getSecondaryText={(item) => item.invoiceNumber}
+                    getSecondaryText={(item) => item.invoice.invoiceNumber}
+                    onView={(item) => router.push(`/billing/payments/${item.idPayment}`)}
                     actions={[
-                      {
-                        label: "Voir le détail",
-                        icon: Eye,
-                        onClick: () => console.log("Voir paiement", payment.id),
-                      },
                       {
                         label: "Modifier",
                         icon: Pencil,
-                        onClick: () => console.log("Modifier paiement", payment.id),
+                        onClick: () => router.push(`/billing/payments/update/${payment.idPayment}`),
                       },
                       {
                         label: "Supprimer",
                         icon: Trash2,
                         color: "text-rose-600",
                         hover: "hover:bg-rose-50",
-                        onClick: () => console.log("Supprimer paiement", payment.id),
+                        onClick: () => {console.log("Supprimer paiement", payment.idPayment)},
                       },
                     ]}
                   />
                 )}
               />
 
-              <PartnerCollapsibleSection
+              <PartnerCollapsibleSection<PurchaseOrderPageItem>
                 title="Bons de commande"
                 addLabel="Ajouter bon commande"
                 transactionType="Bon de commande"
+                partnerId={partner.idPartner}
                 partnerType={partner.partnerType}
-                count={purchaseOrders.length}
+                count={0}
                 open={openSections.purchaseOrders}
                 onToggle={() => toggleSection("purchaseOrders")}
-                items={purchaseOrders}
                 getKey={(order) => order.idPurchaseOrder}
                 onAdd={() => console.log("Ajouter bon de commande")}
                 renderItem={(PurchaseOrder) => (
@@ -388,18 +393,7 @@ export default function PartnerDetails({ partner, clientRevenueInitial, supplier
                     icon={ReceiptText}
                     title="Bon de commande"
                     menuTitle="Actions bon de commande"
-                    getNumber={(item) => item.purchaseOrderNumber}
-                    getDate={(item) => item.issueDate}
-                    getAmount={(item) => item.purchaseCurrency == currencyTypeSchema.enum.EUR ? item.totalInclTaxEUR : item.purchaseCurrency == currencyTypeSchema.enum.USD ? item.totalInclTaxUSD : item.totalInclTaxTND}
-                    getCurrency={(item) => item.purchaseCurrency}
-                    getStatus={(item) => item.purchaseOrderStatus}
-                    statusLabels={purchaseOrderStatusLabels}
-                    statusColors={purchaseOrderStatusColors}
-                    actions={[
-                      {
-                        label: "Voir le détail",
-                        icon: Eye,
-                        onClick: () => {
+                    onView={() => {
                           console.log("Voir bon de commande", PurchaseOrder.partner.partnerType);
                           if (PurchaseOrder.partner.partnerType == partnerTypeSchema.enum.CLIENT.toString()) {
                             setPurchaseOrderId(PurchaseOrder.idPurchaseOrder)
@@ -410,8 +404,15 @@ export default function PartnerDetails({ partner, clientRevenueInitial, supplier
                             setModalSupplierPurchaseOrderOpen(true)
                           }
 
-                        }
-                      },
+                        }}
+                    getNumber={(item) => item.purchaseOrderNumber}
+                    getDate={(item) => item.issueDate}
+                    getAmount={(item) => item.purchaseCurrency == currencyTypeSchema.enum.EUR ? item.totalInclTaxEUR : item.purchaseCurrency == currencyTypeSchema.enum.USD ? item.totalInclTaxUSD : item.totalInclTaxTND}
+                    getCurrency={(item) => item.purchaseCurrency}
+                    getStatus={(item) => item.purchaseOrderStatus}
+                    statusLabels={purchaseOrderStatusLabels}
+                    statusColors={purchaseOrderStatusColors}
+                    actions={[
                       ...(partner.partnerType == partnerTypeSchema.enum.SUPPLIER
                         ? [{
                           label: "Modifier",
@@ -452,15 +453,15 @@ export default function PartnerDetails({ partner, clientRevenueInitial, supplier
                 )}
               />
 
-              <PartnerCollapsibleSection
+              <PartnerCollapsibleSection<InvoiceCreditNotePageItem>
                 title="Factures d'avoir"
                 addLabel="Ajouter avoir"
                 transactionType="Avoir"
                 partnerType={partner.partnerType}
-                count={partnerCreditNotes.length}
+                partnerId={partner.idPartner}
+                count={0}
                 open={openSections.creditNotes}
                 onToggle={() => toggleSection("creditNotes")}
-                items={partnerCreditNotes}
                 getKey={(creditNote) => creditNote.idInvoiceCreditNote}
                 onAdd={() => console.log("Ajouter facture d'avoir")}
                 renderItem={(creditNote) => (
@@ -470,6 +471,10 @@ export default function PartnerDetails({ partner, clientRevenueInitial, supplier
                     icon={ReceiptText}
                     title="facture d'avoir"
                     menuTitle="Actions facture d'avoir"
+                    onView={() => {
+                          console.log("Voir facture d'avoir", creditNote.idInvoiceCreditNote),
+                            router.push(`/billing/invoices/clients/${creditNote.invoice.idInvoice}/credit-note/${creditNote.invoiceCreditNoteNumber}`)
+                        }}
                     getNumber={(item) => item.invoiceCreditNoteNumber}
                     getDate={(item) => item.issueDate}
                     getAmount={(item) => item.invoice.invoiceCurrency == currencyTypeSchema.enum.EUR ? item.totalInclTaxEUR : item.invoice.invoiceCurrency == currencyTypeSchema.enum.USD ? item.totalInclTaxUSD : item.totalInclTaxTND}
@@ -478,14 +483,6 @@ export default function PartnerDetails({ partner, clientRevenueInitial, supplier
                     statusLabels={purchaseOrderStatusLabels}
                     statusColors={purchaseOrderStatusColors}
                     actions={[
-                      {
-                        label: "Voir le détail",
-                        icon: Eye,
-                        onClick: () => {
-                          console.log("Voir facture d'avoir", creditNote.idInvoiceCreditNote),
-                            router.push(`/billing/invoices/clients/${creditNote.invoice.idInvoice}/credit-note/${creditNote.invoiceCreditNoteNumber}`)
-                        }
-                      },
                       ...(partner.partnerType == partnerTypeSchema.enum.CLIENT
                         ? [{
                           label: "Envoyer",

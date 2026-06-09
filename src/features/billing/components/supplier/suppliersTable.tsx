@@ -1,18 +1,16 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { DataTable, type DataTableColumn } from "@/shared/components/datatable";
+import { ActionMenu } from "@/shared/components/ui/actionMenuItem";
 import {
+  Edit,
   Mail,
   Phone,
-  Edit,
   Trash2,
-  Truck,
-  Eye,
+  Truck
 } from "lucide-react";
-import { DataTable, type DataTableColumn } from "@/shared/components/datatable";
+import { useRouter } from "next/navigation";
 import { SupplierPartnerItem } from "../../models/partner";
-import { TableActionButton } from "../widgets/tableActionButton";
-import { ActionMenu } from "@/shared/components/ui/actionMenuItem";
 
 type SupplierTableProps = {
   rows: SupplierPartnerItem[];

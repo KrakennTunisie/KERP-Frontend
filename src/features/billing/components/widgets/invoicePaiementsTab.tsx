@@ -1,11 +1,11 @@
-import { CreditCard, Eye, Pencil, Trash2 } from "lucide-react";
-import Card from "./card";
-import { BillingTable } from "./billingTable";
+import { CreditCard } from "lucide-react";
+import Link from "next/link";
+import { usePaymentListTab } from "../../hooks/usePaymentListTab";
 import { PaymentListItem } from "../../models/payment";
 import { paymentMethodLabels } from "../../types/paymentMethod";
-import { usePaymentListTab } from "../../hooks/usePaymentListTab";
+import { BillingTable } from "./billingTable";
+import Card from "./card";
 import { DeleteInvoiceModal } from "./deleteInvoiceModal";
-import Link from "next/link";
 
 export function InvoicePaymentsTab({
   invoiceId,

@@ -2,14 +2,12 @@
 
 import StatClientInvoiceCard from "@/shared/components/ui/statClientInvoiceCard";
 import useSupplierInvoiceList from "../../hooks/useSupplierInvoiceList";
-import { getSupplierInvoiceAllowedNextStatuses, invoiceStatusColors, invoiceStatusLabels, invoiceStatusSchema } from "../../types/invoiceStatus";
-import { formatDateLong } from "@/shared/utils/formatDate";
-import { ChevronLeft, ChevronRight, Settings } from "lucide-react";
-import { UpdateInvoiceStatusModal } from "../widgets/updateStatusModal";
-import { BillingPageHeader } from "../widgets/billingHeader";
-import { StatusFilterBar } from "../widgets/billingFilterBar";
-import {  BillingTable } from "../widgets/billingTable";
 import { InvoicePageItem } from "../../models/invoice";
+import { getSupplierInvoiceAllowedNextStatuses, invoiceStatusColors, invoiceStatusLabels, invoiceStatusSchema } from "../../types/invoiceStatus";
+import { StatusFilterBar } from "../widgets/billingFilterBar";
+import { BillingPageHeader } from "../widgets/billingHeader";
+import { BillingTable } from "../widgets/billingTable";
+import { UpdateInvoiceStatusModal } from "../widgets/updateStatusModal";
 
 
 export default function SuppliersInvoiceList() {
