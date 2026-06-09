@@ -647,7 +647,7 @@ function InfoBar({ data }: { data: PdfDocumentData }) {
   return (
     <View style={styles.infoBar}>
       <View style={styles.infoCell}>
-        <Text style={styles.infoLabel}>Date d'émission</Text>
+        <Text style={styles.infoLabel}>{"Date d'émission"}</Text>
         <Text style={styles.infoValue}>{formatPdfDate(data.issueDate)}</Text>
       </View>
 

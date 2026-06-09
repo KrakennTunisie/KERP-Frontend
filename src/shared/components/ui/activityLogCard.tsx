@@ -7,13 +7,16 @@ import { AuditLogAPI } from "@/features/billing/api/partners-api";
 import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 import { appToast } from "@/shared/lib/toast";
 import { formatDateLongWithTime } from "@/shared/utils/formatDate";
+import { partnerTypeSchema } from "@/features/billing/types/partnerType";
 type ActivityLogCardProps = {
   partnerId: string;
+  partnerType: string
   getActivityIcon: (type: string) => React.ElementType;
 };
 
 export default function ActivityLogCard({
   partnerId,
+  partnerType,
   getActivityIcon,
 }: ActivityLogCardProps) {
 
@@ -23,8 +26,14 @@ export default function ActivityLogCard({
   const fetchLogs = async () => {
     try {
       setLoadingLogs(true)
-      const clientLogs = await AuditLogAPI.getAuditLogs(partnerId)
+      const clientLogs = partnerType == partnerTypeSchema.enum.CLIENT 
+      ?
+        await AuditLogAPI.getAuditLogs(partnerId)
+      :
+        await AuditLogAPI.getAuditLogsBySupplier(partnerId)
+
       setLogs(clientLogs);
+      
     } catch (error) {
       appToast.error("Erreur fetch les logs du client: ", getApiErrorMessage(error));
     }

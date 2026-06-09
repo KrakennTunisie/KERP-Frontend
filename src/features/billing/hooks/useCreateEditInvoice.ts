@@ -772,7 +772,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
       }
     } catch (e: unknown) {
       const message = getApiErrorMessage(e);
-      appToast.error("Échec de création, veuillez réessayer.", message);
+      appToast.error("Échec de modification, veuillez réessayer.", message);
     } finally {
       setLoadingForm(false)
 

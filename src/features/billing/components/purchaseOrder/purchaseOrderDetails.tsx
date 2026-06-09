@@ -1,15 +1,13 @@
 "use client";
 
-import React from "react";
-import { InvoiceItem } from "../../models/invoiceItem";
-import { Partner } from "../../models/partner";
-import Card from "../widgets/card";
-import { SectionLabel } from "../widgets/sectionLabel";
-import usePurchaseOrderDetails from "../../hooks/usePurchaseOrderDetails";
-import { paymentMethodLabels } from "../../types/paymentMethod";
-import { PaymentConditionLabels } from "../../types/paymentCondition";
 import { DocumentPreviewModal } from "@/shared/components/ui/documentPreviewModal";
 import PageLoader from "@/shared/components/ui/pageLoader";
+import React from "react";
+import usePurchaseOrderDetails from "../../hooks/usePurchaseOrderDetails";
+import { PaymentConditionLabels } from "../../types/paymentCondition";
+import { paymentMethodLabels } from "../../types/paymentMethod";
+import Card from "../widgets/card";
+import { SectionLabel } from "../widgets/sectionLabel";
 
 
 type ModalProps = {
@@ -60,6 +58,7 @@ export function PurchaseOrderModalContent({
   onClose: () => void;
 }) {
   const { router, purchaseOrder, purchaseOrderItems, successMessage, setPreviewDocument, previewDocument, loadingDetails } = usePurchaseOrderDetails({ purchaseOrderId })
+  
 
   if (loadingDetails) {
     return (

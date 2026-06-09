@@ -7,7 +7,7 @@ import { DeleteInvoiceModal } from "../widgets/deleteInvoiceModal";
 import { SendDocumentModal } from "../widgets/sendInvoiceModal";
 import { BillingPageHeader } from "../widgets/billingHeader";
 import { StatusFilterBar } from "../widgets/billingFilterBar";
-import {  BillingTable } from "../widgets/billingTable";
+import { BillingTable } from "../widgets/billingTable";
 import { InvoicePageItem } from "../../models/invoice";
 import { UpdateInvoiceStatusModal } from "../widgets/updateStatusModal";
 
@@ -20,14 +20,18 @@ export default function ClientsInvoiceList() {
         totalElements,
         totalPages,
         deleteLoading,
-
+        updateLoading,
+        updateOpen,
+        nextStatus,
+        setNextStatus,
+        updateStatus,
         setInvoiceId,
         deleteClientInvoice,
         setUpdateOpen,
 
         selectedInvoice, setSelectedInvoice,
 
-        loading, clientInvoiceStats, updateLoading, nextStatus, setNextStatus, updateStatus, updateOpen } = useClientInvoiceList();
+        loading, clientInvoiceStats } = useClientInvoiceList();
 
     const invoiceStatuses = invoiceStatusSchema.options
         .filter(
@@ -100,10 +104,26 @@ export default function ClientsInvoiceList() {
                     open={deleteOpen}
                     onClose={() => setDeleteOpen(false)}
                     invoiceRef={invoiceRef}
-                    onConfirm={deleteClientInvoice} 
-                    loading={deleteLoading}/>
-                
+                    onConfirm={deleteClientInvoice}
+                    loading={deleteLoading} />
+
             </div>
+            <UpdateInvoiceStatusModal
+                open={updateOpen}
+                onClose={() => setUpdateOpen(false)}
+                onConfirm={updateStatus}
+                invoiceNumber={selectedInvoice?.invoiceNumber}
+                currentStatus={selectedInvoice?.invoiceStatus}
+                nextStatus={nextStatus}
+                type="invoice"
+                onNextStatusChange={setNextStatus}
+                allowedStatuses={
+                    selectedInvoice
+                        ? getClientInvoiceAllowedNextStatuses(selectedInvoice.invoiceStatus)
+                        : []
+                }
+                isSubmitting={updateLoading}
+            />
 
             {/* Table card */}
             <StatusFilterBar
@@ -163,9 +183,9 @@ export default function ClientsInvoiceList() {
                     }
                 />
 
-             <UpdateInvoiceStatusModal
+            <UpdateInvoiceStatusModal
                 open={updateOpen}
-                onClose={()=> setUpdateOpen(false)}
+                onClose={() => setUpdateOpen(false)}
                 onConfirm={updateStatus}
                 invoiceNumber={selectedInvoice?.invoiceNumber}
                 currentStatus={selectedInvoice?.invoiceStatus}
@@ -174,11 +194,11 @@ export default function ClientsInvoiceList() {
                 onNextStatusChange={setNextStatus}
                 allowedStatuses={
                     selectedInvoice
-                    ? getClientInvoiceAllowedNextStatuses(selectedInvoice.invoiceStatus)
-                    : []
+                        ? getClientInvoiceAllowedNextStatuses(selectedInvoice.invoiceStatus)
+                        : []
                 }
                 isSubmitting={updateLoading}
-                />
+            />
         </div>
 
 

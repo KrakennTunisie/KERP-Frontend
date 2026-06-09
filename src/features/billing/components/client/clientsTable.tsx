@@ -1,22 +1,21 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import {
   Building2,
+  Edit2Icon,
   Mail,
   Phone,
-  Edit,
-  Trash2,
-  Edit2Icon,
+  Trash2
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import {
   DataTable,
   type DataTableColumn,
 } from "@/shared/components/datatable";
 
-import { ClientPartnerItem } from "../../models/partner";
 import { ActionMenu } from "@/shared/components/ui/actionMenuItem";
+import { ClientPartnerItem } from "../../models/partner";
 
 type ClientsTableProps = {
   rows: ClientPartnerItem[];

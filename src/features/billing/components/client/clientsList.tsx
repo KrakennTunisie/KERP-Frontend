@@ -1,20 +1,18 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
 import {
-  Search,
   Plus
 } from 'lucide-react';
 
 
-import ClientDeleteModal from "./deleteClientModal";
 import ClientsTable from './clientsTable';
+import ClientDeleteModal from "./deleteClientModal";
 
-import { useRouter } from 'next/navigation';
-import { PageHeader } from '../widgets/header';
 import { FiltersBar } from '@/shared/components/ui/filtreBar';
-import  { partnerListProps } from '../../hooks/usePartnerList';
+import { useRouter } from 'next/navigation';
+import { partnerListProps } from '../../hooks/usePartnerList';
 import { partnerTypeSchema } from '../../types/partnerType';
+import { PageHeader } from '../widgets/header';
 
 import usePartnerList from '../../hooks/usePartnerList';
 

@@ -1,16 +1,16 @@
 'use client'
 
-import { useParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
-import {  PartnerAllDetails } from "../../models/partner";
-import {  DashboardAPI, InvoicesAPI, partnersApi } from "../../api/partners-api";
-import { appToast } from "@/shared/lib/toast";
 import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 import PageLoader from "@/shared/components/ui/pageLoader";
-import PartnerDetails from "../partner/partnerDetails";
-import { PartnerInvoiceStats } from "../../types/partnersStats";
 import { NotFound } from "@/shared/components/widgets/notFound";
+import { appToast } from "@/shared/lib/toast";
+import { useParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { DashboardAPI, InvoicesAPI, partnersApi } from "../../api/partners-api";
+import { PartnerAllDetails } from "../../models/partner";
 import { PartnerRevenueStats } from "../../types/partnerRevenueStats";
+import { PartnerInvoiceStats } from "../../types/partnersStats";
+import PartnerDetails from "../partner/partnerDetails";
 
 
 export default function ClientDetails() {
@@ -52,9 +52,6 @@ export default function ClientDetails() {
       setLoading(false)
     }
   };
-
-
-
 
   const fetchPartnerRevenue = async () => {
     if (!client) return;

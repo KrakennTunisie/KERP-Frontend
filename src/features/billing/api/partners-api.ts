@@ -3,8 +3,8 @@ import { apiClient } from "@/shared/api/api-client";
 import { AUDITLOGS_ENDPOINTS, BILLING_ENDPOINTS, DASHBOARD_ENDPOINTS, EXCHANGE_RATE_ENDPOINTS, INVOICES_CREDIT_NOTE_ENDPOINTS, INVOICES_ENDPOINTS, MAILING_ENDPOINTS, PAYMENT_ENDPIONTS, PURCHASE_ORDER_ENDPOINTS } from "@/shared/api/endpoints";
 import { ExchangeRateParams, GetListParams, PageResponse } from "@/shared/api/types";
 import { InvoiceCreditNoteCreate, InvoiceCreditNoteDetails, InvoiceCreditNotePageItem } from "../models/creditNote";
-import { Invoice, InvoiceCreate, InvoicePageItem } from "../models/invoice";
-import {   ClientPartnerItem, CreatePartner, PartnerAllDetails, PartnerSummary, SupplierPartnerItem, UpdatePartner } from "../models/partner";
+import { Invoice, InvoiceCreate, InvoicePageItem, } from "../models/invoice";
+import {   ClientPartnerItem, CreatePartner, PartnerAllDetails, PartnerSummary,  SupplierPartnerItem, UpdatePartner } from "../models/partner";
 import { PurchaseOrderCreate, PurchaseOrderDetails, PurchaseOrderPageItem,  PurchaseOrderPartnerSummary,  PurchaseOrderSummary, PurchaseOrderUpdate } from "../models/purchaseOrder";
 import { ExchangeRate } from "../types/exchangeRate";
 import { nextNumber } from "../types/nextNumber";
@@ -63,8 +63,8 @@ export const partnersApi = {
     apiClient.get<PageResponse<InvoicePageItem[]>>(BILLING_ENDPOINTS.getClientsInvoices(id)),
 
 
-  getPurchaseOrderByPartnerId:(id :string, query? : GetListParams) => 
-    apiClient.get<PageResponse<PurchaseOrderPartnerSummary>>(PURCHASE_ORDER_ENDPOINTS.getPurchaseOrderByIdPartner(id, query)),
+  getPurchaseOrderByPartnerId:(id :string, partnerType: string, query? : GetListParams) => 
+    apiClient.get<PageResponse<PurchaseOrderPartnerSummary>>(PURCHASE_ORDER_ENDPOINTS.getPurchaseOrderByIdPartner(id, partnerType, query )),
 };
 
 export const InvoicesAPI = {
@@ -145,6 +145,12 @@ export const InvoicesCreditNoteAPI = {
 
   deleteInvoiceCreditNote: (id: string) =>
     apiClient.delete<void>(INVOICES_CREDIT_NOTE_ENDPOINTS.invoiceCreditNoteById(id)),
+
+   getInvoiceCreditNoteByIdClient: (id: string,partnerType : string,  query?:GetListParams) =>
+    apiClient.get<PageResponse<InvoiceCreditNotePageItem>>(INVOICES_CREDIT_NOTE_ENDPOINTS.getInvoiceCreditNoteByIdPartner(id,partnerType, query)),
+
+   getInvoiceCreditNoteByIdSupplier: (id: string,partnerType : string,  query?:GetListParams) =>
+    apiClient.get<PageResponse<InvoiceCreditNotePageItem>>(INVOICES_CREDIT_NOTE_ENDPOINTS.getInvoiceCreditNoteByIdPartner(id,partnerType, query)),
 
   updateInvoiceCreditNoteStatus : 
   (id: string, payload: FormData) => apiClient.patch<InvoiceCreditNoteDetails>(INVOICES_CREDIT_NOTE_ENDPOINTS.updateStatusInvoiceCreditNote(id), payload),

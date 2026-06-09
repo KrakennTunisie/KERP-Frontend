@@ -1,23 +1,14 @@
 'use client';
 
-import Link from "next/link";
-import { DeleteInvoiceModal } from "../widgets/deleteInvoiceModal";
-import { mockPurchaseOrders } from "../../mocks/purchase-order-mocks";
-import { getClientPurchaseOrderAllowedNextStatuses, purchaseOrderStatusColors, purchaseOrderStatusLabels, purchaseOrderStatusSchema } from "../../types/purchaseOrderStatus";
-import { usePurchaseOrderList } from "../../hooks/usePurchaseOrderList";
-import PurchaseOrderModal, { PurchaseOrderModalContent } from "./purchaseOrderDetails";
-import { MOCK_PARTNERS } from "../../mocks/clients-mocks";
-import { mockInvoiceItems } from "../../mocks/invoice-items-mocks";
 import { useSupplierPurchaseOrderList } from "../../hooks/useSupplierPurchaseOrderList";
-import { currencyTypeSchema } from "../../types/currency";
-import { UpdateInvoiceStatusModal } from "../widgets/updateStatusModal";
-import { ChevronLeft, ChevronRight, Settings } from "lucide-react";
-import SupplierPurchaseOrderModal, { SupplierPurchaseOrderModalContent } from "./supplierPurchaseOrderDetails";
-import PageLoader from "@/shared/components/ui/pageLoader";
-import { BillingPageHeader } from "../widgets/billingHeader";
-import { PurchaseOrderTable } from "../widgets/purchaseOrderTable";
+import { getClientPurchaseOrderAllowedNextStatuses, purchaseOrderStatusLabels, purchaseOrderStatusSchema } from "../../types/purchaseOrderStatus";
 import { StatusFilterBar } from "../widgets/billingFilterBar";
+import { BillingPageHeader } from "../widgets/billingHeader";
+import { DeleteInvoiceModal } from "../widgets/deleteInvoiceModal";
+import { PurchaseOrderTable } from "../widgets/purchaseOrderTable";
 import { SendDocumentModal } from "../widgets/sendInvoiceModal";
+import { UpdateInvoiceStatusModal } from "../widgets/updateStatusModal";
+import SupplierPurchaseOrderModal, { SupplierPurchaseOrderModalContent } from "./supplierPurchaseOrderDetails";
 
 export default function SuppliersPurchaseOrderList() {
 

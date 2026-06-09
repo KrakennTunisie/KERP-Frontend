@@ -8,7 +8,7 @@ type AddressBoxProps = {
   city?: string;
   state?: string;
   country?: string;
-  type?: String | null;
+  type?: string | null;
 };
 
 export default function AddressBox({

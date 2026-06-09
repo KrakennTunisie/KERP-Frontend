@@ -128,7 +128,7 @@ export function useClientInvoiceList () {
             
           formData.append("status",  nextStatus);
           await InvoicesAPI.updateClientInvoiceStatus(invoiceId, formData);
-          appToast.success('Statut mise à jour avec succès avec succès.')
+          appToast.success('Statut mise à jour avec succès.')
           setUpdateOpen(false)
           await fetchClientsInvoices()
         } catch (error) {
@@ -168,6 +168,7 @@ export function useClientInvoiceList () {
      loading,
      nextStatus, setNextStatus,
      selectedInvoice, setSelectedInvoice,
-     clientInvoiceStats
+     clientInvoiceStats,
+
     }
 }

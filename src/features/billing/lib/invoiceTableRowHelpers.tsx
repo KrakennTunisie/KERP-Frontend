@@ -1,5 +1,5 @@
 import { CheckCircle2, Circle } from "lucide-react";
-import { InvoiceStatus, invoiceStatusColors, invoiceStatusLabels } from "../types/invoiceStatus";
+import { InvoiceStatus } from "../types/invoiceStatus";
 
 export function AmountCell({
   value,

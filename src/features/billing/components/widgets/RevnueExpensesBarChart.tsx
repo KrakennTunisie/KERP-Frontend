@@ -1,16 +1,11 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { RefreshCw } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,  ResponsiveContainer } from 'recharts';
 import { PartnerRevenueStats } from "../../types/partnerRevenueStats";
 import { useMemo } from "react";
 
 export type ChartMode = "revenues" | "expenses" | "both";
 
-type RevenueExpenseChartData = {
-  month: string;
-  revenus?: number;
-  depenses?: number;
-};
 
 type RevenueExpenseBarChartProps = {
   title?: string;

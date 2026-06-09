@@ -101,7 +101,7 @@ export function InvoiceCreditNotesTab({
             "
             >
             <span className="text-sm leading-none">+</span>
-            Nouvelle Facture d'avoir
+            {"Nouvelle Facture d'avoir"}
             </Link>
         )}
         </div>

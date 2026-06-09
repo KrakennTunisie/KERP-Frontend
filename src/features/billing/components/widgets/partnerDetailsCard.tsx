@@ -6,12 +6,11 @@ import InfoGrid from "@/shared/components/ui/infoGrid";
 import SectionCard from "@/shared/components/ui/sectionCard";
 import { Separator } from "@/shared/components/ui/separator";
 
-import { ClientPartnerDetails } from "../../models/partner";
-import { PaymentConditionLabels } from "../../types/paymentCondition";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { UserPen } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ClientPartnerDetails } from "../../models/partner";
 import { partnerTypeSchema } from "../../types/partnerType";
+import { PaymentConditionLabels } from "../../types/paymentCondition";
 
 type PartnerDetailsCardProps = {
   partner: ClientPartnerDetails;

@@ -17,11 +17,9 @@ import { SendDocumentModal } from "../widgets/sendInvoiceModal"
 import { DeleteInvoiceModal } from "../widgets/deleteInvoiceModal"
 
 export default function ClientInvoiceDetails({ invoiceId, type }: InvoiceDetailsProps) {
-    const {   client, invoice, previewDocument, setPreviewDocument, sendToTTN, TtnModalOpen, setTtnModalOpen,
+    const {  invoice, previewDocument, setPreviewDocument, sendToTTN, TtnModalOpen, setTtnModalOpen,
         hasCreditInvoice,loading, sent, successMessage, router, updateStatus,deleteLoading,
-        setDeleteLoading,
         updateLoading,
-        setUpdateLoading,
         updateOpen,
         setUpdateOpen,
         setNextStatus,

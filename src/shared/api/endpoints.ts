@@ -25,6 +25,7 @@ export const BILLING_ENDPOINTS = {
   purchaseOrder: "/purchase-orders",
   getPurchaseOrders:(query? : GetListParams)=> `/purchase-orders/${buildQueryString(query)}`,
   purchaseOrderById: (id : string) => `/purchase-orders/${id}`,
+  getPurchaseOrderByIdPartner:(id: string,partnerType:string) => `/purchase-orders/partner/${id}?partnerType=${partnerType}`,
  
   uploadDocument: "/documents/upload",
 };
@@ -65,8 +66,7 @@ export const INVOICES_CREDIT_NOTE_ENDPOINTS={
   invoiceCreditNoteById: (id?: string) => `/credit-note-invoices/${id}`,
   updateStatusInvoiceCreditNote: (id: string)=> `/credit-note-invoices/${id}/status`,
 
-  getInvoiceCreditNotesByIdPartner: (id: string, query? : GetListParams) => `/credit-note-invoices/partner/${id}${buildQueryString(query)}`,
-
+  getInvoiceCreditNoteByIdPartner: (idPartner?: string, partnerType?:string, query? : GetListParams) => `/credit-note-invoices/getPartnerCreditNote/${idPartner}${buildQueryString(query)}&partnerType=${partnerType}`,
 }
 
 export const PURCHASE_ORDER_ENDPOINTS = {
@@ -84,7 +84,7 @@ export const PURCHASE_ORDER_ENDPOINTS = {
   supplierPurchaseOrderById: (id: string) => `/purchase-orders/supplier/${id}`, 
   supplierupdateStatusPurchaseOrder: (id: string)=> `/purchase-orders/supplier/${id}/status`,
 
-  getPurchaseOrderByIdPartner:(id: string, query? : GetListParams) => `/purchase-orders/partner/${id}${buildQueryString(query)}`,
+  getPurchaseOrderByIdPartner:(id: string,  partnerType:string, query? : GetListParams) => `/purchase-orders/partner/${id}${buildQueryString(query)}&partnerType=${partnerType}`,
 
  
 }

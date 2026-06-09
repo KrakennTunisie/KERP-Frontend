@@ -1,19 +1,19 @@
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/shared/components/ui/collapsible';
-import { Card, CardContent,  CardHeader, CardTitle } from '@/shared/components/ui/card';
-import { ChevronDown, ChevronLeft, ChevronRight, Loader2, Plus } from 'lucide-react';
-import { Badge } from '@/shared/components/ui/badge';
-import React, { useEffect, useState } from 'react';
-import { partnerTypeSchema } from '../../types/partnerType';
-import { InvoicesAPI, partnersApi, paymentsAPI } from '../../api/partners-api';
-import { appToast } from '@/shared/lib/toast';
 import { getApiErrorMessage } from '@/shared/api/handle-api-error';
+import { Badge } from '@/shared/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/shared/components/ui/collapsible';
+import { appToast } from '@/shared/lib/toast';
+import { ChevronDown, ChevronLeft, ChevronRight, Loader2, Plus } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { InvoicesAPI, InvoicesCreditNoteAPI, partnersApi, paymentsAPI } from '../../api/partners-api';
+import { partnerTypeSchema } from '../../types/partnerType';
 
 
 type PartnerCollapsibleSectionProps<T> = {
   title: string;
   addLabel: string;
   partnerId: string;
-  partnerType?: string;
+  partnerType: string;
   transactionType?: string;
   count: number;
   open: boolean;
@@ -49,9 +49,14 @@ export default function PartnerCollapsibleSection<T>({
         case "Facture": {
 
           setLoading(true)
-            const response = await InvoicesAPI.getClientsInvoicesByIdPartner(partnerId, {
+            const response = partnerType==partnerTypeSchema.enum.CLIENT ?
+             await InvoicesAPI.getClientsInvoicesByIdPartner(partnerId, {
               page: currentPage - 1,
-            });
+            })
+            :
+            await InvoicesAPI.getSupplierInvoicesByIdPartner(partnerId, {
+              page: currentPage - 1,
+            })
             setFetchedItems(response.content as T[]);
   
             setTotalPages(response.totalPages);
@@ -61,9 +66,10 @@ export default function PartnerCollapsibleSection<T>({
 
         case "Avoir": {
           
-            const response = await partnersApi.getPurchaseOrderByPartnerId(partnerId, {
+            const response = await InvoicesCreditNoteAPI.getInvoiceCreditNoteByIdClient(partnerId,partnerType, {
                     page: currentPage - 1,
                   });
+
             setFetchedItems(response.content as T[]);
             setTotalPages(response.totalPages);
             setTotalElements(response.totalElements);
@@ -72,7 +78,7 @@ export default function PartnerCollapsibleSection<T>({
 
         case "Bon de commande": {
           
-            const response = await partnersApi.getPurchaseOrderByPartnerId(partnerId, {
+            const response = await partnersApi.getPurchaseOrderByPartnerId(partnerId, partnerType,{
                     page: currentPage - 1,
                   });
             setFetchedItems(response.content as T[]);
@@ -131,7 +137,7 @@ export default function PartnerCollapsibleSection<T>({
 
               <div className="flex items-center gap-2">
                 {partnerType == partnerTypeSchema.enum.CLIENT &&
-                  (transactionType == "Facture" || transactionType == "Avoir") && (
+                  (transactionType == "Facture" ) && (
                     <button
                       type="button"
                       onClick={(e) => {
