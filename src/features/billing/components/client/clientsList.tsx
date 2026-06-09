@@ -71,7 +71,6 @@ export default function ClientsList({partnerType}: partnerListProps) {
             totalElements={totalElements}
             onDeleteRequest={setDeleteConfirmId}
 
-
           />
 
           <ClientDeleteModal

@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 
 import { InvoiceStatus } from "../../types/invoiceStatus";
 import { InvoiceTableRow } from "./invoiceTableRow";
@@ -130,7 +130,18 @@ export function BillingTable<T>({
           </thead>
 
           <tbody className="divide-y divide-slate-100">
-            {items.length === 0 ? (
+            {loading ? (
+              <tr>
+                <td colSpan={columns.length} className="px-5 py-12">
+                  <div className="flex flex-col items-center justify-center gap-3 text-slate-400">
+                    <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+                    <p className="text-sm font-semibold">
+                      Chargement des données...
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            ): items.length === 0 ? (
               <tr>
                 <td colSpan={8} className="px-5 py-12">
                   <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/70 p-6 text-center">

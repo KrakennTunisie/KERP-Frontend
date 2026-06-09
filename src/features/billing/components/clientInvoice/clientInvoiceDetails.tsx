@@ -178,7 +178,7 @@ export default function ClientInvoiceDetails({ invoiceId, type }: InvoiceDetails
             {/* Onglet Paiements */}
             <TabsContent value="payments" className="space-y-5">
             <InvoicePaymentsTab
-                invoiceId={invoiceId}
+                partnerId={invoiceId}
                 payments={[]}
                 open={openSections.payments}
                 onToggle={() => toggleSection("payments")}

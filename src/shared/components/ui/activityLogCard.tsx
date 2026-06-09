@@ -1,18 +1,41 @@
 import SectionCard from "./sectionCard";
 import IconButton from "./iconButton";
-import { Activity, RefreshCw } from "lucide-react";
+import { Activity, Loader2, RefreshCw } from "lucide-react";
 import { AuditLog } from "@/features/billing/models/AuditLogs";
+import { useEffect, useState } from "react";
+import { AuditLogAPI } from "@/features/billing/api/partners-api";
+import { getApiErrorMessage } from "@/shared/api/handle-api-error";
+import { appToast } from "@/shared/lib/toast";
+import { formatDateLongWithTime } from "@/shared/utils/formatDate";
 type ActivityLogCardProps = {
-  logs: AuditLog[];
-  onRefresh: () => void;
+  partnerId: string;
   getActivityIcon: (type: string) => React.ElementType;
 };
 
 export default function ActivityLogCard({
-  logs,
-  onRefresh,
+  partnerId,
   getActivityIcon,
 }: ActivityLogCardProps) {
+
+  const [logs, setLogs] = useState<AuditLog[]>([]);
+  const [loadingLogs, setLoadingLogs] = useState(false);
+
+  const fetchLogs = async () => {
+    try {
+      setLoadingLogs(true)
+      const clientLogs = await AuditLogAPI.getAuditLogs(partnerId)
+      setLogs(clientLogs);
+    } catch (error) {
+      appToast.error("Erreur fetch les logs du client: ", getApiErrorMessage(error));
+    }
+    finally {
+      setLoadingLogs(false)
+    }
+  };
+
+  useEffect(() => {
+    fetchLogs();
+  }, [partnerId]);
   return (
     <SectionCard
       title="Journal d'activités"
@@ -23,14 +46,22 @@ export default function ActivityLogCard({
         <IconButton
           icon={RefreshCw}
           title="Actualiser la liste"
-          onClick={onRefresh}
+          onClick={fetchLogs}
           variant="blue"
         />
       }
       contentClassName="p-0"
     >
       <div className="max-h-[340px] overflow-y-auto px-6 pb-4 space-y-1 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
-        {logs.map((log) => {
+        {loadingLogs ? (
+                  <div className="flex flex-col items-center justify-center gap-3 text-slate-400">
+                    <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+                    <p className="text-sm font-semibold">
+                      Chargement des données...
+                    </p>
+                  </div>
+            ): 
+          logs.map((log) => {
           const Icon = getActivityIcon(log.auditLogType!);
 
           return (
@@ -49,7 +80,7 @@ export default function ActivityLogCard({
 
                 <div className="flex items-center gap-1.5 mt-1">
                   <p className="text-[11px] text-slate-400">
-                 {new Date(log.logDate).toLocaleDateString('fr-FR')}
+                 {formatDateLongWithTime(log.logDate)}
                   </p>
 
                   <span className="text-blue-300">•</span>

@@ -37,6 +37,7 @@ type DocumentListItemProps<T> = {
 
   amountLabel?: string;
   secondaryLabel?: string;
+  onView: (item: T)=>void;
   getSecondaryText?: (item: T) => string | null | undefined;
 };
 
@@ -87,10 +88,10 @@ export function DocumentListItem<T>({
   amountLabel = "Total TTC",
   secondaryLabel,
   getSecondaryText,
+  onView
 }: DocumentListItemProps<T>) {
   const styles = variantStyles[variant];
   console.log(item)
-  const number = getNumber(item);
   const date = getDate(item);
   const amount = getAmount(item);
   const currency = getCurrency?.(item);
@@ -121,9 +122,12 @@ export function DocumentListItem<T>({
         </div>
 
         <div className="min-w-0">
-          <p className="truncate text-sm font-bold text-slate-900">
-            {number || "-"}
-          </p>
+        <button
+          onClick={() => onView(item)}
+          className="cursor-pointer text-xs font-bold text-blue-600 underline-offset-4 transition hover:text-blue-800 hover:underline"
+        >
+          {getNumber(item)}
+        </button>
 
           <p className="mt-0.5 text-xs font-medium text-slate-500">
             Date : {date ? formatDateLong(date) : "-"}

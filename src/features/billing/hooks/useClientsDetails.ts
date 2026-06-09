@@ -1,28 +1,19 @@
-import { TrendingDown, TrendingUp, Truck, Users, CheckCircle, Clock, AlertCircle, FileText, User, Mail, Paperclip } from "lucide-react";
-import { useState, Activity, useMemo } from "react";
+import { TrendingDown, TrendingUp, Truck, Users, CheckCircle, Clock, AlertCircle, FileText} from "lucide-react";
+import { useState } from "react";
 import { PreviewDocument } from "../components/partner/partnerInfoCard";
-import { MOCK_INVOICES } from "../mocks/invoice-mocks";
-import { Invoice, InvoicePageItem, InvoicePageItemV2 } from "../models/invoice";
-import { ClientPartnerDetails, Partner, PartnerAllDetails, SupplierPartnerDetails } from "../models/partner";
+import { InvoicePageItem } from "../models/invoice";
+import { PartnerAllDetails } from "../models/partner";
 import { InvoiceStatusWithoutAll, invoiceStatusColors, invoiceStatusLabels } from "../types/invoiceStatus";
 import { PartnerInvoiceStats } from "../types/partnersStats";
 import { ChartMode } from "../components/widgets/RevnueExpensesBarChart";
 import { AuditLog } from "../models/AuditLogs";
 import { PartnerRevenueStats } from "../types/partnerRevenueStats";
-import { DashboardAPI, InvoicesAPI, partnersApi, PurchaseOrderAPI } from "../api/partners-api";
+import { DashboardAPI, InvoicesAPI,  partnersApi,  PurchaseOrderAPI } from "../api/partners-api";
 import { appToast } from "@/shared/lib/toast";
 import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 import { partnerTypeSchema } from "../types/partnerType";
-import { PurchaseOrderPartnerSummary } from "../models/purchaseOrder";
 
-export interface Payment {
-  id: string;
-  paymentNumber: string;
-  date: string;
-  amount: number;
-  method: string;
-  invoiceNumber: string;
-}
+
 
 export interface EmailLog {
   id: string;
@@ -35,17 +26,14 @@ export interface EmailLog {
 export type PartnerDetailsProps = {
   partner: PartnerAllDetails;
   partnerStats: PartnerInvoiceStats,
-  clientRevenueInitial?: PartnerRevenueStats[] | []
-  supplierDespensesInitial?: PartnerRevenueStats[] | []
-  partnerInvoices: InvoicePageItem[] | []
-  partnerLogs: AuditLog[] | []
-  purchaseOrders :PurchaseOrderPartnerSummary[]|[],
+  clientRevenueInitial?: PartnerRevenueStats[] | [],
+  supplierDespensesInitial?: PartnerRevenueStats[] | [],
   totalRevenueInitial?: number,
-  totalDespensesInitial?: number
-  onRefresh: () => void;
+  totalDespensesInitial?: number,
+  onRefresh:  () => void
 };
 
-export default function UseClientsDetails({ partner, partnerStats, partnerInvoices }: PartnerDetailsProps) {
+export default function UseClientsDetails({ partner, onRefresh }: PartnerDetailsProps) {
 
   const isSupplier = partner.partnerType === "SUPPLIER";
   const [open, setOpen] = useState(false)
@@ -85,6 +73,8 @@ export default function UseClientsDetails({ partner, partnerStats, partnerInvoic
     purchaseOrders: false,
   });
   const [deleteLoading, setDeleteLoading]= useState(false)
+  const [deletePartnerOpen, setDeletePartnerOpen]= useState(false)
+  const [updatePartnerStatusOpen, setUpdatePartnerStatusOpen]= useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deletePOrderOpen, setDeletePOrderOpen] = useState(false);
   const [modalPurchaseOrderOpen, setModalPurchaseOrderOpen] = useState(false);
@@ -93,24 +83,7 @@ export default function UseClientsDetails({ partner, partnerStats, partnerInvoic
   const [invoiceRef ,setInvoiceRef] = useState("");
   const [invoiceId ,setInvoiceId] = useState("");
   const [purchaseOrderId ,setPurchaseOrderId] = useState("");
-  const clientPayments: Payment[] = [
-    {
-      id: '1',
-      paymentNumber: 'PAY-2025-001',
-      date: '2025-02-14',
-      amount: 12500,
-      method: 'Virement bancaire',
-      invoiceNumber: 'FAC-2025-001',
-    },
-    {
-      id: '2',
-      paymentNumber: 'PAY-2025-012',
-      date: '2025-03-15',
-      amount: 5000,
-      method: 'Chèque',
-      invoiceNumber: 'FAC-2025-015',
-    },
-  ];
+
 
  
   // Mock emails
@@ -157,6 +130,7 @@ export default function UseClientsDetails({ partner, partnerStats, partnerInvoic
   const [supplierDespenses, setSupplierDespenses] = useState<PartnerRevenueStats[] | []>([])
   const [totalRevenue, setTotalRevenue] = useState<number>()
   const [totalDespenses, setTotalDespenses] = useState<number>()
+
   const fetchPartnerStats = async (partner: PartnerAllDetails, period: string) => {
     try {
       
@@ -267,11 +241,53 @@ export default function UseClientsDetails({ partner, partnerStats, partnerInvoic
     return labels[status] || status;
   };
 
+      const updatePartnerStatus = async (status: boolean) => {
+          try {
+              setLoading(true);
+              if (partner.partnerType == partnerTypeSchema.enum.CLIENT) {
+  
+                  await partnersApi.updateStatus(partner.idPartner, status);
+  
+                  if (status) {
+                      appToast.success("Le client est activé !");
+                       onRefresh()
+  
+                  } else {
+                      appToast.success("Le client est désactivé !");
+                      onRefresh()
+  
+                  }
+              } else {
+                  await partnersApi.updateSupplierStatus(partner.idPartner, status);
+  
+                  if (status) {
+                      appToast.success("Le fournisseur est activé !");
+                      onRefresh()
+  
+                  } else {
+                      appToast.success("Le fournisseur est désactivé !");
+                        onRefresh()
+
+                  }
+  
+              }
+          } catch (error) {
+              appToast.error(
+                  "Erreur dans la modification du statut : " + getApiErrorMessage(error)
+              );
+          } finally {
+              setLoading(false);
+          }
+      };
+
+
   const chartMode: ChartMode = partner.partnerType === "CLIENT" ? "revenues" : "expenses";
+
   return {
     deleteClientInvoice,deleteLoading,setDeleteLoading,setDeleteOpen,invoiceRef,deleteOpen,setInvoiceId,purchaseOrderId,setPurchaseOrderId,setDeletePOrderOpen,deletePOrderOpen , deletePurchaseOrder,
     getStatusLabel, getEmailStatusColor, chartMode, getStatusIcon, getLabelColor, getStatusColor, toggleSection ,refresh,setRefresed,modalPurchaseOrderOpen,setModalPurchaseOrderOpen
-    , previewDocument, setPreviewDocument, selectedPeriod, setSelectedPeriod, emailLogs, clientPayments, activeTab, setActiveTab, supplierDespenses,totalDespenses
-    , TotalIcon, HeaderIcon, open, setOpen, openSections, pageConfig, fetchPartnerStats,clientRevenue, totalRevenue ,sendeMailOpen, setSendMailOpen,selectedInvoice,setSelectedInvoice
+    , previewDocument, setPreviewDocument, selectedPeriod, setSelectedPeriod, emailLogs, activeTab, setActiveTab, supplierDespenses,totalDespenses
+    , TotalIcon, HeaderIcon, open, setOpen, openSections, pageConfig, fetchPartnerStats,clientRevenue, totalRevenue ,sendeMailOpen, setSendMailOpen,selectedInvoice,setSelectedInvoice,
+    updatePartnerStatus, deletePartnerOpen, setDeletePartnerOpen, updatePartnerStatusOpen, setUpdatePartnerStatusOpen
   };
 }

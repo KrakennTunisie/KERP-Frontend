@@ -28,15 +28,11 @@ export default function PartnerDetailsCard({
       title={partner.partnerType == partnerTypeSchema.enum.CLIENT ? "Détails du client" : "Détails du fournisseur"  }
       description="Informations complètes"
       action={
-        <Link href={`/billing/clients/${partner.idPartner}/edit`}>
           <IconButton
             icon={UserPen}
             title="Modifier"
-            variant="blue"
-            onClick={function (): void {
-              throw new Error("Function not implemented.");
-            }} />
-        </Link>
+            variant="blue" 
+            onClick={()=> router.push(`/billing/clients/${partner.idPartner}/edit`)}/>
       }
       contentClassName="space-y-4 max-h-[350px] overflow-y-auto pr-2"
     >
