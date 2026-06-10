@@ -12,7 +12,7 @@ services:
       - "${FRONTEND_PORT:-3000}:80"
     environment:
       # Nginx tuning
-      - BACKEND_URL=${BACKEND_URL:-http://gateway-server:8080}
+      - BACKEND_URL=${BACKEND_URL:-http://gateway-server:8089}
       - PUBLIC_URL=${PUBLIC_URL:-http://localhost:3000}
       - NGINX_MAX_FILE_SIZE=${NGINX_MAX_FILE_SIZE:-1GB}
       - NGINX_PROXY_READ_TIMEOUT=${NGINX_PROXY_READ_TIMEOUT:-300}
