@@ -1,6 +1,6 @@
 import {  InvoiceCreate } from "@/features/billing/models/invoice";
-import { PdfDocumentData, PdfLineItem, PdfParty } from "./types";
-import { InvoiceCreditNote, InvoiceCreditNoteCreate } from "@/features/billing/models/creditNote";
+import { PdfDocumentData, PdfParty } from "./types";
+import {  InvoiceCreditNoteCreate } from "@/features/billing/models/creditNote";
 import { PurchaseOrder } from "@/features/billing/models/purchaseOrder";
 import { PartnerSummary } from "@/features/billing/models/partner";
 import { CreatePaymentFormValues, PaymentDetails } from "@/features/billing/models/payment";

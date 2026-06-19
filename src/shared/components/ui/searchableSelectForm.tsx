@@ -6,13 +6,6 @@ import { cn } from "@/shared/utils/cn";
 import { Label } from "./label";
 import { InvoicePageItem } from "@/features/billing/models/invoice";
 
-type InvoiceOption = {
-  id: string;
-  invoiceNumber: string;
-  partnerName: string;
-  remainingAmount: number;
-};
-
 type SearchableInvoiceSelectProps = {
   label?: string;
   value?: string;
@@ -212,12 +205,7 @@ export function SearchableInvoiceSelect({
                     </p>
 
                     <p className="text-xs font-black text-slate-800">
-                    {invoice?.invoiceCurrency === "EUR"
-                        ? invoice?.totalInclTaxEUR
-                        : invoice?.invoiceCurrency  === "TND"
-                        ? invoice?.totalInclTaxTND
-                        : invoice?.totalInclTaxUSD
-                        }
+                    {total}
                     </p>
                 </div>
                 </button>

@@ -65,11 +65,11 @@ export function InvoiceDetailsTab({
         <div className="flex-1">
           {invoice?.invoiceComplianceStatus === "TTN_ACCEPTED" ? (
             <p className="text-xs font-medium text-green-600">
-              Validé par l'administration fiscale
+              {"Validé par l'administration fiscale"}
             </p>
           ) : invoice?.invoiceComplianceStatus === "TTN_REJECTED" ? (
             <p className="text-xs font-medium text-red-600">
-              Rejeté par l'administration fiscale
+              {"Rejeté par l'administration fiscale"}
             </p>
           ) : (
             <p className="text-xs font-medium text-gray-500">

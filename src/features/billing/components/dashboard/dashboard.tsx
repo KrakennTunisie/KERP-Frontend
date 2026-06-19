@@ -197,7 +197,7 @@ console.log("suppliersByMonth: ",suppliersByMonth)
         </h1>
 
         <p className="mt-0.5 text-xs text-slate-500">
-          Vue d'ensemble de l'activité financière
+          {"Vue d'ensemble de l'activité financière"}
         </p>
       </div>
 

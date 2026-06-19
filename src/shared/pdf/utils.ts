@@ -1,5 +1,5 @@
 import { BaseItem } from "@/features/billing/models/invoiceItem";
-import { PdfDocumentType, PdfLineItem, PdfTotals } from "./types";
+import { PdfDocumentType,  PdfTotals } from "./types";
 
 export function formatPdfDate(value?: Date | string | null): string {
   if (!value) return "-";
@@ -143,7 +143,7 @@ export function getDocumentTitle(type: PdfDocumentType): string {
   }
 }
 
-export function getDocumentNumberPrefix(type: PdfDocumentType): string {
+export function getDocumentNumberPrefix(): string {
   return "N°";
 }
 

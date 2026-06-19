@@ -184,7 +184,7 @@ const fetchPaymentDetails = async () => {
 
     const payment = await paymentsAPI.getPaymentDetails(paymentId);
 
-    var paymentNumber = payment.reference ?? payment.reference ?? "";
+    let paymentNumber = payment.reference ?? payment.reference ?? "";
 
     if (isClone) {
       const nextPaymentNumber = await paymentsAPI.getNextPaymentNumber();

@@ -2,9 +2,6 @@
 
 import {
   Edit,
-  Trash2,
-  Shield,
-  Eye,
   Mail,
   UserX,
   UserCog,
@@ -38,7 +35,6 @@ type UserTableRowProps<T> = {
 
 export function UserTableRow<T>({
   item,
-  variant,
 
   onView,
   onEdit,
@@ -46,7 +42,6 @@ export function UserTableRow<T>({
   onSendInvite,
   onManageRoles,
 
-  getId,
   getFullName,
   getEmail,
   getRole,

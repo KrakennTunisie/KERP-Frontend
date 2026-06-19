@@ -1,6 +1,6 @@
 "use client";
 
-import { PaymentPageProps } from "@/app/(app)/billing/payments/create/page";
+import { PaymentPageProps } from "@/app/(app)/billing/payments/create/create";
 import PaymentFormPage from "../widgets/paymentFormPage";
 
 

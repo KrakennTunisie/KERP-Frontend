@@ -6,6 +6,7 @@ import InfoItem from "@/shared/components/ui/infoItem";
 import { BadgeCheck } from "lucide-react";
 import { useState } from "react";
 import { Partner } from "../../models/partner";
+import DocumentsList from "@/shared/components/ui/documentItem";
 
 
 
@@ -66,23 +67,26 @@ export default function PartnerInfoCard({
           </div>
 
           <div className="space-y-4">
-            <DocumentItem
+
+            <DocumentsList
               label="RNE"
-              document={partner.rne ?? null}
+              documents={partner.rne ?? []}
               onOpen={setPreviewDocument}
             />
 
-            <DocumentItem
+            <DocumentsList
               label="Contrat"
-              document={partner.contract ?? null}
+              documents={partner.contract ?? []}
               onOpen={setPreviewDocument}
             />
 
-            <DocumentItem
-              label="Patente"
-              document={partner.patente ?? null}
-              onOpen={setPreviewDocument}
-            />
+            {partner.patente &&
+              <DocumentsList
+                label="Patente"
+                documents={[partner.patente] }
+                onOpen={setPreviewDocument}
+              />
+            }
           </div>
         </div>
       </div>

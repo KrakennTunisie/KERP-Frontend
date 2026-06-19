@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   FileText,
   ImageIcon,
@@ -27,23 +27,19 @@ export default function AddDocumentModal({
   onAdd,
 }: AddDocumentModalProps) {
   const [file, setFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string>();
+  const previewUrl = useMemo(() => {
+    if (!file) return undefined;
+    return URL.createObjectURL(file);
+  }, [file]);
 
   useEffect(() => {
-    if (!file) {
-      setPreviewUrl(undefined);
-      return;
-    }
-
-    const url = URL.createObjectURL(file);
-    setPreviewUrl(url);
-
-    return () => URL.revokeObjectURL(url);
-  }, [file]);
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    };
+  }, [previewUrl]);
 
   const reset = () => {
     setFile(null);
-    setPreviewUrl(undefined);
   };
 
   const handleClose = () => {
