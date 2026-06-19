@@ -108,4 +108,62 @@ jobs:
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
             docker compose pull kerp-frontend
             docker compose up -d kerp-frontend
-            docker image prune -f       
+            docker image prune -f    
+  #---------------------------------
+  # 4. SMOKE TEST
+  #---------------------------------
+  smoke-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for services to start
+        run: sleep 30
+
+      - name: Check Eureka
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            http://${{ secrets.SERVER_HOST }}:8761/actuator/health)
+          [ "$STATUS" = "200" ] || (echo "Eureka KO ($STATUS)" && exit 1)
+
+      - name: Check Config Server
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            http://${{ secrets.SERVER_HOST }}:8888/actuator/health)
+          [ "$STATUS" = "200" ] || (echo "Config Server KO ($STATUS)" && exit 1)
+
+     
+      - name: Check Billing Service
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            http://${{ secrets.SERVER_HOST }}:8081/actuator/health)
+          [ "$STATUS" = "200" ] || (echo "Billing KO ($STATUS)" && exit 1)
+
+      - name: Check Frontend via Nginx
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" -L \
+            https://kerp-web.duckdns.org/)
+          [[ "$STATUS" = "200" || "$STATUS" = "401" ]] || (echo "Frontend KO ($STATUS)" && exit 1)
+  #---------------------------------
+  # 5. Deploy prod
+  #---------------------------------
+  deploy-prod:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.PRO_SERVER_IP }}
+          username: root
+          key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
+          debug: true
+          script: |
+            set -eux
+            whoami
+            cd /root/opt/kerp
+
+            # (optionnel mais recommandé si registry privé ou token)
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+            docker compose pull kerp-frontend
+            docker compose up -d kerp-frontend
+
+            docker image prune -f
