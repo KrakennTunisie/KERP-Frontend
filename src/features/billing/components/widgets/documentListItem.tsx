@@ -99,93 +99,100 @@ export function DocumentListItem<T>({
   const secondaryText = getSecondaryText?.(item);
 
   return (
+   <div
+  className="
+    mt-2
+    group flex items-center justify-between gap-3
+    rounded-xl border border-slate-100 bg-white
+    px-4 py-3 shadow-sm transition-colors
+    hover:border-slate-200 hover:bg-slate-50/60
+  "
+>
+
+  {/* LEFT */}
+  <div className="flex min-w-0 items-center gap-3">
+
+    {/* Icon */}
     <div
-      className="
-        group flex items-center justify-between gap-4
-        rounded-2xl border border-slate-100 bg-white
-        px-4 py-3.5 shadow-sm transition-all
-        hover:border-slate-200 hover:bg-slate-50/80 hover:shadow-md
-      "
+      className={`
+        flex h-8 w-8 shrink-0 items-center justify-center
+        rounded-lg ring-1
+        ${styles.iconBg}
+        ${styles.iconText}
+        ${styles.iconRing}
+      `}
     >
-      {/* Left side */}
-      <div className="flex min-w-0 items-center gap-3">
-        <div
-          className={`
-            flex h-10 w-10 shrink-0 items-center justify-center
-            rounded-2xl ring-1
-            ${styles.iconBg}
-            ${styles.iconText}
-            ${styles.iconRing}
-          `}
-        >
-          <Icon className="h-4.5 w-4.5" />
-        </div>
-
-        <div className="min-w-0">
-        <button
-          onClick={() => onView(item)}
-          className="cursor-pointer text-xs font-bold text-blue-600 underline-offset-4 transition hover:text-blue-800 hover:underline"
-        >
-          {getNumber(item)}
-        </button>
-
-          <p className="mt-0.5 text-xs font-medium text-slate-500">
-            Date : {date ? formatDateLong(date) : "-"}
-          </p>
-
-          {secondaryText && (
-            <p className="mt-0.5 truncate text-[11px] font-medium text-slate-400">
-              {secondaryLabel ? `${secondaryLabel} : ` : ""}
-              {secondaryText}
-            </p>
-          )}
-
-          <p className="mt-0.5 text-[11px] text-slate-400 sm:hidden">
-            {title}
-          </p>
-        </div>
-      </div>
-
-      {/* Right side */}
-      <div className="flex shrink-0 items-center gap-3">
-        <div className="hidden text-right sm:block">
-          <p className="text-sm font-bold text-slate-900">
-            {typeof amount === "number"
-              ? amount.toLocaleString("fr-FR", {
-                  minimumFractionDigits: 3,
-                  maximumFractionDigits: 3,
-                })
-              : "—"}
-
-            <span className="ml-1 text-xs font-semibold text-slate-400">
-              {currency}
-            </span>
-          </p>
-
-          <p className="mt-0.5 text-[11px] font-medium text-slate-400">
-            {amountLabel}
-          </p>
-        </div>
-
-        {status && (
-          <Badge
-            className={`
-              shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold
-              ${statusColors?.[status] ?? "bg-slate-100 text-slate-600"}
-            `}
-          >
-            {statusLabels?.[status] ?? status}
-          </Badge>
-        )}
-
-        {actions.length > 0 && (
-          <ActionMenu
-            title={menuTitle ?? `Actions ${title}`}
-            orientation="horizontal"
-            items={actions}
-          />
-        )}
-      </div>
+      <Icon className="h-4 w-4" />
     </div>
+
+    {/* Content */}
+    <div className="min-w-0">
+
+      <button onClick={() => onView(item)} className="cursor-pointer text-xs font-bold text-blue-600 underline-offset-4 transition hover:text-blue-800 hover:underline" >
+         {getNumber(item)} 
+      </button>
+
+      <p className="mt-0.5 text-[11px] text-slate-500">
+        {date ? formatDateLong(date) : "—"}
+      </p>
+
+      {secondaryText && (
+        <p className="mt-0.5 truncate text-[11px] text-slate-400">
+          {secondaryLabel ? `${secondaryLabel}: ` : ""}
+          {secondaryText}
+        </p>
+      )}
+
+    </div>
+  </div>
+
+  {/* RIGHT */}
+  <div className="flex shrink-0 items-center gap-3">
+
+    {/* Amount */}
+    <div className="hidden text-right sm:block">
+
+      <p className="text-sm font-semibold text-slate-900">
+        {typeof amount === "number"
+          ? amount.toLocaleString("fr-FR", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })
+          : "—"}
+
+        <span className="ml-1 text-[11px] font-medium text-slate-400">
+          {currency}
+        </span>
+      </p>
+
+      <p className="text-[10px] text-slate-400">
+        {amountLabel}
+      </p>
+
+    </div>
+
+    {/* Status */}
+    {status && (
+      <Badge
+        className={`
+          rounded-full px-2 py-0.5 text-[11px] font-medium
+          ${statusColors?.[status] ?? "bg-slate-100 text-slate-600"}
+        `}
+      >
+        {statusLabels?.[status] ?? status}
+      </Badge>
+    )}
+
+    {/* Actions */}
+    {actions.length > 0 && (
+      <ActionMenu
+        title={menuTitle ?? `Actions ${title}`}
+        orientation="horizontal"
+        items={actions}
+      />
+    )}
+
+  </div>
+</div>
   );
 }

@@ -71,9 +71,9 @@ export function PurchaseOrderTable({
   const canGoPrevious = currentPage > 1;
   const canGoNext = currentPage < totalPages;
   return (
-    <div className="overflow-hidden rounded-2xl mt-5 border border-slate-200 bg-white shadow-sm">
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[820px] text-sm">
+<div className="overflow-hidden rounded-2xl mt-4 border border-slate-200 bg-white shadow-sm">
+     <div className="overflow-x-auto">
+        <table className="w-full min-w-[780px] text-xs">
           <thead className="bg-slate-50">
             <tr>
               {[
@@ -86,7 +86,7 @@ export function PurchaseOrderTable({
               ].map((column) => (
                 <th
                   key={column}
-                  className="px-5 py-3 text-center text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500"
+                  className="px-4 py-2.5 text-center text-[9px] font-bold uppercase tracking-[0.14em] text-slate-500"
                 >
                   {column}
                 </th>
@@ -127,57 +127,66 @@ export function PurchaseOrderTable({
         </table>
       </div>
 
-      {totalPages > 0 && (
-        <div className="flex flex-col gap-3 border-t border-slate-100 bg-slate-50 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-1.5">
-            <button
-              type="button"
-              onClick={() => onPageChange(currentPage - 1)}
-              disabled={!canGoPrevious || loading}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </button>
+       {/* PAGINATION */}
+  {totalPages > 0 && (
+    <div className="flex flex-col gap-3 border-t border-slate-100 bg-slate-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
 
-            <div className="flex items-center gap-1">
-              {Array.from({ length: totalPages }).map((_, index) => {
-                const page = index + 1;
+      <div className="flex items-center gap-1">
 
-                return (
-                  <button
-                    key={page}
-                    type="button"
-                    onClick={() => onPageChange(page)}
-                    disabled={loading}
-                    className={`h-8 min-w-8 rounded-lg px-2 text-xs font-bold transition disabled:cursor-not-allowed disabled:opacity-50 ${
-                      currentPage === page
-                        ? "bg-slate-900 text-white shadow-sm"
-                        : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-100"
-                    }`}
-                  >
-                    {page}
-                  </button>
-                );
-              })}
-            </div>
+        {/* PREV */}
+        <button
+          type="button"
+          onClick={() => onPageChange(currentPage - 1)}
+          disabled={!canGoPrevious || loading}
+          className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          <ChevronLeft className="h-3.5 w-3.5" />
+        </button>
 
-            <button
-              type="button"
-              onClick={() => onPageChange(currentPage + 1)}
-              disabled={!canGoNext || loading}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </button>
-          </div>
+        {/* PAGES */}
+        <div className="flex items-center gap-1">
+          {Array.from({ length: totalPages }).map((_, index) => {
+            const page = index + 1;
 
-          {totalElements > 0 && (
-            <p className="text-xs font-semibold text-slate-500">
-              {totalElements} facture{totalElements > 1 ? "s" : ""}
-            </p>
-          )}
+            return (
+              <button
+                key={page}
+                type="button"
+                onClick={() => onPageChange(page)}
+                disabled={loading}
+                className={`h-7 min-w-7 rounded-md px-2 text-[11px] font-bold transition ${
+                  currentPage === page
+                    ? "bg-slate-900 text-white shadow-sm"
+                    : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-100"
+                }`}
+              >
+                {page}
+              </button>
+            );
+          })}
         </div>
+
+        {/* NEXT */}
+        <button
+          type="button"
+          onClick={() => onPageChange(currentPage + 1)}
+          disabled={!canGoNext || loading}
+          className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          <ChevronRight className="h-3.5 w-3.5" />
+        </button>
+
+      </div>
+
+      {/* TOTAL */}
+      {totalElements > 0 && (
+        <p className="text-[11px] font-semibold text-slate-500">
+          {totalElements} Bon de commande{totalElements > 1 ? "s" : ""}
+        </p>
       )}
+
+    </div>
+  )}
     </div>
   );
 }

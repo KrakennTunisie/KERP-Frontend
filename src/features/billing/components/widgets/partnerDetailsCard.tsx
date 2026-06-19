@@ -85,21 +85,23 @@ export default function PartnerDetailsCard({
       <div>
         <DocumentItem
           label="RNE"
-          document={partner.rne ?? null}
+          documents={partner.rne}
           onOpen={onOpenDocument}
         />
 
         <DocumentItem
           label="Contrat"
-          document={partner.contract ?? null}
+          documents={partner.contract}
           onOpen={onOpenDocument}
+
         />
 
-        <DocumentItem
+        { partner.patente && <DocumentItem
           label="Patente"
-          document={partner.patente ?? null}
+          documents={[partner.patente]}
           onOpen={onOpenDocument}
-        />
+          
+        />}
       </div>
     </SectionCard>
   );

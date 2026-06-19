@@ -19,9 +19,6 @@ import {
   Bar,
   LineChart,
   Line,
-  PieChart,
-  Pie,
-  Cell,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -33,12 +30,16 @@ import { DashboardAPI } from "../../api/partners-api";
 import { appToast } from "@/shared/lib/toast";
 import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 import RevenueExpenseBarChart from "../widgets/RevnueExpensesBarChart";
+import PageLoader from "@/shared/components/ui/pageLoader";
 
 export function BillingDashboard() {
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().toLocaleString("fr-FR", {
     month: "long",
   });
+
+  const [loadingClientsStats, setLoadingClientsStats]=useState(false)
+  const [loadingSuppliersStats, setLoadingSuppliersStats]=useState(false)
 
   const currentNumericMonth = new Date().getMonth(); // 0-based
 
@@ -47,7 +48,7 @@ export function BillingDashboard() {
 
   const fetchClientsInvoices = async () => {
     try {
-      //setLoading(true);
+      setLoadingClientsStats(true);
 
       const response = await DashboardAPI.clientDashbordStats();
 
@@ -55,7 +56,7 @@ export function BillingDashboard() {
     } catch (error) {
       appToast.error("Erreur de fetch clients: ",getApiErrorMessage(error))
     } finally {
-      //setLoading(false);
+      setLoadingClientsStats(false);
     }
   };
 
@@ -63,7 +64,7 @@ export function BillingDashboard() {
 
   const fetchSupplierssInvoices = async () => {
     try {
-      //setLoading(true);
+      setLoadingSuppliersStats(true);
 
       const response = await DashboardAPI.supplierDashbordStats();
 
@@ -71,7 +72,7 @@ export function BillingDashboard() {
     } catch (error) {
       appToast.error("Erreur de fetch clients: ",getApiErrorMessage(error))
     } finally {
-      //setLoading(false);
+      setLoadingSuppliersStats(false);
     }
   };
 
@@ -156,7 +157,7 @@ console.log("suppliersByMonth: ",suppliersByMonth)
     { month: 'Mar 2025', revenus: 15200, depenses: 9800 },
     { month: 'Avr 2025', revenus: 9800, depenses: 7400 },
     { month: 'Mai 2025', revenus: 11200, depenses: 8600 },
-    { month: 'Juin 2025', revenus: 0, depenses: 0 },
+    { month: 'Juin 2025', revenus: 500, depenses: 20 },
   ];
 
   const [selectedPeriod, setSelectedPeriod] = useState(6);
@@ -170,71 +171,88 @@ console.log("suppliersByMonth: ",suppliersByMonth)
           revenueHT: item.revenus,
           revenueTVA: 0,
           revenueTTC: item.revenus,
+          overdueHT: item.depenses,
+          overdueTVA: item.depenses,
+          overdueTTC: item.depenses,
           nombreFactures: 0,
       }));
 
+      if(loadingClientsStats  || loadingSuppliersStats){
+        return(
+          <PageLoader label="Chargement des données..."/>
+        )
+      }
+
   return (
     <div className="flex min-h-screen flex-col bg-gray-50/30">
-    <header className="border-b border-slate-200 bg-white px-6 py-6">
-      <div className="mx-auto">
-        <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div>
+    <header className="border-b border-slate-200 bg-white px-5 py-4">
+  <div className="mx-auto">
 
-            <h1 className="text-2xl font-semibold tracking-tight text-slate-950">
-              Tableau de bord
-            </h1>
+    {/* Header */}
+    <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 
-            <p className="mt-1 text-sm font-medium text-slate-500">
-              Vue d&apos;ensemble de l&apos;activité financière
-            </p>
-          </div>
+      <div>
+        <h1 className="text-xl font-semibold tracking-tight text-slate-900">
+          Tableau de bord
+        </h1>
 
-          <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
-            <Calendar className="h-4 w-4 text-slate-500" />
-            <span className="text-sm font-medium text-slate-700">
-              {currentMonth} {currentYear}
-            </span>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <KpiCard
-            color="blue"
-            icon={<TrendingUp />}
-            title={`Clients ${currentYear}`}
-            value={`${totalClientsYearEUR.toLocaleString()} EUR`}
-            secondValue={`${totalClientsYearTND.toLocaleString()} TND`}
-            footer={`${clientInvoices.length} factures`}
-          />
-
-          <KpiCard
-            color="emerald"
-            icon={<TrendingDown />}
-            title={`Fournisseurs ${currentYear}`}
-            value={`${totalSuppliersYearEUR.toLocaleString()} EUR`}
-            secondValue={`${totalSuppliersYearTND.toLocaleString()} TND`}
-            footer={`${supplierInvoices.length} factures`}
-          />
-
-          <KpiCard
-            color="purple"
-            icon={<ShieldCheck />}
-            title="Validation E-Facture"
-            value={`${tauxValidation}%`}
-            footer={`${totalConformes}/${clientInvoices.length} conformes`}
-          />
-
-          <KpiCard
-            color="amber"
-            icon={<Calendar />}
-            title="Période"
-            value={currentMonth}
-            secondValue={`${currentYear}`}
-            footer="Exercice en cours"
-          />
-        </div>
+        <p className="mt-0.5 text-xs text-slate-500">
+          {"Vue d'ensemble de l'activité financière"}
+        </p>
       </div>
-    </header>
+
+      <div className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5">
+        <Calendar className="h-3.5 w-3.5 text-slate-500" />
+
+        <span className="text-xs font-medium text-slate-700">
+          {currentMonth} {currentYear}
+        </span>
+      </div>
+
+    </div>
+
+    {/* KPIs */}
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+
+      <KpiCard
+        color="blue"
+        icon={<TrendingUp />}
+        title={`Clients ${currentYear}`}
+        value={`${totalClientsYearEUR.toLocaleString()} EUR`}
+        secondValue={`${totalClientsYearTND.toLocaleString()} TND`}
+        footer={`${clientInvoices.length} factures`}
+      />
+
+      <KpiCard
+        color="emerald"
+        icon={<TrendingDown />}
+        title={`Fournisseurs ${currentYear}`}
+        value={`${totalSuppliersYearEUR.toLocaleString()} EUR`}
+        secondValue={`${totalSuppliersYearTND.toLocaleString()} TND`}
+        footer={`${supplierInvoices.length} factures`}
+      />
+
+      <KpiCard
+        color="purple"
+        icon={<ShieldCheck />}
+        title="Validation E-Facture"
+        value={`${tauxValidation}%`}
+        footer={`${totalConformes}/${clientInvoices.length} conformes`}
+      />
+
+      <KpiCard
+        color="amber"
+        icon={<Calendar />}
+        title="Période"
+        value={currentMonth}
+        secondValue={currentYear.toString()}
+        footer="Exercice en cours"
+      />
+
+    </div>
+
+  </div>
+</header>
 
       <main className="flex-1 p-8">
         <div className="mx-auto space-y-8">

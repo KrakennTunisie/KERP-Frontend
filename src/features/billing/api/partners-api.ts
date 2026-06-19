@@ -14,6 +14,8 @@ import { SendMail } from "../types/sendEmail";
 import { AuditLog } from "../models/AuditLogs";
 import {  Payment, PaymentDetails, PaymentListItem } from "../models/payment";
 import { PartnerRevenueStats } from "../types/partnerRevenueStats";
+import { EmailLog, EmailLogDetails } from "../types/emailLog";
+import { PartnerDocumentType } from "../types/documentType";
 
 export const partnersApi = {
 
@@ -40,6 +42,12 @@ export const partnersApi = {
 
   createSupplier: (payload: FormData) =>
     apiClient.post<CreatePartner>(BILLING_ENDPOINTS.suppliers, payload),
+
+  uploadSupplierDocument : (idPartner: string, documentType: PartnerDocumentType,  payload: FormData)=> 
+    apiClient.post(BILLING_ENDPOINTS.uploadSupplierDocument(idPartner, documentType), payload),
+
+  uploadClientDocument : (idPartner: string, documentType: PartnerDocumentType,  payload: FormData)=> 
+    apiClient.post(BILLING_ENDPOINTS.uploadClientDocument(idPartner, documentType), payload),
 
   updateClient : (id: string, payload: FormData) => apiClient.patch<UpdatePartner>(BILLING_ENDPOINTS.clientById(id), payload),
 
@@ -88,6 +96,14 @@ export const InvoicesAPI = {
 
   getSupplierInvoiceById: (id: string) =>
     apiClient.get<Invoice>(INVOICES_ENDPOINTS.supplierInvoiceById(id)),
+
+
+  getClientInvoiceItemById: (id?: string) =>
+    apiClient.get<InvoicePageItem>(INVOICES_ENDPOINTS.clientInvoiceItemById(id)),
+
+  getSupplierInvoiceItemById: (id: string) =>
+    apiClient.get<InvoicePageItem>(INVOICES_ENDPOINTS.supplierInvoiceItemById(id)),
+
 
   getClientInvoiceStats: (id: string) =>
     apiClient.get<PartnerInvoiceStats>(INVOICES_ENDPOINTS.clientInvoiceStats(id)),
@@ -237,6 +253,12 @@ export const DashboardAPI = {
 }
 
 export const MailingAPI ={
+
+  getEmailsByPartner: (email: string, query: GetListParams)=> 
+    apiClient.get<PageResponse<EmailLog>>(MAILING_ENDPOINTS.getEmailsByPartner(email, query)),
+
+  getEmailsById: (id: string)=> 
+    apiClient.get<EmailLogDetails>(MAILING_ENDPOINTS.getEmailById(id)),
   
   sendEmailWithInvoice : (idInvoice: string, payload: SendMail)=> apiClient.post(MAILING_ENDPOINTS.sendEmailInvoice(idInvoice), payload),
 

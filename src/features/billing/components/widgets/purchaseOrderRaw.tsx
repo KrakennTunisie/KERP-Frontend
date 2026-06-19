@@ -88,59 +88,67 @@ export function PurchaseOrderRow<TPurchaseOrder extends PurchaseOrderPageItem>({
   });
 
   return (
-    <tr
-      key={purchaseOrder.idPurchaseOrder}
-      className="transition-colors hover:bg-slate-50/70"
+<tr
+  key={purchaseOrder.idPurchaseOrder}
+  className="transition-colors hover:bg-slate-50/60"
+>
+
+  {/* NUMBER */}
+  <td className="whitespace-nowrap px-4 py-3 text-center">
+    <button
+      type="button"
+      onClick={() => onView(purchaseOrder)}
+      className="cursor-pointer text-[11px] font-semibold tracking-tight text-blue-600 underline-offset-4 transition hover:text-blue-700 hover:underline"
     >
-      <td className="whitespace-nowrap px-5 py-4 text-center">
-        <button
-          type="button"
-          onClick={() => onView(purchaseOrder)}
-          className="font-semibold tracking-tight text-blue-600 underline-offset-4 transition hover:text-blue-800 hover:underline cursor-pointer"
-        >
-          {purchaseOrder.purchaseOrderNumber}
-        </button>
-      </td>
+      {purchaseOrder.purchaseOrderNumber}
+    </button>
+  </td>
 
-      <td className="px-5 py-4 text-center">
-        <span className="font-medium text-slate-700">
-          {purchaseOrder.partner?.companyName ?? "—"}
-        </span>
-      </td>
+  {/* PARTNER */}
+  <td className="px-4 py-3 text-center">
+    <span className="text-[11px] font-medium text-slate-700">
+      {purchaseOrder.partner?.companyName ?? "—"}
+    </span>
+  </td>
 
-      <td className="px-5 py-4 text-center">
-        <span className="font-medium text-slate-700">
-          {formatDateLong(purchaseOrder.issueDate)}
-        </span>
-      </td>
+  {/* DATE */}
+  <td className="px-4 py-3 text-center">
+    <span className="text-[11px] font-medium text-slate-600">
+      {formatDateLong(purchaseOrder.issueDate)}
+    </span>
+  </td>
 
-      <td className="px-5 py-4 text-center">
-        <span
-          className={`
-            inline-flex items-center justify-center rounded-full px-2.5 py-1
-            text-xs font-medium ring-1 ring-inset
-            ${purchaseOrderStatusColors[purchaseOrder.purchaseOrderStatus]}
-          `}
-        >
-          {purchaseOrderStatusLabels[purchaseOrder.purchaseOrderStatus]}
-        </span>
-      </td>
+  {/* STATUS */}
+  <td className="px-4 py-3 text-center">
+    <span
+      className={`
+        inline-flex items-center rounded-full px-2 py-0.5
+        text-[10px] font-semibold ring-1 ring-inset
+        ${purchaseOrderStatusColors[purchaseOrder.purchaseOrderStatus]}
+      `}
+    >
+      {purchaseOrderStatusLabels[purchaseOrder.purchaseOrderStatus]}
+    </span>
+  </td>
 
-      <td className="whitespace-nowrap px-5 py-4 text-center">
-        <span className="font-semibold tabular-nums text-slate-900">
-          {formatPurchaseOrderAmount(purchaseOrder)}
-        </span>
-      </td>
+  {/* AMOUNT */}
+  <td className="whitespace-nowrap px-4 py-3 text-center">
+    <span className="text-[11px] font-semibold tabular-nums text-slate-900">
+      {formatPurchaseOrderAmount(purchaseOrder)}
+    </span>
+  </td>
 
-      <td className="px-5 py-4 text-center">
-        <div className="flex items-center justify-center">
-          <ActionMenu
-            orientation="horizontal"
-            title="Actions bon de commande"
-            items={purchaseOrderActions}
-          />
-        </div>
-      </td>
-    </tr>
+  {/* ACTIONS */}
+  <td className="px-4 py-3 text-center">
+    <div className="flex items-center justify-center">
+      <ActionMenu
+        orientation="horizontal"
+        title="Actions bon de commande"
+        items={purchaseOrderActions}
+      />
+    </div>
+  </td>
+
+</tr>
   );
 }

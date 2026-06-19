@@ -134,6 +134,9 @@ export default function ClientsInvoiceList() {
                 defaultStatus={invoiceStatusSchema.enum.ALL}
                 statuses={invoiceStatuses}
                 searchPlaceholder="Référence ou client..."
+                onDownloadAll={()=>console.log("DownloadALL")}
+                onDownloadCurrentYear={()=>console.log("onDownloadCurrentYear")}
+                onDownloadFitered={()=>console.log("onDownloadFitered")}
             />
             {/* Table */}
 

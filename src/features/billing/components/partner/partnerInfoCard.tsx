@@ -1,12 +1,12 @@
 "use client";
 
 import DocumentItem from "@/shared/components/ui/documentItem";
-import { DocumentPreviewModal } from "@/shared/components/ui/documentPreviewModal";
+import { DocumentOrFile, DocumentPreviewModal } from "@/shared/components/ui/documentPreviewModal";
 import InfoItem from "@/shared/components/ui/infoItem";
 import { BadgeCheck } from "lucide-react";
 import { useState } from "react";
-import { Document } from "../../models/document";
 import { Partner } from "../../models/partner";
+import DocumentsList from "@/shared/components/ui/documentItem";
 
 
 
@@ -15,13 +15,13 @@ type PartnerInfoCardProps = {
   typeLabel: string;
 };
 
-export type PreviewDocument = Document | File | null;
+
 
 export default function PartnerInfoCard({
   partner,
   typeLabel,
 }: PartnerInfoCardProps) {
-  const [previewDocument, setPreviewDocument] =useState<PreviewDocument>(null);
+  const [previewDocument, setPreviewDocument] =useState<DocumentOrFile>(null);
   return (
     <>
       <div className="bg-white rounded-[32px] border border-gray-100 shadow-sm p-6 md:p-8">
@@ -67,23 +67,26 @@ export default function PartnerInfoCard({
           </div>
 
           <div className="space-y-4">
-            <DocumentItem
+
+            <DocumentsList
               label="RNE"
-              document={partner.rne ?? null}
+              documents={partner.rne ?? []}
               onOpen={setPreviewDocument}
             />
 
-            <DocumentItem
+            <DocumentsList
               label="Contrat"
-              document={partner.contract ?? null}
+              documents={partner.contract ?? []}
               onOpen={setPreviewDocument}
             />
 
-            <DocumentItem
-              label="Patente"
-              document={partner.patente ?? null}
-              onOpen={setPreviewDocument}
-            />
+            {partner.patente &&
+              <DocumentsList
+                label="Patente"
+                documents={[partner.patente] }
+                onOpen={setPreviewDocument}
+              />
+            }
           </div>
         </div>
       </div>

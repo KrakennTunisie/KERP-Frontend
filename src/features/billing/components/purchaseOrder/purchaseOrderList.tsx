@@ -83,6 +83,9 @@ export default function PurchaseOrderList() {
                     defaultStatus={purchaseOrderStatusSchema.enum.ALL}
                     statuses={purchaseOrderStatus}
                     searchPlaceholder="Référence ou client..."
+                    onDownloadAll={()=>console.log("DownloadALL")}
+                    onDownloadCurrentYear={()=>console.log("onDownloadCurrentYear")}
+                    onDownloadFitered={()=>console.log("onDownloadFitered")}
                 />
             {/* Table */}
             <PurchaseOrderTable

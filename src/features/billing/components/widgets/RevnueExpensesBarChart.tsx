@@ -32,8 +32,9 @@ export default function RevenueExpenseBarChart({
   totalLabel,
   totalValue,
 }: RevenueExpenseBarChartProps) {
-  const showRevenues = mode === "revenues" || mode === "both";
-  const showExpenses = mode === "expenses" || mode === "both";
+  const showRevenues = mode === "revenues";
+  const showExpenses = mode === "expenses";
+  const showBoth = mode ==="both"
 
   const chartTitle =
     title ??
@@ -47,6 +48,7 @@ export default function RevenueExpenseBarChart({
   const transformed = data.map((item) => ({
     month: item.monthLabel,
     revenus: item.revenueTTC ?? 0,
+    overdues: item.overdueTTC,
   }));
   return transformed;
 }, [data]);
@@ -93,7 +95,9 @@ export default function RevenueExpenseBarChart({
 
       <CardContent>
         <ResponsiveContainer width="100%" height={320}>
-          <BarChart data={chartData} barCategoryGap={mode === "both" ? "35%" : "55%"}>
+          <BarChart data={chartData} 
+                    barCategoryGap={mode === "both" ? "35%" : "45%"}
+                    barGap={2}>
             <defs>
               <linearGradient id="gradRevenus" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="#60a5fa" />
@@ -136,7 +140,7 @@ export default function RevenueExpenseBarChart({
                 fontWeight: 600,
               }}
               formatter={(value, name) => {
-                const label = name === "revenus" ? "Revenus" : "Dépenses";
+                const label = name === "revenus" ? "Revenus" : name === "overdues" ? "En retard" :"Dépenses";
                 const colorClass = name === "revenus" ? "text-blue-400" : "text-red-400";
 
                 return [
@@ -148,7 +152,8 @@ export default function RevenueExpenseBarChart({
               }}
             />
 
-            {showRevenues && (
+            {showBoth && (
+              <>
               <Bar
                 dataKey="revenus"
                 name="revenus"
@@ -156,16 +161,52 @@ export default function RevenueExpenseBarChart({
                 radius={[6, 6, 0, 0]}
                 maxBarSize={mode === "both" ? 22 : 18}
               />
-            )}
-
-            {showExpenses && (
               <Bar
-                dataKey="depenses"
-                name="depenses"
+                dataKey="overdues"
+                name="despenses"
                 fill="url(#gradDepenses)"
                 radius={[6, 6, 0, 0]}
                 maxBarSize={mode === "both" ? 22 : 18}
               />
+              </>
+            )}
+
+            {showRevenues && (
+              <>
+              <Bar
+                dataKey="revenus"
+                name="revenus"
+                fill="url(#gradRevenus)"
+                radius={[6, 6, 0, 0]}
+                maxBarSize={ 18}
+              />
+              <Bar
+                dataKey="overdues"
+                name="overdues"
+                fill="url(#gradDepenses)"
+                radius={[6, 6, 0, 0]}
+                maxBarSize={ 18}
+              />
+              </>
+            )}
+
+            {showExpenses && (
+              <>
+              <Bar
+                dataKey="revenus"
+                name="depenses"
+                fill="url(#gradDepenses)"
+                radius={[6, 6, 0, 0]}
+                maxBarSize={ 18}
+              />
+              <Bar
+                dataKey="overdues"
+                name="overdues"
+                fill="url(#gradRevenus)"
+                radius={[6, 6, 0, 0]}
+                maxBarSize={ 18}
+              />
+              </>
             )}
           </BarChart>
         </ResponsiveContainer>

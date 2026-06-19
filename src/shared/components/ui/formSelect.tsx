@@ -1,11 +1,5 @@
 import React from "react";
 
-type FormInputProps = React.InputHTMLAttributes<HTMLInputElement> & {
-  label: string;
-  icon?: React.ReactNode;
-  error?: string;
-};
-
 
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/shared/utils/cn";

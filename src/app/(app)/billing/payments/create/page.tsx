@@ -1,11 +1,10 @@
-"use client";
+import { Suspense } from "react";
+import CreatePayment from "./create";
 
-import CreatePaymentPage from "@/features/billing/components/payment/createPayment";
-
-
-
-export default function Payments() {
-  return(
-    <CreatePaymentPage/>
+export default function PaymentsPage() {
+  return (
+    <Suspense fallback={null}>
+      <CreatePayment />
+    </Suspense>
   );
 }

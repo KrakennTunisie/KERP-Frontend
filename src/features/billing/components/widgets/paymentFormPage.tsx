@@ -28,11 +28,13 @@ import { DocumentPreviewModal } from "@/shared/components/ui/documentPreviewModa
 type PaymentFormPageProps = {
   mode: "create" | "update" | "clone";
   paymentId?: string;
+  invoiceId?:string | null ;
 };
 
 export default function PaymentFormPage({
   mode,
   paymentId,
+  invoiceId
 }: PaymentFormPageProps) {
   const {
     router,
@@ -55,6 +57,7 @@ export default function PaymentFormPage({
   } = useCreatePayment({
     mode,
     paymentId,
+    invoiceId
   });
 
 const isUpdate = mode === "update";
@@ -264,7 +267,7 @@ const submitLoading = createLoading || updateLoading;
 
                   <AmountRow
                     label="Reste à payer"
-                    value={max}
+                    value={Number(selectedInvoice.remainingAmount.toFixed(2))}
                     currency={selectedInvoice.invoiceCurrency}
                     strong
                   />

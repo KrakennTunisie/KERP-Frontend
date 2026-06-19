@@ -14,23 +14,23 @@ export function Modal({ open, title, onClose, children, footer }: ModalProps) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/30 flex items-center justify-center p-4 z-50">
-      <div className="bg-white w-full max-w-3xl rounded-xl p-6 shadow-xl border border-gray-100">
+    <div className="fixed inset-0 bg-black/25 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+      <div className="bg-white w-full max-w-3xl rounded-2xl p-6 shadow-lg border border-gray-100 transform transition-all duration-300 scale-100 opacity-100">
         
         {/* Header */}
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-5">
           {title && (
-              <p
-                className="text-lg font-black text-gray-900 truncate max-w-l"
-                title={title}
-              >
-                {title}
-              </p>  
+            <p
+              className="text-xl font-semibold text-gray-900 truncate max-w-[80%]"
+              title={title}
+            >
+              {title}
+            </p>
           )}
 
           <button
             onClick={onClose}
-            className="w-10 h-10 rounded-xl border border-black-400 hover:bg-gray-50 font-black text-black cursor-pointer"
+            className="flex items-center justify-center w-9 h-9 rounded-lg text-gray-500 hover:bg-gray-100 transition cursor-pointer"
             aria-label="Fermer"
           >
             ×
@@ -38,7 +38,9 @@ export function Modal({ open, title, onClose, children, footer }: ModalProps) {
         </div>
 
         {/* Body */}
-        <div>{children}</div>
+        <div className="space-y-4 text-gray-700 text-sm">
+          {children}
+        </div>
 
         {/* Footer */}
         {footer && (

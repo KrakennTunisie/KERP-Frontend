@@ -3,7 +3,10 @@ import {
   Receipt, 
   Wallet, 
   CalendarCheck, 
-  LayoutDashboard 
+  LayoutDashboard, 
+  UsersRound,
+  ShieldCheck,
+  KeyRound
 } from "lucide-react";
 
 export const NAVIGATION_ITEMS = [
@@ -14,20 +17,41 @@ export const NAVIGATION_ITEMS = [
     ],
   },
   {
+    title: "Gestion utilisateurs",
+    items: [
+      {
+        title: "Utilisateurs",
+        icon: UsersRound,
+        href:"/admin/users"
+      },
+      {
+        title: "Rôles",
+        icon: ShieldCheck,
+        href: "/admin/roles",
+      },
+      
+      {
+        title: "Permissions",
+        icon: KeyRound,
+        href: "/admin/permissions",
+      },
+    ],
+  },
+  {
     title: "Ressources Humaines",
     items: [
       {
         title: "Employés",
         icon: Users,
         subMenu: [
-          { title: "Liste des employés", href: "/employees" },
-          { title: "Contrats", href: "/employees/contracts" },
+          { title: "Liste des employés", href: "/rh/employees" },
+          { title: "Contrats", href: "/rh/contracts" },
         ],
       },
       {
         title: "Présence & Congés",
         icon: CalendarCheck,
-        href: "/attendance",
+        href: "/rh/attendance",
       },
     ],
   },

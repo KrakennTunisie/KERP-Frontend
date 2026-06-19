@@ -2,7 +2,7 @@
 
 import { DocumentPreviewModal } from "@/shared/components/ui/documentPreviewModal"
 import useClientInvoiceDetails, { InvoiceDetailsProps } from "../../hooks/useClientInvoiceDetails"
-import { getClientInvoiceAllowedNextStatuses, invoiceStatusLabels } from "../../types/invoiceStatus"
+import { getClientInvoiceAllowedNextStatuses, invoiceStatusLabels, invoiceStatusSchema } from "../../types/invoiceStatus"
 import { formatDateLong } from "@/shared/utils/formatDate"
 import PageLoader from "@/shared/components/ui/pageLoader"
 import { DocumentTopBar } from "../widgets/documentTopBar"
@@ -77,7 +77,7 @@ export default function ClientInvoiceDetails({ invoiceId, type }: InvoiceDetails
             {
             label: "Cloner",
             icon: Copy,
-            onClick: () => console.log("Cloner", invoice?.idInvoice),
+            onClick: () => router.push(`/billing/invoices/clients/${invoice?.idInvoice}/clone`),
             },
             {
             label: "Télécharger",
@@ -129,6 +129,15 @@ export default function ClientInvoiceDetails({ invoiceId, type }: InvoiceDetails
                 Détails
                 </TabsTrigger>
 
+                
+                <TabsTrigger
+                value="payments"
+                className="flex flex-1 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold text-slate-500 transition-all data-[state=active]:bg-white data-[state=active]:text-emerald-600 data-[state=active]:shadow-sm cursor-pointer"
+                >
+                <CreditCard className="h-4 w-4" />
+                Paiements
+                </TabsTrigger>
+
                 <TabsTrigger
                 value="creditNotes"
                 className="flex flex-1 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold text-slate-500 transition-all data-[state=active]:bg-white data-[state=active]:text-rose-600 data-[state=active]:shadow-sm cursor-pointer"
@@ -137,13 +146,6 @@ export default function ClientInvoiceDetails({ invoiceId, type }: InvoiceDetails
                 Factures d’avoirs
                 </TabsTrigger>
 
-                <TabsTrigger
-                value="payments"
-                className="flex flex-1 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold text-slate-500 transition-all data-[state=active]:bg-white data-[state=active]:text-emerald-600 data-[state=active]:shadow-sm cursor-pointer"
-                >
-                <CreditCard className="h-4 w-4" />
-                Paiements
-                </TabsTrigger>
             </TabsList>
             </div>
 
@@ -176,10 +178,12 @@ export default function ClientInvoiceDetails({ invoiceId, type }: InvoiceDetails
             {/* Onglet Paiements */}
             <TabsContent value="payments" className="space-y-5">
             <InvoicePaymentsTab
-                partnerId={invoiceId}
-                payments={[]}
+                invoiceId={invoiceId}
                 open={openSections.payments}
                 onToggle={() => toggleSection("payments")}
+                isDisabled={invoice.invoiceStatus === invoiceStatusSchema.enum.PAID || invoice.invoiceStatus === invoiceStatusSchema.enum.DRAFT ||
+                    invoice.invoiceStatus === invoiceStatusSchema.enum.CANCELLED
+                }
             />
             </TabsContent>
         </Tabs>

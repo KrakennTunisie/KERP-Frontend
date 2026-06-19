@@ -6,11 +6,12 @@ export function InfoBlock({
   value?: React.ReactNode;
 }) {
   return (
-    <div>
-      <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-gray-400">
+    <div className="space-y-0.5">
+      <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">
         {label}
       </p>
-      <p className="text-sm font-bold text-gray-900">
+
+      <p className="truncate text-xs font-medium text-gray-900">
         {value ?? "—"}
       </p>
     </div>

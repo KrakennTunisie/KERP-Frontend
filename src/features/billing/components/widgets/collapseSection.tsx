@@ -117,7 +117,7 @@ export default function PartnerCollapsibleSection<T>({
     if (open) {
       fetchItems();
     }
-  }, [open, transactionType, partnerId]);
+  }, [open, transactionType, partnerId, currentPage]);
     const canGoPrevious = currentPage > 1;
   const canGoNext = currentPage < totalPages;
   return (

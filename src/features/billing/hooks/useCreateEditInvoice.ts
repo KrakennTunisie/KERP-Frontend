@@ -2,14 +2,13 @@ import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 import { useDebounce } from "@/shared/hooks/useDebounce";
 import { appToast } from "@/shared/lib/toast";
 import { useEffect, useRef, useState } from "react";
-import { useForm, useFieldArray, useWatch } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
 import { ExchangeRateAPI, InvoicesAPI, partnersApi, PurchaseOrderAPI } from "../api/partners-api";
-import { handleSaveAsPDF } from "../lib/buildInvoicePDF";
 import { Invoice, InvoiceCreate, invoiceCreateSchema } from "../models/invoice";
-import { BaseItem, defaultInvoiceItem, InvoiceItem, PurchaseOrderItem } from "../models/invoiceItem";
+import { BaseItem, defaultInvoiceItem, InvoiceItem } from "../models/invoiceItem";
 import { PartnerSummary } from "../models/partner";
 import {
   calculateInvoiceTotals,
@@ -29,9 +28,10 @@ import { PaymentConditionSchema } from "../types/paymentCondition";
 import { paymentMethodSchema } from "../types/paymentMethod";
 import { generatePdfFile } from "@/shared/pdf/pdfGenerator";
 import { invoiceToPdfData } from "@/shared/pdf/documentAdapter";
+import { invoiceTypeSchema } from "../types/invoiceType";
 
 export type InvoiceFormClientProps = {
-  mode: "create" | "edit"
+    mode: "create" | "edit" | "clone";
   invoiceId?: string
 }
 
@@ -51,11 +51,11 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
   /** Appel de la fonction qui permet la récupération des données lorsque la facture est en mode = edit */
   const fetchClientInvoice = async () => {
     try {
-      if (mode == "edit") {
-        setLoadingEdit(true)
-        const invoice = await InvoicesAPI.getClientInvoiceById(invoiceId);
-        setInvoice(invoice);
-      }
+      if (mode === "edit" || mode === "clone") {
+          setLoadingEdit(true);
+          const invoice = await InvoicesAPI.getClientInvoiceById(invoiceId);
+          setInvoice(invoice);
+        }
     } catch (error) {
       appToast.error("Erreur Fetch du client:", getApiErrorMessage(error));
     }
@@ -67,13 +67,15 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
   /*** Affichage le nombre suivant du facture => Série des nombre */
   const fetchNextNumber = async () => {
     try {
-      if (mode == "create") {
-
+      if (mode === "create" || mode === "clone") {
         const response = await InvoicesAPI.getNextInvoiceNumber();
         setNextNumber(response);
-      }
-      else {
-        await fetchClientInvoice()
+
+        if (mode === "clone" && invoiceId) {
+          await fetchClientInvoice();
+        }
+      } else {
+        await fetchClientInvoice();
       }
     }
     catch (error: any) {
@@ -127,12 +129,19 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
   });
   /*** Récupération des données de la facture lorsque le mode est edit */
   useEffect(() => {
-    if (mode === "edit" && invoice) {
+    if ((mode === "edit" || mode==="clone") && invoice) {
       console.log(invoice.issueDate)
       reset({
-        idInvoice: invoice.idInvoice,
-        invoiceType: invoice.invoiceType,
-        invoiceNumber: invoice.invoiceNumber,
+        idInvoice: mode === "clone" ? "" : invoice.idInvoice,
+        invoiceNumber:
+          mode === "clone"
+            ? nextNumber?.value
+            : invoice.invoiceNumber,
+        invoiceStatus:
+          mode === "clone"
+          ? invoiceStatusSchema.enum.DRAFT
+          : invoice.invoiceStatus,
+        invoiceType: invoiceTypeSchema.enum.SALE,
         issueDate: new Date(invoice.issueDate),
         dueDate: new Date(invoice.dueDate),
         creationDate: new Date(),
@@ -142,12 +151,12 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
           ? invoice.totalExclTaxEUR
           : invoice.invoiceCurrency == "TND"
             ? invoice.totalExclTaxTND
-            : invoice.totalExclTax,
+            : invoice.totalExclTaxUSD,
         totalInclTax: invoice.invoiceCurrency == "EUR"
           ? invoice.totalInclTaxEUR
           : invoice.invoiceCurrency == "TND"
             ? invoice.totalInclTaxTND
-            : invoice.totalInclTax,
+            : invoice.totalExclTaxUSD,
         invoiceItems: invoice.purchaseOrder
           ? invoice.invoiceItems!.map((item: any) => ({
             idInvoiceItem: item.idInvoiceItem,
@@ -189,21 +198,21 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
         invoiceDocument: null,
         complianceQRcode: "",
         invoiceComplianceStatus: invoice.invoiceComplianceStatus,
-        invoiceStatus: invoice.invoiceStatus,
       });
     }
   }, [mode, invoice, reset]);
 
-  useEffect(() => {
-    if (nextNumber?.value) {
-      form.setValue("invoiceNumber", nextNumber.value, {
-        shouldValidate: true,
-        shouldDirty: false,
-      });
-    }
-    if (mode == "edit") {
-    }
-  }, [nextNumber]);
+    useEffect(() => {
+      if (
+        nextNumber?.value &&
+        (mode === "create" || mode === "clone")
+      ) {
+        form.setValue("invoiceNumber", nextNumber.value, {
+          shouldValidate: true,
+          shouldDirty: false,
+        });
+      }
+    }, [nextNumber, mode]);
 
   /**** Récupération de l'éxchange rate */
   const fetchExchangeRate = async (toCurrency: string) => {
@@ -285,7 +294,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
   // Validation des données obligatoire
   const canCreateInvoice =
     (mode == "create" ? isDirty : true) &&
-    isValid &&
+     isValid &&
     !!previewData.partner &&
     !!previewData.invoiceItems?.length &&
     !!previewData.dueDate &&
@@ -596,13 +605,9 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
   /* eslint-disable react-hooks/refs */
   const onSubmit = handleSubmit(
     async () => {
-      const element = invoiceRef.current;
-
-      if (!element) return;
-            const values = getValues();
+      const values = getValues();
 
       console.log(getValues("purchaseOrder"))
-      const file = await handleSaveAsPDF(element, getValues("invoiceNumber"));
       const pdfFile = await generatePdfFile(invoiceToPdfData(values));
       if (pdfFile) {
         setValue("invoiceDocument", pdfFile, { shouldValidate: true, shouldDirty: true });

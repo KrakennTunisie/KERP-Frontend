@@ -41,17 +41,21 @@ import PartnerStatCard from "../widgets/partnerStatCard";
 import RevenueExpenseBarChart from "../widgets/RevnueExpensesBarChart";
 import { SendDocumentModal } from "../widgets/sendInvoiceModal";
 import PartnerHeader from "./partnerHeroSection";
+import { getEmailStatusColor, getStatusLabel } from "../../types/emailLog";
+import { MailDetailsModal } from "@/shared/components/ui/emailLogModal";
+import AddDocumentModal from "@/shared/components/ui/addDocumentModal";
+import { PartnerDocumentType } from "../../types/documentType";
 
 
 export default function PartnerDetails({ partner, clientRevenueInitial, supplierDespensesInitial, totalRevenueInitial, totalDespensesInitial, partnerStats, onRefresh }: PartnerDetailsProps) {
 
   const {     deleteClientInvoice,deleteLoading,setDeleteLoading,setDeleteOpen,invoiceRef,deleteOpen,setInvoiceId,purchaseOrderId,setPurchaseOrderId,setDeletePOrderOpen,deletePOrderOpen , deletePurchaseOrder,
-    getStatusLabel, getEmailStatusColor, chartMode, getStatusIcon, getLabelColor, getStatusColor, toggleSection ,refresh,setRefresed,modalPurchaseOrderOpen,setModalPurchaseOrderOpen
-    , previewDocument, setPreviewDocument, selectedPeriod, setSelectedPeriod, emailLogs, activeTab, setActiveTab, supplierDespenses,totalDespenses
+    chartMode, getStatusIcon, getLabelColor, getStatusColor, toggleSection ,refresh,setRefresed,modalPurchaseOrderOpen,setModalPurchaseOrderOpen
+    , previewDocument, setPreviewDocument, selectedPeriod, setSelectedPeriod, activeTab, setActiveTab, supplierDespenses,totalDespenses, addDocumentType, setAddDocumentType
     , TotalIcon, HeaderIcon, open, setOpen, openSections, pageConfig, fetchPartnerStats,clientRevenue, totalRevenue ,sendeMailOpen, setSendMailOpen,
     updatePartnerStatus, deletePartnerOpen, setDeletePartnerOpen, updatePartnerStatusOpen, setUpdatePartnerStatusOpen,deleteCreditInvoice,
-     setDeleteCNoteOpen,deleteCNoteOpen,creditNoteId,setCreditNoteId, modalSupplierPurchaseOrderOpen, setModalSupplierPurchaseOrderOpen, selected, setSelected, invoiceType, setInvoiceType
-     } = UseClientsDetails({ partner, partnerStats, clientRevenueInitial, supplierDespensesInitial, totalRevenueInitial, totalDespensesInitial, onRefresh});
+    addDocumentLoading, setDeleteCNoteOpen,deleteCNoteOpen,creditNoteId,setCreditNoteId, modalSupplierPurchaseOrderOpen, setModalSupplierPurchaseOrderOpen, selected, setSelected, invoiceType, setInvoiceType
+    ,onAddDocument ,addDocument ,sendDocumentOpen, setSendDocumentOpen, setShowDetails, showDetails, selectedEmail, setSelectedEmail, openAddDocument, setOpenAddDocument} = UseClientsDetails({ partner, partnerStats, clientRevenueInitial, supplierDespensesInitial, totalRevenueInitial, totalDespensesInitial, onRefresh});
   const router = useRouter();
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-gray-50">
@@ -64,7 +68,8 @@ export default function PartnerDetails({ partner, clientRevenueInitial, supplier
         onRefresh={onRefresh} 
         setDeleteOpen={setDeletePartnerOpen} 
         deleteOpen={deletePartnerOpen} 
-        updatePartnerStatus={updatePartnerStatus} 
+        updatePartnerStatus={updatePartnerStatus}
+        onAddDocument={(type: PartnerDocumentType)=>onAddDocument(type)}
         />
       <DeleteInvoiceModal
         open={deleteOpen}
@@ -87,8 +92,8 @@ export default function PartnerDetails({ partner, clientRevenueInitial, supplier
       <SendDocumentModal
         document={selected}
         variant="invoice"
-        isOpen={open}
-        onClose={() => setOpen(false)}
+        isOpen={sendDocumentOpen}
+        onClose={() => setSendDocumentOpen(false)}
       />
 
       <PurchaseOrderModal
@@ -139,7 +144,7 @@ export default function PartnerDetails({ partner, clientRevenueInitial, supplier
             />
 
             <PartnerStatCard
-              label="En Attente"
+              label="En Retard"
               value={partnerStats.pendingInvoices}
               icon={Clock}
               iconWrapperClassName="bg-gradient-to-br from-rose-50 to-red-100 ring-rose-100"
@@ -311,7 +316,7 @@ export default function PartnerDetails({ partner, clientRevenueInitial, supplier
                           icon: Send,
                           onClick: () => {
                             setSelected(invoice);
-                            setSendMailOpen(true);
+                            setSendDocumentOpen(true);
                           },
                           disabled: invoice.invoiceStatus === "CANCELLED",
                         }] : []),
@@ -430,7 +435,7 @@ export default function PartnerDetails({ partner, clientRevenueInitial, supplier
                           icon: Send,
                           onClick: () => {
                             setSelected(PurchaseOrder)
-                            setSendMailOpen(true)
+                            setSendDocumentOpen(true)
                             console.log("Envoyer un bon de commande", PurchaseOrder.idPurchaseOrder);
                           }
                           ,
@@ -489,7 +494,7 @@ export default function PartnerDetails({ partner, clientRevenueInitial, supplier
                           icon: Send,
                           onClick: () => {
                             setSelected(creditNote)
-                            setSendMailOpen(true)
+                            setSendDocumentOpen(true)
                             console.log("Envoyer facture d'avoir", creditNote.idInvoiceCreditNote);
                           },
                           disabled: creditNote.invoiceCreditNoteStatus === "CANCELLED",
@@ -517,8 +522,10 @@ export default function PartnerDetails({ partner, clientRevenueInitial, supplier
             {/* ── Emails Tab ─────────────────────────────────────── */}
             <TabsContent value="emails">
               <EmailHistoryCard
-                emails={emailLogs}
+                email={partner.email}
                 onSendEmail={() => setOpen(true)}
+                onShowDetails={()=> setShowDetails(true)}
+                onSelectEmail={setSelectedEmail}
                 getEmailStatusColor={getEmailStatusColor}
                 getStatusLabel={getStatusLabel}
               />
@@ -536,6 +543,19 @@ export default function PartnerDetails({ partner, clientRevenueInitial, supplier
         onClose={() => setOpen(false)}
         defaultTo={partner.email}
         recipientName={partner.displayName}
+      />
+      <MailDetailsModal
+        open={showDetails}
+        mailId={selectedEmail}
+        onClose={()=>setShowDetails(false)}
+        />
+      
+      <AddDocumentModal
+        open={openAddDocument}
+        loading={addDocumentLoading}
+        type={addDocumentType}
+        onClose={() => setOpenAddDocument(false)}
+        onAdd={(file, type) => addDocument(file, type)}
       />
     </div>
   );

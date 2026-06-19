@@ -8,6 +8,8 @@ import { PaymentConditionLabels } from "../../types/paymentCondition";
 import { paymentMethodLabels } from "../../types/paymentMethod";
 import Card from "../widgets/card";
 import { SectionLabel } from "../widgets/sectionLabel";
+import Link from "next/link";
+import { partnerTypeSchema } from "../../types/partnerType";
 
 
 type ModalProps = {
@@ -72,15 +74,17 @@ export function SupplierPurchaseOrderModalContent({
               </svg>
             </div>
             <div>
-              <p className="font-bold text-gray-900 text-sm">{purchaseOrder?.partner?.companyName}</p>
-              <p className="text-xs text-blue-500 font-medium">Client</p>
+              <Link 
+                href={purchaseOrder?.partner?.partnerType == partnerTypeSchema.enum.SUPPLIER ?
+                  `/billing/suppliers/${purchaseOrder?.partner?.idPartner}`
+                  :`/billing/clients/${purchaseOrder?.partner?.idPartner}`}
+                className="font-semibold tracking-tight text-blue-600 underline-offset-4 transition hover:text-blue-800 hover:underline cursor-pointer"
+                >
+                  {purchaseOrder?.partner?.companyName}
+              </Link>
             </div>
           </div>
-          <DocumentPreviewModal
-            open={!!previewDocument}
-            onClose={() => setPreviewDocument(null)}
-            document={previewDocument}
-          />
+
 
           {/* Contact details */}
           <div className="space-y-2.5 mb-4 divide-y divide-gray-100">
@@ -297,6 +301,12 @@ export function SupplierPurchaseOrderModalContent({
           Fermer
         </button>
       </div>
+
+                <DocumentPreviewModal
+            open={!!previewDocument}
+            onClose={() => setPreviewDocument(null)}
+            document={previewDocument}
+          />
     </div>
   );
 }

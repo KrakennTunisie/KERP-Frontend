@@ -10,7 +10,6 @@ import {  PartnerSummary } from "../models/partner";
 import {
   calculateInvoiceTotals,
   calculUnityPrice,
-  convertItemCurrency,
   recalculate,
 } from "../lib/invoiceCalculation";
 import { CurrencyType, currencyTypeSchema } from "../types/currency";
@@ -19,7 +18,6 @@ import { paymentMethodSchema } from "../types/paymentMethod";
 import { exchangeRateSourceSchema } from "../types/exchangeRateSource";
 import { PurchaseOrder, basePurchaseOrderSchema, PurchaseOrderDetails } from "../models/purchaseOrder";
 import { purchaseOrderStatusSchema } from "../types/purchaseOrderStatus";
-import { handleSaveAsPDF } from "../lib/buildInvoicePDF";
 import { nextNumber } from "../types/nextNumber";
 import { ExchangeRateAPI, partnersApi, PurchaseOrderAPI } from "../api/partners-api";
 import { appToast } from "@/shared/lib/toast";
@@ -51,8 +49,8 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
   const [nextNumber, setNextNumber] = useState<nextNumber>()
   const [exchangeRate, setExchangeRate] = useState<ExchangeRate>()
   const [purchaseOrder, setPurchaseOrder] = useState<PurchaseOrderDetails>()
-      const [loadingEdit, setLoadingEdit] = useState(false);
-      const [loadingForm, setLoadingForm] = useState(false);
+  const [loadingEdit, setLoadingEdit] = useState(false);
+  const [loadingForm, setLoadingForm] = useState(false);
 
   const router = useRouter()
   const form = useForm<PurchaseOrder>({
@@ -374,10 +372,6 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
   /* eslint-disable react-hooks/refs */
   const onSubmit = handleSubmit(
     async () => {
-      const element = purchaseOrderRef.current;
-
-      if (!element) return;
-      const file = await handleSaveAsPDF(element, getValues("purchaseOrderNumber"));
             const pdfFile = await generatePdfFile(purchaseOrderToPdfData(getValues()));
       
       if (pdfFile) {
@@ -447,6 +441,7 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
       if (createdInvoice) {
         appToast.success("Bon de commande créée avec succès");
         setIsModalOpen(false);
+        router.push("/billing/purchaseOrder/suppliers")
 
       }
     } catch (e: unknown) {
@@ -519,6 +514,7 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
         if (createdInvoice) {
           appToast.success("Bon de commande mise à jour avec succès");
           setIsModalOpen(false);
+          router.push("/billing/purchaseOrder/suppliers")
         }
       } catch (e: unknown) {
         const message = getApiErrorMessage(e);

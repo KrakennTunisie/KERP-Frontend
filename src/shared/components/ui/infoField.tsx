@@ -4,20 +4,26 @@ type InfoFieldProps = {
   breakWords?: boolean;
 };
 
-export default function InfoField({ label, value, breakWords = false }: InfoFieldProps) {
+export default function InfoField({
+  label,
+  value,
+  breakWords = false,
+}: InfoFieldProps) {
   return (
-    <div>
-      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">
+    <div className="min-w-0">
+
+      <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
         {label}
       </p>
 
       <p
-        className={`text-sm font-bold text-gray-900 ${
-          breakWords ? "break-words" : ""
+        className={`text-xs font-medium text-slate-900 ${
+          breakWords ? "break-words" : "truncate"
         }`}
       >
-        {value || "-"}
+        {value ?? "-"}
       </p>
+
     </div>
   );
 }

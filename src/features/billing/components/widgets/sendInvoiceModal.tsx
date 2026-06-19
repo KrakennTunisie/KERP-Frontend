@@ -169,6 +169,35 @@ const getDocumentEmail = (
   }
 };
 
+const getDocumentSalutation = (
+  document: SendableDocument | null | undefined,
+  variant: SendDocumentVariant
+) => {
+  if (!document) return "";
+
+  switch (variant) {
+    case "invoice":
+      return (document as Invoice | InvoicePageItem).partner?.maritalStatus ?? "";
+
+    case "purchaseOrder":
+      return (document as PurchaseOrderPageItem).partner?.maritalStatus ?? "";
+
+    case "payment":
+      return (
+        (document as PaymentDetails).invoice?.partner?.maritalStatus ??
+        ""
+      );
+
+    case "invoiceCreditNote":
+      return (
+        (document as InvoiceCreditNotePageItem).invoice?.partner?.email ?? ""
+      );
+
+    default:
+      return "";
+  }
+};
+
 const getDocumentCurrency = (
   document: SendableDocument | null | undefined,
   variant: SendDocumentVariant
@@ -248,6 +277,11 @@ export function SendDocumentModal({
     [document, variant]
   );
 
+  const salutation = useMemo(
+    () => getDocumentSalutation(document, variant),
+    [document, variant]
+  );
+
   const amount = useMemo(
     () => getDocumentAmount(document, variant),
     [document, variant]
@@ -259,7 +293,7 @@ export function SendDocumentModal({
     setTo(getDocumentEmail(document, variant));
     setSubject(`${documentLabel} ${documentNumber}`);
 
-    setMessage(`Bonjour ${partnerName},
+    setMessage(`Bonjour ${salutation} ${partnerName},
 
         Veuillez trouver ci-joint le document suivant : ${documentLabel} ${documentNumber}, pour un montant de ${amount}.
 

@@ -29,7 +29,7 @@ export function StatusPill({
 }) {
   return (
     <span
-      className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wide ${getStatusColor(
+      className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wide ${getStatusColor(
         status
       )}`}
     >

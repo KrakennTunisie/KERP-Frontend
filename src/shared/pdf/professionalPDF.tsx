@@ -611,7 +611,7 @@ function Header({ data, accent }: { data: PdfDocumentData; accent: string }) {
         <Text style={styles.documentTitle}>{title}</Text>
         <View style={{ ...styles.numberBadge, backgroundColor: getDocumentSoftColor(data.type) }}>
           <Text style={{ ...styles.numberText, color: accent }}>
-            {getDocumentNumberPrefix(data.type)} {data.number}
+            {getDocumentNumberPrefix()} {data.number}
           </Text>
         </View>
       </View>
@@ -866,38 +866,6 @@ function PaymentDetails({ data }: { data: PdfDocumentData }) {
   );
 }
 
-function PaymentTotals({ data }: { data: PdfDocumentData }) {
-  const paidAmount = data.payment?.paidAmount ?? 0;
-
-  return (
-    <View style={styles.paymentTotalsZone}>
-      <View style={styles.paymentTotalCard}>
-        <View style={styles.totalLine}>
-          <Text style={styles.totalLabel}>Montant payé</Text>
-          <Text style={styles.totalValue}>
-            {formatMoney(paidAmount, data.currency)}
-          </Text>
-        </View>
-
-        <View style={styles.totalLine}>
-          <Text style={styles.totalLabel}>TVA</Text>
-          <Text style={styles.totalValue}>Non applicable</Text>
-        </View>
-
-        <View style={styles.totalSeparator} />
-
-        <View style={styles.grandTotalLine}>
-          <Text style={styles.grandTotalLabel}>Total reçu</Text>
-
-          <Text style={styles.grandTotalValue}>
-            {formatNumber(paidAmount)}{" "}
-            <Text style={styles.grandTotalCurrency}>{data.currency}</Text>
-          </Text>
-        </View>
-      </View>
-    </View>
-  );
-}
 
 function PaymentNotice({ data }: { data: PdfDocumentData }) {
   const invoiceNumber =

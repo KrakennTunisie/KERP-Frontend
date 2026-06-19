@@ -87,7 +87,6 @@ export function InfoCard({
 export function AmountLine({
   label,
   value,
-  currency,
   strong = false,
 }: {
   label: string;
