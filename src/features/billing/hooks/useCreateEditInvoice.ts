@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
 import { ExchangeRateAPI, InvoicesAPI, partnersApi, PurchaseOrderAPI } from "../api/partners-api";
 import { Invoice, InvoiceCreate, invoiceCreateSchema } from "../models/invoice";
-import { BaseItem, InvoiceItem } from "../models/invoiceItem";
+import { BaseItem, defaultInvoiceItem, InvoiceItem } from "../models/invoiceItem";
 import { PartnerSummary } from "../models/partner";
 import {
   calculateInvoiceTotals,
@@ -16,7 +16,7 @@ import {
   calculUnityPrice,
   recalculate,
 } from "../lib/invoiceCalculation";
-import defaultItem from "../mocks/invoice-items-mocks";
+
 import { CurrencyType, currencyTypeSchema } from "../types/currency";
 import { PurchaseOrderDetails, PurchaseOrderSummary } from "../models/purchaseOrder";
 import { ExchangeRate } from "../types/exchangeRate";
@@ -102,7 +102,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
       sentToclientDate: null,
       sentToTTNDate: null,
       dueDate: new Date(new Date().setDate(new Date().getDate() + 15)),
-      invoiceItems: [defaultItem()],
+      invoiceItems: [defaultInvoiceItem()],
       totalExclTax: 0,
       totalInclTax: 0,
       vatRate: 0,
@@ -407,7 +407,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
 
   // Ajout d'un card qui permet l'ajout les données d'unt item (P.U ,QT , TVA)
   const addItem = () => {
-    append(defaultItem(), {
+    append(defaultInvoiceItem(), {
       shouldFocus: false,
     });
   };
@@ -589,7 +589,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
       setSelectedPO(null);
 
       clearClient();
-      setValue("invoiceItems", [defaultItem()], { shouldValidate: true, shouldDirty: true, });
+      setValue("invoiceItems", [defaultInvoiceItem()], { shouldValidate: true, shouldDirty: true, });
       setValue("issueDate", new Date(), { shouldValidate: true, shouldDirty: true, });
       setValue("invoiceCurrency", currencyTypeSchema.enum.TND, { shouldValidate: true, shouldDirty: true, });
       setValue("paymentCondition", PaymentConditionSchema.enum.NET_15, { shouldValidate: true, shouldDirty: true, });
