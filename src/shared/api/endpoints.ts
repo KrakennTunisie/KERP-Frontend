@@ -1,3 +1,4 @@
+import { PartnerDocumentType } from "@/features/billing/types/documentType";
 import { buildQueryString } from "./query-string-builder";
 import {  ExchangeRateParams, GetListParams } from "./types";
 
@@ -26,7 +27,11 @@ export const BILLING_ENDPOINTS = {
   getPurchaseOrders:(query? : GetListParams)=> `/purchase-orders/${buildQueryString(query)}`,
   purchaseOrderById: (id : string) => `/purchase-orders/${id}`,
   getPurchaseOrderByIdPartner:(id: string,partnerType:string) => `/purchase-orders/partner/${id}?partnerType=${partnerType}`,
- 
+
+  uploadSupplierDocument: (idPartner: string, partnerDocumentType:PartnerDocumentType)=>`/partners/suppliers/documents/upload/${idPartner}?partnerDocumentType=${partnerDocumentType}`,
+
+  uploadClientDocument: (idPartner: string, partnerDocumentType:PartnerDocumentType)=>`/partners/clients/documents/upload/${idPartner}?partnerDocumentType=${partnerDocumentType}`,
+
   uploadDocument: "/documents/upload",
 };
 
@@ -48,6 +53,10 @@ export const INVOICES_ENDPOINTS={
   supplierInvoiceStats: (id?: string) => `/invoices/supplier-invoices/stats/${id}`,
 
   supplierInvoiceById: (id: string) => `/invoices/supplier-invoices/${id}`,
+
+  supplierInvoiceItemById: (id: string) => `/invoices/supplier-invoices/item/${id}`,
+
+  clientInvoiceItemById: (id?: string) => `/invoices/client-invoices/item/${id}`,
 
   clientInvoicesById: (id: string) => `/invoices/clients/${id}`,
   supplierInvoicesById: (id: string) => `/invoices/suppliers/${id}`,
@@ -116,6 +125,8 @@ export const DASHBOARD_ENDPOINTS={
 export const MAILING_ENDPOINTS={
   mailing:'/mailing',
   sendSimpleEmail:`/mailing/send-email`,
+  getEmailById: (id: string )=>`/mailing/mail/${id}`,
+  getEmailsByPartner:(email: string, query : GetListParams )=>`/mailing/partner/${email}${buildQueryString(query)}`,
   sendEmailInvoice:(id: string )=>`/mailing/invoice/${id}/send-email`,
   sendEmailCreditNote:(id: string )=>`/mailing/creditNote/${id}/send-email`,
   sendEmailPurchaseOrder:(id: string )=>`/mailing/purchase-order/${id}/send-email`,

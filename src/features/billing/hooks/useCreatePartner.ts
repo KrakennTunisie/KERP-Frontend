@@ -78,13 +78,13 @@ export default function UseCreatePartner({ type, mode, partnerId }: pageProps) {
             field: fields.rne,
             label: "RNE",
             tooltip: "Registre National des Entreprises : document officiel d'identification de l'entreprise.",
-            existingUrl: partner?.rne?.storageURL ?? null,
+            existingUrl: partner?.rne[0]?.storageURL ?? null,
         },
         {
             field: fields.contract,
             label: "Contrat",
             tooltip: "Contrat signé avec le client ou le fournisseur.",
-            existingUrl: partner?.contract?.storageURL ?? null,
+            existingUrl: partner?.contract[0]?.storageURL ?? null,
         },
         {
             field: fields.patente,
@@ -96,14 +96,14 @@ export default function UseCreatePartner({ type, mode, partnerId }: pageProps) {
     const isClient = type === "CLIENT";
 
     const copyBillingToShipping = () => {
-        setValue("shippingAddress.region", watch("billingAddress.region"));
-        setValue("shippingAddress.state", watch("billingAddress.state"));
-        setValue("shippingAddress.city", watch("billingAddress.city"));
-        setValue("shippingAddress.street1", watch("billingAddress.street1"));
-        setValue("shippingAddress.street2", watch("billingAddress.street2"));
-        setValue("shippingAddress.zipCode", watch("billingAddress.zipCode"));
-    };
+        const billingAddress = getValues("billingAddress");
 
+        setValue("shippingAddress", billingAddress, {
+            shouldValidate: true,
+            shouldDirty: true,
+        });
+        console.log(getValues("shippingAddress.region"));
+};
     const fetchPartner = async () => {
         try {
             if (mode == "edit" && type == partnerTypeSchema.enum.CLIENT) {
@@ -190,6 +190,7 @@ export default function UseCreatePartner({ type, mode, partnerId }: pageProps) {
     const getError = (field: keyof AddPartnerFormData) => {
         return errors[field]?.message as string | undefined;
     };
+    
     const updatePartnerr = async (data :UpdatePartner)=>{
         try{
          const formData = new FormData();
@@ -202,8 +203,8 @@ export default function UseCreatePartner({ type, mode, partnerId }: pageProps) {
 
             formData.append("currency", data.currency);
             formData.append("email", data.email);
-            formData.append("personnelPhoneNumber", data.workPhone ?? "");
-            formData.append("professionnalPhoneNumber", data.mobilePhone ?? "");
+            formData.append("personnelPhoneNumber", data.mobilePhone ?? "");
+            formData.append("professionnalPhoneNumber", data.workPhone ?? "");
             formData.append("Language", data.language ?? "");
 
             formData.append("taxRegistrationNumber", data.taxId);

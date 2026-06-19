@@ -60,6 +60,9 @@ export default function PaymentsList() {
         defaultStatus="ALL"
         statuses={paymentMethods}
         searchPlaceholder="Référence paiement ou facture..."
+        onDownloadAll={()=>console.log("DownloadALL")}
+        onDownloadCurrentYear={()=>console.log("onDownloadCurrentYear")}
+        onDownloadFitered={()=>console.log("onDownloadFitered")}
       />
 
       {/* Table */}

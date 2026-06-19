@@ -17,30 +17,44 @@ export default function SectionCard({
   iconClassName = "text-blue-600",
   action,
   children,
-  contentClassName = "space-y-4",
+  contentClassName = "space-y-3",
 }: SectionCardProps) {
   return (
     <Card className="border-slate-200 shadow-sm">
-      <CardHeader className="flex flex-row items-start justify-between gap-4">
-        <div>
-          <CardTitle className="flex items-center gap-2 text-base font-black text-slate-900">
-            {Icon && <Icon className={`w-4 h-4 ${iconClassName}`} />}
-            {title}
+
+      <CardHeader className="flex items-start justify-between gap-3">
+
+        {/* Left */}
+        <div className="min-w-0">
+
+          <CardTitle className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+            {Icon && (
+              <Icon className={`h-4 w-4 shrink-0 ${iconClassName}`} />
+            )}
+            <span className="truncate">{title}</span>
           </CardTitle>
 
           {description && (
-            <CardDescription className="text-xs">
+            <CardDescription className="mt-0.5 text-xs">
               {description}
             </CardDescription>
           )}
+
         </div>
 
-        {action}
+        {/* Right action */}
+        {action && (
+          <div className="shrink-0">
+            {action}
+          </div>
+        )}
+
       </CardHeader>
 
       <CardContent className={contentClassName}>
         {children}
       </CardContent>
+
     </Card>
   );
 }

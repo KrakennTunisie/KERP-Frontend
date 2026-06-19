@@ -47,78 +47,78 @@ export function DocumentTopBar({
   actionItems,
 }: DocumentTopBarProps) {
   return (
-    <div className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 px-6 py-4 shadow-sm backdrop-blur">
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex min-w-0 items-center gap-4">
-          <button
-            type="button"
-            onClick={onBack}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 shadow-sm transition-all hover:-translate-x-0.5 hover:bg-slate-50 hover:text-slate-900"
-          >
-            <svg
-              width="17"
-              height="17"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.4"
-              viewBox="0 0 24 24"
+<div className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 px-4 py-3 shadow-sm backdrop-blur">
+  <div className="flex items-center justify-between gap-3">
+    <div className="flex min-w-0 items-center gap-3">
+      <button
+        type="button"
+        onClick={onBack}
+        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 shadow-sm transition-all hover:-translate-x-0.5 hover:bg-slate-50 hover:text-slate-900"
+      >
+        <svg
+          width="15"
+          height="15"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.4"
+          viewBox="0 0 24 24"
+        >
+          <path d="M19 12H5M12 5l-7 7 7 7" />
+        </svg>
+      </button>
+
+      <div className="min-w-0">
+        <div className="mb-0.5 flex items-center gap-2">
+          <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+            {documentTypeLabel}
+          </span>
+
+          {statusLabel && (
+            <span
+              className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${statusStyles[statusVariant]}`}
             >
-              <path d="M19 12H5M12 5l-7 7 7 7" />
-            </svg>
-          </button>
-
-          <div className="min-w-0">
-            <div className="mb-1 flex items-center gap-2">
-              <span className="rounded-md bg-slate-100 px-2 py-1 text-[11px] font-bold uppercase tracking-wide text-slate-500">
-                {documentTypeLabel}
-              </span>
-
-              {statusLabel && (
-                <span
-                  className={`rounded-full border px-2.5 py-1 text-[11px] font-black uppercase tracking-wide ${statusStyles[statusVariant]}`}
-                >
-                  {statusLabel}
-                </span>
-              )}
-            </div>
-
-            <h1 className="truncate text-xl font-black tracking-[-0.03em] text-slate-950">
-              {documentNumber || "-"}
-            </h1>
-
-            <p className="mt-1 text-xs font-medium text-slate-500">
-              {issueDateLabel}{" "}
-              <span className="font-semibold text-slate-700">
-                {issueDate || "-"}
-              </span>
-
-              {dueDate && (
-                <>
-                  <span className="mx-2 text-slate-300">•</span>
-                  {dueDateLabel}{" "}
-                  <span className="font-semibold text-slate-700">
-                    {dueDate}
-                  </span>
-                </>
-              )}
-            </p>
-          </div>
+              {statusLabel}
+            </span>
+          )}
         </div>
 
-        {(rightContent || actionItems?.length) && (
-          <div className="hidden shrink-0 items-center gap-3 md:flex">
-            {rightContent}
+        <h1 className="truncate text-lg font-bold tracking-[-0.02em] text-slate-950">
+          {documentNumber || "-"}
+        </h1>
 
-            {actionItems && actionItems.length > 0 && (
-              <ActionMenu
-                title="Actions document"
-                orientation="horizontal"
-                items={actionItems}
-              />
-            )}
-          </div>
-        )}
+        <p className="mt-0.5 text-[11px] font-medium text-slate-500">
+          {issueDateLabel}{" "}
+          <span className="font-semibold text-slate-700">
+            {issueDate || "-"}
+          </span>
+
+          {dueDate && (
+            <>
+              <span className="mx-1.5 text-slate-300">•</span>
+              {dueDateLabel}{" "}
+              <span className="font-semibold text-slate-700">
+                {dueDate}
+              </span>
+            </>
+          )}
+        </p>
       </div>
     </div>
+
+    {(rightContent || actionItems?.length) && (
+      <div className="hidden shrink-0 items-center gap-2 md:flex">
+        {rightContent}
+
+        {actionItems && actionItems.length > 0 && (
+          <ActionMenu
+            title="Actions document"
+            orientation="horizontal"
+            items={actionItems}
+          />
+        )}
+      </div>
+    )}
+  </div>
+</div>
   );
 }

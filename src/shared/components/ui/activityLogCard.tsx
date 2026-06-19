@@ -50,7 +50,7 @@ export default function ActivityLogCard({
       title="Journal d'activités"
       description="Historique des actions liées au partenaire"
       icon={Activity}
-      iconClassName="text-blue-600"
+      iconClassName={"text-blue-600"}
       action={
         <IconButton
           icon={RefreshCw}
@@ -76,29 +76,37 @@ export default function ActivityLogCard({
           return (
             <div
               key={log.idLog}
-              className="flex items-start gap-3 py-3 border-b border-slate-50 last:border-0"
+              className="flex items-start gap-2.5 px-4 py-2.5"
             >
-              <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
-                <Icon className="w-3.5 h-3.5 text-blue-600" />
+
+              {/* Icon */}
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600 mt-0.5">
+                <Icon className="h-3.5 w-3.5" />
               </div>
 
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-slate-800 leading-snug">
+              {/* Content */}
+              <div className="min-w-0 flex-1">
+
+                <p className="text-xs font-medium text-slate-800 leading-snug">
                   {log.description}
                 </p>
 
-                <div className="flex items-center gap-1.5 mt-1">
-                  <p className="text-[11px] text-slate-400">
-                 {formatDateLongWithTime(log.logDate)}
-                  </p>
+                <div className="mt-1 flex items-center gap-1.5 text-[11px] text-slate-400">
 
-                  <span className="text-blue-300">•</span>
+                  <span>
+                    {formatDateLongWithTime(log.logDate)}
+                  </span>
 
-                  <p className="text-[11px] text-slate-400">
+                  <span className="text-slate-300">•</span>
+
+                  <span>
                     Par {log.triggeredBy}
-                  </p>
+                  </span>
+
                 </div>
+
               </div>
+
             </div>
           );
         })}

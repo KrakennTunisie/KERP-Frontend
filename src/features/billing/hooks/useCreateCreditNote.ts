@@ -7,7 +7,6 @@ import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
 import { InvoicesAPI, InvoicesCreditNoteAPI } from "../api/partners-api";
-import { handleSaveAsPDF } from "../lib/buildInvoicePDF";
 import {
     calculateInvoiceTotals,
     calculUnityPrice,
@@ -279,10 +278,6 @@ export default function useCreateCreditNote({ invoiceId }: InvoiceDetailsProps) 
     /* eslint-disable react-hooks/refs */
     const onSubmit = handleSubmit(
         async () => {
-            const element = invoiceRef.current;
-
-            if (!element) return;
-            const file = await handleSaveAsPDF(element, getValues("invoiceCreditNoteNumber"));
             const pdfFile = await generatePdfFile(creditNoteToPdfData(getValues()))
             if (pdfFile) {
                 setValue("invoiceCreditNoteDocument", pdfFile, { shouldValidate: true, shouldDirty: true });

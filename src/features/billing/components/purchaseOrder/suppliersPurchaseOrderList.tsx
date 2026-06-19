@@ -86,6 +86,9 @@ export default function SuppliersPurchaseOrderList() {
                 defaultStatus={purchaseOrderStatusSchema.enum.ALL}
                 statuses={purchaseOrderStatus}
                 searchPlaceholder="Référence ou client..."
+                onDownloadAll={()=>console.log("DownloadALL")}
+                onDownloadCurrentYear={()=>console.log("onDownloadCurrentYear")}
+                onDownloadFitered={()=>console.log("onDownloadFitered")}
             />
             <PurchaseOrderTable
                 type="SUPPLIER"

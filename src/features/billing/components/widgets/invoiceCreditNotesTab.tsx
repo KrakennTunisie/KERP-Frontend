@@ -54,116 +54,122 @@ export function InvoiceCreditNotesTab({
             }));
 
   return (
-    <Card>
-        <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-            <p className="text-base font-bold text-slate-900">
-            Factures d’avoir liées
-            </p>
-            <p className="mt-1 text-sm text-slate-500">
-            Consultez, modifiez ou envoyez les avoirs associés à cette facture.
-            </p>
-        </div>
+<Card>
+  {/* Header */}
+  <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
 
-        <div className="flex w-fit flex-wrap items-center gap-2">
-        <div className="inline-flex items-center gap-2 rounded-full bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 ring-1 ring-rose-100">
-            <ReceiptText className="h-3.5 w-3.5" />
-            {totalElements} avoir(s)
-        </div>
+    <div>
+      <p className="text-sm font-semibold text-slate-900">
+        Factures d’avoir liées
+      </p>
+      <p className="text-xs text-slate-500">
+        Gérer les avoirs associés à cette facture
+      </p>
+    </div>
 
-        <button
-            type="button"
-            onClick={refresh}
-            disabled={loading}
-            className="
-            inline-flex items-center gap-1.5
-            rounded-lg border border-slate-200 bg-white
-            px-3 py-2 text-xs font-semibold text-slate-600
-            shadow-sm transition
-            hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900
-            disabled:cursor-not-allowed disabled:opacity-60
-            "
+    <div className="flex flex-wrap items-center gap-2">
+
+      <div className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-2.5 py-1 text-[11px] font-semibold text-rose-700 ring-1 ring-rose-100">
+        <ReceiptText className="h-3 w-3" />
+        {totalElements}
+      </div>
+
+      <button
+        type="button"
+        onClick={refresh}
+        disabled={loading}
+        className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 disabled:opacity-60"
+      >
+        <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
+        Refresh
+      </button>
+
+      {type === "CLIENT" && (
+        <Link
+          href={`/billing/invoices/clients/${invoiceId}/credit-note/create`}
+          className="inline-flex items-center gap-1.5 rounded-md bg-red-500 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-red-600"
         >
-            <RefreshCw
-            className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`}
-            />
-            Rafraîchir
-        </button>
+          + Avoir
+        </Link>
+      )}
+    </div>
+  </div>
 
-        {type === "CLIENT" && (
-            <Link
-            href={`/billing/invoices/clients/${invoiceId}/credit-note/create`}
-            className="
-                inline-flex items-center gap-1.5
-                rounded-lg bg-red-500 px-3 py-2
-                text-xs font-semibold text-white shadow-sm
-                transition-colors hover:bg-red-700
-            "
-            >
-            <span className="text-sm leading-none">+</span>
-            {"Nouvelle Facture d'avoir"}
-            </Link>
-        )}
-        </div>
-        </div>
+  {/* Filters */}
+  <div className="mb-3">
+    <StatusFilterBar
+      search={search}
+      onSearchChange={setSearch}
+      selectedStatus={filtre}
+      onStatusChange={setFiltre}
+      defaultStatus={invoiceStatusSchema.enum.ALL}
+      statuses={invoiceStatuses}
+      searchPlaceholder="Référence ou client..."
+      onDownloadAll={() => console.log("DownloadALL")}
+      onDownloadCurrentYear={() => console.log("onDownloadCurrentYear")}
+      onDownloadFitered={() => console.log("onDownloadFitered")}
+    />
+  </div>
 
-                    <StatusFilterBar
-                        search={search}
-                        onSearchChange={setSearch}
-                        selectedStatus={filtre}
-                        onStatusChange={setFiltre}
-                        defaultStatus={invoiceStatusSchema.enum.ALL}
-                        statuses={invoiceStatuses}
-                        searchPlaceholder="Référence ou client..."
-                    />
+  {/* Table */}
+  <BillingTable<InvoiceCreditNotePageItem>
+    items={creditNotes}
+    variant="invoiceCreditNotes"
+    secondColumnLabel="Facture"
+    currentPage={currentPage}
+    totalPages={totalPages}
+    totalElements={totalElements}
+    loading={loading}
+    onPageChange={setCurrentPage}
+    onView={(creditNote) =>
+      type === "CLIENT"
+        ? router.push(
+            `/billing/invoices/clients/${invoiceId}/credit-note/${creditNote.invoiceCreditNoteNumber}`
+          )
+        : router.push(
+            `/billing/invoices/suppliers/${invoiceId}/credit-note/${creditNote.invoiceCreditNoteNumber}`
+          )
+    }
+    onSend={(creditNote) => {
+      setOpen(true);
+      setSelectedCreditNote(creditNote);
+    }}
+    onDelete={(creditNote) => {
+      setDeleteId(creditNote.idInvoiceCreditNote);
+      setDeleteOpen(true);
+    }}
+    getNumber={(creditNote) => creditNote.invoiceCreditNoteNumber}
+    getDate={(creditNote) => creditNote.issueDate}
+    getPartnerName={(creditNote) => creditNote.invoice.invoiceNumber}
+    getStatus={(creditNote) => creditNote.invoiceCreditNoteStatus}
+    getAmountEUR={(creditNote) => creditNote.totalInclTaxEUR}
+    getAmountTND={(creditNote) => creditNote.totalInclTaxTND}
+    getStatusLabel={(status) => invoiceStatusLabels[status]}
+    getStatusColor={(status: InvoiceStatus) =>
+      status === "ALL"
+        ? "bg-slate-100 text-slate-700"
+        : invoiceStatusColors[status]
+    }
+    canUpdateStatus={(creditNote) =>
+      creditNote.invoiceCreditNoteStatus !== "CANCELLED"
+    }
+    emptyMessage="Aucun avoir lié"
+  />
 
-      <BillingTable<InvoiceCreditNotePageItem>
-        items={creditNotes}
-        variant="invoiceCreditNotes"
-        secondColumnLabel={"Facture"}
-        currentPage={currentPage}
-        totalPages={totalPages}
-        totalElements={totalElements}
-        loading={loading}
-        onPageChange={setCurrentPage}
-        onView={(creditNote) =>
-           type=="CLIENT" ?
-                router.push(`/billing/invoices/clients/${invoiceId}/credit-note/${creditNote.invoiceCreditNoteNumber}`)
-            :router.push(`/billing/invoices/suppliers/${invoiceId}/credit-note/${creditNote.invoiceCreditNoteNumber}`)
-        }
-        onSend={(creditNote) =>
-          {  setOpen(true);  setSelectedCreditNote(creditNote) }
-        }
-        onDelete={(creditNote)=>{
-            setDeleteId(creditNote.idInvoiceCreditNote);
-            setDeleteOpen(true)
-        }}
-        getNumber={(creditNote) => creditNote.invoiceCreditNoteNumber}
-        getDate={(creditNote) => creditNote.issueDate}
-        getPartnerName={(creditNote) => creditNote.invoice.invoiceNumber}
-        getStatus={(creditNote) => creditNote.invoiceCreditNoteStatus}
-        getAmountEUR={(creditNote) => creditNote.totalInclTaxEUR}
-        getAmountTND={(creditNote) => creditNote.totalInclTaxTND}
-        getStatusLabel={(status) => invoiceStatusLabels[status]}
-        getStatusColor={(status: InvoiceStatus) => status === "ALL" ? "bg-slate-100 text-slate-700" : invoiceStatusColors[status]}
-        canUpdateStatus={(creditNote) =>
-          creditNote.invoiceCreditNoteStatus !== "CANCELLED"
-        }
-        emptyMessage="Aucune facture d’avoir liée à cette facture."
-      />
+  {/* Modals */}
+  <DeleteInvoiceModal
+    open={deleteOpen}
+    onClose={() => setDeleteOpen(false)}
+    invoiceRef={creditNoteRef}
+    onConfirm={() => onDelete()}
+  />
 
-                  <DeleteInvoiceModal
-                      open={deleteOpen}
-                      onClose={() => setDeleteOpen(false)}
-                      invoiceRef={creditNoteRef}
-                      onConfirm={()=>onDelete()} />
-                  
-                  <SendDocumentModal
-                      document={selectedCreditNote ?? null}
-                      variant="invoiceCreditNote"
-                      isOpen={open}
-                      onClose={() => setOpen(false)}
-                  />
-    </Card>
+  <SendDocumentModal
+    document={selectedCreditNote ?? null}
+    variant="invoiceCreditNote"
+    isOpen={open}
+    onClose={() => setOpen(false)}
+  />
+</Card>
   );
 }

@@ -6,6 +6,9 @@ export const partnerRevunueStats = z.object({
   revenueHT: z.number(),
   revenueTVA: z.number(),
   revenueTTC: z.number(),
+  overdueHT: z.number(),
+  overdueTVA: z.number(),
+  overdueTTC: z.number(),
   nombreFactures: z.number(),
 });
 

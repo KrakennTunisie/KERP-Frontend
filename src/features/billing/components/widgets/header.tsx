@@ -19,35 +19,39 @@ export function PageHeader({
   action,
 }: PageHeaderProps) {
   return (
-    <header className="bg-white border-b border-slate-100 px-6 py-5 font-[Inter,system-ui,sans-serif]">
-      <div className=" mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          
+<header className="border-b border-slate-100 bg-white px-5 py-4">
+  <div className="mx-auto flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
 
-          <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight leading-tight">
-            {title}
-          </h1>
+    {/* Title */}
+    <div className="min-w-0">
+      <h1 className="truncate text-xl font-bold tracking-tight text-slate-900 md:text-2xl">
+        {title}
+      </h1>
 
-          {description && (
-            <p className="text-sm text-slate-500 font-medium mt-1">
-              {description}
-            </p>
+      {description && (
+        <p className="mt-0.5 text-xs font-medium text-slate-500">
+          {description}
+        </p>
+      )}
+    </div>
+
+    {/* Action */}
+    <div className="shrink-0">
+      {action
+        ? action
+        : actionLabel && onAction && (
+            <button
+              type="button"
+              onClick={onAction}
+              className="cursor-pointer inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white transition hover:bg-black"
+            >
+              {ActionIcon && <ActionIcon className="h-4 w-4" />}
+              {actionLabel}
+            </button>
           )}
-        </div>
+    </div>
 
-        {action
-          ? action
-          : actionLabel && onAction && (
-              <button
-                type="button"
-                onClick={onAction}
-                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-900 text-white rounded-xl hover:bg-black transition-all font-bold text-xs shadow-lg shadow-slate-200 cursor-pointer shrink-0"
-              >
-                {ActionIcon && <ActionIcon className="w-4 h-4" />}
-                {actionLabel}
-              </button>
-            )}
-      </div>
-    </header>
+  </div>
+</header>
   );
 }

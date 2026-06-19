@@ -131,71 +131,80 @@ export function InvoiceTableRow<T>({
   ];
 
   return (
-    <tr className="transition-colors hover:bg-slate-50/70">
-      <td className="px-5 py-3.5">
-        <button
-          onClick={() => onView(item)}
-          className="cursor-pointer text-xs font-bold text-blue-600 underline-offset-4 transition hover:text-blue-800 hover:underline"
-        >
-          {getNumber(item)}
-        </button>
-      </td>
+<tr className="transition-colors hover:bg-slate-50/60">
 
-      <td className="px-5 py-3.5">
-        <p className="max-w-[220px] truncate text-xs font-semibold text-slate-800">
-          {variant === "payment"
-            ? getRelatedInvoiceNumber?.(item) ?? "—"
-            : getPartnerName?.(item) ?? "—"}
-        </p>
-      </td>
+  {/* NUMBER */}
+  <td className="px-4 py-2.5">
+    <button
+      onClick={() => onView(item)}
+      className="cursor-pointer text-[11px] font-semibold text-blue-600 underline-offset-4 transition hover:text-blue-700 hover:underline"
+    >
+      {getNumber(item)}
+    </button>
+  </td>
 
-      <td className="px-5 py-3.5">
-        {variant === "payment" ? (
-          <span className="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-bold text-slate-700">
-            {getPaymentMethod?.(item) ?? "—"}
-          </span>
-        ) : status && getStatusLabel && getStatusColor ? (
-          <StatusPill
-            status={status}
-            getStatusLabel={getStatusLabel}
-            getStatusColor={getStatusColor}
-          />
-        ) : (
-          <span className="text-xs text-slate-400">—</span>
-        )}
-      </td>
+  {/* NAME */}
+  <td className="px-4 py-2.5">
+    <p className="max-w-[200px] truncate text-[11px] font-semibold text-slate-800">
+      {variant === "payment"
+        ? getRelatedInvoiceNumber?.(item) ?? "—"
+        : getPartnerName?.(item) ?? "—"}
+    </p>
+  </td>
 
-      <td className="px-5 py-3.5">
-        <AmountCell value={getAmountEUR?.(item)} currency="EUR" />
-      </td>
+  {/* STATUS / METHOD */}
+  <td className="px-4 py-2.5">
+    {variant === "payment" ? (
+      <span className="inline-flex rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-700">
+        {getPaymentMethod?.(item) ?? "—"}
+      </span>
+    ) : status && getStatusLabel && getStatusColor ? (
+      <StatusPill
+        status={status}
+        getStatusLabel={getStatusLabel}
+        getStatusColor={getStatusColor}
+      />
+    ) : (
+      <span className="text-[11px] text-slate-400">—</span>
+    )}
+  </td>
 
-      <td className="px-5 py-3.5">
-        <AmountCell value={getAmountTND?.(item)} currency="TND" />
-      </td>
+  {/* AMOUNTS */}
+  <td className="px-4 py-2.5">
+    <AmountCell value={getAmountEUR?.(item)} currency="EUR" />
+  </td>
 
-      <td className="px-5 py-3.5">
-        <p className="whitespace-nowrap text-xs font-medium text-slate-600">
-          {formatDateLong(getDate(item))}
-        </p>
-      </td>
+  <td className="px-4 py-2.5">
+    <AmountCell value={getAmountTND?.(item)} currency="TND" />
+  </td>
 
-      <td className="px-5 py-3.5 text-center">
-        {variant === "payment" ? (
-          <span className="text-xs font-semibold text-slate-400">—</span>
-        ) : (
-          <ComplianceIcon />
-        )}
-      </td>
+  {/* DATE */}
+  <td className="px-4 py-2.5">
+    <p className="whitespace-nowrap text-[11px] font-medium text-slate-600">
+      {formatDateLong(getDate(item))}
+    </p>
+  </td>
 
-      <td className="px-5 py-3.5">
-        <div className="flex items-center justify-end">
-          <ActionMenu
-            orientation="horizontal"
-            title={variant === "payment" ? "Actions paiement" : "Actions facture"}
-            items={actions}
-          />
-        </div>
-      </td>
-    </tr>
+  {/* COMPLIANCE */}
+  <td className="px-4 py-2.5 text-center">
+    {variant === "payment" ? (
+      <span className="text-[11px] font-medium text-slate-400">—</span>
+    ) : (
+      <ComplianceIcon />
+    )}
+  </td>
+
+  {/* ACTIONS */}
+  <td className="px-4 py-2.5">
+    <div className="flex items-center justify-end">
+      <ActionMenu
+        orientation="horizontal"
+        title={variant === "payment" ? "Actions paiement" : "Actions facture"}
+        items={actions}
+      />
+    </div>
+  </td>
+
+</tr>
   );
 }

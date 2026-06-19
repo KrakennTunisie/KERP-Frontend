@@ -31,35 +31,49 @@ export default function AddPartnerPage({ type, mode, partnerId }: pageProps) {
     return (
         <div className=" bg-gray-50">
 
-            <header className="bg-white border-b border-gray-100 px-8 py-6">
-                <div className=" mx-auto">
-                    <button
-                        onClick={() => router.push(type === "CLIENT" ? "/billing/clients" : "/billing/suppliers")}
-                        className="flex items-center gap-2 text-gray-600 hover:text-gray-900 font-bold mb-4 transition-colors group"
-                    >
-                        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-                        Retour aux {type === partnerTypeSchema.enum.CLIENT ? "clients" : "fournisseurs"}
-                    </button>
-                    <div className="flex items-center gap-4">
-                        <div className="w-16 h-16 bg-blue-600 rounded-[24px] flex items-center justify-center">
-                            <User className="w-8 h-8 text-white" />
-                        </div>
-                        <div>
-                            <h1 className="text-3xl font-black text-gray-900 tracking-tighter">
-                                {mode === 'edit'
-                                    ? `Modification d'un ${type === partnerTypeSchema.enum.CLIENT ? "Client" : "Fournisseur"}`
-                                    : `Nouveau ${type === partnerTypeSchema.enum.CLIENT ? "Client" : "Fournisseur"}`
-                                }
-                            </h1>
-                            <p className="text-sm font-bold text-gray-600 mt-1">
-                                {mode === 'edit'
-                                    ? `Modifier un ${type === partnerTypeSchema.enum.CLIENT ? "Client" : "Fournisseur"}`
-                                    : `Créer un nouveau ${type === partnerTypeSchema.enum.CLIENT ? "Client" : "Fournisseur"}`
-                                }
-                            </p>
-                        </div>
-                    </div>
+            <header className="bg-white border-b border-gray-100 px-6 py-4">
+            <div className="mx-auto space-y-3">
+
+                {/* BACK BUTTON */}
+                <button
+                onClick={() =>
+                    router.push(
+                    type === partnerTypeSchema.enum.CLIENT
+                        ? "/billing/clients"
+                        : "/billing/suppliers"
+                    )
+                }
+                className="flex items-center cursor-pointer gap-2 text-gray-500 hover:text-gray-900 text-xs font-medium transition group"
+                >
+                <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
+                Retour
+                </button>
+
+                {/* MAIN HEADER */}
+                <div className="flex items-center gap-3">
+
+                {/* ICON */}
+                <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
+                    <User className="w-5 h-5 text-white" />
                 </div>
+
+                {/* TEXT */}
+                <div>
+                    <h1 className="text-lg font-bold text-gray-900 leading-tight">
+                    {mode === "edit"
+                        ? `Modifier ${type === partnerTypeSchema.enum.CLIENT ? "Client" : "Fournisseur"}`
+                        : `Nouveau ${type === partnerTypeSchema.enum.CLIENT ? "Client" : "Fournisseur"}`}
+                    </h1>
+
+                    <p className="text-xs text-gray-500 mt-0.5">
+                    {mode === "edit"
+                        ? "Mettre à jour les informations"
+                        : "Créer un nouveau partenaire"}
+                    </p>
+                </div>
+                </div>
+
+            </div>
             </header>
 
             <main className="flex-1 overflow-y-auto p-8">
@@ -599,7 +613,7 @@ export default function AddPartnerPage({ type, mode, partnerId }: pageProps) {
                                             variant="outline"
                                             size="sm"
                                             className="w-full rounded-full bg-white sm:w-auto cursor-pointer"
-                                            onClick={() => copyBillingToShipping()}
+                                            onClick={ copyBillingToShipping}
                                         >
                                             Copier depuis facturation
                                         </Button>

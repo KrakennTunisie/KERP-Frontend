@@ -10,6 +10,7 @@ import { DeleteInvoiceModal } from "./deleteInvoiceModal";
 export function InvoicePaymentsTab({
   invoiceId,
   type,
+  isDisabled
 }: any) {
 
   const {
@@ -37,76 +38,85 @@ export function InvoicePaymentsTab({
   );
 
   return (
-    <Card>
-    <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+<Card>
+  {/* Header */}
+  <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+
     <div>
-        <p className="text-base font-bold text-slate-900">
+      <p className="text-sm font-semibold text-slate-900">
         Paiements liés
-        </p>
-        <p className="mt-1 text-sm text-slate-500">
-        Consultez les règlements associés à cette facture.
-        </p>
+      </p>
+      <p className="text-xs text-slate-500">
+        Règlements associés à cette facture
+      </p>
     </div>
 
     <div className="flex flex-wrap items-center gap-2">
-        <div className="inline-flex w-fit items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-100">
-        <CreditCard className="h-3.5 w-3.5" />
-        {payments.length} paiement(s)
-        </div>
 
-        <div className="inline-flex w-fit items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700">
-        Total payé : {totalPaid.toFixed(2)}
-        </div>
+      <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700 ring-1 ring-emerald-100">
+        <CreditCard className="h-3 w-3" />
+        {payments.length}
+      </div>
 
-        <Link
-        href={`/billing/payments/create`}
-        className="
-            inline-flex items-center gap-1.5
-            rounded-lg bg-emerald-600 px-3 py-2
-            text-xs font-semibold text-white shadow-sm
-            transition-colors hover:bg-emerald-700
-        "
-        >
-        <span className="text-sm leading-none">+</span>
-        Ajouter paiement
-        </Link>
+      <div className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-700">
+        {totalPaid.toFixed(2)} €
+      </div>
+
+      <Link
+        href={isDisabled ? "#" : `/billing/payments/create?invoiceId=${invoiceId}`}
+        onClick={(e) => isDisabled && e.preventDefault()}
+        className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition
+          ${
+            isDisabled
+              ? "cursor-not-allowed bg-slate-200 text-slate-500"
+              : "bg-emerald-600 text-white hover:bg-emerald-700"
+          }`}
+      >
+        + Ajouter
+      </Link>
     </div>
-    </div>
+  </div>
 
-      <BillingTable<PaymentListItem>
-        items={payments}
-        variant="payment"
-        secondColumnLabel="Facture liée"
-        currentPage={currentPage}
-        totalPages={totalPages}
-        totalElements={totalElements}
-        loading={loading}
-        onPageChange={setCurrentPage}
-        onView={(payment) => {
-          router.push(`/billing/payments/${payment.idPayment}`);
-        }}
-        onEdit={(payment) => {
-          router.push(`/billing/payments/update/${payment.idPayment}`);
-        }}
-        onDelete={(payment) => {
-          setSelectedPayment(payment);
-          setDeleteId(payment.idPayment);
-          setDeleteOpen(true);
-        }}
-        getNumber={(payment) => payment.reference}
-        getRelatedInvoiceNumber={(payment) => payment.invoice.invoiceNumber}
-        getPaymentMethod={(payment) => paymentMethodLabels[ payment.method]}
-        getAmountEUR={(payment) =>payment.currency=="EUR" ? payment.amount : null}
-        getAmountTND={(payment) =>payment.currency=="TND" ? payment.amount : null}
-        getDate={(payment) => new Date(payment.paymentDate)}
-        emptyMessage="Aucun paiement trouvé."
-      />
-            <DeleteInvoiceModal 
-            open={deleteOpen} 
-            onClose={()=> setDeleteOpen(false)} 
-            onConfirm={onDelete}
-            loading={deleteLoading}      
-            />
-    </Card>
+  {/* Table */}
+  <BillingTable<PaymentListItem>
+    items={payments}
+    variant="payment"
+    secondColumnLabel="Facture"
+    currentPage={currentPage}
+    totalPages={totalPages}
+    totalElements={totalElements}
+    loading={loading}
+    onPageChange={setCurrentPage}
+    onView={(payment) =>
+      router.push(`/billing/payments/${payment.idPayment}`)
+    }
+    onEdit={(payment) =>
+      router.push(`/billing/payments/update/${payment.idPayment}`)
+    }
+    onDelete={(payment) => {
+      setSelectedPayment(payment);
+      setDeleteId(payment.idPayment);
+      setDeleteOpen(true);
+    }}
+    getNumber={(payment) => payment.reference}
+    getRelatedInvoiceNumber={(payment) => payment.invoice.invoiceNumber}
+    getPaymentMethod={(payment) => paymentMethodLabels[payment.method]}
+    getAmountEUR={(payment) =>
+      payment.currency === "EUR" ? payment.amount : null
+    }
+    getAmountTND={(payment) =>
+      payment.currency === "TND" ? payment.amount : null
+    }
+    getDate={(payment) => new Date(payment.paymentDate)}
+    emptyMessage="Aucun paiement"
+  />
+
+  <DeleteInvoiceModal
+    open={deleteOpen}
+    onClose={() => setDeleteOpen(false)}
+    onConfirm={onDelete}
+    loading={deleteLoading}
+  />
+</Card>
   );
 }

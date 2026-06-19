@@ -92,6 +92,9 @@ export default function SuppliersInvoiceList() {
                 defaultStatus={invoiceStatusSchema.enum.TO_COLLECT}
                 statuses={invoiceStatuses}
                 searchPlaceholder="Référence ou client..."
+                onDownloadAll={()=>console.log("DownloadALL")}
+                onDownloadCurrentYear={()=>console.log("onDownloadCurrentYear")}
+                onDownloadFitered={()=>console.log("onDownloadFitered")}
             />
 
             <UpdateInvoiceStatusModal

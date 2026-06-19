@@ -24,11 +24,13 @@ import { paymentToPdfData } from "@/shared/pdf/documentAdapter";
 type UseCreatePaymentProps = {
   mode?: "create" | "update" | "clone";
   paymentId?: string;
+  invoiceId?: string | null;
 };
 
 export default function useCreatePayment({
   mode = "create",
   paymentId,
+  invoiceId
 }: UseCreatePaymentProps = {}) {
   const router = useRouter();
 
@@ -39,6 +41,7 @@ export default function useCreatePayment({
   const [nextNumber, setNextNumber] = useState<nextNumber>();
   const [invoices, setInvoices] = useState<InvoicePageItem[]>([]);
   const [loadingInvoices, setLoadingInvoices] = useState(false);
+  const [loadingInvoice, setLoadingInvoice] = useState(false);
   const [loadingPayment, setLoadingPayment] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
   const [updateLoading, setUpdateLoading] = useState(false);
@@ -89,6 +92,32 @@ export default function useCreatePayment({
     return errors[field]?.message as string | undefined;
   };
 
+  const handleInvoiceChange = (invoiceNumber: string, invoiceToSelect?:InvoicePageItem) => {
+    const invoice =
+    invoiceToSelect ??
+    invoices.find((item) => item.invoiceNumber === invoiceNumber);
+
+    setValue("invoiceNumber", invoiceNumber, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+
+    
+    if (invoice) {
+      setSelectedInvoice(invoice)
+      setValue("amount", Number(invoice.remainingAmount.toFixed(2)) ?? 0, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+
+      setValue("currency", invoice.invoiceCurrency, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    }
+  };
+
+
   const fetchNextNumber = async () => {
     if (isUpdate) return;
 
@@ -128,6 +157,25 @@ export default function useCreatePayment({
     }
   };
 
+  const fetchSelectedInvoice = async () => {
+      if(!invoiceId) return ;
+      try {
+        setLoadingInvoice(true);
+
+        const response =
+          await InvoicesAPI.getClientInvoiceItemById(invoiceId);
+
+        handleInvoiceChange(response.invoiceNumber, response)
+      } catch (error) {
+        appToast.error(
+          "Erreur lors du chargement des factures",
+          getApiErrorMessage(error)
+        );
+      } finally {
+        setLoadingInvoice(false);
+      }
+  };
+
 const fetchPaymentDetails = async () => {
   if (!isEditMode || !paymentId) return;
 
@@ -136,7 +184,7 @@ const fetchPaymentDetails = async () => {
 
     const payment = await paymentsAPI.getPaymentDetails(paymentId);
 
-    let paymentNumber = payment.reference ?? payment.reference ?? "";
+    var paymentNumber = payment.reference ?? payment.reference ?? "";
 
     if (isClone) {
       const nextPaymentNumber = await paymentsAPI.getNextPaymentNumber();
@@ -149,19 +197,20 @@ const fetchPaymentDetails = async () => {
       amount: payment.amount ?? 0,
       method: payment.method ?? "BANK_TRANSFER",
       invoiceNumber:
-        payment.invoice?.idInvoice  ?? "",
+        payment.invoice?.invoiceNumber  ?? "",
       currency:
         payment.currency ??
         payment.invoice?.invoiceCurrency ??
         payment.invoice?.invoiceCurrency ??
         "EUR",
+      invoice: null,
+      paymentDocument: null,
+      paymentNumber: paymentNumber,
     });
 
     if (payment.invoice) {
       setSelectedInvoice({
-          ...payment.invoice,
-          idInvoice: payment.invoice.idInvoice ?? payment.invoice.idInvoice,
-          invoiceNumber: payment.invoice.invoiceNumber,
+          ...payment.invoice
       }  as InvoicePageItem);
     }
   } catch (error) {
@@ -180,6 +229,11 @@ const fetchPaymentDetails = async () => {
     fetchNextNumber();
   }, [mode]);
 
+  useEffect(()=>{
+    if(!invoiceId) return;
+    fetchSelectedInvoice()
+  },[invoiceId])
+
   useEffect(() => {
     fetchInvoices();
   }, [debouncedSearchQuery]);
@@ -188,32 +242,7 @@ const fetchPaymentDetails = async () => {
     fetchPaymentDetails();
   }, [mode, paymentId]);
 
-  const handleInvoiceChange = (invoiceNumber: string) => {
-    const invoice = invoices.find(
-      (item) => item.invoiceNumber === invoiceNumber
-    );
 
-    setSelectedInvoice(invoice);
-
-    setValue("invoiceNumber", invoiceNumber, {
-      shouldValidate: true,
-      shouldDirty: true,
-    });
-
-    
-    if (invoice) {
-        
-      setValue("amount", invoice.remainingAmount ?? 0, {
-        shouldValidate: true,
-        shouldDirty: true,
-      });
-
-      setValue("currency", invoice.invoiceCurrency, {
-        shouldValidate: true,
-        shouldDirty: true,
-      });
-    }
-  };
 
   const onSubmit = handleSubmit(
     async () => {
@@ -381,7 +410,7 @@ function getInvoiceTotalByCurrency(invoice: InvoicePageItem): number {
 
     max,
     total,
-
+    loadingInvoice, setLoadingInvoice,
     isModalOpen, setIsModalOpen
   };
 }

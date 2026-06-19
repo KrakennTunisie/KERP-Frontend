@@ -1,11 +1,10 @@
 "use client";
 
 import DocumentItem from "@/shared/components/ui/documentItem";
-import { DocumentPreviewModal } from "@/shared/components/ui/documentPreviewModal";
+import { DocumentOrFile, DocumentPreviewModal } from "@/shared/components/ui/documentPreviewModal";
 import InfoItem from "@/shared/components/ui/infoItem";
 import { BadgeCheck } from "lucide-react";
 import { useState } from "react";
-import { Document } from "../../models/document";
 import { Partner } from "../../models/partner";
 
 
@@ -15,13 +14,13 @@ type PartnerInfoCardProps = {
   typeLabel: string;
 };
 
-export type PreviewDocument = Document | File | null;
+
 
 export default function PartnerInfoCard({
   partner,
   typeLabel,
 }: PartnerInfoCardProps) {
-  const [previewDocument, setPreviewDocument] =useState<PreviewDocument>(null);
+  const [previewDocument, setPreviewDocument] =useState<DocumentOrFile>(null);
   return (
     <>
       <div className="bg-white rounded-[32px] border border-gray-100 shadow-sm p-6 md:p-8">

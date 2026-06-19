@@ -28,8 +28,8 @@ export const partnerSchema = z.object({
   shippingAddress : addAddressSchema,
   language: z.string().min(1, "Language est obligatoire"),
   iban: z.string().min(1, "IBAN est obligatoire"),
-  rne: fileSchema.nullable(),
-  contract: fileSchema.nullable(),
+  rne: z.array(documentSchema).default([]),
+  contract: z.array(documentSchema).default([]),
   patente: fileSchema.nullable() ,
   partnerType: partnerTypeSchema,
   invoices: z.array(z.lazy(() => z.any())).optional(),
@@ -79,8 +79,8 @@ export const partnerDetailsSchema = z.object({
   shippingAddress : addAddressSchema,
   language: z.string().min(1, "Language est obligatoire"),
   iban: z.string().min(1, "IBAN est obligatoire"),
-  rne: documentSchema.nullable(),
-  contract:  documentSchema.nullable(),
+  rne: z.array(documentSchema).default([]),
+  contract: z.array(documentSchema).default([]),
   patente:  documentSchema.nullable() ,
   partnerType: partnerTypeSchema,
 });
@@ -145,8 +145,7 @@ export type PartnerAllDetails = z.infer<typeof partnerDetailsSchema>;
 export type ClientPartnerDetails = z.infer<typeof clientPartnerDetailsSchema>;
 export type SupplierPartnerDetails = z.infer<typeof supplierPartnerDetailsSchema>;
 
-export const partnerItemSchema = partnerSchema.omit({
-  maritalStatus: true,displayName: true,currency:true, taxRate:true,logs:true,paymentCondition:true,shippingAddress:true,
+export const partnerItemSchema = partnerSchema.omit({displayName: true,currency:true, taxRate:true,logs:true,paymentCondition:true,shippingAddress:true,
   personnelPhoneNumber : true,patente: true,enablePortal:true,active:true,language:true,
    rne: true, contract: true,  invoices: true})
 
@@ -160,6 +159,7 @@ export type SupplierPartnerItem = PartnerItem & { partnerType: "SUPPLIER" };
 
 export const partnerSummarySchema = partnerSchema.pick({
   idPartner: true,
+  maritalStatus: true,
   partnerName: true,
   companyName: true,
   email: true,

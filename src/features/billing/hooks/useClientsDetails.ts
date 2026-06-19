@@ -1,6 +1,5 @@
 import { TrendingDown, TrendingUp, Truck, Users, CheckCircle, Clock, AlertCircle, FileText} from "lucide-react";
 import { useState } from "react";
-import { PreviewDocument } from "../components/partner/partnerInfoCard";
 import { InvoicePageItem } from "../models/invoice";
 import { PartnerAllDetails } from "../models/partner";
 import { InvoiceStatusWithoutAll, invoiceStatusColors, invoiceStatusLabels } from "../types/invoiceStatus";
@@ -13,18 +12,11 @@ import { partnerTypeSchema } from "../types/partnerType";
 import { invoiceTypeSchema } from "../types/invoiceType";
 import { DashboardAPI, InvoicesAPI, InvoicesCreditNoteAPI, partnersApi, PurchaseOrderAPI } from "../api/partners-api";
 
-import { PurchaseOrderPageItem, PurchaseOrderPartnerSummary } from "../models/purchaseOrder";
+import { PurchaseOrderPageItem } from "../models/purchaseOrder";
 import {  InvoiceCreditNotePageItem } from "../models/creditNote";
+import { DocumentOrFile } from "@/shared/components/ui/documentPreviewModal";
+import { PartnerDocumentType } from "../types/documentType";
 
-
-
-export interface EmailLog {
-  id: string;
-  subject: string;
-  date: string;
-  status: 'sent' | 'delivered' | 'opened' | 'failed';
-  attachments: string[];
-}
 
 export type PartnerDetailsProps = {
   partner: PartnerAllDetails;
@@ -40,6 +32,7 @@ export default function UseClientsDetails({ partner, onRefresh }: PartnerDetails
 
   const isSupplier = partner.partnerType === "SUPPLIER";
   const [open, setOpen] = useState(false)
+  const [sendDocumentOpen, setSendDocumentOpen] = useState(false)
   const pageConfig = {
     title: isSupplier ? "Fournisseur" : "Client",
     backHref: isSupplier ? "/billing/suppliers" : "/billing/clients",
@@ -85,52 +78,19 @@ export default function UseClientsDetails({ partner, onRefresh }: PartnerDetails
   const [modalSupplierPurchaseOrderOpen, setModalSupplierPurchaseOrderOpen] = useState(false);
   const [sendeMailOpen, setSendMailOpen] = useState(false);
   const [selected, setSelected] = useState<InvoicePageItem | InvoiceCreditNotePageItem | PurchaseOrderPageItem | null>();
+  const [selectedEmail, setSelectedEmail]= useState<string|null>(null)
   const [invoiceRef, setInvoiceRef] = useState("");
   const [invoiceId, setInvoiceId] = useState("");
   const [creditNoteId, setCreditNoteId] = useState("");
   const [invoiceType, setInvoiceType] = useState("");
   const [purchaseOrderId, setPurchaseOrderId] = useState("");
-
-
+  const [showDetails, setShowDetails]= useState(false)
+  const [openAddDocument, setOpenAddDocument] = useState(false);
+  const [addDocumentLoading, setAddDocumentLoading] = useState(false);
+  const [addDocumentType, setAddDocumentType] = useState<PartnerDocumentType>("CONTRACT");
 
   // Mock emails
-  const emailLogs: EmailLog[] = [
-    {
-      id: '1',
-      subject: 'Facture FAC-2025-034 - Échéance à venir',
-      date: '2025-03-20 10:30',
-      status: 'opened',
-      attachments: ['FAC-2025-034.pdf'],
-    },
-    {
-      id: '2',
-      subject: 'Relance de paiement - Facture FAC-2025-023',
-      date: '2025-03-15 14:00',
-      status: 'delivered',
-      attachments: ['FAC-2025-023.pdf', 'CGV.pdf'],
-    },
-    {
-      id: '3',
-      subject: 'Nouvelle facture disponible',
-      date: '2025-02-01 09:15',
-      status: 'opened',
-      attachments: ['FAC-2025-015.pdf'],
-    },
-    {
-      id: '4',
-      subject: 'Confirmation de paiement',
-      date: '2025-02-10 10:20',
-      status: 'sent',
-      attachments: [],
-    },
-    {
-      id: '5',
-      subject: 'Nouvelle facture disponible',
-      date: '2025-02-01 09:15',
-      status: 'opened',
-      attachments: ['FAC-2025-015.pdf'],
-    },
-  ];
+
   const [loading, setLoading] = useState<boolean>();
   const [refresh, setRefresed] = useState<boolean>(false);
   const [clientRevenue, setClientRevenue] = useState<PartnerRevenueStats[] | []>([])
@@ -214,7 +174,7 @@ export default function UseClientsDetails({ partner, onRefresh }: PartnerDetails
     }
   }
 
-  const [previewDocument, setPreviewDocument] = useState<PreviewDocument>(null);
+  const [previewDocument, setPreviewDocument] = useState<DocumentOrFile>(null);
   const [selectedPeriod, setSelectedPeriod] = useState(6);
 
 
@@ -241,31 +201,7 @@ export default function UseClientsDetails({ partner, onRefresh }: PartnerDetails
   };
 
 
-  const getEmailStatusColor = (status: string) => {
-    switch (status) {
-      case 'sent': return 'bg-blue-50 text-blue-600 border-blue-100';
-      case 'delivered': return 'bg-emerald-50 text-emerald-600 border-emerald-100';
-      case 'opened': return 'bg-purple-50 text-purple-600 border-purple-100';
-      case 'failed': return 'bg-rose-50 text-rose-600 border-rose-100';
-      default: return 'bg-gray-50 text-gray-500 border-gray-100';
-    }
-  };
-
-  const getStatusLabel = (status: string) => {
-    const labels: Record<string, string> = {
-      paid: 'Payée',
-      pending: 'En attente',
-      overdue: 'En retard',
-      completed: 'Complété',
-      approved: 'Approuvé',
-      sent: 'Envoyé',
-      draft: 'Brouillon',
-      opened: 'Ouvert',
-      delivered: 'Délivré',
-      failed: 'Échoué',
-    };
-    return labels[status] || status;
-  };
+ 
 
       const updatePartnerStatus = async (status: boolean) => {
           try {
@@ -307,14 +243,45 @@ export default function UseClientsDetails({ partner, onRefresh }: PartnerDetails
       };
 
 
+      const onAddDocument= ( type: PartnerDocumentType)=>{
+        setAddDocumentType(type)
+        setOpenAddDocument(true)
+      }
+
+
+      const addDocument= async (file: File, documentType: PartnerDocumentType)=>{
+        try {
+          setAddDocumentLoading(true)
+
+          const formData = new FormData();
+          formData.append("document", file)
+          
+          partner.partnerType ==="CLIENT" ?
+
+            await partnersApi.uploadClientDocument(partner.idPartner, documentType, formData)
+
+            : await partnersApi.uploadSupplierDocument(partner.idPartner, documentType, formData)
+
+         appToast.success("Document ajouté avec succès", `Un nouvelle document ${documentType} est ajouté avec succèès.`)
+         onRefresh()
+
+        } catch (error) {
+            appToast.error("Erreur", getApiErrorMessage(error))
+
+        }finally{
+          setAddDocumentLoading(false)
+        }
+      }
+
   const chartMode: ChartMode = partner.partnerType === "CLIENT" ? "revenues" : "expenses";
 
-  return {
+  return {sendDocumentOpen, setSendDocumentOpen,showDetails, setShowDetails, selectedEmail, setSelectedEmail,openAddDocument, setOpenAddDocument, addDocument,
     deleteClientInvoice,deleteLoading,setDeleteLoading,setDeleteOpen,invoiceRef,deleteOpen,setInvoiceId,purchaseOrderId,setPurchaseOrderId,setDeletePOrderOpen,deletePOrderOpen , deletePurchaseOrder,
-    getStatusLabel, getEmailStatusColor, chartMode, getStatusIcon, getLabelColor, getStatusColor, toggleSection ,refresh,setRefresed,modalPurchaseOrderOpen,setModalPurchaseOrderOpen
-    , previewDocument, setPreviewDocument, selectedPeriod, setSelectedPeriod, emailLogs, activeTab, setActiveTab, supplierDespenses,totalDespenses
+    chartMode, getStatusIcon, getLabelColor, getStatusColor, toggleSection ,refresh,setRefresed,modalPurchaseOrderOpen,setModalPurchaseOrderOpen
+    , previewDocument, setPreviewDocument, selectedPeriod, setSelectedPeriod,  activeTab, setActiveTab, supplierDespenses,totalDespenses
     , TotalIcon, HeaderIcon, open, setOpen, openSections, pageConfig, fetchPartnerStats,clientRevenue, totalRevenue ,sendeMailOpen, setSendMailOpen,
     updatePartnerStatus, deletePartnerOpen, setDeletePartnerOpen, updatePartnerStatusOpen, setUpdatePartnerStatusOpen,deleteCreditInvoice,
-     setDeleteCNoteOpen,deleteCNoteOpen,creditNoteId,setCreditNoteId, modalSupplierPurchaseOrderOpen, setModalSupplierPurchaseOrderOpen, selected, setSelected, invoiceType, setInvoiceType
+     setDeleteCNoteOpen,deleteCNoteOpen,creditNoteId,setCreditNoteId, modalSupplierPurchaseOrderOpen, setModalSupplierPurchaseOrderOpen, selected, setSelected, invoiceType, setInvoiceType,
+    addDocumentLoading, addDocumentType, setAddDocumentType, onAddDocument
   };
 }
