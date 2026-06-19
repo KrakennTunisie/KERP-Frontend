@@ -10,9 +10,14 @@ import {
 } from '@/shared/components/ui/dropdown';
 import { Avatar, AvatarFallback } from '@/shared/components/ui/avatar';
 import { Badge } from '@/shared/components/ui/badge';
+import { signOut } from 'next-auth/react';
 
 export function Navbar() {
   const notificationCount = 3;
+  const handleLogout = async () => {
+    localStorage.removeItem("access_token");
+    await signOut({ callbackUrl: "/login" })
+  };
 
   return (
     <header className="h-20 bg-white border-b border-gray-100 flex items-center justify-between px-8">
@@ -33,7 +38,7 @@ export function Navbar() {
         <button className="relative p-3 hover:bg-gray-50 rounded-[16px] transition-all duration-200 group">
           <Bell className="w-5 h-5 text-gray-500 group-hover:text-gray-900" />
           {notificationCount > 0 && (
-            <Badge 
+            <Badge
               className="absolute -top-1 -right-1 h-5 min-w-5 flex items-center justify-center p-0 px-1.5 bg-blue-600 hover:bg-blue-600 text-white text-[10px] font-black"
             >
               {notificationCount}
@@ -84,12 +89,13 @@ export function Navbar() {
                 <span className="font-bold text-sm text-gray-700">Mon Profil</span>
               </DropdownMenuItem>
 
-               <DropdownMenuItem className="px-4 py-3 rounded-[16px] cursor-pointer focus:bg-gray-50">
+              <DropdownMenuItem className="px-4 py-3 rounded-[16px] cursor-pointer focus:bg-gray-50">
                 <Settings className="mr-3 h-4 w-4 text-gray-500" />
                 <span className="font-bold text-sm text-gray-700">Parmètres</span>
               </DropdownMenuItem>
 
-              <DropdownMenuItem className="px-4 py-3 rounded-[16px] cursor-pointer focus:bg-red-50 text-red-600">
+              <DropdownMenuItem className="px-4 py-3 rounded-[16px] cursor-pointer focus:bg-red-50 text-red-600"
+                onClick={() => handleLogout()} >
                 <LogOut className="mr-3 h-4 w-4" />
                 <span className="font-bold text-sm">Déconnexion</span>
               </DropdownMenuItem>

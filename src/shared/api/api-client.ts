@@ -13,7 +13,7 @@ type RequestOptions = {
   signal?: AbortSignal;
 };
 
-const API_BASE_URL ="/api";
+const API_BASE_URL ="http://localhost:8089/api";
 
 async function parseResponse(response: Response) {
   const contentType = response.headers.get("content-type");
@@ -47,10 +47,15 @@ export async function apiRequest<T>(
   endpoint: string,
   options: RequestOptions = {}
 ): Promise<T> {
-  const { method , body, headers, token, signal } = options;
+  const { method , body, headers, signal } = options;
 
   const multipart = isFormData(body);
   const finalHeaders = normalizeHeaders(headers);
+  const token = options.token ?? 
+    (typeof window !== "undefined" 
+      ? localStorage.getItem("access_token") ?? undefined 
+      : undefined);
+    
   if (token) {
     finalHeaders.Authorization = `Bearer ${token}`;
   }
