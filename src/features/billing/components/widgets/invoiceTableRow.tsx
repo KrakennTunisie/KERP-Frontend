@@ -14,7 +14,7 @@ import {
   ComplianceIcon,
   StatusPill,
 } from "../../lib/invoiceTableRowHelpers";
-import { ActionMenu } from "@/shared/components/ui/actionMenuItem";
+import { ActionMenu, ActionMenuItem } from "@/shared/components/ui/actionMenuItem";
 
 export interface Payment {
   id: string;
@@ -79,7 +79,7 @@ export function InvoiceTableRow<T>({
   const statusUpdateDisabled =
     !onUpdateStatus || (canUpdateStatus ? !canUpdateStatus(item) : false);
 
-  const actions = [
+  const actions: ActionMenuItem[] = [
     ...(onEdit
       ? [
           {
@@ -88,6 +88,7 @@ export function InvoiceTableRow<T>({
             color: "text-amber-600",
             hover: "hover:bg-amber-50",
             onClick: () => onEdit(item),
+            visible: true
           },
         ]
       : []),
@@ -100,6 +101,7 @@ export function InvoiceTableRow<T>({
             color: "text-emerald-600",
             hover: "hover:bg-emerald-50",
             onClick: () => onSend(item),
+            visible: true
           },
         ]
       : []),
@@ -113,6 +115,7 @@ export function InvoiceTableRow<T>({
             hover: "hover:bg-violet-50",
             disabled: statusUpdateDisabled,
             onClick: () => onUpdateStatus(item),
+            visible: true
           },
         ]
       : []),
@@ -125,6 +128,7 @@ export function InvoiceTableRow<T>({
             color: "text-rose-600",
             hover: "hover:bg-rose-50",
             onClick: () => onDelete(item),
+            visible: true
           },
         ]
       : []),

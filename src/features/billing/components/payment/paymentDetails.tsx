@@ -135,30 +135,33 @@ return (
           label: "Modifier",
           icon: Pencil,
           onClick: () => router.push(`/billing/payments/update/${payment?.idPayment}`),
+          visible: true
         },
         {
           label: "Voir la facture",
           icon: FileText,
-          onClick: () =>
-            router.push(`/billing/invoices/clients/${payment?.invoice?.idInvoice}/details`),
+          onClick: () => router.push(`/billing/invoices/clients/${payment?.invoice?.idInvoice}/details`),
           disabled: !payment?.invoice?.idInvoice,
+          visible: true
         },
         {
           label: "Cloner",
           icon: Copy,
-          onClick: () =>
-            router.push(`/billing/payments/clone/${payment?.idPayment}`),
+          onClick: () => router.push(`/billing/payments/clone/${payment?.idPayment}`),
           disabled: !payment?.invoice?.idInvoice,
+          visible: true
         },
         {
           label: "Télécharger",
           icon: Download,
           onClick: () => telecharger(),
+          visible: true
         },
         {
-        label: "Envoyer",
-        icon: Send,
-        onClick: () => setSendOpen(true),
+          label: "Envoyer",
+          icon: Send,
+          onClick: () => setSendOpen(true),
+          visible: true
         },
         {
           label: "Supprimer",
@@ -166,6 +169,7 @@ return (
           color: "text-rose-600",
           hover: "hover:bg-rose-50",
           onClick: () => setDeleteOpen(true),
+          visible: true
         },
       ]}
     />

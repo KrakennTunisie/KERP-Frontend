@@ -1,6 +1,6 @@
 "use client";
 
-import { ActionMenu } from "@/shared/components/ui/actionMenuItem";
+import { ActionMenu, ActionMenuItem } from "@/shared/components/ui/actionMenuItem";
 import { Search, RotateCcw, DownloadCloud, Download, HardDriveDownload } from "lucide-react";
 
 export type StatusFilterOption<T extends string> = {
@@ -44,7 +44,7 @@ export function StatusFilterBar<T extends string>({
     onStatusChange(defaultStatus);
   };
 
-   const actions = [
+   const actions: ActionMenuItem[] = [
     ...(onDownloadAll
       ? [
           {
@@ -53,6 +53,7 @@ export function StatusFilterBar<T extends string>({
             color: "text-amber-600",
             hover: "hover:bg-amber-50",
             onClick: () => onDownloadAll(),
+            visible: true
           },
         ]
       : []),
@@ -65,6 +66,7 @@ export function StatusFilterBar<T extends string>({
             color: "text-emerald-600",
             hover: "hover:bg-emerald-50",
             onClick: () => onDownloadFitered(),
+            visible: true
           },
         ]
       : []),
@@ -77,6 +79,7 @@ export function StatusFilterBar<T extends string>({
             color: "text-violet-600",
             hover: "hover:bg-violet-50",
             onClick: () => onDownloadCurrentYear(),
+            visible: true
           },
         ]
       : []),

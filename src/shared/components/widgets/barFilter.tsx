@@ -81,6 +81,7 @@ export function UserFilterBar<
             color: "text-amber-600",
             hover: "hover:bg-amber-50",
             onClick: onDownloadAll,
+            visible: true
           },
         ]
       : []),
@@ -93,6 +94,7 @@ export function UserFilterBar<
             color: "text-emerald-600",
             hover: "hover:bg-emerald-50",
             onClick: onDownloadFiltered,
+            visible: true
           },
         ]
       : []),
@@ -105,6 +107,7 @@ export function UserFilterBar<
             color: "text-violet-600",
             hover: "hover:bg-violet-50",
             onClick: onDownloadCurrentYear,
+            visible: true
           },
         ]
       : []),

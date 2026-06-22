@@ -60,6 +60,7 @@ export function UserTableRow<T>({
           color: "text-amber-600",
           hover: "hover:bg-amber-50",
           onClick: () => onEdit(item),
+          visible: true
         }]
       : []),
 
@@ -70,6 +71,7 @@ export function UserTableRow<T>({
           color: "text-violet-600",
           hover: "hover:bg-violet-50",
           onClick: () => onManageRoles(item),
+          visible: true
         }]
       : []),
 
@@ -80,6 +82,7 @@ export function UserTableRow<T>({
           color: "text-emerald-600",
           hover: "hover:bg-emerald-50",
           onClick: () => onSendInvite(item),
+          visible: true
         }]
       : []),
 
@@ -90,6 +93,7 @@ export function UserTableRow<T>({
           color: "text-rose-600",
           hover: "hover:bg-rose-50",
           onClick: () => onDelete(item),
+          visible: true
         }]
       : []),
   ];
