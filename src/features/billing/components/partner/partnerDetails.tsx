@@ -57,6 +57,14 @@ export default function PartnerDetails({ partner, clientRevenueInitial, supplier
     addDocumentLoading, setDeleteCNoteOpen,deleteCNoteOpen,creditNoteId,setCreditNoteId, modalSupplierPurchaseOrderOpen, setModalSupplierPurchaseOrderOpen, selected, setSelected, invoiceType, setInvoiceType
     ,onAddDocument ,addDocument ,sendDocumentOpen, setSendDocumentOpen, setShowDetails, showDetails, selectedEmail, setSelectedEmail, openAddDocument, setOpenAddDocument} = UseClientsDetails({ partner, partnerStats, clientRevenueInitial, supplierDespensesInitial, totalRevenueInitial, totalDespensesInitial, onRefresh});
   const router = useRouter();
+  const onAction = ()=>{
+    if(partner && partner.partnerType === partnerTypeSchema.enum.CLIENT){
+      router.push(`/billing/clients/${partner.idPartner}/edit`)
+    }
+    if(partner && partner.partnerType === partnerTypeSchema.enum.SUPPLIER){
+        router.push(`/billing/suppliers/${partner.idPartner}/edit`)
+    }
+  }
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-gray-50">
       <PartnerHeader
@@ -65,12 +73,13 @@ export default function PartnerDetails({ partner, clientRevenueInitial, supplier
         pageConfig={pageConfig}
         icon={HeaderIcon}
         setOpen={() => setOpen(true)}
-        onRefresh={onRefresh} 
-        setDeleteOpen={setDeletePartnerOpen} 
-        deleteOpen={deletePartnerOpen} 
+        onRefresh={onRefresh}
+        setDeleteOpen={setDeletePartnerOpen}
+        deleteOpen={deletePartnerOpen}
         updatePartnerStatus={updatePartnerStatus}
-        onAddDocument={(type: PartnerDocumentType)=>onAddDocument(type)}
-        />
+        onAddDocument={(type: PartnerDocumentType) => onAddDocument(type)} 
+        onUpdate={onAction}
+       />
       <DeleteInvoiceModal
         open={deleteOpen}
         onClose={() => setDeleteOpen(false)}
@@ -205,7 +214,8 @@ export default function PartnerDetails({ partner, clientRevenueInitial, supplier
             {/* ── Overview Tab ───────────────────────────────────── */}
             <TabsContent value="overview" className="space-y-6">
 
-              {partner.partnerType == partnerTypeSchema.enum.CLIENT ? <RevenueExpenseBarChart
+              {partner.partnerType == partnerTypeSchema.enum.CLIENT ? 
+              <RevenueExpenseBarChart
                 mode={"revenues"}
                 data={refresh ? (clientRevenue ?? []) : (clientRevenueInitial ?? [])}
                 selectedPeriod={selectedPeriod}
@@ -244,6 +254,7 @@ export default function PartnerDetails({ partner, clientRevenueInitial, supplier
                 <PartnerDetailsCard
                   partner={partner as ClientPartnerDetails}
                   onOpenDocument={setPreviewDocument}
+                  onAction={onAction}
                 />
 
                 {/* Activity Log — scrollable after 5 items */}

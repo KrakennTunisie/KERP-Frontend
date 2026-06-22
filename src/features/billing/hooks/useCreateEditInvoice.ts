@@ -293,7 +293,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
 
   // Validation des données obligatoire
   const canCreateInvoice =
-    (mode == "create" ? isDirty : true) &&
+   (mode == "create" ? isDirty : true) && 
      isValid &&
     !!previewData.partner &&
     !!previewData.invoiceItems?.length &&

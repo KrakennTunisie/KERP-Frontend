@@ -24,7 +24,7 @@ export function InvoiceDocumentsCard({
         <button
           type="button"
           onClick={() => setPreviewDocument(document)}
-          className="group mt-4 flex w-full items-center justify-between rounded-xl bg-slate-50 p-3 text-left transition-colors hover:bg-slate-100"
+          className="group cursor-pointer mt-4 flex w-full items-center justify-between rounded-xl bg-slate-50 p-3 text-left transition-colors hover:bg-slate-100"
         >
           <div className="flex min-w-0 items-center gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-50">

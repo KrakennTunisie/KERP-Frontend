@@ -131,8 +131,8 @@ const columns: DataTableColumn<ClientPartnerItem>[] = [
           {
             label: "Modifier",
             icon: Edit2Icon,
-            color: "text-blue-600",
-            hover: "hover:bg-blue-50",
+            color: "text-amber-600",
+            hover: "hover:bg-amber-50",
             onClick: () =>
               router.push(`/billing/clients/${client.idPartner}/edit`),
           },

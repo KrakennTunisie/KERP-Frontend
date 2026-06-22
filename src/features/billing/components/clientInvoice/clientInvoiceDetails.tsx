@@ -159,7 +159,7 @@ export default function ClientInvoiceDetails({ invoiceId, type }: InvoiceDetails
                 TtnModalOpen={TtnModalOpen}
                 setTtnModalOpen={setTtnModalOpen}
                 sendToTTN={sendToTTN}
-                updateStatus={updateStatus}
+                updateStatus={()=>updateStatus(invoiceStatusSchema.enum.PAID)}
                 loading={loading}
                 sent={sent}
                 successMessage={successMessage}
@@ -197,7 +197,7 @@ export default function ClientInvoiceDetails({ invoiceId, type }: InvoiceDetails
             <UpdateInvoiceStatusModal
             open={updateOpen}
             onClose={()=> setUpdateOpen(false)}
-            onConfirm={updateStatus}
+            onConfirm={()=>updateStatus()}
             invoiceNumber={invoice?.invoiceNumber}
             currentStatus={invoice?.invoiceStatus}
             type="invoice"

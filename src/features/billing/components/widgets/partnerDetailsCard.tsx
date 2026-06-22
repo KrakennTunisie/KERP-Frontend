@@ -7,31 +7,33 @@ import SectionCard from "@/shared/components/ui/sectionCard";
 import { Separator } from "@/shared/components/ui/separator";
 
 import { UserPen } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { ClientPartnerDetails } from "../../models/partner";
 import { partnerTypeSchema } from "../../types/partnerType";
 import { PaymentConditionLabels } from "../../types/paymentCondition";
+import Link from "next/link";
 
 type PartnerDetailsCardProps = {
   partner: ClientPartnerDetails;
   onOpenDocument: (document: any) => void;
+  onAction: ()=>void
 };
 
 export default function PartnerDetailsCard({
   partner,
   onOpenDocument,
+  onAction,
 }: PartnerDetailsCardProps) {
-  const router = useRouter();
   return (
     <SectionCard
       title={partner.partnerType == partnerTypeSchema.enum.CLIENT ? "Détails du client" : "Détails du fournisseur"  }
       description="Informations complètes"
-      action={
-          <IconButton
-            icon={UserPen}
-            title="Modifier"
-            variant="blue" 
-            onClick={()=> router.push(`/billing/clients/${partner.idPartner}/edit`)}/>
+      action={  
+            <IconButton
+              icon={UserPen}
+              title="Modifier"
+              variant="blue"
+              onClick={()=>onAction()}
+            />
       }
       contentClassName="space-y-4 max-h-[350px] overflow-y-auto pr-2"
     >
