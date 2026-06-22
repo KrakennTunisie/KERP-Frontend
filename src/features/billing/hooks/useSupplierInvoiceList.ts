@@ -1,7 +1,6 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { InvoiceStatus, invoiceStatusSchema } from "../types/invoiceStatus";
-import { CategoriesFacturesFournisseur } from "../types/invoiceSupplierCategory";
 import { useDebounce } from "@/shared/hooks/useDebounce";
 import { InvoicePageItem } from "../models/invoice";
 import { PartnerInvoiceStats } from "../types/partnersStats";
@@ -70,10 +69,10 @@ export default function useSupplierInvoiceList (){
     
       fetchSupplierInvoicesStats();
     }, []);
-    const deleteClientInvoice = async ()=>{
+    const deleteSupplierInvoice = async ()=>{
         try {
           setDeleteLoading(true);
-          await InvoicesAPI.deleteClientInvoice(invoiceId);
+          await InvoicesAPI.deleteSupplierInvoice(invoiceId);
           appToast.success('Facture supprimée avec succès.')
           setInvoiceId("")
           setDeleteOpen(false)
@@ -157,7 +156,7 @@ export default function useSupplierInvoiceList (){
      setCurrentPage,
      totalElements,
      totalPages,
-     deleteClientInvoice,
+     deleteSupplierInvoice,
      invoiceId,
      setInvoiceId,
      deleteLoading,

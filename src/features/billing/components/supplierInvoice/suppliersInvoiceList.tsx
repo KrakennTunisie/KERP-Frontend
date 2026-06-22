@@ -8,6 +8,7 @@ import { StatusFilterBar } from "../widgets/billingFilterBar";
 import { BillingPageHeader } from "../widgets/billingHeader";
 import { BillingTable } from "../widgets/billingTable";
 import { UpdateInvoiceStatusModal } from "../widgets/updateStatusModal";
+import { DeleteInvoiceModal } from "../widgets/deleteInvoiceModal";
 
 
 export default function SuppliersInvoiceList() {
@@ -18,9 +19,9 @@ export default function SuppliersInvoiceList() {
         setUpdateOpen,
         updateOpen,
         updateLoading,
-        updateStatus,
-        selectedInvoice, setSelectedInvoice,
-        nextStatus, setNextStatus,
+        updateStatus,invoiceRef,
+        selectedInvoice, setSelectedInvoice, deleteSupplierInvoice,
+        nextStatus, setNextStatus, deleteOpen, deleteLoading, setDeleteOpen,
         loading, suppliersInvoiceStats } = useSupplierInvoiceList();
     const invoiceStatuses = invoiceStatusSchema.options
         .filter(
@@ -83,6 +84,13 @@ export default function SuppliersInvoiceList() {
                 />
             </div>
 
+            <DeleteInvoiceModal
+                open={deleteOpen}
+                onClose={() => setDeleteOpen(false)}
+                invoiceRef={invoiceRef}
+                onConfirm={deleteSupplierInvoice}
+                loading={deleteLoading} />
+
             {/* Search + Filters */}
             <StatusFilterBar
                 search={search}
@@ -125,7 +133,7 @@ export default function SuppliersInvoiceList() {
                                     loading={loading}
                                     onPageChange={setCurrentPage}
                                     onView={(invoice) => {
-                                        router.push(`/billing/invoices/clients/${invoice.idInvoice}/details/`);
+                                        router.push(`/billing/invoices/suppliers/details/${invoice.idInvoice}`);
                                     }}
                                     onUpdateStatus={(invoice) => {
                                         setSelectedInvoice(invoice);
@@ -135,15 +143,12 @@ export default function SuppliersInvoiceList() {
                                     canUpdateStatus={(invoice) =>
                                         getSupplierInvoiceAllowedNextStatuses(invoice.invoiceStatus).length > 0
                                     }
-                                    onEdit={(invoice) => {
-                                        router.push(`/billing/invoices/clients/update/${invoice.idInvoice}`);
-                                    }}
-                                    onSend={(invoice) => {
-                                        console.log("Envoyer facture client", invoice.idInvoice);
-                                    }}
                                     onDelete={(invoice) => {
-                                        console.log("Supprimer facture client", invoice.idInvoice);
-                                    }}
+
+                                            setSelectedInvoice(invoice);
+                                            setInvoiceId(invoice.idInvoice);
+                                            setDeleteOpen(true);                                    
+                                        }}
                                     getNumber={(invoice) => invoice.invoiceNumber}
                                     getPartnerName={(invoice) => invoice.partner?.partnerName}
                                     getStatus={(invoice) => invoice.invoiceStatus}
@@ -155,6 +160,24 @@ export default function SuppliersInvoiceList() {
                                         status !== "ALL" ? invoiceStatusColors[status] : ""
                                     }
                                 />
+
+                                
+            <UpdateInvoiceStatusModal
+                open={updateOpen}
+                onClose={() => setUpdateOpen(false)}
+                onConfirm={updateStatus}
+                invoiceNumber={selectedInvoice?.invoiceNumber}
+                currentStatus={selectedInvoice?.invoiceStatus}
+                type="invoice"
+                nextStatus={nextStatus}
+                onNextStatusChange={setNextStatus}
+                allowedStatuses={
+                    selectedInvoice
+                        ? getSupplierInvoiceAllowedNextStatuses(selectedInvoice.invoiceStatus)
+                        : []
+                }
+                isSubmitting={updateLoading}
+            />
         </div>
 
     );
