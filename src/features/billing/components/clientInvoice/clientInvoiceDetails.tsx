@@ -15,6 +15,7 @@ import { InvoicePaymentsTab } from "../widgets/invoicePaiementsTab"
 import { UpdateInvoiceStatusModal } from "../widgets/updateStatusModal"
 import { SendDocumentModal } from "../widgets/sendInvoiceModal"
 import { DeleteInvoiceModal } from "../widgets/deleteInvoiceModal"
+import { invoiceTypeSchema } from "../../types/invoiceType"
 
 export default function ClientInvoiceDetails({ invoiceId, type }: InvoiceDetailsProps) {
     const {  invoice, previewDocument, setPreviewDocument, sendToTTN, TtnModalOpen, setTtnModalOpen,
@@ -44,6 +45,57 @@ export default function ClientInvoiceDetails({ invoiceId, type }: InvoiceDetails
         [section]: !prev[section],
     }));
     };
+
+    const actions = [
+  {
+    label: "Cloner",
+    icon: Copy,
+    onClick: () =>
+      router.push(`/billing/invoices/clients/${invoice?.idInvoice}/clone`),
+    visible: invoice?.invoiceType === invoiceTypeSchema.enum.SALE,
+  },
+  {
+    label: "Télécharger",
+    icon: Download,
+    onClick: () => telecharger(),
+    visible: true,
+  },
+  {
+    label: "Mettre à jour statut",
+    icon: Settings,
+    onClick: () => setUpdateOpen(true),
+    disabled: invoice?.invoiceStatus === "CANCELLED",
+    visible: true,
+  },
+  {
+    label: "Envoyer",
+    icon: Send,
+    onClick: () => setSendOpen(true),
+    disabled: invoice?.invoiceStatus === "CANCELLED",
+    visible: invoice?.invoiceType === invoiceTypeSchema.enum.SALE,
+  },
+  {
+    label: "Modifier",
+    icon: Pencil,
+    onClick: () =>
+      router.push(`/billing/invoices/clients/${invoice?.idInvoice}/edit`),
+    disabled:
+      invoice?.invoiceStatus === "PAID" ||
+      invoice?.invoiceStatus === "CANCELLED",
+    visible: invoice?.invoiceType === invoiceTypeSchema.enum.SALE,
+  },
+  {
+    label: "Supprimer",
+    icon: Trash2,
+    color: "text-rose-600",
+    hover: "hover:bg-rose-50",
+    onClick: () => setDeleteOpen(true),
+    disabled: invoice?.invoiceStatus !== "DRAFT",
+    visible: true,
+  },
+];
+
+const menuItems = actions.filter((action) => action.visible)
         if(loading){
             return(
                 <PageLoader label="Chargement de facture ..."/>
@@ -75,43 +127,47 @@ export default function ClientInvoiceDetails({ invoiceId, type }: InvoiceDetails
         onBack={() => router.back()}
         actionItems={[
             {
-            label: "Cloner",
-            icon: Copy,
-            onClick: () => router.push(`/billing/invoices/clients/${invoice?.idInvoice}/clone`),
+                label: "Cloner",
+                icon: Copy,
+                onClick: () => router.push(`/billing/invoices/clients/${invoice?.idInvoice}/clone`),
+                visible: false
             },
             {
-            label: "Télécharger",
-            icon: Download,
-            onClick: () => telecharger(),
+                label: "Télécharger",
+                icon: Download,
+                onClick: () => telecharger(),
+                visible: false
             },
             {
-            label: "Mettre à jour statut",
-            icon: Settings,
-            onClick: () => setUpdateOpen(true),
-            disabled: invoice?.invoiceStatus === "CANCELLED",
+                label: "Mettre à jour statut",
+                icon: Settings,
+                onClick: () => setUpdateOpen(true),
+                disabled: invoice?.invoiceStatus === "CANCELLED",
+                visible: false
             },
             {
-            label: "Envoyer",
-            icon: Send,
-            onClick: () => setSendOpen(true),
-            disabled: invoice?.invoiceStatus === "CANCELLED",
+                label: "Envoyer",
+                icon: Send,
+                onClick: () => setSendOpen(true),
+                disabled: invoice?.invoiceStatus === "CANCELLED",
+                visible: false
             },
             {
-            label: "Modifier",
-            icon: Pencil,
-            onClick: () =>
-                router.push(`/billing/invoices/clients/${invoice?.idInvoice}/edit`),
-            disabled:
-                invoice?.invoiceStatus === "PAID" ||
-                invoice?.invoiceStatus === "CANCELLED",
+                label: "Modifier",
+                icon: Pencil,
+                onClick: () => router.push(`/billing/invoices/clients/${invoice?.idInvoice}/edit`),
+                disabled: invoice?.invoiceStatus === "PAID" ||
+                    invoice?.invoiceStatus === "CANCELLED",
+                visible: false
             },
             {
-            label: "Supprimer",
-            icon: Trash2,
-            color: "text-rose-600",
-            hover: "hover:bg-rose-50",
-            onClick: () =>setDeleteOpen(true),
-            disabled: invoice?.invoiceStatus !== "DRAFT",
+                label: "Supprimer",
+                icon: Trash2,
+                color: "text-rose-600",
+                hover: "hover:bg-rose-50",
+                onClick: () => setDeleteOpen(true),
+                disabled: invoice?.invoiceStatus !== "DRAFT",
+                visible: false
             },
         ]}
         />

@@ -165,50 +165,54 @@ export default function PartnerHeader({
               color: "text-amber-600",
               hover: "hover:bg-amber-50",
               onClick: onUpdate,
+              visible: true
             },{
               label: "Envoyer email",
               icon: Send,
               color: "text-blue-600",
               hover: "hover:bg-blue-50",
               onClick: setOpen,
+              visible: true
             },
             {
               label: "Ajouter contrat",
               icon: Signature,
               color: "text-emerald-600",
               hover: "hover:bg-emerald-50",
-              onClick: () =>
-                onAddDocument(partnerDocumentType.enum.CONTRACT),
+              onClick: () => onAddDocument(partnerDocumentType.enum.CONTRACT),
+              visible: true
             },
             {
               label: "Ajouter RNE",
               icon: ScrollText,
               color: "text-amber-600",
               hover: "hover:bg-amber-50",
-              onClick: () =>
-                onAddDocument(partnerDocumentType.enum.RNE),
+              onClick: () => onAddDocument(partnerDocumentType.enum.RNE),
+              visible: true
             },
-            partner.active
-              ? {
+            {
                   label: "Désactiver",
                   icon: UserX,
                   color: "text-amber-600",
                   hover: "hover:bg-amber-50",
                   onClick: () => updatePartnerStatus(false),
-                }
-              : {
-                  label: "Activer",
-                  icon: UserCheck,
-                  color: "text-emerald-600",
-                  hover: "hover:bg-emerald-50",
-                  onClick: () => updatePartnerStatus(true),
-                },
+                  visible: partner.active
+              },
+              {
+                label: "Activer",
+                icon: UserCheck,
+                color: "text-emerald-600",
+                hover: "hover:bg-emerald-50",
+                onClick: () => updatePartnerStatus(true),
+                visible: !partner.active
+              },
             {
               label: "Supprimer",
               icon: UserMinus,
               color: "text-rose-600",
               hover: "hover:bg-rose-50",
               onClick: () => setDeleteOpen(true),
+              visible: true
             },
           ]}
         />

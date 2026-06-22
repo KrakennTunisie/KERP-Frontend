@@ -112,6 +112,7 @@ export default function SuppliersTable({
               color: "text-amber-600",
               hover: "hover:bg-amber-50",
               onClick: () => router.push(`/billing/suppliers/${supplier.idPartner}/edit`),
+              visible: true
             },
             {
               label: "Supprimer",
@@ -119,6 +120,7 @@ export default function SuppliersTable({
               color: "text-rose-600",
               hover: "hover:bg-rose-50",
               onClick: () => onDeleteRequest(supplier.idPartner),
+              visible: true
             },
           ]}
         />

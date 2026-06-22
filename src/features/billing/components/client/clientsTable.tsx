@@ -133,8 +133,8 @@ const columns: DataTableColumn<ClientPartnerItem>[] = [
             icon: Edit2Icon,
             color: "text-amber-600",
             hover: "hover:bg-amber-50",
-            onClick: () =>
-              router.push(`/billing/clients/${client.idPartner}/edit`),
+            onClick: () => router.push(`/billing/clients/${client.idPartner}/edit`),
+            visible: true
           },
           {
             label: "Supprimer",
@@ -142,6 +142,7 @@ const columns: DataTableColumn<ClientPartnerItem>[] = [
             color: "text-rose-600",
             hover: "hover:bg-rose-50",
             onClick: () => onDeleteRequest(client.idPartner),
+            visible: true
           },
         ]}
       />

@@ -298,39 +298,27 @@ export default function PartnerDetails({ partner, clientRevenueInitial, supplier
                     onView={(item) => {
                           partner.partnerType == partnerTypeSchema.enum.CLIENT ?
                             router.push(`/billing/invoices/clients/${item.idInvoice}/details/`) :
-                            router.push(`/billing/invoices/suppliers/${item.idInvoice}/details/`);
+                            router.push(`/billing/invoices/suppliers/details/${invoice.idInvoice}/`);
                           }}
                     actions={[
                       {
-                        label: "Voir le détail",
-                        icon: Eye,
+                        label: "Modifier",
+                        icon: Pencil,
                         onClick: () => {
-                          partner.partnerType == partnerTypeSchema.enum.CLIENT ?
-                            router.push(`/billing/invoices/clients/${invoice.idInvoice}/details/`) :
-                            router.push(`/billing/invoices/suppliers/details/${invoice.idInvoice}/`)
+                          router.push(`/billing/invoices/clients/${invoice.idInvoice}/edit/`);
                         },
+                        disabled: invoice.invoiceStatus === "CANCELLED",
+                        visible: partner.partnerType == partnerTypeSchema.enum.CLIENT
                       },
-                      ...(partner.partnerType == partnerTypeSchema.enum.CLIENT
-                        ? [{
-                          label: "Modifier",
-                          icon: Pencil,
-                          onClick: () => {
-                            router.push(`/billing/invoices/clients/${invoice.idInvoice}/edit/`);
-                          },
-                          disabled: invoice.invoiceStatus === "CANCELLED",
-                        }]
-                        : []
-                      ),
-                      ...(partner.partnerType == partnerTypeSchema.enum.CLIENT
-                        ? [{
-                          label: "Envoyer",
-                          icon: Send,
-                          onClick: () => {
-                            setSelected(invoice);
-                            setSendDocumentOpen(true);
-                          },
-                          disabled: invoice.invoiceStatus === "CANCELLED",
-                        }] : []),
+                      {
+                        label: "Envoyer",
+                        icon: Send,
+                        onClick: () => {
+                          setSelected(invoice);
+                          setSendDocumentOpen(true);
+                        },
+                        visible: partner.partnerType == partnerTypeSchema.enum.CLIENT
+                      },
                       {
                         label: "Supprimer",
                         icon: Trash2,
@@ -339,9 +327,10 @@ export default function PartnerDetails({ partner, clientRevenueInitial, supplier
                         onClick: () => {
                           setInvoiceType(invoice.invoiceType);
                           setInvoiceId(invoice.idInvoice);
-                          setDeleteOpen(true)
+                          setDeleteOpen(true);
                         },
                         disabled: invoice.invoiceStatus !== "DRAFT",
+                        visible: true
                       },
                     ]} />
                   )}             
@@ -378,13 +367,15 @@ export default function PartnerDetails({ partner, clientRevenueInitial, supplier
                         label: "Modifier",
                         icon: Pencil,
                         onClick: () => router.push(`/billing/payments/update/${payment.idPayment}`),
+                        visible: true
                       },
                       {
                         label: "Supprimer",
                         icon: Trash2,
                         color: "text-rose-600",
                         hover: "hover:bg-rose-50",
-                        onClick: () => {console.log("Supprimer paiement", payment.idPayment)},
+                        onClick: () => { console.log("Supprimer paiement", payment.idPayment); },
+                        visible: true
                       },
                     ]}
                   />
@@ -429,19 +420,18 @@ export default function PartnerDetails({ partner, clientRevenueInitial, supplier
                     statusLabels={purchaseOrderStatusLabels}
                     statusColors={purchaseOrderStatusColors}
                     actions={[
-                      ...(partner.partnerType == partnerTypeSchema.enum.SUPPLIER
-                        ? [{
-                          label: "Modifier",
-                          icon: Pencil,
-                          onClick: () => {
-                            console.log("Modifier un bon de commande", PurchaseOrder.idPurchaseOrder)
-                            router.push(`/billing/purchaseOrder/suppliers/${PurchaseOrder.idPurchaseOrder}/edit/`)
-                          }
-                          ,
-                          disabled: PurchaseOrder.purchaseOrderStatus === "CANCELLED",
-                        }] : []),
-                      ...(partner.partnerType == partnerTypeSchema.enum.SUPPLIER
-                        ? [{
+                      {
+                        label: "Modifier",
+                        icon: Pencil,
+                        onClick: () => {
+                          console.log("Modifier un bon de commande", PurchaseOrder.idPurchaseOrder);
+                          router.push(`/billing/purchaseOrder/suppliers/${PurchaseOrder.idPurchaseOrder}/edit/`);
+                        },
+
+                        disabled: PurchaseOrder.purchaseOrderStatus === "CANCELLED",
+                        visible: partner.partnerType == partnerTypeSchema.enum.SUPPLIER
+                      },
+                      {
                           label: "Envoyer",
                           icon: Send,
                           onClick: () => {
@@ -451,19 +441,21 @@ export default function PartnerDetails({ partner, clientRevenueInitial, supplier
                           }
                           ,
                           disabled: PurchaseOrder.purchaseOrderStatus === "CANCELLED",
-                        }] : []),
-                      {
-                        label: "Supprimer",
-                        icon: Trash2,
-                        color: "text-rose-600",
-                        hover: "hover:bg-rose-50",
-                        onClick: () => {
-                          setPurchaseOrderId(PurchaseOrder.idPurchaseOrder); setDeletePOrderOpen(true);
-                          console.log("Supprimer un bon de commande", PurchaseOrder.idPurchaseOrder)
-                        }
-                        ,
-                        disabled: PurchaseOrder.purchaseOrderStatus !== "DRAFT",
-                      },
+                        visible: partner.partnerType == partnerTypeSchema.enum.SUPPLIER
+                        },
+                        {
+                          label: "Supprimer",
+                          icon: Trash2,
+                          color: "text-rose-600",
+                          hover: "hover:bg-rose-50",
+                          onClick: () => {
+                            setPurchaseOrderId(PurchaseOrder.idPurchaseOrder); setDeletePOrderOpen(true);
+                            console.log("Supprimer un bon de commande", PurchaseOrder.idPurchaseOrder);
+                          },
+
+                          disabled: PurchaseOrder.purchaseOrderStatus !== "DRAFT",
+                          visible: true
+                        },
                     ]}
                   />
                 )}
@@ -499,29 +491,31 @@ export default function PartnerDetails({ partner, clientRevenueInitial, supplier
                     statusLabels={purchaseOrderStatusLabels}
                     statusColors={purchaseOrderStatusColors}
                     actions={[
-                      ...(partner.partnerType == partnerTypeSchema.enum.CLIENT
-                        ? [{
-                          label: "Envoyer",
-                          icon: Send,
-                          onClick: () => {
-                            setSelected(creditNote)
-                            setSendDocumentOpen(true)
-                            console.log("Envoyer facture d'avoir", creditNote.idInvoiceCreditNote);
-                          },
-                          disabled: creditNote.invoiceCreditNoteStatus === "CANCELLED",
-                        }] : []),
+                      
+                      {
+                        label: "Envoyer",
+                        icon: Send,
+                        onClick: () => {
+                          setSelected(creditNote);
+                          setSendDocumentOpen(true);
+                          console.log("Envoyer facture d'avoir", creditNote.idInvoiceCreditNote);
+                        },
+                        disabled: creditNote.invoiceCreditNoteStatus === "CANCELLED",
+                        visible: partner.partnerType == partnerTypeSchema.enum.CLIENT
+                      },
                       {
                         label: "Supprimer",
                         icon: Trash2,
                         color: "text-rose-600",
                         hover: "hover:bg-rose-50",
                         onClick: () => {
-                          setCreditNoteId(creditNote.idInvoiceCreditNote)
-                          setDeleteCNoteOpen(true)
-                          console.log("Supprimer facture d'avoir", creditNote.idInvoiceCreditNote)
+                          setCreditNoteId(creditNote.idInvoiceCreditNote);
+                          setDeleteCNoteOpen(true);
+                          console.log("Supprimer facture d'avoir", creditNote.idInvoiceCreditNote);
                         },
 
                         disabled: creditNote.invoiceCreditNoteStatus !== "DRAFT",
+                        visible: true
                       },
                     ]}
                   />
