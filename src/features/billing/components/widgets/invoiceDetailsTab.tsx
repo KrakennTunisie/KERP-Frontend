@@ -122,7 +122,8 @@ export function InvoiceDetailsTab({
             }
             disabled={
               invoice?.invoiceStatus === invoiceStatusSchema.enum.PAID ||
-              invoice?.invoiceStatus === invoiceStatusSchema.enum.DRAFT
+              invoice?.invoiceStatus === invoiceStatusSchema.enum.DRAFT ||
+              invoice?.invoiceStatus === invoiceStatusSchema.enum.CANCELLED  
             }
             className="flex items-center justify-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 py-2.5 text-xs font-semibold text-rose-600 disabled:opacity-50"
           >
@@ -134,7 +135,8 @@ export function InvoiceDetailsTab({
         <button
           disabled={
             invoice?.invoiceStatus === invoiceStatusSchema.enum.PAID ||
-            invoice?.invoiceStatus === invoiceStatusSchema.enum.DRAFT
+            invoice?.invoiceStatus === invoiceStatusSchema.enum.DRAFT ||
+              invoice?.invoiceStatus === invoiceStatusSchema.enum.CANCELLED  
           }
           onClick={updateStatus}
           className="flex items-center justify-center gap-1.5 rounded-lg border border-blue-300 bg-blue-100 py-2.5 text-xs font-semibold text-blue-700 disabled:opacity-50"

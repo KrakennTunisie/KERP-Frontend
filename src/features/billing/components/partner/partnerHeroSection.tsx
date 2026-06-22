@@ -13,6 +13,7 @@ import {
   UserCheck,
   Signature,
   ScrollText,
+  Pencil,
 } from "lucide-react";
 import { ActionMenu } from "@/shared/components/ui/actionMenuItem";
 import {  PartnerAllDetails } from "../../models/partner";
@@ -34,6 +35,7 @@ type PartnerHeaderProps = {
   };
   partnerType: string
   setOpen: () => void;
+  onUpdate: () => void;
   setDeleteOpen: (status: boolean)=> void,
   deleteOpen: boolean,
   icon: LucideIcon;
@@ -48,6 +50,7 @@ export default function PartnerHeader({
   icon: Icon,
   partnerType,
   setOpen,
+  onUpdate,
   onRefresh,
   updatePartnerStatus,
   deleteOpen,
@@ -157,6 +160,12 @@ export default function PartnerHeader({
           orientation="vertical"
           items={[
             {
+              label: "Modifier",
+              icon: Pencil,
+              color: "text-amber-600",
+              hover: "hover:bg-amber-50",
+              onClick: onUpdate,
+            },{
               label: "Envoyer email",
               icon: Send,
               color: "text-blue-600",

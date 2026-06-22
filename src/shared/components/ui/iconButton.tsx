@@ -1,7 +1,7 @@
 type IconButtonProps = {
   icon: React.ElementType;
   title: string;
-  onClick: () => void;
+  onClick?: () => void;
   variant?: "default" | "blue" | "danger" | "success" | "warning";
 };
 

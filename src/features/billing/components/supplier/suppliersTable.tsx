@@ -109,15 +109,15 @@ export default function SuppliersTable({
             {
               label: "Modifier",
               icon: Edit,
-              color: "text-blue-600",
-              hover: "hover:bg-blue-50",
+              color: "text-amber-600",
+              hover: "hover:bg-amber-50",
               onClick: () => router.push(`/billing/suppliers/${supplier.idPartner}/edit`),
             },
             {
               label: "Supprimer",
               icon: Trash2,
-              color: "text-blue-600",
-              hover: "hover:bg-blue-50",
+              color: "text-rose-600",
+              hover: "hover:bg-rose-50",
               onClick: () => onDeleteRequest(supplier.idPartner),
             },
           ]}

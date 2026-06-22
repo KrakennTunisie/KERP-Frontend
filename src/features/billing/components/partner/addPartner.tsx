@@ -31,17 +31,13 @@ export default function AddPartnerPage({ type, mode, partnerId }: pageProps) {
     return (
         <div className=" bg-gray-50">
 
-            <header className="bg-white border-b border-gray-100 px-6 py-4">
+        <div className="bg-white border-b border-gray-100 px-6 py-4">
             <div className="mx-auto space-y-3">
 
                 {/* BACK BUTTON */}
                 <button
                 onClick={() =>
-                    router.push(
-                    type === partnerTypeSchema.enum.CLIENT
-                        ? "/billing/clients"
-                        : "/billing/suppliers"
-                    )
+                    router.back()
                 }
                 className="flex items-center cursor-pointer gap-2 text-gray-500 hover:text-gray-900 text-xs font-medium transition group"
                 >
@@ -74,7 +70,7 @@ export default function AddPartnerPage({ type, mode, partnerId }: pageProps) {
                 </div>
 
             </div>
-            </header>
+        </div>
 
             <main className="flex-1 overflow-y-auto p-8">
                 <form

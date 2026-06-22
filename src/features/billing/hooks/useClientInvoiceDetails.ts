@@ -8,6 +8,7 @@ import { appToast } from "@/shared/lib/toast";
 import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 import { DocumentOrFile } from "@/shared/components/ui/documentPreviewModal";
 import { openDocumentInNewTab } from "@/shared/pdf/pdfGenerator";
+import { InvoiceStatus, invoiceStatusSchema, InvoiceStatusWithoutAll } from "../types/invoiceStatus";
 export type InvoiceDetailsProps = {
   invoiceId: string,
   type: "CLIENT"|"SUPPLIER"
@@ -52,7 +53,7 @@ export default function useClientInvoiceDetails ({invoiceId, type}:InvoiceDetail
     const [deleteOpen, setDeleteOpen] = useState(false);
     const [sendOpen, setSendOpen] = useState(false);
     const [updateOpen, setUpdateOpen] = useState(false);
-    const [nextStatus, setNextStatus]=useState("")
+    const [nextStatus, setNextStatus]=useState<InvoiceStatus | string>("")
     const router = useRouter()
    
   //modifier la statut de paiement
@@ -67,13 +68,14 @@ export default function useClientInvoiceDetails ({invoiceId, type}:InvoiceDetail
     });
   };
 
-  const updateStatus = async ()=>{
+  const updateStatus = async (status?: string)=>{
         try {
         setUpdateLoading(true)
         const formData = new FormData();
           
-        formData.append("status",  nextStatus);
-
+        const finalStatus = status ?? nextStatus;
+        console.log("final status", status)
+        formData.append("status",  String(finalStatus));
         if(type=="CLIENT"){
 
         const invoice = await InvoicesAPI.updateClientInvoiceStatus(invoiceId, formData);
