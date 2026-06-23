@@ -96,11 +96,11 @@ export default function UserForm ({userId, mode}:PropsForm) {
 
             <CardHeader className="border-b border-slate-100 bg-white">
                 <CardTitle className="text-lg text-slate-900">
-                Informations générales
+                {"Informations générales"}
                 </CardTitle>
 
                 <CardDescription>
-                Informations principales de l'utilisateur.
+                {"Informations principales de l'utilisateur."}
                 </CardDescription>
             </CardHeader>
 
