@@ -13,11 +13,13 @@ import {
   USER_STATUS_OPTIONS,
 } from "../../mocks/mock-users";
 import { getUserRoleColor, getUserRoleLabel, getUserStatusColor, getUserStatusLabel } from "../../helpers/userHelpers";
+import { useRouter } from "next/navigation";
 
 export default function ListUsers() {
   const [search, setSearch] = useState("");
   const [role, setRole] = useState("ALL");
   const [status, setStatus] = useState("ALL");
+  const router = useRouter()
 
   const totalUsers = mockUsers.length;
 
@@ -48,7 +50,9 @@ export default function ListUsers() {
         </p>
       </div>
 
-      <button className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-lg bg-slate-900 px-4 text-xs font-semibold text-white transition hover:bg-slate-800">
+      <button 
+      onClick={()=> router.push(`/admin/users/new`)}
+      className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-lg bg-slate-900 px-4 text-xs font-semibold text-white transition hover:bg-slate-800">
         <Plus className="h-4 w-4" />
         Ajouter un utilisateur
       </button>
@@ -116,8 +120,8 @@ export default function ListUsers() {
         totalPages={1}
         totalElements={mockUsers.length}
         onPageChange={() => {}}
-        onView={(u) => console.log(u)}
-        onEdit={(u) => console.log(u)}
+        onView={(u) => router.push(`/admin/users/${u.id}/details`)}
+        onEdit={(u) =>router.push(`/admin/users/${u.id}/edit`)}
         onDelete={(u) => console.log(u)}
         onManageRoles={(u) => console.log(u)}
         getId={(u) => u.id}

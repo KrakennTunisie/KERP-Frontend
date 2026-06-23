@@ -9,6 +9,7 @@ import { AddPermissionModal } from "../../widgets/addPermissionModal";
 import { mockPermissions, Permission } from "../../mocks/mock-permission";
 import { appToast } from "@/shared/lib/toast";
 import RevokePermissionModal from "../../widgets/revokePermissionModal";
+import AddRoleModal from "./addRoleModal";
 
 export default function RolesPage() {
 
@@ -32,6 +33,7 @@ export default function RolesPage() {
   }, [currentPage]);
 
   const [modalOpen, setModalOpen] =useState(false)
+  const [createModalOpen, setCreateModalOpen] =useState(false)
   const [selectedRole, setSelectedRole] =useState<Role>()
   const [revokeModalOpen, setRevokeModalOpen] = useState(false);
 
@@ -67,7 +69,9 @@ export default function RolesPage() {
         </p>
       </div>
 
-      <button className="cursor-pointer inline-flex h-10 items-center gap-2 rounded-xl bg-slate-900 px-4 text-xs font-semibold text-white hover:bg-slate-800">
+      <button 
+        onClick={()=>setCreateModalOpen(true)}
+        className="cursor-pointer inline-flex h-10 items-center gap-2 rounded-xl bg-slate-900 px-4 text-xs font-semibold text-white hover:bg-slate-800">
         <Plus className="h-4 w-4" />
         Nouveau rôle
       </button>
@@ -183,6 +187,15 @@ export default function RolesPage() {
       onSubmit={handleRevokePermission}
     />
   )}
+  <AddRoleModal 
+    mode={"create"} 
+    open={createModalOpen} 
+    onClose={()=>setCreateModalOpen(false)} 
+    onSave={
+      ()=>console.log("saved")
+    } 
+    permissions={mockPermissions}/>
+  
 </div>
   );
 }

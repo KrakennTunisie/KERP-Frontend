@@ -92,7 +92,9 @@ export function DocumentPreviewModal({
             "Créer la facture"
           ) : type === "Avoir" ? (
             "Créer la facture d'avoir"
-          ) : (
+          ) : type === "Payment" ? (
+            "Créer Paiement"
+          ) :(
             "Créer le bon de commande"
           )}
         </button>

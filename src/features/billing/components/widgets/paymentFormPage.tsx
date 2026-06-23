@@ -63,6 +63,7 @@ export default function PaymentFormPage({
 const isUpdate = mode === "update";
 const isClone = mode === "clone";
 const isEditMode = isUpdate || isClone;
+const remainingAmount = selectedInvoice && selectedInvoice.remainingAmount ?  selectedInvoice.remainingAmount.toFixed(2) : 0;
 
 const submitLoading = createLoading || updateLoading;
 
@@ -267,7 +268,7 @@ const submitLoading = createLoading || updateLoading;
 
                   <AmountRow
                     label="Reste à payer"
-                    value={Number(selectedInvoice.remainingAmount.toFixed(2))}
+                    value={Number(remainingAmount)}
                     currency={selectedInvoice.invoiceCurrency}
                     strong
                   />
@@ -321,7 +322,7 @@ const submitLoading = createLoading || updateLoading;
                 onCreateInvoice={submitPayment}
                 document={pdf}
                 loading={submitLoading}
-                type=""
+                type="Payment"
             />
     </div>
   );
