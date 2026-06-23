@@ -67,7 +67,7 @@ export default function CreditNoteDetails({ params }: PropsCreditNote) {
                             icon: Send,
                             onClick: () => setSendOpen(true),
                             disabled: invoice?.invoiceCreditNoteStatus === "CANCELLED",
-                            visible: false
+                            visible: true
                         },
                         {
                             label: "Supprimer",
@@ -76,7 +76,7 @@ export default function CreditNoteDetails({ params }: PropsCreditNote) {
                             hover: "hover:bg-rose-50",
                             onClick: () => setDeleteOpen(true),
                             disabled: invoice?.invoiceCreditNoteStatus !== "DRAFT",
-                            visible: false
+                            visible: true
                         },
                     ]}
             />

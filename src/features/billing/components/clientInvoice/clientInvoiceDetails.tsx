@@ -125,51 +125,7 @@ const menuItems = actions.filter((action) => action.visible)
         issueDate={formatDateLong(invoice?.issueDate)}
         dueDate={formatDateLong(invoice?.dueDate)}
         onBack={() => router.back()}
-        actionItems={[
-            {
-                label: "Cloner",
-                icon: Copy,
-                onClick: () => router.push(`/billing/invoices/clients/${invoice?.idInvoice}/clone`),
-                visible: false
-            },
-            {
-                label: "Télécharger",
-                icon: Download,
-                onClick: () => telecharger(),
-                visible: false
-            },
-            {
-                label: "Mettre à jour statut",
-                icon: Settings,
-                onClick: () => setUpdateOpen(true),
-                disabled: invoice?.invoiceStatus === "CANCELLED",
-                visible: false
-            },
-            {
-                label: "Envoyer",
-                icon: Send,
-                onClick: () => setSendOpen(true),
-                disabled: invoice?.invoiceStatus === "CANCELLED",
-                visible: false
-            },
-            {
-                label: "Modifier",
-                icon: Pencil,
-                onClick: () => router.push(`/billing/invoices/clients/${invoice?.idInvoice}/edit`),
-                disabled: invoice?.invoiceStatus === "PAID" ||
-                    invoice?.invoiceStatus === "CANCELLED",
-                visible: false
-            },
-            {
-                label: "Supprimer",
-                icon: Trash2,
-                color: "text-rose-600",
-                hover: "hover:bg-rose-50",
-                onClick: () => setDeleteOpen(true),
-                disabled: invoice?.invoiceStatus !== "DRAFT",
-                visible: false
-            },
-        ]}
+        actionItems={menuItems}
         />
 
         <main className="mx-auto px-6 py-6">
