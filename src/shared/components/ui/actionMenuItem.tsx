@@ -17,6 +17,7 @@ export type ActionMenuItem = {
   color?: string;
   hover?: string;
   disabled?: boolean;
+  visible: boolean
 };
 
 type ActionMenuProps = {
@@ -189,7 +190,7 @@ export function ActionMenu({
             >
               {items.map((item) => {
                 const Icon = item.icon;
-
+               if(item.visible)
                 return (
                   <button
                     key={item.label}

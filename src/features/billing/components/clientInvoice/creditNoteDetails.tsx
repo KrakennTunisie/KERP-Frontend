@@ -57,38 +57,26 @@ export default function CreditNoteDetails({ params }: PropsCreditNote) {
                 onBack={() => router.back()}
                 actionItems={[
                         {
-                        label: "Cloner",
-                        icon: Copy,
-                        onClick: () => console.log("Cloner", invoice?.idInvoiceCreditNote),
+                            label: "Cloner",
+                            icon: Copy,
+                            onClick: () => console.log("Cloner", invoice?.idInvoiceCreditNote),
+                            visible: false
                         },
-/*                         {
-                        label: "Mettre à jour statut",
-                        icon: Settings,
-                        onClick: () => console.log("Mettre à jour statut", invoice?.idInvoiceCreditNote),
-                        disabled: invoice?.invoiceCreditNoteStatus === "CANCELLED",
-                        }, */
                         {
-                        label: "Envoyer",
-                        icon: Send,
-                        onClick: () => setSendOpen(true),
-                        disabled: invoice?.invoiceCreditNoteStatus === "CANCELLED",
+                            label: "Envoyer",
+                            icon: Send,
+                            onClick: () => setSendOpen(true),
+                            disabled: invoice?.invoiceCreditNoteStatus === "CANCELLED",
+                            visible: false
                         },
-/*                         {
-                        label: "Modifier",
-                        icon: Pencil,
-                        onClick: () =>
-                            router.push(`/billing/invoices/clients/${invoice?.idInvoiceCreditNote}/edit`),
-                        disabled:
-                            invoice?.invoiceCreditNoteStatus === "PAID" ||
-                            invoice?.invoiceCreditNoteStatus === "CANCELLED",
-                        }, */
                         {
-                        label: "Supprimer",
-                        icon: Trash2,
-                        color: "text-rose-600",
-                        hover: "hover:bg-rose-50",
-                        onClick: () => setDeleteOpen(true),
-                        disabled: invoice?.invoiceCreditNoteStatus !== "DRAFT",
+                            label: "Supprimer",
+                            icon: Trash2,
+                            color: "text-rose-600",
+                            hover: "hover:bg-rose-50",
+                            onClick: () => setDeleteOpen(true),
+                            disabled: invoice?.invoiceCreditNoteStatus !== "DRAFT",
+                            visible: false
                         },
                     ]}
             />

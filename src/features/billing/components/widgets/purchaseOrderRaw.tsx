@@ -55,6 +55,7 @@ export function PurchaseOrderRow<TPurchaseOrder extends PurchaseOrderPageItem>({
       color: "text-amber-600",
       hover: "hover:bg-amber-50",
       onClick: () => onEdit?.(purchaseOrder),
+      visible: true
     });
   }
 
@@ -65,6 +66,7 @@ export function PurchaseOrderRow<TPurchaseOrder extends PurchaseOrderPageItem>({
     hover: "hover:bg-violet-50",
     disabled: !canUpdateStatus,
     onClick: () => onUpdateStatus(purchaseOrder),
+    visible: true
   });
 
   if (isSupplierPurchaseOrder) {
@@ -75,6 +77,7 @@ export function PurchaseOrderRow<TPurchaseOrder extends PurchaseOrderPageItem>({
       hover: "hover:bg-emerald-50",
       disabled: !canSend,
       onClick: () => onSend?.(purchaseOrder),
+      visible: true
     });
   }
 
@@ -85,6 +88,7 @@ export function PurchaseOrderRow<TPurchaseOrder extends PurchaseOrderPageItem>({
     hover: "hover:bg-rose-50",
     disabled: !canDelete,
     onClick: () => onDelete(purchaseOrder),
+    visible: true
   });
 
   return (
