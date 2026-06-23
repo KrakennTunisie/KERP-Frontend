@@ -16,6 +16,7 @@ import { DocumentTopBar } from "../widgets/documentTopBar";
 import { SectionLabel } from "../widgets/sectionLabel";
 import { SendDocumentModal } from "../widgets/sendInvoiceModal";
 import { SendToTTNModal } from "../widgets/ttnConfirmationModal";
+import { invoiceTypeSchema } from "../../types/invoiceType";
 
 export default function CreditNoteDetails({ params }: PropsCreditNote) {
     const { updateStatus, previewDocument, setPreviewDocument, setStatusPaiement, invoice, 
@@ -60,7 +61,7 @@ export default function CreditNoteDetails({ params }: PropsCreditNote) {
                             label: "Cloner",
                             icon: Copy,
                             onClick: () => console.log("Cloner", invoice?.idInvoiceCreditNote),
-                            visible: false
+                            visible: invoice?.invoice.invoiceType == invoiceTypeSchema.enum.SALE
                         },
                         {
                             label: "Envoyer",
