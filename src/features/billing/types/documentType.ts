@@ -4,7 +4,7 @@ import { z } from "zod";
 export const partnerDocumentType = z.enum([
   "RNE",
   "CONTRACT",
-  "PATENTE"
+  "PATENT"
 ]);
 
 

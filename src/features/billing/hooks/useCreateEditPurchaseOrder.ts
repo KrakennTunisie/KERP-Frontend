@@ -354,7 +354,7 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
   // Sélection d'un fournisseur
   const selectSupplier = (client: PartnerSummary) => {
     setValue("partner", client, { shouldValidate: true, shouldDirty: true, });
-    setSupplierSearch(client.partnerName);
+    setSupplierSearch(client.partnerName!);
     setShowDropdown(false);
   };
 

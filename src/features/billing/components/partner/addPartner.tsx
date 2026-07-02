@@ -27,50 +27,50 @@ export default function AddPartnerPage({ type, mode, partnerId }: pageProps) {
         copyBillingToShipping, documentFields, isClient, router, getValues,
         onSubmit, getError, register, handleSubmit, setValue, setValueAny, isSubmitting
         , watch
-    } = UseCreatePartner({ type, mode,partnerId })
+    } = UseCreatePartner({ type, mode, partnerId })
     return (
         <div className=" bg-gray-50">
 
-        <div className="bg-white border-b border-gray-100 px-6 py-4">
-            <div className="mx-auto space-y-3">
+            <div className="bg-white border-b border-gray-100 px-6 py-4">
+                <div className="mx-auto space-y-3">
 
-                {/* BACK BUTTON */}
-                <button
-                onClick={() =>
-                    router.back()
-                }
-                className="flex items-center cursor-pointer gap-2 text-gray-500 hover:text-gray-900 text-xs font-medium transition group"
-                >
-                <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
-                Retour
-                </button>
+                    {/* BACK BUTTON */}
+                    <button
+                        onClick={() =>
+                            router.back()
+                        }
+                        className="flex items-center cursor-pointer gap-2 text-gray-500 hover:text-gray-900 text-xs font-medium transition group"
+                    >
+                        <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
+                        Retour
+                    </button>
 
-                {/* MAIN HEADER */}
-                <div className="flex items-center gap-3">
+                    {/* MAIN HEADER */}
+                    <div className="flex items-center gap-3">
 
-                {/* ICON */}
-                <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
-                    <User className="w-5 h-5 text-white" />
+                        {/* ICON */}
+                        <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
+                            <User className="w-5 h-5 text-white" />
+                        </div>
+
+                        {/* TEXT */}
+                        <div>
+                            <h1 className="text-lg font-bold text-gray-900 leading-tight">
+                                {mode === "edit"
+                                    ? `Modifier ${type === partnerTypeSchema.enum.CLIENT ? "Client" : "Fournisseur"}`
+                                    : `Nouveau ${type === partnerTypeSchema.enum.CLIENT ? "Client" : "Fournisseur"}`}
+                            </h1>
+
+                            <p className="text-xs text-gray-500 mt-0.5">
+                                {mode === "edit"
+                                    ? "Mettre à jour les informations"
+                                    : "Créer un nouveau partenaire"}
+                            </p>
+                        </div>
+                    </div>
+
                 </div>
-
-                {/* TEXT */}
-                <div>
-                    <h1 className="text-lg font-bold text-gray-900 leading-tight">
-                    {mode === "edit"
-                        ? `Modifier ${type === partnerTypeSchema.enum.CLIENT ? "Client" : "Fournisseur"}`
-                        : `Nouveau ${type === partnerTypeSchema.enum.CLIENT ? "Client" : "Fournisseur"}`}
-                    </h1>
-
-                    <p className="text-xs text-gray-500 mt-0.5">
-                    {mode === "edit"
-                        ? "Mettre à jour les informations"
-                        : "Créer un nouveau partenaire"}
-                    </p>
-                </div>
-                </div>
-
             </div>
-        </div>
 
             <main className="flex-1 overflow-y-auto p-8">
                 <form
@@ -96,9 +96,7 @@ export default function AddPartnerPage({ type, mode, partnerId }: pageProps) {
                             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 
                                 <div className="space-y-2">
-                                    <Label
-                                        required
-                                    >
+                                    <Label>
                                         Salutation
                                     </Label>
                                     <Select value={watch("maritalStatus") ?? ""}
@@ -131,7 +129,7 @@ export default function AddPartnerPage({ type, mode, partnerId }: pageProps) {
 
                                 <Input
                                     id="firstName"
-                                    required
+
                                     label="Prénom"
                                     placeholder="Prénom"
                                     error={getError("firstName")}
@@ -140,7 +138,7 @@ export default function AddPartnerPage({ type, mode, partnerId }: pageProps) {
 
                                 <Input
                                     id="lastName"
-                                    required
+
                                     label="Nom"
                                     placeholder="Nom"
                                     error={getError("lastName")}
@@ -149,7 +147,6 @@ export default function AddPartnerPage({ type, mode, partnerId }: pageProps) {
 
                                 <Input
                                     id="shortName"
-                                    required
                                     label="Nom abrégé"
                                     placeholder="Nom abrégé"
                                     error={getError("shortName")}
@@ -158,7 +155,6 @@ export default function AddPartnerPage({ type, mode, partnerId }: pageProps) {
 
                                 <Input
                                     id="email"
-                                    required
                                     label="Email"
                                     type="email"
                                     placeholder="email@exemple.com"
@@ -168,18 +164,24 @@ export default function AddPartnerPage({ type, mode, partnerId }: pageProps) {
 
                                 <Input
                                     id="workPhone"
+                                    type="number"
+
                                     label="Téléphone professionnel"
                                     placeholder="+216 XX XXX XXX"
                                     error={getError("workPhone")}
-                                    {...register("workPhone")}
+                                    className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                    {...register("workPhone", { valueAsNumber: true })}
                                 />
 
                                 <Input
                                     id="mobilePhone"
+                                    type="number"
+
                                     label="Téléphone mobile"
                                     placeholder="+216 XX XXX XXX"
                                     error={getError("mobilePhone")}
-                                    {...register("mobilePhone")}
+                                    className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                    {...register("mobilePhone", { valueAsNumber: true })}
                                 />
 
                                 <div className="space-y-2">
@@ -215,102 +217,113 @@ export default function AddPartnerPage({ type, mode, partnerId }: pageProps) {
                                 </CardTitle>
 
                                 <CardDescription className="text-sm text-slate-500">
-                                    Veuillez joindre les 3 documents requis avant de créer le partenaire.
+                                    {mode === "create"
+                                        ? "Veuillez joindre les 3 documents requis avant de créer le partenaire."
+                                        : "Vous pouvez ajouter ou consulter les documents du partenaire."}
                                 </CardDescription>
                             </CardHeader>
 
                             <CardContent className="p-4 sm:p-5">
                                 <div className="grid grid-cols-1 gap-3">
-                                    {documentFields.map(({ label, field, tooltip, existingUrl }) => (
-                                        <div key={field}>
-                                            {mode === "create" ? (
-                                                <FilePicker
-                                                    id={field}
-                                                    label={label}
-                                                    required
-                                                    tooltip={tooltip}
-                                                    file={watch(field) as unknown as File | undefined}
-                                                    existingFileUrl={null}
-                                                    error={getError(field)}
-                                                    onPick={(file) =>
-                                                        setValueAny(field, file, {
-                                                            shouldValidate: true,
-                                                            shouldDirty: true,
-                                                        })
-                                                    }
-                                                    onRemove={() =>
-                                                        setValueAny(field, undefined, {
-                                                            shouldValidate: true,
-                                                            shouldDirty: true,
-                                                        })
-                                                    }
-                                                />
-                                            ) : (
-                                                <div
-                                                    className={`group h-full rounded-2xl border p-4 transition-all duration-200 ${existingUrl
-                                                        ? "border-blue-100 bg-blue-50/40 hover:border-blue-200 hover:bg-blue-50/70 hover:shadow-sm"
-                                                        : "border-slate-200 bg-slate-50"
-                                                        }`}
-                                                >
-                                                    <div className="flex h-full flex-col justify-between gap-3">
-                                                        <div className="flex items-start gap-3">
-                                                            <div
-                                                                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${existingUrl
-                                                                    ? "bg-white text-blue-600 shadow-sm ring-1 ring-blue-100"
-                                                                    : "bg-white text-slate-400 ring-1 ring-slate-200"
-                                                                    }`}
-                                                            >
-                                                                <FileText className="h-5 w-5" />
-                                                            </div>
+                                    {documentFields.map(({ label, field, tooltip, existingUrl }) => {
+                                        const isPatente = field === "patente";
+                                        const canReplace = !isPatente; // RNE et contrat : toujours remplaçables
+                                        const showPicker =
+                                            mode === "create" || (canReplace) || (!existingUrl);
 
-                                                            <div className="min-w-0 flex-1">
-                                                                <p className="truncate text-sm font-semibold text-slate-900">
-                                                                    {label}
-                                                                </p>
+                                        return (
+                                            <div key={field}>
+                                                {showPicker ? (
+                                                    <FilePicker
+                                                        id={field}
+                                                        label={label}
+                                                        tooltip={tooltip}
 
-                                                                <div className="mt-1 flex items-center gap-1.5">
-                                                                    {existingUrl ? (
-                                                                        <>
-                                                                            <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-500" />
-                                                                            <p className="truncate text-xs font-medium text-slate-500">
-                                                                                Document ajouté
-                                                                            </p>
-                                                                        </>
-                                                                    ) : (
-                                                                        <>
-                                                                            <AlertCircle className="h-3.5 w-3.5 shrink-0 text-amber-500" />
-                                                                            <p className="truncate text-xs font-medium text-amber-600">
-                                                                                Document manquant
-                                                                            </p>
-                                                                        </>
-                                                                    )}
+                                                        file={watch(field) as unknown as File | undefined}
+                                                        existingFileUrl={mode === "edit" ? existingUrl ?? null : null}
+                                                        error={getError(field)}
+                                                        onPick={(file) =>
+                                                            setValueAny(field, file, {
+                                                                shouldValidate: true,
+                                                                shouldDirty: true,
+                                                            })
+                                                        }
+                                                        onRemove={() =>
+                                                            setValueAny(field, undefined, {
+                                                                shouldValidate: true,
+                                                                shouldDirty: true,
+                                                            })
+                                                        }
+                                                    />
+                                                ) : (
+                                                    <div
+                                                        className={`group h-full rounded-2xl border p-4 transition-all duration-200 ${existingUrl
+                                                            ? "border-blue-100 bg-blue-50/40 hover:border-blue-200 hover:bg-blue-50/70 hover:shadow-sm"
+                                                            : "border-slate-200 bg-slate-50"
+                                                            }`}
+                                                    >
+                                                        <div className="flex h-full flex-col justify-between gap-3">
+                                                            <div className="flex items-start gap-3">
+                                                                <div
+                                                                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${existingUrl
+                                                                        ? "bg-white text-blue-600 shadow-sm ring-1 ring-blue-100"
+                                                                        : "bg-white text-slate-400 ring-1 ring-slate-200"
+                                                                        }`}
+                                                                >
+                                                                    <FileText className="h-5 w-5" />
+                                                                </div>
+
+                                                                <div className="min-w-0 flex-1">
+                                                                    <p className="truncate text-sm font-semibold text-slate-900">
+                                                                        {label}
+                                                                    </p>
+
+                                                                    <div className="mt-1 flex items-center gap-1.5">
+                                                                        {existingUrl ? (
+                                                                            <>
+                                                                                <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-500" />
+                                                                                <p className="truncate text-xs font-medium text-slate-500">
+                                                                                    Document ajouté
+                                                                                </p>
+                                                                            </>
+                                                                        ) : (
+                                                                            <>
+                                                                                <AlertCircle className="h-3.5 w-3.5 shrink-0 text-amber-500" />
+                                                                                <p className="truncate text-xs font-medium text-amber-600">
+                                                                                    Document manquant
+                                                                                </p>
+                                                                            </>
+                                                                        )}
+                                                                    </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
 
-                                                        {existingUrl ? (
-                                                            <a
-                                                                href={existingUrl}
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
-                                                                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white px-3 py-2 text-xs font-semibold text-blue-700 shadow-sm ring-1 ring-blue-100 transition hover:bg-blue-600 hover:text-white"
-                                                            >
-                                                                Voir le fichier
-                                                                <ExternalLink className="h-3.5 w-3.5" />
-                                                            </a>
-                                                        ) : (
-                                                            <div className="inline-flex w-full items-center justify-center rounded-xl bg-white px-3 py-2 text-xs font-semibold text-slate-400 ring-1 ring-slate-200">
-                                                                Non disponible
-                                                            </div>
-                                                        )}
+                                                            {existingUrl ? (
+
+                                                                <a href={existingUrl}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white px-3 py-2 text-xs font-semibold text-blue-700 shadow-sm ring-1 ring-blue-100 transition hover:bg-blue-600 hover:text-white"
+                                                                >
+                                                                    Voir le fichier
+                                                                    <ExternalLink className="h-3.5 w-3.5" />
+                                                                </a>
+                                                            ) : (
+                                                                <div className="inline-flex w-full items-center justify-center rounded-xl bg-white px-3 py-2 text-xs font-semibold text-slate-400 ring-1 ring-slate-200">
+                                                                    Non disponible
+                                                                </div>
+                                                            )}
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    ))}
+                                                )}
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             </CardContent>
+
                         </Card>
+
                         {/* Facturation */}
                         <Card className="h-full">
                             <CardHeader className="border-b border-slate-100 bg-white">
@@ -326,7 +339,7 @@ export default function AddPartnerPage({ type, mode, partnerId }: pageProps) {
                                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                                     <Input
                                         id="taxId"
-                                        required
+
                                         label="Matricule Fiscal"
                                         tooltip="Matricule fiscal utilisé pour l'identification fiscale de l'entreprise."
                                         placeholder="1234567/A/M/000"
@@ -347,11 +360,11 @@ export default function AddPartnerPage({ type, mode, partnerId }: pageProps) {
                                         <Label
                                             tooltip="TVA par défaut pour les factures."
                                             htmlFor="taxRate">
-                                            Taux TVA <span className="text-red-500">*</span>
+                                            Taux TVA
                                         </Label>
 
                                         <Select
-                                            defaultValue="19"
+                                            defaultValue="0"
                                             onValueChange={(value) =>
                                                 setValue("taxRate", value as TvaRateString, {
                                                     shouldValidate: true,
@@ -389,11 +402,11 @@ export default function AddPartnerPage({ type, mode, partnerId }: pageProps) {
                                         <Label
                                             tooltip="Les conditions de payements des factures."
                                             htmlFor="paymentTerms">
-                                            Conditions de paiement <span className="text-red-500">*</span>
+                                            Conditions de paiement
                                         </Label>
 
                                         <Select
-                                            defaultValue="NET_30"
+                                            defaultValue="IMMEDIATE"
                                             onValueChange={(value) =>
                                                 setValue("paymentTerms", value as PaymentCondition, {
                                                     shouldValidate: true,
@@ -467,7 +480,7 @@ export default function AddPartnerPage({ type, mode, partnerId }: pageProps) {
                                                     {"Activer l'accès au portail client"}
                                                 </Label>
                                                 <p className="mt-1 text-xs text-slate-500">
-                                                   {" Le client pourra accéder à son espace dédié."}
+                                                    {" Le client pourra accéder à son espace dédié."}
                                                 </p>
                                             </div>
                                         </div>
@@ -504,11 +517,11 @@ export default function AddPartnerPage({ type, mode, partnerId }: pageProps) {
                                     <div className="space-y-4">
                                         <div className="space-y-2">
                                             <Label htmlFor="billingCountry">
-                                                Pays / Région <span className="text-red-500">*</span>
+                                                Pays / Région
                                             </Label>
 
                                             <Select
-                                                value={watch("billingAddress.region")}
+                                                value={watch("billingAddress.region") ?? ""}
                                                 onValueChange={(value) => {
                                                     setValue("billingAddress.addressType", "Billing Address", {
                                                         shouldValidate: true,
@@ -532,10 +545,10 @@ export default function AddPartnerPage({ type, mode, partnerId }: pageProps) {
                                                 </SelectTrigger>
 
                                                 <SelectContent>
-                                                    <SelectItem value="Tunisie">Tunisie</SelectItem>
-                                                    <SelectItem value="France">France</SelectItem>
-                                                    <SelectItem value="Algérie">Algérie</SelectItem>
-                                                    <SelectItem value="Maroc">Maroc</SelectItem>
+                                                    <SelectItem value="TN">Tunisie</SelectItem>
+                                                    <SelectItem value="FR">France</SelectItem>
+                                                    <SelectItem value="DZ">Algérie</SelectItem>
+                                                    <SelectItem value="Ma">Maroc</SelectItem>
                                                 </SelectContent>
                                             </Select>
 
@@ -549,7 +562,6 @@ export default function AddPartnerPage({ type, mode, partnerId }: pageProps) {
                                         <Input
                                             id="billingStreet1"
                                             label="Adresse ligne 1"
-                                            required
                                             placeholder="Numéro et nom de rue"
                                             error={getError("billingAddress")}
                                             {...register("billingAddress.street1")}
@@ -567,7 +579,6 @@ export default function AddPartnerPage({ type, mode, partnerId }: pageProps) {
                                             <Input
                                                 id="billingCity"
                                                 label="Ville"
-                                                required
                                                 placeholder="Ville"
                                                 error={getError("billingAddress")}
                                                 {...register("billingAddress.city")}
@@ -609,7 +620,7 @@ export default function AddPartnerPage({ type, mode, partnerId }: pageProps) {
                                             variant="outline"
                                             size="sm"
                                             className="w-full rounded-full bg-white sm:w-auto cursor-pointer"
-                                            onClick={ copyBillingToShipping}
+                                            onClick={copyBillingToShipping}
                                         >
                                             Copier depuis facturation
                                         </Button>
@@ -620,7 +631,7 @@ export default function AddPartnerPage({ type, mode, partnerId }: pageProps) {
                                             <Label htmlFor="shippingCountry">Pays / Région</Label>
 
                                             <Select
-                                                value={watch("shippingAddress.region")}
+                                                value={watch("shippingAddress.region") ?? ""}
                                                 onValueChange={(value) => {
                                                     setValue("shippingAddress.addressType", "Shipping Address", {
                                                         shouldValidate: true,

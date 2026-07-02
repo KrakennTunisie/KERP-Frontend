@@ -1,13 +1,13 @@
 import { Building2, MapPin } from "lucide-react";
 
 type AddressBoxProps = {
-  title: string;
-  street1?: string;
-  street2?: string;
-  zip?: string;
-  city?: string;
-  state?: string;
-  country?: string;
+  title: string | null;
+  street1?: string | null;
+  street2?: string | null;
+  zip?: string | null;
+  city?: string | null;
+  state?: string | null;
+  country?: string | null;
   type?: string | null;
 };
 
@@ -68,7 +68,7 @@ export default function AddressBox({
         </span>
 
         <span className="text-right text-xs font-medium text-slate-800 break-words">
-          {row.value ?? "-"}
+          {row.value && row.value!=="" ? row.value  : "-"}
         </span>
 
       </div>

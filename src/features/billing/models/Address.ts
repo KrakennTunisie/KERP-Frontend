@@ -1,18 +1,21 @@
 import { z } from "zod";
 
+const nullableString = (schema: z.ZodString) =>
+  schema.nullable().or(z.literal("").transform(() => null));
+
 
 export const addressSchema = z.object({
   idAddress: z.uuid().or(z.string()),
-  region: z.string().min(1),
-  state: z.string().min(1),
-  street1: z.string().min(1),
-  street2: z.string().min(1),
-  city: z.string().min(1),
-  zipCode: z.string(),
-  addressType : z.string().nullable()
- 
-  
+  region: nullableString(z.string().min(1)).optional(),
+  state: nullableString(z.string().min(1)),
+  street1: nullableString(z.string().min(1)),
+  street2: nullableString(z.string().min(1)),
+  city: nullableString(z.string().min(1)),
+  zipCode: z.string().nullable().or(z.literal("").transform(() => null)),
+  addressType: nullableString(z.string().min(1)).optional(),
 });
+
+
 export const getAddressSchema = z.object({
   idAddress: z.uuid().or(z.string()),
   region: z.string().min(1),

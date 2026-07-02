@@ -120,7 +120,7 @@ export function PurchaseOrderModalContent({
                   <circle cx="12" cy="10" r="3" />
                 </svg>
               </div>
-              <p className="text-xs text-gray-700">{purchaseOrder?.partner?.billingAddress.region}</p>
+              <p className="text-xs text-gray-700">{purchaseOrder?.partner?.billingAddress!.region}</p>
             </div>
           </div>
 
