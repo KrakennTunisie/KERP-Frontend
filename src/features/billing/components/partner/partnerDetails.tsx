@@ -49,7 +49,7 @@ import { PartnerDocumentType } from "../../types/documentType";
 
 export default function PartnerDetails({ partner, clientRevenueInitial, supplierDespensesInitial, totalRevenueInitial, totalDespensesInitial, partnerStats, onRefresh }: PartnerDetailsProps) {
 
-  const {     deleteClientInvoice,deleteLoading,setDeleteLoading,setDeleteOpen,invoiceRef,deleteOpen,setInvoiceId,purchaseOrderId,setPurchaseOrderId,setDeletePOrderOpen,deletePOrderOpen , deletePurchaseOrder,
+  const {deleteClientInvoice,deleteLoading,setDeleteLoading,setDeleteOpen,invoiceRef,deleteOpen,setInvoiceId,purchaseOrderId,setPurchaseOrderId,setDeletePOrderOpen,deletePOrderOpen , deletePurchaseOrder,
     chartMode, getStatusIcon, getLabelColor, getStatusColor, toggleSection ,refresh,setRefresed,modalPurchaseOrderOpen,setModalPurchaseOrderOpen
     , previewDocument, setPreviewDocument, selectedPeriod, setSelectedPeriod, activeTab, setActiveTab, supplierDespenses,totalDespenses, addDocumentType, setAddDocumentType
     , TotalIcon, HeaderIcon, open, setOpen, openSections, pageConfig, fetchPartnerStats,clientRevenue, totalRevenue ,sendeMailOpen, setSendMailOpen,
@@ -558,6 +558,7 @@ export default function PartnerDetails({ partner, clientRevenueInitial, supplier
       <AddDocumentModal
         open={openAddDocument}
         loading={addDocumentLoading}
+        hasPatent={partner?.patente? false : true}
         type={addDocumentType}
         onClose={() => setOpenAddDocument(false)}
         onAdd={(file, type) => addDocument(file, type)}

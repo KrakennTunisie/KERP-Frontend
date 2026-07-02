@@ -1,4 +1,4 @@
-import { TrendingDown, TrendingUp, Truck, Users, CheckCircle, Clock, AlertCircle, FileText} from "lucide-react";
+import { TrendingDown, TrendingUp, Truck, Users, CheckCircle, Clock, AlertCircle, FileText } from "lucide-react";
 import { useState } from "react";
 import { InvoicePageItem } from "../models/invoice";
 import { PartnerAllDetails } from "../models/partner";
@@ -13,7 +13,7 @@ import { invoiceTypeSchema } from "../types/invoiceType";
 import { DashboardAPI, InvoicesAPI, InvoicesCreditNoteAPI, partnersApi, PurchaseOrderAPI } from "../api/partners-api";
 
 import { PurchaseOrderPageItem } from "../models/purchaseOrder";
-import {  InvoiceCreditNotePageItem } from "../models/creditNote";
+import { InvoiceCreditNotePageItem } from "../models/creditNote";
 import { DocumentOrFile } from "@/shared/components/ui/documentPreviewModal";
 import { PartnerDocumentType } from "../types/documentType";
 
@@ -25,7 +25,7 @@ export type PartnerDetailsProps = {
   supplierDespensesInitial?: PartnerRevenueStats[] | []
   totalRevenueInitial?: number,
   totalDespensesInitial?: number,
-  onRefresh:  () => void
+  onRefresh: () => void
 };
 
 export default function UseClientsDetails({ partner, onRefresh }: PartnerDetailsProps) {
@@ -68,9 +68,9 @@ export default function UseClientsDetails({ partner, onRefresh }: PartnerDetails
     payments: false,
     purchaseOrders: false,
   });
-  const [deleteLoading, setDeleteLoading]= useState(false)
-  const [deletePartnerOpen, setDeletePartnerOpen]= useState(false)
-  const [updatePartnerStatusOpen, setUpdatePartnerStatusOpen]= useState(false)
+  const [deleteLoading, setDeleteLoading] = useState(false)
+  const [deletePartnerOpen, setDeletePartnerOpen] = useState(false)
+  const [updatePartnerStatusOpen, setUpdatePartnerStatusOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deletePOrderOpen, setDeletePOrderOpen] = useState(false);
   const [deleteCNoteOpen, setDeleteCNoteOpen] = useState(false);
@@ -78,18 +78,17 @@ export default function UseClientsDetails({ partner, onRefresh }: PartnerDetails
   const [modalSupplierPurchaseOrderOpen, setModalSupplierPurchaseOrderOpen] = useState(false);
   const [sendeMailOpen, setSendMailOpen] = useState(false);
   const [selected, setSelected] = useState<InvoicePageItem | InvoiceCreditNotePageItem | PurchaseOrderPageItem | null>();
-  const [selectedEmail, setSelectedEmail]= useState<string|null>(null)
+  const [selectedEmail, setSelectedEmail] = useState<string | null>(null)
   const [invoiceRef, setInvoiceRef] = useState("");
   const [invoiceId, setInvoiceId] = useState("");
   const [creditNoteId, setCreditNoteId] = useState("");
   const [invoiceType, setInvoiceType] = useState("");
   const [purchaseOrderId, setPurchaseOrderId] = useState("");
-  const [showDetails, setShowDetails]= useState(false)
+  const [showDetails, setShowDetails] = useState(false)
   const [openAddDocument, setOpenAddDocument] = useState(false);
   const [addDocumentLoading, setAddDocumentLoading] = useState(false);
   const [addDocumentType, setAddDocumentType] = useState<PartnerDocumentType>("CONTRACT");
 
-  // Mock emails
 
   const [loading, setLoading] = useState<boolean>();
   const [refresh, setRefresed] = useState<boolean>(false);
@@ -201,87 +200,88 @@ export default function UseClientsDetails({ partner, onRefresh }: PartnerDetails
   };
 
 
- 
-
-      const updatePartnerStatus = async (status: boolean) => {
-          try {
-              setLoading(true);
-              if (partner.partnerType == partnerTypeSchema.enum.CLIENT) {
-  
-                  await partnersApi.updateStatus(partner.idPartner, status);
-  
-                  if (status) {
-                      appToast.success("Le client est activé !");
-                       onRefresh()
-  
-                  } else {
-                      appToast.success("Le client est désactivé !");
-                      onRefresh()
-  
-                  }
-              } else {
-                  await partnersApi.updateSupplierStatus(partner.idPartner, status);
-  
-                  if (status) {
-                      appToast.success("Le fournisseur est activé !");
-                      onRefresh()
-  
-                  } else {
-                      appToast.success("Le fournisseur est désactivé !");
-                        onRefresh()
-
-                  }
-  
-              }
-          } catch (error) {
-              appToast.error(
-                  "Erreur dans la modification du statut : " + getApiErrorMessage(error)
-              );
-          } finally {
-              setLoading(false);
-          }
-      };
 
 
-      const onAddDocument= ( type: PartnerDocumentType)=>{
-        setAddDocumentType(type)
-        setOpenAddDocument(true)
-      }
+  const updatePartnerStatus = async (status: boolean) => {
+    try {
+      setLoading(true);
+      if (partner.partnerType == partnerTypeSchema.enum.CLIENT) {
 
+        await partnersApi.updateStatus(partner.idPartner, status);
 
-      const addDocument= async (file: File, documentType: PartnerDocumentType)=>{
-        try {
-          setAddDocumentLoading(true)
+        if (status) {
+          appToast.success("Le client est activé !");
+          onRefresh()
 
-          const formData = new FormData();
-          formData.append("document", file)
-          
-          partner.partnerType ==="CLIENT" ?
+        } else {
+          appToast.success("Le client est désactivé !");
+          onRefresh()
 
-            await partnersApi.uploadClientDocument(partner.idPartner, documentType, formData)
-
-            : await partnersApi.uploadSupplierDocument(partner.idPartner, documentType, formData)
-
-         appToast.success("Document ajouté avec succès", `Un nouvelle document ${documentType} est ajouté avec succèès.`)
-         onRefresh()
-
-        } catch (error) {
-            appToast.error("Erreur", getApiErrorMessage(error))
-
-        }finally{
-          setAddDocumentLoading(false)
         }
+      } else {
+        await partnersApi.updateSupplierStatus(partner.idPartner, status);
+
+        if (status) {
+          appToast.success("Le fournisseur est activé !");
+          onRefresh()
+
+        } else {
+          appToast.success("Le fournisseur est désactivé !");
+          onRefresh()
+
+        }
+
       }
+    } catch (error) {
+      appToast.error(
+        "Erreur dans la modification du statut : " + getApiErrorMessage(error)
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+  const onAddDocument = (type: PartnerDocumentType) => {
+    setAddDocumentType(type)
+    setOpenAddDocument(true)
+  }
+
+
+  const addDocument = async (file: File, documentType: PartnerDocumentType) => {
+    try {
+      setAddDocumentLoading(true)
+
+      const formData = new FormData();
+      formData.append("document", file)
+
+      partner.partnerType === "CLIENT" ?
+
+        await partnersApi.uploadClientDocument(partner.idPartner, documentType, formData)
+
+        : await partnersApi.uploadSupplierDocument(partner.idPartner, documentType, formData)
+
+      appToast.success("Document ajouté avec succès", `Un nouvelle document ${documentType} est ajouté avec succèès.`)
+      onRefresh()
+
+    } catch (error) {
+      appToast.error("Erreur", getApiErrorMessage(error))
+
+    } finally {
+      setAddDocumentLoading(false)
+    }
+  }
 
   const chartMode: ChartMode = partner.partnerType === "CLIENT" ? "revenues" : "expenses";
 
-  return {sendDocumentOpen, setSendDocumentOpen,showDetails, setShowDetails, selectedEmail, setSelectedEmail,openAddDocument, setOpenAddDocument, addDocument,
-    deleteClientInvoice,deleteLoading,setDeleteLoading,setDeleteOpen,invoiceRef,deleteOpen,setInvoiceId,purchaseOrderId,setPurchaseOrderId,setDeletePOrderOpen,deletePOrderOpen , deletePurchaseOrder,
-    chartMode, getStatusIcon, getLabelColor, getStatusColor, toggleSection ,refresh,setRefresed,modalPurchaseOrderOpen,setModalPurchaseOrderOpen
-    , previewDocument, setPreviewDocument, selectedPeriod, setSelectedPeriod,  activeTab, setActiveTab, supplierDespenses,totalDespenses
-    , TotalIcon, HeaderIcon, open, setOpen, openSections, pageConfig, fetchPartnerStats,clientRevenue, totalRevenue ,sendeMailOpen, setSendMailOpen,
-    updatePartnerStatus, deletePartnerOpen, setDeletePartnerOpen, updatePartnerStatusOpen, setUpdatePartnerStatusOpen,deleteCreditInvoice,
-     setDeleteCNoteOpen,deleteCNoteOpen,creditNoteId,setCreditNoteId, modalSupplierPurchaseOrderOpen, setModalSupplierPurchaseOrderOpen, selected, setSelected, invoiceType, setInvoiceType,
-    addDocumentLoading, addDocumentType, setAddDocumentType, onAddDocument
+  return {
+    sendDocumentOpen, setSendDocumentOpen, showDetails, setShowDetails, selectedEmail, setSelectedEmail, openAddDocument, setOpenAddDocument, addDocument,
+    deleteClientInvoice, deleteLoading, setDeleteLoading, setDeleteOpen, invoiceRef, deleteOpen, setInvoiceId, purchaseOrderId, setPurchaseOrderId, setDeletePOrderOpen, deletePOrderOpen, deletePurchaseOrder,
+    chartMode, getStatusIcon, getLabelColor, getStatusColor, toggleSection, refresh, setRefresed, modalPurchaseOrderOpen, setModalPurchaseOrderOpen
+    , previewDocument, setPreviewDocument, selectedPeriod, setSelectedPeriod, activeTab, setActiveTab, supplierDespenses, totalDespenses
+    , TotalIcon, HeaderIcon, open, setOpen, openSections, pageConfig, fetchPartnerStats, clientRevenue, totalRevenue, sendeMailOpen, setSendMailOpen,
+    updatePartnerStatus, deletePartnerOpen, setDeletePartnerOpen, updatePartnerStatusOpen, setUpdatePartnerStatusOpen, deleteCreditInvoice,
+    setDeleteCNoteOpen, deleteCNoteOpen, creditNoteId, setCreditNoteId, modalSupplierPurchaseOrderOpen, setModalSupplierPurchaseOrderOpen, selected, setSelected, invoiceType, setInvoiceType,
+    addDocumentLoading, addDocumentType, setAddDocumentType, onAddDocument,
   };
 }

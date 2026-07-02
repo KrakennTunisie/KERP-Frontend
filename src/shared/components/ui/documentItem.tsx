@@ -12,7 +12,7 @@ import {
 
 type DocumentsListProps = {
   label: string;
-  documents: (Document | File  )[];
+  documents: (Document | File  )[] | null;
   onOpen: (document: Document | File) => void;
 };
 
@@ -27,23 +27,23 @@ export default function DocumentsList({
 
   const totalPages = Math.max(
     1,
-    Math.ceil(documents.length / pageSize)
+    Math.ceil(documents!.length / pageSize)
   );
 
   const paginatedDocuments = useMemo(() => {
     const start = (page - 1) * pageSize;
-    return documents.slice(start, start + pageSize);
+    return documents!.slice(start, start + pageSize);
   }, [documents, page]);
 
   return (
     <div>
       <div className="mt-4 flex items-center justify-between mb-1.5">
         <p className="text-[9px] font-extrabold text-gray-400 uppercase tracking-widest">
-          {label+"("+documents.length+")"}
+          {label+"("+documents!.length+")"}
         </p>
       </div>
 
-      {documents.length === 0 ? (
+      {documents!.length === 0 ? (
         <div className="w-full flex items-center gap-2 p-2 rounded-xl border border-dashed border-gray-200 bg-gray-50">
           <div className="w-7 h-7 rounded-md bg-white border border-gray-200 flex items-center justify-center shrink-0">
             <Paperclip className="w-3.5 h-3.5 text-gray-400" />
@@ -72,7 +72,7 @@ export default function DocumentsList({
               const meta =
                 document instanceof File
                   ? null
-                  : getDocumentMeta(document);
+                  : getDocumentMeta(document!);
 
               const Icon =
                 meta?.icon as React.ElementType | undefined;
@@ -82,10 +82,10 @@ export default function DocumentsList({
                   key={
                     document instanceof File
                       ? `${document.name}-${index}`
-                      : document.idDocument
+                      : document!.idDocument
                   }
                   type="button"
-                  onClick={() => onOpen(document)}
+                  onClick={() => onOpen(document!)}
                   className="
                     group
                     w-full
@@ -115,7 +115,7 @@ export default function DocumentsList({
                       <p className="text-[11px] font-bold text-gray-900 truncate">
                         {document instanceof File
                           ? document.name
-                          : document.fileName}
+                          : document!.fileName}
                       </p>
 
                       {meta && (

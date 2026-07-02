@@ -13,14 +13,13 @@ import usePartnerList, { partnerListProps } from '../../hooks/usePartnerList';
 import { partnerTypeSchema } from '../../types/partnerType';
 import { PageHeader } from '../widgets/header';
 import SupplierDeleteModal from "./deleteSupplierModal";
+import { PartnerDocumentType } from '../../types/documentType';
 
 
-export default function SuppliersList({partnerType}: partnerListProps) {
+export default function SuppliersList({ partnerType }: partnerListProps) {
   const router = useRouter();
-  const { fetchPartner, filterCity, currentPage, cities, searchQuery, setCurrentPage, setDeleteConfirmId, setSearchQuery
-    , loading, suppliers, setFilterCity, deleteConfirmId, totalElements, totalPages } = usePartnerList({partnerType});
-
-
+  const { fetchPartner, filterCity, currentPage, cities, searchQuery, setCurrentPage, setDeleteConfirmId, setSearchQuery, openEmail, addDocument, sendDocumentOpen, setSendDocumentOpen, openAddDocument, setOpenAddDocument, addDocumentLoading, addDocumentType, setOpenEmail, onAddDocument, updatePartnerStatus
+    , loading, suppliers, setFilterCity, deleteConfirmId, totalElements, totalPages } = usePartnerList({ partnerType });
   return (
     <div className=" min-h-screen flex-1 flex flex-col min-h-0 bg-gray-50">
       {/* Header */}
@@ -48,8 +47,8 @@ export default function SuppliersList({partnerType}: partnerListProps) {
               setCurrentPage(1);
             }}
             cityOptions={cities.map((city) => ({
-              label: city,
-              value: city,
+              label: city ?? "",
+              value: city ?? "",
             }))}
             onReset={() => {
               setSearchQuery("");
@@ -67,6 +66,15 @@ export default function SuppliersList({partnerType}: partnerListProps) {
             loading={loading}
             totalElements={totalElements}
             onDeleteRequest={setDeleteConfirmId}
+            setOpenEmail={setOpenEmail}
+            updateStatus={updatePartnerStatus}
+            onAddDocument={(type: PartnerDocumentType) => onAddDocument(type)}
+            openAddDocument={openAddDocument}
+            addDocumentLoading={addDocumentLoading}
+            addDocumentType={addDocumentType}
+            setOpenAddDocument={setOpenAddDocument}
+            addDocument={addDocument}
+            openEmail={openEmail}
           />
 
 
