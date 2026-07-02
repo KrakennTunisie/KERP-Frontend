@@ -128,7 +128,7 @@ export default function AddDocumentModal({
             <SelectContent>
               <SelectItem value={partnerDocumentType.enum.RNE}>RNE</SelectItem>
               <SelectItem value={partnerDocumentType.enum.CONTRACT}>Contrat</SelectItem>
-             {hasPatent && <SelectItem value={partnerDocumentType.enum.PATENTE}>Patente</SelectItem>}
+             {hasPatent && <SelectItem value={partnerDocumentType.enum.PATENT}>Patente</SelectItem>}
             </SelectContent>
           </Select>
         </div>

@@ -165,7 +165,7 @@ export default function PartnerHeader({
                   icon: Send,
                   hover: "hover:bg-blue-50",
                   onClick: setOpen,
-                  visible: true
+                  visible: partner.email!=""
                 },
                 {
                   label: "Ajouter un document",
