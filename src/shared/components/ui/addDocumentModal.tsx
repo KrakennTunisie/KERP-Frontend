@@ -38,9 +38,6 @@ export default function AddDocumentModal({
   const [file, setFile] = useState<File | null>(null);
   const [selectedType, setSelectedType] = useState<PartnerDocumentType>(type);
 
-  useEffect(() => {
-    setSelectedType(type);
-  }, [type, open]);
 
   const previewUrl = useMemo(() => {
     if (!file) return undefined;
