@@ -491,7 +491,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
   // Sélection d'un client
   const selectClient = (client: PartnerSummary) => {
     setValue("partner", client, { shouldValidate: true, shouldDirty: true, });
-    setClientSearch(client.partnerName);
+    setClientSearch(client.partnerName!);
     setShowDropdown(false);
   };
 
