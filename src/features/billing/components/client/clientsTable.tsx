@@ -213,8 +213,8 @@ export default function ClientsTable({
       <SendEmailModal
         isOpen={openEmail}
         onClose={()=>setOpenEmail(false)}
-        defaultTo={partner?.email!}
-        recipientName={partner?.partnerName!}
+        defaultTo={partner?.email ?? ""}
+        recipientName={partner?.partnerName ?? ""}
       />
 
 
