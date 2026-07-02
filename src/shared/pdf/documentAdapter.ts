@@ -13,14 +13,14 @@ export function mapPartnerToPdfParty(partner: PartnerSummary): PdfParty {
     companyName: partner.companyName,
     taxId: partner.taxRegistrationNumber,
     email: partner.email,
-    phone: partner.professionnalPhoneNumber ||"",
+    phone: partner.professionnalPhoneNumber?.toString() ||"",
     address: {
-      street1: partner.billingAddress.street1,
-      street2: partner.billingAddress.street2,
-      city: partner.billingAddress.city,
-      state: partner.billingAddress.state,
-      zip: partner.billingAddress.zipCode,
-      country: partner.billingAddress.city,
+      street1: partner.billingAddress!.street1,
+      street2: partner.billingAddress!.street2,
+      city: partner.billingAddress!.city,
+      state: partner.billingAddress!.state,
+      zip: partner.billingAddress!.zipCode,
+      country: partner.billingAddress!.city,
     },
   };
 }
