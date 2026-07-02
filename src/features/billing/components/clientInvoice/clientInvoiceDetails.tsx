@@ -2,7 +2,7 @@
 
 import { DocumentPreviewModal } from "@/shared/components/ui/documentPreviewModal"
 import useClientInvoiceDetails, { InvoiceDetailsProps } from "../../hooks/useClientInvoiceDetails"
-import { getClientInvoiceAllowedNextStatuses, invoiceStatusLabels, invoiceStatusSchema } from "../../types/invoiceStatus"
+import { getClientInvoiceAllowedNextStatuses, getCreditNoteAllowedNextStatuses, invoiceStatusLabels, invoiceStatusSchema } from "../../types/invoiceStatus"
 import { formatDateLong } from "@/shared/utils/formatDate"
 import PageLoader from "@/shared/components/ui/pageLoader"
 import { DocumentTopBar } from "../widgets/documentTopBar"
@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui
 import { InvoiceDetailsTab } from "../widgets/invoiceDetailsTab"
 import { InvoiceCreditNotesTab } from "../widgets/invoiceCreditNotesTab"
 import { InvoicePaymentsTab } from "../widgets/invoicePaiementsTab"
-import { UpdateInvoiceStatusModal } from "../widgets/updateStatusModal"
+import { Status, UpdateDocumentStatusModal } from "../widgets/updateStatusModal"
 import { SendDocumentModal } from "../widgets/sendInvoiceModal"
 import { DeleteInvoiceModal } from "../widgets/deleteInvoiceModal"
 import { invoiceTypeSchema } from "../../types/invoiceType"
@@ -90,7 +90,7 @@ export default function ClientInvoiceDetails({ invoiceId, type }: InvoiceDetails
     color: "text-rose-600",
     hover: "hover:bg-rose-50",
     onClick: () => setDeleteOpen(true),
-    disabled: invoice?.invoiceStatus !== "DRAFT",
+    disabled: false,
     visible: true,
   },
 ];
@@ -206,14 +206,14 @@ const menuItems = actions.filter((action) => action.visible)
         onClose={() => setPreviewDocument(null)}
         document={previewDocument}
         />
-            <UpdateInvoiceStatusModal
+            <UpdateDocumentStatusModal
+            documentType="invoice"
             open={updateOpen}
             onClose={()=> setUpdateOpen(false)}
             onConfirm={()=>updateStatus()}
-            invoiceNumber={invoice?.invoiceNumber}
+            documentNumber={invoice?.invoiceNumber}
             currentStatus={invoice?.invoiceStatus}
-            type="invoice"
-            nextStatus={nextStatus}
+            nextStatus={nextStatus as Status}
             onNextStatusChange={setNextStatus}
             allowedStatuses={
                 invoice
@@ -223,6 +223,8 @@ const menuItems = actions.filter((action) => action.visible)
             isSubmitting={updateLoading}
             />
 
+
+
             <SendDocumentModal
                 document={invoice}
                 variant="invoice"
@@ -231,6 +233,8 @@ const menuItems = actions.filter((action) => action.visible)
             />
 
             <DeleteInvoiceModal 
+                documentType="invoice"
+                documentRef={invoice.invoiceNumber}
                 open={deleteOpen} 
                 onClose={()=> setDeleteOpen(false)} 
                 onConfirm={deleteClientInvoice}

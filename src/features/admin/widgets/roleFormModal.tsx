@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { Role } from "../mocks/mock-roles";
 import { Permission } from "../mocks/mock-permission";
 import { Modal } from "@/shared/components/ui/modal";
+import { getCategoryLabel } from "../helpers/categoryHelper";
 
 export type RoleModalProps = {
   mode: "edit" | "create";
@@ -35,18 +36,18 @@ export function RoleModalForm({
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [color, setColor] = useState("#3b82f6");
-  const [activeCategory, setActiveCategory] = useState<string>("all");
+  const [activeCategory, setActiveCategory] = useState<string>("ALL");
   const [selectedPermissions, setSelectedPermissions] = useState<Set<string>>(
     new Set()
   );
 
   const categories = useMemo(() => {
     const cats = Array.from(new Set(permissions.map((p) => p.category)));
-    return ["all", ...cats];
+    return ["ALL", ...cats];
   }, [permissions]);
 
   const filteredPermissions = useMemo(() => {
-    if (activeCategory === "all") return permissions;
+    if (activeCategory === "ALL") return permissions;
     return permissions.filter((p) => p.category === activeCategory);
   }, [permissions, activeCategory]);
 
@@ -70,11 +71,8 @@ export function RoleModalForm({
     setDescription("");
     setColor("#3b82f6");
     setSelectedPermissions(new Set());
-    setActiveCategory("all");
+    setActiveCategory("ALL");
   };
-
-  const categoryLabel = (cat: string) =>
-    cat === "all" ? "Tous" : cat;
 
   return (
     <Modal
@@ -85,13 +83,13 @@ export function RoleModalForm({
         <div className="flex justify-end gap-2">
           <button
             onClick={onClose}
-            className="h-[34px] px-4 rounded-lg border border-gray-200 text-sm text-gray-500 hover:bg-gray-50 transition-colors"
+            className="h-[34px] px-4 cursor-pointer rounded-lg border border-blue-200 text-sm text-blue-500 hover:bg-blue-50 transition-colors"
           >
             Annuler
           </button>
           <button
             onClick={handleSave}
-            className="h-[34px] px-4 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 transition-colors flex items-center gap-1.5"
+            className="h-[34px] px-4 cursor-pointer rounded-lg bg-blue-500 text-white text-sm font-medium hover:bg-blue-800 transition-colors flex items-center gap-1.5"
           >
             <i className="ti ti-check text-sm" aria-hidden="true" />
             Enregistrer
@@ -108,8 +106,8 @@ export function RoleModalForm({
               Nom du rôle
             </label>
             <input
-              className="h-9 px-3 rounded-lg border border-gray-200 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-gray-400 transition-all"
-              placeholder="ex. Responsable comptable"
+              className="h-9 px-3 rounded-lg border border-gray-200 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-100  transition-all"
+              placeholder="ex. Comptable"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
@@ -123,7 +121,7 @@ export function RoleModalForm({
             <span className="font-normal text-gray-400">(optionnelle)</span>
           </label>
           <textarea
-            className="px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-900 placeholder:text-gray-400 resize-none leading-relaxed focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-gray-400 transition-all"
+            className="px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-900 placeholder:text-gray-400 resize-none leading-relaxed focus:outline-none focus:ring-2 focus:ring-gray-100  transition-all"
             placeholder="Décrivez les responsabilités de ce rôle…"
             rows={2}
             value={description}
@@ -151,10 +149,10 @@ export function RoleModalForm({
                 className={`px-3 py-0.5 rounded-full text-xs border transition-all ${
                   activeCategory === cat
                     ? "bg-gray-900 text-white border-transparent"
-                    : "bg-transparent text-gray-500 border-gray-200 hover:bg-gray-50"
+                    : "bg-transparent cursor-pointer text-gray-500 border-gray-200 hover:bg-gray-50"
                 }`}
               >
-                {categoryLabel(cat)}
+                {getCategoryLabel(cat)}
               </button>
             ))}
           </div>
@@ -175,14 +173,13 @@ export function RoleModalForm({
                   <span
                     className={`w-4 h-4 rounded-[4px] flex items-center justify-center flex-shrink-0 transition-all border ${
                       checked
-                        ? "bg-gray-900 border-transparent"
-                        : "bg-transparent border-gray-300"
+                        ? "bg-blue-600 border-transparent"
+                        : "bg-transparent border-blue-300"
                     }`}
                   >
                     {checked && (
                       <i
                         className="ti ti-check text-white"
-                        style={{ fontSize: 11 }}
                         aria-hidden="true"
                       />
                     )}
@@ -190,7 +187,7 @@ export function RoleModalForm({
 
                   {/* Icône permission */}
                   <i
-                    className={`ti ${icon} text-gray-400`}
+                    className={`ti ${icon} text-blue-400`}
                     style={{ fontSize: 15 }}
                     aria-hidden="true"
                   />
@@ -202,7 +199,7 @@ export function RoleModalForm({
 
                   {/* Badge catégorie */}
                   <span className="text-[11px] px-2 py-0.5 rounded-full border border-gray-200 bg-white text-gray-400">
-                    {perm.category}
+                    {getCategoryLabel(perm.category)}
                   </span>
                 </label>
               );

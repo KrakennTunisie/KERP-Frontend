@@ -1,4 +1,6 @@
-import { BaseItem } from "@/features/billing/models/invoiceItem";
+import { BaseItem, InvoiceItem } from "@/features/billing/models/invoiceItem";
+import { DiscountType } from "@/features/billing/types/discountType";
+import { OperationCategory } from "@/features/billing/types/operationCategory";
 
 export type PdfDocumentType = "INVOICE" | "CREDIT_NOTE" | "PURCHASE_ORDER" | "PAYMENT";
 
@@ -20,13 +22,18 @@ export type PdfParty = {
 };
 
 export type PdfLineItem = {
-  description: string;
-  reference?: string | null;
-  category?: string | null;
-  quantity: number;
-  unitPrice: number;
-  taxRate?: number | null;
-  discountRate?: number | null;
+    description:string|null,
+    quantity: number ,
+    unityPriceEXclTax: number ,
+    vatRate: number ,
+    itemTotalExclTax: number ,
+    itemTaxAmount: number ,
+    itemTotalInclTax: number ,
+    operationCategory: OperationCategory,
+    discountType?:DiscountType | null,
+    discountValue?:number,
+    discountTotal?:number ,
+    netHT?:number ,
 };
 
 export type PdfPaymentInfo = {
@@ -55,7 +62,7 @@ export type PdfDocumentData = {
   purchaseOrderNumber?: string | null;
   deliveryDate?: Date | string | null;
 
-  items: BaseItem[];
+  items: PdfLineItem[];
 
   notes?: string | null;
   terms?: string | null;

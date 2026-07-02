@@ -24,6 +24,7 @@ export function InvoicePaymentsTab({
   setDeleteId,
   setDeleteOpen,
   setSelectedPayment,
+  selectedPayment,
   deleteLoading,
   deleteOpen,
   onDelete, router
@@ -112,6 +113,8 @@ export function InvoicePaymentsTab({
   />
 
   <DeleteInvoiceModal
+    documentType="payment"
+    documentRef={selectedPayment?.reference}
     open={deleteOpen}
     onClose={() => setDeleteOpen(false)}
     onConfirm={onDelete}

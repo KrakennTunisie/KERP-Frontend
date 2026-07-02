@@ -8,49 +8,74 @@ import {
 } from "../../types/purchaseOrderStatus";
 import { ArrowRight, CheckCircle2, FileText } from "lucide-react";
 
-type UpdateInvoiceStatusModalProps = {
+type DocumentType = "invoice" | "credit-note" | "purchase-order";
+
+export type Status =
+  | InvoiceStatus
+  | purchaseOrderStatus;
+
+type UpdateDocumentStatusModalProps = {
   open: boolean;
   onClose: () => void;
   onConfirm: () => void;
-  invoiceNumber?: string;
-  currentStatus?: InvoiceStatus | purchaseOrderStatus;
-  nextStatus: string | " ";
-  type: string;
-  onNextStatusChange: (status: InvoiceStatus) => void;
-  allowedStatuses: InvoiceStatus[] | purchaseOrderStatus[];
+  documentNumber?: string;
+
+  currentStatus?: Status;
+  nextStatus: Status | "";
+
+  documentType: DocumentType;
+
+  onNextStatusChange: (status: Status) => void;
+
+  allowedStatuses: Status[];
+
   isSubmitting?: boolean;
 };
 
-export function UpdateInvoiceStatusModal({
+export function UpdateDocumentStatusModal({
   open,
   onClose,
   onConfirm,
-  invoiceNumber,
+  documentNumber,
   currentStatus,
   nextStatus,
-  type,
+  documentType,
   onNextStatusChange,
   allowedStatuses,
   isSubmitting = false,
-}: UpdateInvoiceStatusModalProps) {
-  const isInvoice = type === "invoice";
+}: UpdateDocumentStatusModalProps) {
 
-  const documentLabel = isInvoice ? "facture" : "bon de commande";
-  const documentNumberLabel = isInvoice
+const isInvoice = documentType === "invoice";
+const isCreditNote = documentType === "credit-note";
+const isPurchaseOrder = documentType === "purchase-order";
+
+  const documentLabel =
+  isInvoice
+    ? "facture"
+    : isCreditNote
+      ? "avoir"
+      : "bon de commande";
+
+const documentNumberLabel =
+  isInvoice
     ? "Numéro de facture"
-    : "Numéro de bon de commande";
+    : isCreditNote
+      ? "Numéro de l'avoir"
+      : "Numéro de bon de commande";
 
-  const currentStatusLabel = currentStatus
-    ? isInvoice
-      ? invoiceStatusLabels[currentStatus as InvoiceStatus]
-      : purchaseOrderStatusLabels[currentStatus as purchaseOrderStatus]
-    : "-";
+const getStatusLabel = (status: Status) => {
+  if (isInvoice || isCreditNote) {
+    return invoiceStatusLabels[status as InvoiceStatus];
+  }
 
-  const getStatusLabel = (status: InvoiceStatus | purchaseOrderStatus) => {
-    return isInvoice
-      ? invoiceStatusLabels[status as InvoiceStatus]
-      : purchaseOrderStatusLabels[status as purchaseOrderStatus];
-  };
+  return purchaseOrderStatusLabels[
+    status as purchaseOrderStatus
+  ];
+};
+
+const currentStatusLabel = currentStatus
+  ? getStatusLabel(currentStatus)
+  : "-";
 
   const hasAllowedStatuses = allowedStatuses.length > 0;
 
@@ -119,7 +144,7 @@ export function UpdateInvoiceStatusModal({
                 {documentNumberLabel}
               </p>
               <p className="truncate text-sm font-semibold text-slate-900">
-                {invoiceNumber || "-"}
+                {documentNumber || "-"}
               </p>
             </div>
 
@@ -148,7 +173,7 @@ export function UpdateInvoiceStatusModal({
               value={nextStatus}
               disabled={!hasAllowedStatuses || isSubmitting}
               onChange={(e) =>
-                onNextStatusChange(e.target.value as InvoiceStatus)
+                onNextStatusChange(e.target.value as Status)
               }
               className="
                 w-full appearance-none rounded-2xl

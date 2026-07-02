@@ -36,6 +36,8 @@ export const paymentSchema = z.object({
   paymentNumber: z.string().nullable(),
 
   invoice: invoicePageItemSchema.nullable(),
+
+  comment : z.string(),
   
 });
 
@@ -86,6 +88,8 @@ export const paymentDetailsSchema = z.object({
 
   invoice: invoiceDetailedSummarySchema,
   paymentDocument: documentSchema.nullable(), 
+
+  comment: z.string(),
   
   
   createdAt: z.date(),

@@ -190,7 +190,7 @@ const getDocumentSalutation = (
 
     case "invoiceCreditNote":
       return (
-        (document as InvoiceCreditNotePageItem).invoice?.partner?.email ?? ""
+        (document as InvoiceCreditNotePageItem).invoice?.partner?.maritalStatus ?? ""
       );
 
     default:

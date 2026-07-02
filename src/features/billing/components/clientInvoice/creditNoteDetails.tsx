@@ -428,7 +428,9 @@ export default function CreditNoteDetails({ params }: PropsCreditNote) {
                 onClose={() => setSendOpen(false)}
             />
 
-            <DeleteInvoiceModal 
+            <DeleteInvoiceModal
+                documentType="credit-note"
+                documentRef={invoice?.invoiceCreditNoteNumber} 
                 open={deleteOpen} 
                 onClose={()=> setDeleteOpen(false)} 
                 onConfirm={deleteCreditNote}

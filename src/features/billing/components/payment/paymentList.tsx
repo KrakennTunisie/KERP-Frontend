@@ -93,7 +93,9 @@ export default function PaymentsList() {
         getDate={(payment) => new Date(payment.paymentDate)}
         emptyMessage="Aucun paiement trouvé."
       />
-      <DeleteInvoiceModal 
+      <DeleteInvoiceModal
+      documentType="payment"
+      documentRef={selectedPayment?.reference} 
       open={deleteOpen} 
       onClose={()=> setDeleteOpen(false)} 
       onConfirm={deletePayment}

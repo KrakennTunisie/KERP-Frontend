@@ -7,3 +7,9 @@ export const InvoiceEventSourceSchema = z.enum([
 ])
 
 export type InvoiceEventSource = z.infer<typeof InvoiceEventSourceSchema>
+
+export const InvoiceEventSourceLabels: Record<InvoiceEventSource, string> = {
+  USER: "Utilisateur",
+  SYSTEM: "Système",
+  "AI AGENT": "Agent IA",
+};

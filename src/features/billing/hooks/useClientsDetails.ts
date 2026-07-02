@@ -203,75 +203,75 @@ export default function UseClientsDetails({ partner, onRefresh }: PartnerDetails
 
  
 
-      const updatePartnerStatus = async (status: boolean) => {
-          try {
-              setLoading(true);
-              if (partner.partnerType == partnerTypeSchema.enum.CLIENT) {
-  
-                  await partnersApi.updateStatus(partner.idPartner, status);
-  
-                  if (status) {
-                      appToast.success("Le client est activé !");
-                       onRefresh()
-  
-                  } else {
-                      appToast.success("Le client est désactivé !");
-                      onRefresh()
-  
-                  }
-              } else {
-                  await partnersApi.updateSupplierStatus(partner.idPartner, status);
-  
-                  if (status) {
-                      appToast.success("Le fournisseur est activé !");
-                      onRefresh()
-  
-                  } else {
-                      appToast.success("Le fournisseur est désactivé !");
-                        onRefresh()
-
-                  }
-  
-              }
-          } catch (error) {
-              appToast.error(
-                  "Erreur dans la modification du statut : " + getApiErrorMessage(error)
-              );
-          } finally {
-              setLoading(false);
-          }
-      };
-
-
-      const onAddDocument= ( type: PartnerDocumentType)=>{
-        setAddDocumentType(type)
-        setOpenAddDocument(true)
-      }
-
-
-      const addDocument= async (file: File, documentType: PartnerDocumentType)=>{
+    const updatePartnerStatus = async (status: boolean) => {
         try {
-          setAddDocumentLoading(true)
+            setLoading(true);
+            if (partner.partnerType == partnerTypeSchema.enum.CLIENT) {
 
-          const formData = new FormData();
-          formData.append("document", file)
-          
-          partner.partnerType ==="CLIENT" ?
+                await partnersApi.updateStatus(partner.idPartner, status);
 
-            await partnersApi.uploadClientDocument(partner.idPartner, documentType, formData)
+                if (status) {
+                    appToast.success("Le client est activé !");
+                      onRefresh()
 
-            : await partnersApi.uploadSupplierDocument(partner.idPartner, documentType, formData)
+                } else {
+                    appToast.success("Le client est désactivé !");
+                    onRefresh()
 
-         appToast.success("Document ajouté avec succès", `Un nouvelle document ${documentType} est ajouté avec succèès.`)
-         onRefresh()
+                }
+            } else {
+                await partnersApi.updateSupplierStatus(partner.idPartner, status);
 
+                if (status) {
+                    appToast.success("Le fournisseur est activé !");
+                    onRefresh()
+
+                } else {
+                    appToast.success("Le fournisseur est désactivé !");
+                      onRefresh()
+
+                }
+
+            }
         } catch (error) {
-            appToast.error("Erreur", getApiErrorMessage(error))
-
-        }finally{
-          setAddDocumentLoading(false)
+            appToast.error(
+                "Erreur dans la modification du statut : " + getApiErrorMessage(error)
+            );
+        } finally {
+            setLoading(false);
         }
+    };
+
+
+    const onAddDocument= ( type: PartnerDocumentType)=>{
+      setAddDocumentType(type)
+      setOpenAddDocument(true)
+    }
+
+
+    const addDocument= async (file: File, documentType: PartnerDocumentType)=>{
+      try {
+        setAddDocumentLoading(true)
+
+        const formData = new FormData();
+        formData.append("document", file)
+        
+        partner.partnerType ==="CLIENT" ?
+
+          await partnersApi.uploadClientDocument(partner.idPartner, documentType, formData)
+
+          : await partnersApi.uploadSupplierDocument(partner.idPartner, documentType, formData)
+
+        appToast.success("Document ajouté avec succès", `Un nouvelle document ${documentType} est ajouté avec succèès.`)
+        onRefresh()
+
+      } catch (error) {
+          appToast.error("Erreur", getApiErrorMessage(error))
+
+      }finally{
+        setAddDocumentLoading(false)
       }
+    }
 
   const chartMode: ChartMode = partner.partnerType === "CLIENT" ? "revenues" : "expenses";
 

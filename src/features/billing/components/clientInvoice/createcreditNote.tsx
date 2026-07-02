@@ -10,12 +10,14 @@ import SummaryOriginalInvoice from '../widgets/summaryOriginalInvoice';
 import ErrorForm from '../widgets/errorForm';
 import { DocumentPreviewModal } from '@/shared/components/ui/documentPreviewModal';
 import { SendToTTNModal } from '../widgets/ttnConfirmationModal';
+import { Controller } from 'react-hook-form';
+import { FieldError } from '@/shared/components/ui/fieldError';
 
 export function CreateCreditNote({invoiceId}: InvoiceDetailsProps) {
     const { previewData, form, removeItem, addItem, updateItem, onSubmit, onCloseDocumentModal, createCreditNoteInvoice,
         setItemSearchMap, setShowDropdownMap, itemSearchMap, showDropdownMap, creditNoteItemMap, setCreditNoteItemMap, filteredItems, fields,
         canCreateInvoice, invoiceRef, isModalOpen, TtnModalOpen, setTtnModalOpen, pdfUrl, loadingForm, loadingInvoice, loadingTTN, successMessage, 
-        sent, sendToTTN, router, errors, getMaxQuantity } = useCreateCreditNote({invoiceId});
+        sent, sendToTTN, router, errors, getMaxQuantity, getError } = useCreateCreditNote({invoiceId});
     const { register } = form
     return (
         <div className="flex-1 flex flex-col min-h-0 bg-white">
@@ -109,10 +111,47 @@ export function CreateCreditNote({invoiceId}: InvoiceDetailsProps) {
 
                                         <div className="space-y-2">
                                             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{"Date d'émission"}</label>
-                                            <input
+                                            {/* <input
                                                 type="date"
                                                 {...register("issueDate", { valueAsDate: true })}
                                                 className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
+                                            /> */}
+
+                                            <Controller
+                                                control={form.control}
+                                                name="issueDate"
+                                                render={({ field }) => (
+                                                    <>
+                                                    <input
+                                                        type="date"
+                                                        value={field.value ? (() => {
+                                                            const d = new Date(field.value);
+                                                            const year = d.getFullYear();
+                                                            const month = String(d.getMonth() + 1).padStart(2, "0");
+                                                            const day = String(d.getDate()).padStart(2, "0");
+                                                            return `${year}-${month}-${day}`;
+                                                        })() : ""}
+                                                        onChange={(e) => {
+                                                            field.onChange(new Date(e.target.value));
+                                                        }}
+                                                        min={
+                                                            (() => {
+                                                                let poDate: Date | null = null;
+                                                                    const editPODate = form.getValues("originalInvoice");
+                                                                    if (editPODate) poDate = new Date(editPODate);
+                                                                if (poDate) {
+                                                                    const year = poDate.getFullYear();
+                                                                    const month = String(poDate.getMonth() + 1).padStart(2, "0");
+                                                                    const day = String(poDate.getDate()).padStart(2, "0");
+                                                                    return `${year}-${month}-${day}`;
+                                                                }
+                                                            })()
+                                                        }
+                                                        className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
+                                                    />
+                                                    <FieldError error={getError("issueDate")} />
+                                                    </>
+                                                )}
                                             />
                                         </div>
                                     </div>

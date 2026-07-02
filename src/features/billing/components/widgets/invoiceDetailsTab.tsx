@@ -1,4 +1,4 @@
-import { FileText, Info, ReceiptText } from "lucide-react";
+import { FileText, Info, MessageSquare, ReceiptText } from "lucide-react";
 import { invoiceStatusSchema } from "../../types/invoiceStatus";
 import Card from "./card";
 import { SectionLabel } from "./sectionLabel";
@@ -223,9 +223,9 @@ export function InvoiceDetailsTab({
       <Card>
         <SectionLabel>Admin</SectionLabel>
 
-        <div className="grid grid-cols-2 gap-2 text-xs">
+        <div className="grid grid-cols-3 gap-2 text-xs">
           {invoice?.purchaseOrder && (
-            <div className="col-span-2 flex flex-col gap-1">
+            <div className="col-span-3 flex flex-col gap-1">
               <InfoBlock
                 label="Bon commande"
                 value={invoice.purchaseOrder.purchaseOrderNumber}
@@ -255,6 +255,11 @@ export function InvoiceDetailsTab({
           />
 
           <InfoBlock
+            label={invoice?.invoiceType === invoiceTypeSchema.enum.SALE ? "à encaisser":"à payer"}
+            value={invoice?.remainingAmount ?? "—"}
+          />
+
+          <InfoBlock
             label="Devise"
             value={invoice?.invoiceCurrency ?? "—"}
           />
@@ -274,6 +279,41 @@ export function InvoiceDetailsTab({
       invoice={invoice}
       setPreviewDocument={setPreviewDocument}
     />
+    <Card>
+      <SectionLabel>Commentaires</SectionLabel>
+
+      {invoice && invoice.comment?.trim() ? (
+        <div className="mt-4 rounded-xl bg-slate-50 p-4">
+          <div className="flex items-start gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50">
+              <MessageSquare className="h-5 w-5 text-blue-600" />
+            </div>
+
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-bold text-slate-900">
+                Commentaire
+              </p>
+
+              <p className="mt-2 whitespace-pre-wrap break-words text-sm leading-6 text-slate-600">
+                {invoice.comment}
+              </p>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="mt-4 rounded-xl border border-dashed border-slate-200 bg-slate-50 p-5 text-center">
+          <MessageSquare className="mx-auto h-7 w-7 text-slate-300" />
+
+          <p className="mt-2 text-sm font-bold text-slate-500">
+            Aucun commentaire
+          </p>
+
+          <p className="mt-1 text-xs font-medium text-slate-400">
+            {"Aucun commentaire n'a été ajouté à cette facture."}
+          </p>
+        </div>
+      )}
+    </Card>
   </aside>
 </div>
   );

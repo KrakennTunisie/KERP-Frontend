@@ -1,9 +1,11 @@
 import {  InvoiceCreate } from "@/features/billing/models/invoice";
-import { PdfDocumentData, PdfParty } from "./types";
+import { PdfDocumentData, PdfLineItem, PdfParty } from "./types";
 import {  InvoiceCreditNoteCreate } from "@/features/billing/models/creditNote";
 import { PurchaseOrder } from "@/features/billing/models/purchaseOrder";
 import { PartnerSummary } from "@/features/billing/models/partner";
 import { CreatePaymentFormValues, PaymentDetails } from "@/features/billing/models/payment";
+import { BaseItem, InvoiceItem } from "@/features/billing/models/invoiceItem";
+import { getDiscountValue } from "@/features/billing/lib/invoiceItemHelpers";
 
 
 export function mapPartnerToPdfParty(partner: PartnerSummary): PdfParty {
@@ -40,7 +42,38 @@ const defaultSeller: PdfParty = {
     country: "Tunisie",
   },
 };
+export function invoiceItemToPdfLineItem(
+  invoiceItem: BaseItem
+): PdfLineItem {
+  const quantity = Number(invoiceItem.quantity ?? 0);
+  const unitPrice = Number(invoiceItem.unityPriceEXclTax ?? 0);
 
+  const subtotal = quantity * unitPrice;
+
+  const discount =getDiscountValue(invoiceItem, subtotal)
+
+  const netHT = Math.max(0, subtotal - discount);
+
+  return {
+    description: invoiceItem.description ?? "",
+    quantity,
+    unityPriceEXclTax: unitPrice,
+    vatRate: invoiceItem.vatRate ?? 0,
+
+    itemTotalExclTax: subtotal,
+    itemTaxAmount: invoiceItem.itemTaxAmount ?? 0,
+    itemTotalInclTax: invoiceItem.itemTotalInclTax ?? 0,
+
+    operationCategory: invoiceItem.operationCategory,
+
+    discountType: invoiceItem.discountType ,
+
+    discountValue: invoiceItem.discountValue ?? 0,
+
+    discountTotal: discount,
+    netHT: netHT,
+  };
+}
 export function invoiceToPdfData(invoice: InvoiceCreate): PdfDocumentData {
   return {
     type: "INVOICE",
@@ -51,12 +84,14 @@ export function invoiceToPdfData(invoice: InvoiceCreate): PdfDocumentData {
     status: invoice.invoiceStatus,
     seller: defaultSeller,
     buyer: invoice.partner ? mapPartnerToPdfParty(invoice.partner) : null,
-    items: invoice.invoiceItems || [],
+    items: invoice.invoiceItems?.map((item)=> invoiceItemToPdfLineItem(item) ) || [],
     payment: {
       paymentTerms: invoice.paymentCondition,
       paymentMethod: invoice.paymentMethod,
       dueDate: invoice.dueDate,
     },
+    notes:invoice.comment,
+    companyLogoUrl: 'https://media.licdn.com/dms/image/v2/C4D0BAQFVRUutFiqfNQ/company-logo_200_200/company-logo_200_200/0/1630498184078/kouka_consulting_logo?e=2147483647&v=beta&t=zpqXf6154o5KacCI-jH0_htYqVuTjAl496ow9R1WEa4'
   };
 }
 
@@ -70,11 +105,13 @@ export function creditNoteToPdfData(creditNote: InvoiceCreditNoteCreate): PdfDoc
     seller: defaultSeller,
     buyer: creditNote.originalInvoice.partner ? mapPartnerToPdfParty(creditNote.originalInvoice.partner) : null,
     originalInvoiceNumber: creditNote.originalInvoice.invoiceNumber,
-    items: creditNote.creditNoteItems || [],
+    items: creditNote.creditNoteItems?.map((item)=> invoiceItemToPdfLineItem(item) ) || [],
     payment: {
       paymentTerms: "NET_15",
       paymentMethod: "BANK_TRANSFER",
     },
+    companyLogoUrl: 'https://media.licdn.com/dms/image/v2/C4D0BAQFVRUutFiqfNQ/company-logo_200_200/company-logo_200_200/0/1630498184078/kouka_consulting_logo?e=2147483647&v=beta&t=zpqXf6154o5KacCI-jH0_htYqVuTjAl496ow9R1WEa4'
+ 
   };
 }
 
@@ -88,11 +125,13 @@ export function purchaseOrderToPdfData(purchaseOrder: PurchaseOrder): PdfDocumen
     status: purchaseOrder.purchaseOrderStatus,
     seller: defaultSeller,
     buyer: purchaseOrder.partner ? mapPartnerToPdfParty(purchaseOrder.partner) : null,
-    items: purchaseOrder.purchaseOrderItems || [],
+    items: purchaseOrder.purchaseOrderItems?.map((item)=> invoiceItemToPdfLineItem(item) ) || [],
     payment: {
       paymentTerms: "NET_30",
       paymentMethod: "BANK_TRANSFER",
     },
+    companyLogoUrl: 'https://media.licdn.com/dms/image/v2/C4D0BAQFVRUutFiqfNQ/company-logo_200_200/company-logo_200_200/0/1630498184078/kouka_consulting_logo?e=2147483647&v=beta&t=zpqXf6154o5KacCI-jH0_htYqVuTjAl496ow9R1WEa4'
+ 
   };
 }
 
@@ -171,5 +210,7 @@ export function paymentToPdfData(
       paidAmount: payment.amount,
       invoiceNumber,
     },
+    notes:payment.comment,
+    companyLogoUrl: "https://media.licdn.com/dms/image/v2/C4D0BAQFVRUutFiqfNQ/company-logo_200_200/company-logo_200_200/0/1630498184078/kouka_consulting_logo?e=2147483647&v=beta&t=zpqXf6154o5KacCI-jH0_htYqVuTjAl496ow9R1WEa4"
   };
 }

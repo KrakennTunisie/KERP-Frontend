@@ -51,7 +51,7 @@ export default function UserForm ({userId, mode}:PropsForm) {
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-gray-50">
 
       {/* HEADER */}
       <div className="bg-white border-b border-gray-100 px-6 py-4">
@@ -125,6 +125,14 @@ export default function UserForm ({userId, mode}:PropsForm) {
                     placeholder="john.doe@company.com"
                     required
                     type="email"
+                    className="md:col-span-2"
+                />
+
+                <Input
+                    label="Téléphone"
+                    placeholder="+216XXXXXXXX"
+                    required
+                    type="text"
                     className="md:col-span-2"
                 />
 

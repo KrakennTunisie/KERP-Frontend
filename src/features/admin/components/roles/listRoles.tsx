@@ -5,7 +5,7 @@ import { Plus, ShieldCheck, Key, ChevronLeft, ChevronRight } from "lucide-react"
 
 import { mockRoles, Role } from "../../mocks/mock-roles";
 import { RoleCard } from "../../widgets/roleCard";
-import { AddPermissionModal } from "../../widgets/addPermissionModal";
+import { AddPermissionModal } from "../../widgets/affectPermissionModal";
 import { mockPermissions, Permission } from "../../mocks/mock-permission";
 import { appToast } from "@/shared/lib/toast";
 import RevokePermissionModal from "../../widgets/revokePermissionModal";
@@ -53,7 +53,7 @@ export default function RolesPage() {
   }
 
   return (
-<div className="min-h-screen">
+<div >
   <div className="mx-auto px-6 py-6">
 
     {/* HEADER */}

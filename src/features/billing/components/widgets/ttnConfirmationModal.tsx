@@ -1,4 +1,5 @@
 import { Modal } from "@/shared/components/ui/modal";
+import { Loader2, Mail, Send } from "lucide-react";
 
 
 type SendToTTNModalProps = {
@@ -8,7 +9,8 @@ type SendToTTNModalProps = {
     invoiceRef?: string;
     loading?: boolean;
     invoiceSent?: boolean
-    successMessage?: string
+    successMessage?: string,
+    onSendToClient?: ()=>void,
 };
 
 export function SendToTTNModal({
@@ -18,76 +20,51 @@ export function SendToTTNModal({
     invoiceRef,
     loading,
     invoiceSent,
-    successMessage
+    successMessage,
+    onSendToClient
 }: SendToTTNModalProps) {
-    const footer = (
-        <>
-            {/* Cancel */}
-            <button
-                onClick={onClose}
-                disabled={loading || invoiceSent}
-                className="
-          px-5 py-2.5 rounded-xl border border-gray-300
-          text-sm font-semibold text-gray-700
-          hover:bg-gray-50 transition-colors
-          disabled:opacity-50 disabled:cursor-not-allowed
-          cursor-pointer">
-                Annuler
-            </button>
+const footer = (
+  <>
+    {/* Cancel */}
+    <button
+      onClick={onClose}
+      disabled={loading || invoiceSent}
+      className="px-5 py-2.5 rounded-xl border border-gray-300 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+    >
+      Annuler
+    </button>
 
-            {/* Confirm */}
-            <button
-                onClick={onConfirm}
-                disabled={loading || invoiceSent}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semiboldhover:bg-blue-700 transition-colors
-            disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer ">
-                {loading ? (
-                    <>
-                        {/* Spinner */}
-                        <svg
-                            className="animate-spin h-4 w-4 text-white"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                        >
-                            <circle
-                                className="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                strokeWidth="4"
-                            />
-                            <path
-                                className="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4z"
-                            />
-                        </svg>
-                        Envoi en cours…
-                    </>
-                ) : (
-                    <>
-                        {/* Send icon */}
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-4 w-4"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                        >
-                            <line x1="22" y1="2" x2="11" y2="13" />
-                            <polygon points="22 2 15 22 11 13 2 9 22 2" />
-                        </svg>
-                        Envoyer au TTN
-                    </>
-                )}
-            </button>
+    {/* Send to Client */}
+    {onSendToClient && 
+    <button
+      onClick={onSendToClient}
+      disabled={loading || invoiceSent}
+      className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-blue-200 bg-blue-50 text-blue-700 text-sm font-semibold hover:bg-blue-100 transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+    >
+      <Mail className="h-4 w-4" />
+      Envoyer au client
+    </button>}
+
+    {/* Send to TTN */}
+    <button
+      onClick={onConfirm}
+      disabled={loading || invoiceSent}
+      className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+    >
+      {loading ? (
+        <>
+          <Loader2 className="h-4 w-4 animate-spin" />
+          Envoi en cours…
         </>
-    );
+      ) : (
+        <>
+          <Send className="h-4 w-4" />
+          Envoyer au TTN
+        </>
+      )}
+    </button>
+  </>
+);
 
     return (
         <Modal
