@@ -292,7 +292,7 @@ export default function CreateInvoiceClient({ mode,
                                                         className="w-full text-left px-4 py-3 hover:bg-blue-50 transition border-b border-slate-50 last:border-0"
                                                     >
                                                         <p className="text-sm font-bold text-slate-800">{client.companyName}</p>
-                                                        <p className="text-xs text-slate-400 mt-0.5">{client.billingAddress.city}</p>
+                                                        <p className="text-xs text-slate-400 mt-0.5">{client.billingAddress!.city}</p>
                                                     </button>
                                                 ))}
                                             </div>
@@ -316,7 +316,7 @@ export default function CreateInvoiceClient({ mode,
                                                 </svg>
                                             </button>
                                         </div>
-                                        <p className="text-xs text-blue-500 mb-2">{previewData.partner.billingAddress.region}</p>
+                                        <p className="text-xs text-blue-500 mb-2">{previewData.partner.billingAddress!.region}</p>
 
                                         {/* Email + Téléphone sur une ligne */}
                                         <div className="grid grid-cols-2 gap-4">

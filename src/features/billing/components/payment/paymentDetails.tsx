@@ -338,7 +338,7 @@ return (
                   <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-3">
                     <MiniInfo
                       label="Téléphone"
-                      value={partner?.professionnalPhoneNumber}
+                    value={partner?.professionnalPhoneNumber?.toString() ?? ""}
                     />
 
                     <MiniInfo

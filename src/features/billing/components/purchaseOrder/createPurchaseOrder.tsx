@@ -202,7 +202,7 @@ export default function CreatePurchaseOrder({
                                               className="w-full text-left px-4 py-3 hover:bg-blue-50 transition border-b border-slate-50 last:border-0"
                                           >
                                               <p className="text-sm font-bold text-slate-800">{client.companyName}</p>
-                                              <p className="text-xs text-slate-400 mt-0.5">{client.billingAddress.city}</p>
+                                              <p className="text-xs text-slate-400 mt-0.5">{client.billingAddress!.city}</p>
                                           </button>
                                       ))}
                                   </div>
