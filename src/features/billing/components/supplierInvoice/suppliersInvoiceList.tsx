@@ -151,7 +151,7 @@ export default function SuppliersInvoiceList() {
                         setDeleteOpen(true);                                    
                     }}
                 getNumber={(invoice) => invoice.invoiceNumber}
-                getPartnerName={(invoice) => invoice.partner?.partnerName}
+                getPartnerName={(invoice) => invoice.partner?.companyName}
                 getStatus={(invoice) => invoice.invoiceStatus}
                 getAmountEUR={(invoice) => invoice.totalInclTaxEUR}
                 getAmountTND={(invoice) => invoice.totalInclTaxTND}

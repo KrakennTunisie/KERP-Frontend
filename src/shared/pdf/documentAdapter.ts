@@ -11,7 +11,7 @@ import { getDiscountValue } from "@/features/billing/lib/invoiceItemHelpers";
 export function mapPartnerToPdfParty(partner: PartnerSummary): PdfParty {
 
   return {
-    name: partner.partnerName || partner.companyName || "-",
+    name: partner.companyName || partner.partnerName || "-",
     companyName: partner.companyName,
     taxId: partner.taxRegistrationNumber,
     email: partner.email,

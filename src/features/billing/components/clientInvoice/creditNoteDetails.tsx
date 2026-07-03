@@ -153,7 +153,7 @@ export default function CreditNoteDetails({ params }: PropsCreditNote) {
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                                 <div className="bg-gray-50 dark:bg-neutral-800 rounded-lg p-3">
                                     <p className="text-[11px] font-medium tracking-wide uppercase text-gray-400 mb-1">Client</p>
-                                    <p className="text-sm font-medium text-gray-900 dark:text-white">{invoice?.invoice.partner.partnerName}</p>
+                                    <p className="text-sm font-medium text-gray-900 dark:text-white">{invoice?.invoice.partner.companyName}</p>
                                 </div>
                                 <div className="bg-gray-50 dark:bg-neutral-800 rounded-lg p-3">
                                     <p className="text-[11px] font-medium tracking-wide uppercase text-gray-400 mb-1">N° Facture originale</p>

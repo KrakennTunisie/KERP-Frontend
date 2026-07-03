@@ -184,6 +184,9 @@ const menuItems = actions.filter((action) => action.visible)
             <InvoiceCreditNotesTab
                 invoiceId={invoiceId}
                 type={type}
+                isDisabled={invoice.invoiceStatus === invoiceStatusSchema.enum.PAID || invoice.invoiceStatus === invoiceStatusSchema.enum.DRAFT ||
+                    invoice.invoiceStatus === invoiceStatusSchema.enum.CANCELLED || invoice.invoiceStatus === invoiceStatusSchema.enum.ARCHIVED
+                }
             />
             </TabsContent>
 
@@ -194,7 +197,7 @@ const menuItems = actions.filter((action) => action.visible)
                 open={openSections.payments}
                 onToggle={() => toggleSection("payments")}
                 isDisabled={invoice.invoiceStatus === invoiceStatusSchema.enum.PAID || invoice.invoiceStatus === invoiceStatusSchema.enum.DRAFT ||
-                    invoice.invoiceStatus === invoiceStatusSchema.enum.CANCELLED
+                    invoice.invoiceStatus === invoiceStatusSchema.enum.CANCELLED || invoice.invoiceStatus === invoiceStatusSchema.enum.ARCHIVED
                 }
             />
             </TabsContent>

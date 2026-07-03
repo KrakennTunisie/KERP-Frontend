@@ -12,7 +12,7 @@ type RequestOptions = {
   signal?: AbortSignal;
 };
 
-const API_BASE_URL ="/api";
+const API_BASE_URL ="http://localhost:8089/api";
 
 async function parseResponse(response: Response) {
   const contentType = response.headers.get("content-type");
@@ -50,6 +50,7 @@ export async function apiRequest<T>(
 
   const multipart = isFormData(body);
   const finalHeaders = normalizeHeaders(headers);
+
 
   if (multipart) {
     delete finalHeaders["Content-Type"];

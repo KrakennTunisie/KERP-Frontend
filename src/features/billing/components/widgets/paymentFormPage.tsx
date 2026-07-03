@@ -247,7 +247,7 @@ const submitLoading = createLoading || updateLoading;
                     </p>
 
                     <p className="mt-1 text-xs font-semibold text-slate-500">
-                      {selectedInvoice.partner?.partnerName ?? "—"}
+                      {selectedInvoice.partner?.companyName ?? "—"}
                     </p>
                   </div>
 

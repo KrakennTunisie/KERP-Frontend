@@ -259,7 +259,7 @@ export default function CreateInvoiceClient({ mode,
                                                         </div>
                                                         <div className="flex-1 min-w-0">
                                                             <p className="text-sm font-semibold text-blue-700 truncate">{selectedPO.purchaseOrderNumber}</p>
-                                                            <p className="text-xs text-blue-500 mt-0.5 truncate">{selectedPO.partner?.partnerName}</p>
+                                                            <p className="text-xs text-blue-500 mt-0.5 truncate">{selectedPO.partner?.companyName}</p>
                                                         </div>
                                                         <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wide bg-blue-100 px-2.5 py-1 rounded-full">
                                                             {selectedPO.purchaseCurrency}
@@ -325,7 +325,7 @@ export default function CreateInvoiceClient({ mode,
                                 {previewData.partner && (
                                     <div className="border-2 border-blue-100 bg-blue-50/40 rounded-xl p-4">
                                         <div className="flex items-start justify-between mb-1">
-                                            <p className="text-sm font-semibold text-slate-700">{previewData.partner.partnerName}</p>
+                                            <p className="text-sm font-semibold text-slate-700">{previewData.partner.companyName}</p>
                                             <button
                                                 type="button"
                                                 onClick={clearClient}
@@ -337,7 +337,7 @@ export default function CreateInvoiceClient({ mode,
                                                 </svg>
                                             </button>
                                         </div>
-                                        <p className="text-xs text-blue-500 mb-2">{previewData.partner.billingAddress!.region}</p>
+                                        <p className="text-xs text-blue-500 mb-2">{previewData.partner?.billingAddress?.region ?? "-"}</p>
 
                                         {/* Email + Téléphone sur une ligne */}
                                         <div className="grid grid-cols-2 gap-4">
@@ -345,13 +345,13 @@ export default function CreateInvoiceClient({ mode,
                                                 <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                                 </svg>
-                                                {previewData.partner.email}
+                                                {previewData.partner.email ?? "-"}
                                             </span>
                                             <span className="flex items-center gap-1.5 text-xs text-blue-500">
                                                 <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                                                 </svg>
-                                                {previewData.partner.professionnalPhoneNumber}
+                                                {previewData.partner.professionnalPhoneNumber!=null ? previewData.partner.professionnalPhoneNumber : "-"}
                                             </span>
                                         </div>
                                     </div>

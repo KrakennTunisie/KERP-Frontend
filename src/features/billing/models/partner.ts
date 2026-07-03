@@ -13,14 +13,19 @@ export const partnerSchema = z.object({
   idPartner: z.uuid(),
   active: z.boolean(),
   enablePortal: z.boolean,
-  maritalStatus: z.string().min(1),
-  partnerName: z.string().min(3, "Le nom doit contenir au moins 3 caractères").nullable(),
+  maritalStatus: z.string().nullable().or(z.literal("")),
+  partnerName: z.string().min(3, "Le nom doit contenir au moins 3 caractères").nullable().or(z.literal("").transform(() => null)),
   companyName: z.string().min(3, "Le nom doit contenir au moins 3 caractères"),
   displayName: z.string().min(3, "Le nom doit contenir au moins 3 caractères").nullable(),
-  email: z.email("Email invalide").nullable(),
-  professionnalPhoneNumber: z.number().min(8, "Le numéro de téléphone est invalide").nullable(),
-  personnelPhoneNumber: z.number().min(8, "Le numéro de téléphone est invalide").nullable(),
-  taxRegistrationNumber: z.string().min(1, "La matricule fiscale est obligatoire").nullable(),
+  email: z.string()
+    .nullable(),
+  professionnalPhoneNumber: z
+    .union([z.number(), z.nan(), z.literal("")])
+    .nullable(),
+  personnelPhoneNumber:  z
+    .union([z.number(), z.nan(), z.literal("")])
+    .nullable(),
+  taxRegistrationNumber: z.string().min(1).nullable().or(z.literal("")),
   currency: currencyTypeSchema.nullable(),
   taxRate: tvaRateStringSchema.nullable(),
   paymentCondition: PaymentConditionSchema.nullable(),

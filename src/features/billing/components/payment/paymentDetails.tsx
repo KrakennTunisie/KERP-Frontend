@@ -329,7 +329,7 @@ return (
 
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-lg font-black text-slate-950">
-                    {partner?.partnerName ?? "—"}
+                    {partner?.companyName ?? "—"}
                   </p>
 
                   <p className="mt-1 text-sm font-semibold text-slate-500">

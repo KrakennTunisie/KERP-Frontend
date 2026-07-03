@@ -190,7 +190,7 @@ export function InvoiceDetailsTab({
 
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold text-gray-900">
-              {invoice?.partner?.partnerName ?? "—"}
+              {invoice?.partner?.companyName ?? "—"}
             </p>
             <p className="truncate text-xs text-gray-500">
               {invoice?.partner?.billingAddress?.region ?? "—"}

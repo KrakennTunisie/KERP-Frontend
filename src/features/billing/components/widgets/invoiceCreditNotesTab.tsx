@@ -14,11 +14,13 @@ import { Status, UpdateDocumentStatusModal } from "./updateStatusModal";
 type InvoiceCreditNotesTabProps = {
   invoiceId: string;
   type: "CLIENT" | "SUPPLIER";
+  isDisabled: boolean,
 };
 
 export function InvoiceCreditNotesTab({
   invoiceId,
   type,
+  isDisabled
 }: InvoiceCreditNotesTabProps) {
     const {   router,
      search,
@@ -91,7 +93,15 @@ export function InvoiceCreditNotesTab({
       {type === "CLIENT" &&  (
         <Link
           href={`/billing/invoices/clients/${invoiceId}/credit-note/create`}
-          className="inline-flex items-center gap-1.5 rounded-md bg-red-500 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-red-600"
+          className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold text-white transition 
+            ${
+            isDisabled
+              ? "cursor-not-allowed bg-red-100 text-slate-500"
+              : "cursor-pointer hover:bg-red-600"
+            
+            }
+            
+            `}
         >
           + Avoir
         </Link>
