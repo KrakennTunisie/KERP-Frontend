@@ -26,6 +26,10 @@ export function useCreditNoteListTab({
     const [open, setOpen] = useState(false);
     const [loading, setLoading]= useState(false)
     const [deleteOpen, setDeleteOpen] = useState(false);
+    const [updateStatusOpen, setUpdateStatusOpen] = useState(false);
+    const [updateLoading, setUpdateLoading]= useState(false)
+    const [nextStatus, setNextStatus]=useState("")
+
     const [invoiceRef ,setInvoiceRef] = useState(invoiceId);
     const [creditNoteRef ,setCreditNoteRef] = useState<string>();
     const [creditNotes, setCreditNotes]=useState<InvoiceCreditNotePageItem[]| []>([])
@@ -36,7 +40,7 @@ export function useCreditNoteListTab({
     const [totalElements, setTotalElements] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedCreditNote, setSelectedCreditNote]=useState<InvoiceCreditNotePageItem>();
-
+    const [updateCreditNoteStatusOpen, setUpdateCreditNoteStatusOpen] = useState(false);
 
     const debouncedSearchQuery = useDebounce(search, 2000);
 
@@ -67,7 +71,7 @@ export function useCreditNoteListTab({
      
      useEffect(() => {
        setCurrentPage(1);
-     }, [debouncedSearchQuery]);
+     }, [filtre, debouncedSearchQuery]);
      
      useEffect(() => {
        
@@ -91,6 +95,27 @@ export function useCreditNoteListTab({
         setDeleteLoading(false);
         }
   };
+
+    const updateStatus = async ()=>{
+          try {
+          setLoading(true)
+          const formData = new FormData();
+            
+          formData.append("status",  nextStatus);
+          if(selectedCreditNote){
+
+            await InvoicesCreditNoteAPI.updateInvoiceCreditNoteStatus(selectedCreditNote?.invoiceCreditNoteNumber, formData);
+            appToast.success('Statut mise à jour avec succès.')
+            setUpdateStatusOpen(false)
+            await fetchCreditNotes()
+          }
+        } catch (error) {
+          appToast.error("Erreur Fetch du client:",getApiErrorMessage(error));
+        }
+        finally{
+          setLoading(false)
+        }
+    }
 
        const router = useRouter()
   
@@ -119,7 +144,12 @@ export function useCreditNoteListTab({
      deleteLoading,
      deleteId,
      setDeleteId,
+     nextStatus, setNextStatus,
+     updateLoading, setUpdateLoading,
+     updateStatusOpen, setUpdateStatusOpen,
      selectedCreditNote, setSelectedCreditNote,
+     updateStatus,
+
     refresh: () => fetchCreditNotes(),
   };
 }

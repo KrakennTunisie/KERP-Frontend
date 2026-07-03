@@ -6,11 +6,20 @@ import {
   Edit,
   Mail,
   Phone,
+  ScrollText,
+  Send,
+  Signature,
   Trash2,
-  Truck
+  Truck,
+  UserCheck,
+  UserX
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { SupplierPartnerItem } from "../../models/partner";
+import { partnerDocumentType, PartnerDocumentType } from "../../types/documentType";
+import AddDocumentModal from "@/shared/components/ui/addDocumentModal";
+import { SendEmailModal } from "@/shared/components/widgets/sendEmailModal";
+import { useState } from "react";
 
 type SupplierTableProps = {
   rows: SupplierPartnerItem[];
@@ -20,6 +29,15 @@ type SupplierTableProps = {
   loading: boolean;
   totalElements: number;
   onDeleteRequest: (id: string) => void;
+  onAddDocument: (type: PartnerDocumentType) => void;
+  openAddDocument: boolean;
+  addDocumentLoading: boolean;
+  addDocumentType: PartnerDocumentType;
+  setOpenAddDocument: (value: boolean) => void;
+  addDocument: (file: File, type: PartnerDocumentType, partner: SupplierPartnerItem) => void;
+  updateStatus: (partnerId: string, partnerType: string, status: boolean) => void,
+  openEmail: boolean;
+  setOpenEmail: (value: boolean) => void;
 };
 
 export default function SuppliersTable({
@@ -30,9 +48,18 @@ export default function SuppliersTable({
   loading,
   totalElements,
   onDeleteRequest,
+  updateStatus,
+  onAddDocument,
+  openAddDocument,
+  addDocumentLoading,
+  addDocumentType,
+  setOpenAddDocument,
+  addDocument,
+  openEmail,
+  setOpenEmail,
 }: SupplierTableProps) {
   const router = useRouter();
-
+  const [partner, setPartner] = useState<SupplierPartnerItem>()
   const columns: DataTableColumn<SupplierPartnerItem>[] = [
     {
       key: "supplier",
@@ -52,7 +79,7 @@ export default function SuppliersTable({
             </button>
 
             <p className="mt-0.5 truncate text-[11px] font-medium text-slate-500">
-              {supplier.billingAddress.city || "Adresse non renseignée"}
+              {supplier.billingAddress!.city || "Adresse non renseignée"}
             </p>
           </div>
         </div>
@@ -63,7 +90,7 @@ export default function SuppliersTable({
       header: "Matricule Fiscal",
       cell: (supplier) => (
         <p className="text-xs font-semibold text-slate-700">
-          {supplier.taxRegistrationNumber || "-"}
+          {supplier.taxRegistrationNumber && supplier.taxRegistrationNumber !== 'null' ? supplier.taxRegistrationNumber : '_'}
         </p>
       ),
     },
@@ -73,7 +100,7 @@ export default function SuppliersTable({
       cell: (supplier) => (
         <>
           <p className="text-xs font-semibold text-slate-800">{supplier?.billingAddress?.region || '-'}</p>
-          
+
         </>
       ),
     },
@@ -85,13 +112,13 @@ export default function SuppliersTable({
           {supplier.email && (
             <div className="flex items-center gap-2 text-xs font-medium text-gray-600">
               <Mail className="w-3 h-3" />
-              <span>{supplier.email}</span>
+              <span>{supplier.email && supplier.email !== 'null' ? supplier.email : '-'}</span>
             </div>
           )}
           {supplier.professionnalPhoneNumber && (
             <div className="flex items-center gap-2 text-xs font-medium text-gray-600">
               <Phone className="w-3 h-3" />
-              <span>{supplier.professionnalPhoneNumber}</span>
+              <span>{supplier.professionnalPhoneNumber || '-'}</span>
             </div>
           )}
         </div>
@@ -104,23 +131,51 @@ export default function SuppliersTable({
       cell: (supplier) => (
         <ActionMenu
           orientation="horizontal"
-          title="Actions client"
+          title="Actions supplier"
           items={[
             {
               label: "Modifier",
               icon: Edit,
-              color: "text-amber-600",
               hover: "hover:bg-amber-50",
               onClick: () => router.push(`/billing/suppliers/${supplier.idPartner}/edit`),
               visible: true
             },
             {
-              label: "Supprimer",
-              icon: Trash2,
-              color: "text-rose-600",
-              hover: "hover:bg-rose-50",
-              onClick: () => onDeleteRequest(supplier.idPartner),
+              label: "Envoyer email",
+              icon: Send,
+              hover: "hover:bg-blue-50",
+              onClick: () => {
+                setPartner(supplier);
+                setOpenEmail(true);
+                console.log(openEmail)
+              },
+              visible: supplier.email !== ""
+            },
+            {
+              label: "Ajouter un document",
+              icon: Signature,
+              hover: "hover:bg-emerald-50",
+              onClick: () => {
+                setPartner(supplier)
+                setOpenAddDocument(true)
+              },
               visible: true
+            },
+            
+            {
+              label: "Désactiver",
+              icon: UserX,
+              hover: "hover:bg-amber-50",
+              onClick: () => updateStatus(supplier.idPartner, supplier.partnerType, false),
+              visible: supplier.active
+            },
+            {
+              label: "Activer",
+              icon: UserCheck,
+              color: "text-emerald-600",
+              hover: "hover:bg-emerald-50",
+              onClick: () => updateStatus(supplier.idPartner, supplier.partnerType, true),
+              visible: !supplier.active
             },
           ]}
         />
@@ -129,19 +184,38 @@ export default function SuppliersTable({
   ];
 
   return (
-    <DataTable
-      rows={rows}
-      columns={columns}
-      getRowKey={(row) => row.idPartner}
-      currentPage={currentPage}
-      totalPages={totalPages}
-      onPageChange={setCurrentPage}
-      isLoading={loading}
-      emptyMessage="Aucun fournisseur trouvé."
-      totalCount={totalElements}
-      countLabel={(count) =>
-        `${count} fournisseur${count > 1 ? "s" : ""} trouvé${count > 1 ? "s" : ""}`
-      }
-    />
+    <>
+      <SendEmailModal
+        isOpen={openEmail}
+        onClose={() => setOpenEmail(false)}
+        defaultTo={partner?.email ?? ""}
+        recipientName={partner?.partnerName ?? ""}
+      />
+
+
+      <AddDocumentModal
+        open={openAddDocument}
+        loading={addDocumentLoading}
+        type={addDocumentType}
+        hasPatent={partner?.patente? false : true}
+        onClose={() => setOpenAddDocument(false)}
+        onAdd={async (file, type) => addDocument(file, type, partner!)}
+      />
+      <DataTable
+        rows={rows}
+        columns={columns}
+        getRowKey={(row) => row.idPartner}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+        isLoading={loading}
+        emptyMessage="Aucun fournisseur trouvé."
+        totalCount={totalElements}
+        countLabel={(count) =>
+          `${count} fournisseur${count > 1 ? "s" : ""} trouvé${count > 1 ? "s" : ""}`
+        }
+      />
+    </>
+
   );
 }

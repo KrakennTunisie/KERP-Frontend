@@ -71,7 +71,7 @@ export function usePurchaseOrderList() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [debouncedSearchQuery]);
+  }, [filtre, debouncedSearchQuery]);
 
   useEffect(() => {
 

@@ -10,9 +10,11 @@ import {
 } from '@/shared/components/ui/dropdown';
 import { Avatar, AvatarFallback } from '@/shared/components/ui/avatar';
 import { Badge } from '@/shared/components/ui/badge';
+import { useRouter } from 'next/navigation';
 
 export function Navbar() {
   const notificationCount = 3;
+  const router = useRouter()
 
   return (
     <header className="h-20 bg-white border-b border-gray-100 flex items-center justify-between px-8">
@@ -89,7 +91,7 @@ export function Navbar() {
                 <span className="font-bold text-sm text-gray-700">Parmètres</span>
               </DropdownMenuItem>
 
-              <DropdownMenuItem className="px-4 py-3 rounded-[16px] cursor-pointer focus:bg-red-50 text-red-600">
+              <DropdownMenuItem onClick={()=>router.push('/auth/login')} className="px-4 py-3 rounded-[16px] cursor-pointer focus:bg-red-50 text-red-600">
                 <LogOut className="mr-3 h-4 w-4" />
                 <span className="font-bold text-sm">Déconnexion</span>
               </DropdownMenuItem>

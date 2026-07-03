@@ -9,7 +9,6 @@ type RequestOptions = {
   method?: HttpMethod;
   body?: RequestBody;
   headers?: HeadersInit;
-  token?: string;
   signal?: AbortSignal;
 };
 
@@ -47,13 +46,11 @@ export async function apiRequest<T>(
   endpoint: string,
   options: RequestOptions = {}
 ): Promise<T> {
-  const { method , body, headers, token, signal } = options;
+  const { method , body, headers, signal } = options;
 
   const multipart = isFormData(body);
   const finalHeaders = normalizeHeaders(headers);
-  if (token) {
-    finalHeaders.Authorization = `Bearer ${token}`;
-  }
+
 
   if (multipart) {
     delete finalHeaders["Content-Type"];

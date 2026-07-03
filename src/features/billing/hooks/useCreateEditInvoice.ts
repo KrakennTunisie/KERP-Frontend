@@ -29,6 +29,7 @@ import { paymentMethodSchema } from "../types/paymentMethod";
 import { generatePdfFile } from "@/shared/pdf/pdfGenerator";
 import { invoiceToPdfData } from "@/shared/pdf/documentAdapter";
 import { invoiceTypeSchema } from "../types/invoiceType";
+import { discountTypeSchema } from "../types/discountType";
 
 export type InvoiceFormClientProps = {
     mode: "create" | "edit" | "clone";
@@ -40,13 +41,17 @@ type UpdateableField =
   | "quantity"
   | "unityPriceEXclTax"
   | "vatRate"
-  | "operationCategory";
+  | "operationCategory"
+  | "discountType"
+  | "discountValue";
 
 
 export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
   const [nextNumber, setNextNumber] = useState<nextNumber>()
   const [exchangeRate, setExchangeRate] = useState<ExchangeRate>()
   const [invoice, setInvoice] = useState<Invoice>()
+  const [createdInvoice, setCreatedInvoice] = useState<Invoice>()
+  const [sendOpen, setSendOpen] = useState(false);    
 
   /** Appel de la fonction qui permet la récupération des données lorsque la facture est en mode = edit */
   const fetchClientInvoice = async () => {
@@ -118,9 +123,23 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
       invoiceComplianceStatus: invoiceComplianceStatusSchema.enum.RECEIVED,
       invoiceDocument: null,
       vatAmount: 0,
+      comment:""
     },
     mode: "onChange",
   });
+
+  const getError = (field: keyof InvoiceCreate) => {
+          return errors[field]?.message as string | undefined;
+      };
+
+  const getItemError = (
+      index: number,
+      field: keyof InvoiceItem
+    ) => {
+      return errors.invoiceItems?.[index]?.[field]?.message as
+        | string
+        | undefined;
+    };
 
   const { control, setValue, getValues, handleSubmit, reset, formState: { isDirty, isValid, errors } } = form;
   const { append, remove, replace } = useFieldArray({
@@ -198,6 +217,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
         invoiceDocument: null,
         complianceQRcode: "",
         invoiceComplianceStatus: invoice.invoiceComplianceStatus,
+        comment:invoice.comment,
       });
     }
   }, [mode, invoice, reset]);
@@ -292,10 +312,10 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
   const previewData = getValues();
 
   // Validation des données obligatoire
-  const canCreateInvoice =
-   (mode == "create" ? isDirty : true) && 
-     isValid &&
-    !!previewData.partner &&
+  const canCreateInvoice = true
+   //(mode == "create" ? isDirty : true) && 
+    // isValid &&
+    /* !!previewData.partner &&
     !!previewData.invoiceItems?.length &&
     !!previewData.dueDate &&
     !!previewData.issueDate &&
@@ -308,7 +328,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
         item.quantity! > 0 &&
         item.unityPriceEXclTax! >= 0 &&
         item.vatRate! >= 0
-    );
+    ); */
 
 
 
@@ -349,6 +369,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
       invoice: (item as InvoiceItem).invoice ?? null,
       purchaseOrderItem: null,
       creditedQuantity: 0,
+      
 
     }));
 
@@ -356,6 +377,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
     setValue("invoiceItems", mappedItems, {
       shouldValidate: true,
       shouldDirty: true,
+        shouldTouch: true,
     });
 
 
@@ -391,6 +413,8 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
           quantity,
           purchaseOrderItem: cleanPurchaseOrderItem,
           creditedQuantity: 0,
+          discountType:discountTypeSchema.enum.PERCENTAGE,
+          discountValue: 0,
         };
       })
       .filter(item => item.quantity > 0);
@@ -407,7 +431,10 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
 
   // Ajout d'un card qui permet l'ajout les données d'unt item (P.U ,QT , TVA)
   const addItem = () => {
-    append(defaultInvoiceItem(), {
+      const partner = getValues("partner");
+
+    append({...defaultInvoiceItem(),
+      vatRate: Number(partner && partner.taxRate) ?? 0}, {
       shouldFocus: false,
     });
   };
@@ -470,6 +497,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
     console.log(originalItem?.quantity)
     return originalItem?.quantity ?? 0;
   };
+
   const getMaxQuantity = (item: InvoiceItem) => {
     if (mode === "edit" && item.purchaseOrderItem) {
       const remaining = (item.purchaseOrderItem?.quantity ?? 0) -
@@ -491,7 +519,19 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
   // Sélection d'un client
   const selectClient = (client: PartnerSummary) => {
     setValue("partner", client, { shouldValidate: true, shouldDirty: true, });
-    setClientSearch(client.partnerName);
+    setClientSearch(client.partnerName!);
+    setValue("invoiceCurrency", client.currency!, {
+    shouldValidate: true,
+    shouldDirty: true,
+  });
+  // Apply client's tax rate to all invoice items
+  const invoiceItems = getValues("invoiceItems");
+  invoiceItems && invoiceItems.forEach((_, index) => {
+    setValue(`invoiceItems.${index}.vatRate`, Number(client.taxRate), {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+  });
     setShowDropdown(false);
   };
 
@@ -499,6 +539,10 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
   // Suppression de client selectionnée 
   const clearClient = () => {
     setValue("partner", null, { shouldValidate: true, shouldDirty: true, });
+    setValue("invoiceCurrency", currencyTypeSchema.enum.TND, {
+    shouldValidate: true,
+    shouldDirty: true,
+  });
     setClientSearch("");
   };
 
@@ -657,6 +701,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
       formData.append("vatRate", String(values.vatRate));
       formData.append("paymentMethod", values.paymentMethod);
       formData.append("paymentCondition", values.paymentCondition);
+      formData.append("comment", values.comment);
 
       formData.append(
         "exchangeRateReferenceDate", values.exchangeRateReferenceDate.toISOString()
@@ -691,6 +736,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
         setIsModalOpen(false);
         setSuccessMessage("La facture a été créée avec succès.");
         setTtnModalOpen(true);
+        setCreatedInvoice(createdInvoice as unknown as  Invoice)
       }
     } catch (e: unknown) {
       const message = getApiErrorMessage(e);
@@ -737,6 +783,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
       formData.append("vatRate", String(values.vatRate));
       formData.append("paymentMethod", values.paymentMethod);
       formData.append("paymentCondition", values.paymentCondition);
+      formData.append("comment", values.comment);
 
       formData.append(
         "exchangeRateReferenceDate", values.exchangeRateReferenceDate.toISOString()
@@ -774,6 +821,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
         setIsModalOpen(false);
         setSuccessMessage("La facture a été mise à jour avec succès.");
         setTtnModalOpen(true);
+        setCreatedInvoice(createdInvoice as unknown as  Invoice)
       }
     } catch (e: unknown) {
       const message = getApiErrorMessage(e);
@@ -852,12 +900,16 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
 
     //createInvoice
     createInvoice,
+    createdInvoice,
 
     updateInvoice,
     //Navigation
     router,
     getMaxQuantity,
-    invoice
+    invoice,
+    getError,
+    getItemError,
+    sendOpen, setSendOpen
 
   };
 

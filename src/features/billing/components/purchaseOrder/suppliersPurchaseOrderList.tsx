@@ -7,7 +7,7 @@ import { BillingPageHeader } from "../widgets/billingHeader";
 import { DeleteInvoiceModal } from "../widgets/deleteInvoiceModal";
 import { PurchaseOrderTable } from "../widgets/purchaseOrderTable";
 import { SendDocumentModal } from "../widgets/sendInvoiceModal";
-import { UpdateInvoiceStatusModal } from "../widgets/updateStatusModal";
+import { Status, UpdateDocumentStatusModal } from "../widgets/updateStatusModal";
 import SupplierPurchaseOrderModal, { SupplierPurchaseOrderModalContent } from "./supplierPurchaseOrderDetails";
 
 export default function SuppliersPurchaseOrderList() {
@@ -38,9 +38,10 @@ export default function SuppliersPurchaseOrderList() {
             />
 
             <DeleteInvoiceModal
+                documentType="purchase-order"
                 open={deleteOpen}
                 onClose={() => setDeleteOpen(false)}
-                invoiceRef={invoiceRef}
+                documentRef={invoiceRef}
                 onConfirm={async () => {
                     deletePurchaseOrder(idPurchaseOrder)
                     setDeleteOpen(false);
@@ -60,14 +61,15 @@ export default function SuppliersPurchaseOrderList() {
                     onClose={() => setOpen(false)}
                 />
             </SupplierPurchaseOrderModal>
-            <UpdateInvoiceStatusModal
+
+            <UpdateDocumentStatusModal
+                documentType="purchase-order"
                 open={updateOpen}
                 onClose={() => setUpdateOpen(false)}
                 onConfirm={updateStatus}
-                invoiceNumber={selectedPurchaseOrder?.purchaseOrderNumber}
+                documentNumber={selectedPurchaseOrder?.purchaseOrderNumber}
                 currentStatus={selectedPurchaseOrder?.purchaseOrderStatus}
-                nextStatus={nextStatus}
-                type="purchaseOrder"
+                nextStatus={nextStatus as Status}
                 onNextStatusChange={setNextStatus}
                 allowedStatuses={
                     selectedPurchaseOrder

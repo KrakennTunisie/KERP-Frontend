@@ -17,12 +17,19 @@ import { SectionTitle } from "../widgets/sectionTitle"
 import { SendToTTNModal } from "../widgets/ttnConfirmationModal"
 import { Eye, EyeOff } from "lucide-react"
 import { useState } from "react"
+import { SendDocumentModal } from "../widgets/sendInvoiceModal"
+import { FieldError } from "@/shared/components/ui/fieldError"
+import { Input } from "@/shared/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select"
+import { Label } from "@/shared/components/ui/label"
+import { discountTypeOptions, discountTypeSchema } from "../../types/discountType"
+import { Textarea } from "@/shared/components/ui/textArea"
 
 export default function CreateInvoiceClient({ mode,
     invoiceId, }: InvoiceFormClientProps) {
     const { addItem, removeItem, updateItem, clientSearch, setClientSearch, showDropdown, setShowDropdown, invoiceRef, pdfUrl, canCreateInvoice, errors, TtnModalOpen, setTtnModalOpen, sent, successMessage, purchaseOrders,
         linkedToPO, selectedPO, handleSelectPO, loadingTTN, handleTogglePO, selectClient, clearClient, updateInvoice, clients, previewData, form, onSubmit, isModalOpen, router, calculateDueDate, onCloseDocumentModal, createInvoice, sendToTTN,
-        loadingClients, loadingEdit, loadingForm, getMaxQuantity, invoice
+        loadingClients, loadingEdit, loadingForm, getMaxQuantity, invoice, sendOpen, setSendOpen, createdInvoice, getError, getItemError
     } = useCreateInvoice({ mode, invoiceId })
 
     const [showPreview, setShowPreview] = useState(true);
@@ -77,7 +84,7 @@ export default function CreateInvoiceClient({ mode,
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                         </svg>
-                        {mode === "create" || mode === "clone" ? "Créer & Envoyer au TTN" : "Modifier & Envoyer à TTN"}
+                        {mode === "create" || mode === "clone" ? "Créer & Envoyer" : "Modifier & Envoyer"}
                     </button>
 
                     {/* Toggle aperçu */}
@@ -116,13 +123,21 @@ export default function CreateInvoiceClient({ mode,
                 loading={loadingTTN}
                 invoiceSent={sent}
                 invoiceRef={previewData.invoiceNumber}
-                successMessage={successMessage} />
+                successMessage={successMessage} 
+                onSendToClient={()=>setSendOpen(true)}/>
+
+            <SendDocumentModal
+                document={createdInvoice}
+                variant="invoice"
+                isOpen={sendOpen}
+                onClose={() => {setSendOpen(false); onCloseDocumentModal()}}
+            />
 
             {/* ── Body : 2 colonnes ── */}
-            <div className="flex h-[calc(100vh-80px)]">
+            <div className={`flex h-[calc(100vh-80px)] `}>
 
                 {/* ── Colonne formulaire (66 %) ── */}
-                <div className={`${showPreview ? "w-6/10 overflow-y-auto" : "w-full"} transition-all duration-300`}>
+                <div className={`${showPreview ? "w-6/10 overflow-y-auto" : "mx-auto"} transition-all duration-300`}>
                     <div className="max-w-7xl mx-auto p-6 flex flex-col gap-5 ">
 
                         {/* Section 01 — Référence */}
@@ -138,10 +153,12 @@ export default function CreateInvoiceClient({ mode,
                                         </label>
                                         <input
                                             readOnly
+                                            disabled
                                             type="text"
                                             {...register("invoiceNumber")}
-                                            className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
+                                            className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition disabled:opacity-50"
                                         />
+                                        <FieldError error={getError("invoiceNumber")}/>
                                     </div>
                                     <div>
                                         <label className="block text-xs font-medium text-slate-500 mb-1">
@@ -151,6 +168,7 @@ export default function CreateInvoiceClient({ mode,
                                             control={form.control}
                                             name="issueDate"
                                             render={({ field }) => (
+                                                <>
                                                 <input
                                                     type="date"
                                                     value={field.value ? (() => {
@@ -183,6 +201,8 @@ export default function CreateInvoiceClient({ mode,
                                                     }
                                                     className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
                                                 />
+                                                <FieldError error={getError("issueDate")} />
+                                                </>
                                             )}
                                         />
                                     </div>
@@ -239,7 +259,7 @@ export default function CreateInvoiceClient({ mode,
                                                         </div>
                                                         <div className="flex-1 min-w-0">
                                                             <p className="text-sm font-semibold text-blue-700 truncate">{selectedPO.purchaseOrderNumber}</p>
-                                                            <p className="text-xs text-blue-500 mt-0.5 truncate">{selectedPO.partner?.partnerName}</p>
+                                                            <p className="text-xs text-blue-500 mt-0.5 truncate">{selectedPO.partner?.companyName}</p>
                                                         </div>
                                                         <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wide bg-blue-100 px-2.5 py-1 rounded-full">
                                                             {selectedPO.purchaseCurrency}
@@ -292,19 +312,20 @@ export default function CreateInvoiceClient({ mode,
                                                         className="w-full text-left px-4 py-3 hover:bg-blue-50 transition border-b border-slate-50 last:border-0"
                                                     >
                                                         <p className="text-sm font-bold text-slate-800">{client.companyName}</p>
-                                                        <p className="text-xs text-slate-400 mt-0.5">{client.billingAddress.city}</p>
+                                                        <p className="text-xs text-slate-400 mt-0.5">{client.billingAddress!.city}</p>
                                                     </button>
                                                 ))}
                                             </div>
                                         )}
                                     </div>
+                                    <FieldError error={getError("partner")} />
                                 </div>
 
                                 {/* Client sélectionné */}
                                 {previewData.partner && (
                                     <div className="border-2 border-blue-100 bg-blue-50/40 rounded-xl p-4">
                                         <div className="flex items-start justify-between mb-1">
-                                            <p className="text-sm font-semibold text-slate-700">{previewData.partner.partnerName}</p>
+                                            <p className="text-sm font-semibold text-slate-700">{previewData.partner.companyName}</p>
                                             <button
                                                 type="button"
                                                 onClick={clearClient}
@@ -316,7 +337,7 @@ export default function CreateInvoiceClient({ mode,
                                                 </svg>
                                             </button>
                                         </div>
-                                        <p className="text-xs text-blue-500 mb-2">{previewData.partner.billingAddress.region}</p>
+                                        <p className="text-xs text-blue-500 mb-2">{previewData.partner?.billingAddress?.region ?? "-"}</p>
 
                                         {/* Email + Téléphone sur une ligne */}
                                         <div className="grid grid-cols-2 gap-4">
@@ -324,17 +345,18 @@ export default function CreateInvoiceClient({ mode,
                                                 <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                                 </svg>
-                                                {previewData.partner.email}
+                                                {previewData.partner.email ?? "-"}
                                             </span>
                                             <span className="flex items-center gap-1.5 text-xs text-blue-500">
                                                 <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                                                 </svg>
-                                                {previewData.partner.professionnalPhoneNumber}
+                                                {previewData.partner.professionnalPhoneNumber!=null ? previewData.partner.professionnalPhoneNumber : "-"}
                                             </span>
                                         </div>
                                     </div>
                                 )}
+
                             </div>
                         </section>
 
@@ -357,6 +379,7 @@ export default function CreateInvoiceClient({ mode,
                                                 <option key={currency} value={currency}>{currency}</option>
                                             ))}
                                         </select>
+                                        
                                     </div>
 
                                     {/* Taux de change */}
@@ -367,6 +390,7 @@ export default function CreateInvoiceClient({ mode,
                                         <input
                                             type="text"
                                             readOnly
+                                            disabled
                                             {...register("appliedExchangeRate", { valueAsNumber: true })}
                                             className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition disabled:opacity-50"
                                         />
@@ -434,9 +458,8 @@ export default function CreateInvoiceClient({ mode,
 
                                             {/* Désignation + bouton supprimer */}
                                             <div className="flex items-center justify-between mb-1">
-                                                <label className="text-xs font-medium text-slate-500">
-                                                    Désignation
-                                                </label>
+                                                <div className="text-xs font-medium text-slate-500">
+                                                </div>
                                                 <button
                                                     onClick={() => removeItem(item.idInvoiceItem!)}
                                                     className="text-slate-300 hover:text-red-400 transition"
@@ -446,67 +469,168 @@ export default function CreateInvoiceClient({ mode,
                                                     </svg>
                                                 </button>
                                             </div>
-                                            <input
-                                                type="text"
+
+                                           <Input
+                                                label="Désignation"
                                                 readOnly={linkedToPO && !!selectedPO || invoice?.purchaseOrder != null}
                                                 value={item.description}
-                                                onChange={(e) => updateItem(item.idInvoiceItem!, "description", e.target.value)}
-                                                className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition mb-3"
+                                                onChange={(e) =>
+                                                    updateItem(item.idInvoiceItem!, "description", e.target.value)
+                                                }
+                                                error={getItemError(index, "description")}
                                             />
 
+                                            
+
                                             {/* Catégorie */}
-                                            <div className="mb-3">
-                                                <label className="block text-xs font-medium text-slate-500 mb-1">
+                                            <div className="mb-3 mt-3 space-y-2">
+                                                <Label className="block text-xs font-medium text-slate-500 mb-1">
                                                     Catégorie
-                                                </label>
-                                                <select
+                                                </Label>
+                                                <Select
                                                     value={item.operationCategory}
                                                     disabled={linkedToPO && !!selectedPO || invoice?.purchaseOrder != null}
-                                                    onChange={(e) => updateItem(item.idInvoiceItem!, "operationCategory", e.target.value)}
-                                                    className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
+                                                    onValueChange={(value) =>
+                                                    updateItem(
+                                                        item.idInvoiceItem!,
+                                                        "operationCategory",
+                                                        value
+                                                    )
+                                                    }
                                                 >
-                                                    {operationCategorySchema.options.map((value) => (
-                                                        <option key={value} value={value}>{OperationCategoryLabels[value]}</option>
+                                                    <SelectTrigger>
+                                                    <SelectValue placeholder="Sélectionner une catégorie" />
+                                                    </SelectTrigger>
+
+                                                    <SelectContent>
+                                                    {operationCategorySchema.options.map((category) => (
+                                                        <SelectItem
+                                                        key={category}
+                                                        value={category}
+                                                        >
+                                                        {OperationCategoryLabels[category]}
+                                                        </SelectItem>
                                                     ))}
-                                                </select>
+                                                    </SelectContent>
+                                                </Select>
+
+                                                <FieldError
+                                                    error={getItemError(index, "operationCategory")}
+                                                />
                                             </div>
 
                                             {/* Qté | PU HT | TVA | Total HT */}
-                                            <div className="grid grid-cols-4 gap-3">
-                                                <div>
-                                                    <label className="block text-xs font-medium text-slate-500 mb-1">Qté</label>
-                                                    <input
-                                                        type="number"
-                                                        max={getMaxQuantity(item)}
-                                                        min={1}
-                                                        value={item.quantity}
-                                                        onChange={(e) => updateItem(item.idInvoiceItem!, "quantity", parseFloat(e.target.value) || 0)}
-                                                        className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 text-center focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <label className="block text-xs font-medium text-slate-500 mb-1">PU HT</label>
-                                                    <input
-                                                        type="text"
-                                                        readOnly={linkedToPO && !!selectedPO || invoice?.purchaseOrder != null}
-                                                        defaultValue={item.unityPriceEXclTax}
-                                                        onBlur={(e) => updateItem(item.idInvoiceItem!, "unityPriceEXclTax", parseFloat(e.target.value))}
-                                                        className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 text-center focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
-                                                    />
-                                                </div>
-                                                <div>
+                                            <div className="grid grid-cols-3 gap-3">
+                                                
+                                                <Input
+                                                    label="Qté"
+                                                    type="number"
+                                                    max={getMaxQuantity(item)}
+                                                    min={1}
+                                                    value={item.quantity}
+                                                    onChange={(e) =>
+                                                        updateItem(
+                                                            item.idInvoiceItem!,
+                                                            "quantity",
+                                                            Number(e.target.value)
+                                                        )
+                                                    }
+                                                    error={getItemError(index, "quantity")}
+                                                />
+                                                <Input
+                                                    label="PU HT"
+                                                    type="number"
+                                                    min={0}
+                                                    readOnly={linkedToPO && !!selectedPO || invoice?.purchaseOrder != null}
+                                                    defaultValue={item.unityPriceEXclTax}
+                                                    onBlur={(e) =>
+                                                        updateItem(
+                                                            item.idInvoiceItem!,
+                                                            "unityPriceEXclTax",
+                                                            Number(e.target.value)
+                                                        )
+                                                    }
+                                                    error={getItemError(index, "unityPriceEXclTax")}
+                                                />
+                                                <div className="md-5">
                                                     <label className="block text-xs font-medium text-slate-500 mb-1">TVA</label>
-                                                    <select
-                                                        value={item.vatRate}
+                                                    <Select
+                                                        value={String(item.vatRate)}
                                                         disabled={linkedToPO && !!selectedPO || invoice?.purchaseOrder != null}
-                                                        onChange={(e) => updateItem(item.idInvoiceItem!, "vatRate", Number(e.target.value))}
-                                                        className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 text-center focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
+                                                        onValueChange={(value) =>
+                                                            updateItem(item.idInvoiceItem!, "vatRate", Number(value))
+                                                        }
                                                     >
-                                                        {tvaRateSchema.options.map((rate) => (
-                                                            <option key={rate.value} value={rate.value}>{rate.value}%</option>
-                                                        ))}
-                                                    </select>
+                                                        <SelectTrigger>
+                                                            <SelectValue />
+                                                        </SelectTrigger>
+
+                                                        <SelectContent>
+                                                            {tvaRateSchema.options.map((rate) => (
+                                                                <SelectItem
+                                                                    key={rate.value}
+                                                                    value={String(rate.value)}
+                                                                >
+                                                                    {rate.value}%
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+
+                                                    <FieldError error={errors.invoiceItems?.[index]?.vatRate?.message} />
                                                 </div>
+                                                 {/* Discount */}
+                                                    <div className="col-span-2">
+                                                        <label className="block text-xs font-medium text-slate-500 mb-1">
+                                                            Discount
+                                                        </label>
+
+                                                        <div className="flex gap-2">
+                                                            <Input
+                                                                type="number"
+                                                                min={0}
+                                                                value={item.discountValue ?? 0}
+                                                                onChange={(e) =>
+                                                                    updateItem(
+                                                                        item.idInvoiceItem!,
+                                                                        "discountValue",
+                                                                        Number(e.target.value)
+                                                                    )
+                                                                }
+                                                                className="flex-1"
+                                                            />
+
+                                                            <Select
+                                                                value={ item.discountType ?? "PERCENTAGE"}
+                                                                onValueChange={(value) =>
+                                                                    updateItem(
+                                                                        item.idInvoiceItem!,
+                                                                        "discountType",
+                                                                        value
+                                                                    )
+                                                                }
+                                                            >
+                                                                <SelectTrigger className="w-28">
+                                                                    <SelectValue />
+                                                                </SelectTrigger>
+
+                                                                <SelectContent>
+                                                                   {discountTypeOptions.map((discountType)=>(
+                                                                       
+                                                                            <SelectItem key={discountType.value} value={discountType.value}>
+                                                                                { discountType.value === discountTypeSchema.enum.AMOUNT ? 
+                                                                                    form.getValues("invoiceCurrency")
+                                                                                : discountType.label}
+                                                                            </SelectItem>
+                                                                        
+
+                                                                   ))}
+                                                                </SelectContent>
+                                                            </Select>
+                                                        </div>
+
+                                                        <FieldError error={errors.invoiceItems?.[index]?.discountValue?.message} />
+                                                    </div>
                                                 <div>
                                                     <label className="block text-xs font-medium text-slate-500 mb-1">Total HT</label>
                                                     <input
@@ -516,6 +640,7 @@ export default function CreateInvoiceClient({ mode,
                                                         className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-100 text-sm font-semibold text-slate-700 text-center focus:outline-none transition"
                                                     />
                                                 </div>
+                                                   
                                             </div>
 
                                             {item.purchaseOrderItem && (
@@ -530,6 +655,29 @@ export default function CreateInvoiceClient({ mode,
                             {errors.invoiceItems?.message && (
                                 <ErrorForm error={errors.invoiceItems?.message} />
                             )}
+                        </section>
+
+                        {/* Section XX — Commentaires */}
+                        <section>
+                            <SectionTitle
+                                number="05"
+                                label="Commentaires"
+                                invoiceType={invoiceTypeSchema.enum.SALE}
+                            />
+
+                            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 mt-3">
+                                <Textarea
+                                    label="Commentaires"
+                                    placeholder="Ajouter un commentaire..."
+                                    rows={3}
+                                    value={form.watch("comment") ?? ""}
+                                    onChange={(e) => form.setValue("comment",e.target.value, {
+                                                shouldDirty: true,
+                                                shouldValidate: true,
+                                                })}
+                                    error={getError("comment")}
+                                />
+                            </div>
                         </section>
 
                     </div>

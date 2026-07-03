@@ -15,13 +15,15 @@ import { partnerTypeSchema } from '../../types/partnerType';
 import { PageHeader } from '../widgets/header';
 
 import usePartnerList from '../../hooks/usePartnerList';
+import { PartnerDocumentType } from '../../types/documentType';
 
 
-export default function ClientsList({partnerType}: partnerListProps) {
+export default function ClientsList({ partnerType }: partnerListProps) {
 
   const router = useRouter();
-  const { fetchPartner, filterCity, currentPage, cities, searchQuery, setCurrentPage, setDeleteConfirmId, setSearchQuery
-    , loading, clients, setFilterCity, deleteConfirmId, totalElements, totalPages } = usePartnerList({partnerType});
+  const { fetchPartner, filterCity, currentPage, cities, searchQuery, setCurrentPage, setDeleteConfirmId, setSearchQuery, openEmail, addDocument, sendDocumentOpen, setSendDocumentOpen,openAddDocument,setOpenAddDocument,addDocumentLoading,addDocumentType
+    , loading, clients, setFilterCity, deleteConfirmId, totalElements, totalPages, setOpenEmail, onAddDocument, updatePartnerStatus } = usePartnerList({ partnerType });
+    
   return (
     <div className="min-h-screen flex-1 flex flex-col min-h-0 bg-gray-50">
       {/* Header */}
@@ -49,8 +51,8 @@ export default function ClientsList({partnerType}: partnerListProps) {
               setCurrentPage(1);
             }}
             cityOptions={cities.map((city) => ({
-              label: city,
-              value: city,
+              label: city ?? "",
+              value: city ?? "",
             }))}
             onReset={() => {
               setSearchQuery("");
@@ -68,7 +70,15 @@ export default function ClientsList({partnerType}: partnerListProps) {
             loading={loading}
             totalElements={totalElements}
             onDeleteRequest={setDeleteConfirmId}
-
+            setOpenEmail={setOpenEmail}
+            updateStatus={updatePartnerStatus}
+            onAddDocument={(type: PartnerDocumentType) => onAddDocument(type)}
+            openAddDocument={openAddDocument}
+            addDocumentLoading={addDocumentLoading}
+            addDocumentType={addDocumentType}
+            setOpenAddDocument={setOpenAddDocument}
+            addDocument={addDocument}
+            openEmail={openEmail}
           />
 
           <ClientDeleteModal

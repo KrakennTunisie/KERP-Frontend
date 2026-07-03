@@ -4,6 +4,7 @@ import Card from "../widgets/card";
 import { OperationCategoryLabels } from "../../types/operationCategory";
 import { Invoice } from "../../models/invoice";
 import { InvoiceItem } from "../../models/invoiceItem";
+import { getDiscountLabel, getDiscountValue } from "../../lib/invoiceItemHelpers";
 
 type InvoiceItemsCardProps = {
   invoice: Invoice | undefined;
@@ -30,6 +31,17 @@ export function InvoiceItemsCard({ invoice }: InvoiceItemsCardProps) {
   const vat =
     Number(total ?? 0) - Number(subtotal ?? 0);
 
+    const totalDiscount = items.reduce((sum, item) => {
+      const quantity = Number(item.quantity ?? 0);
+      const unitPrice = Number(item.unityPriceEXclTax ?? 0);
+      const subtotal = quantity * unitPrice;
+
+      const discount =
+          getDiscountValue(item, subtotal)
+
+      return sum + discount;
+    }, 0);
+
   return (
     <Card>
       <div className="mb-4 flex items-center justify-between">
@@ -42,8 +54,15 @@ export function InvoiceItemsCard({ invoice }: InvoiceItemsCardProps) {
         </span>
       </div>
 
-      <div className="grid grid-cols-[1fr_70px_90px_100px] gap-2 border-b border-slate-100 pb-2.5">
-        {["Désignation", "Qté", "P.U HT", "Total HT"].map((header) => (
+      <div className="grid grid-cols-[1fr_70px_90px_100px_120px_100px] gap-2 border-b border-slate-100 pb-2.5">
+        {[
+          "Désignation",
+          "Qté",
+          "P.U HT",
+          "Total HT",
+          "Remise",
+          "Net HT",
+        ].map((header) => (
           <span
             key={header}
             className={`text-[10px] font-bold uppercase tracking-widest text-slate-400 ${
@@ -73,56 +92,76 @@ export function InvoiceItemsCard({ invoice }: InvoiceItemsCardProps) {
             scrollbarColor: "#CBD5E1 transparent",
           }}
         >
-          {items.map((item: InvoiceItem, index: number) => {
-            const quantity = Number(item.quantity ?? 0);
-            const unitPrice = Number(item.unityPriceEXclTax ?? 0);
-            const lineTotal = quantity * unitPrice;
+        {items.map((item: InvoiceItem, index: number) => {
+          const quantity = Number(item.quantity ?? 0);
+          const unitPrice = Number(item.unityPriceEXclTax ?? 0);
 
-            return (
-              <div
-                key={item.idInvoiceItem ?? index}
-                className={`grid grid-cols-[1fr_70px_90px_100px] items-center gap-2 py-3.5 ${
-                  index < items.length - 1 ? "border-b border-slate-50" : ""
-                }`}
-              >
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-slate-900">
-                    {item.description ?? "—"}
-                  </p>
+          const subtotal = quantity * unitPrice;
 
+          const discount =getDiscountValue(item, subtotal)
+
+          const lineTotal = Math.max(0, subtotal - discount);
+
+          return (
+            <div
+              key={item.idInvoiceItem ?? index}
+              className={`grid grid-cols-[1fr_70px_90px_100px_120px_100px] items-center gap-2 py-3.5 ${
+                index < items.length - 1 ? "border-b border-slate-50" : ""
+              }`}
+            >
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold text-slate-900">
+                  {item.description ?? "—"}
+                </p>
+
+                <p className="mt-0.5 text-xs text-slate-400">
+                  TVA {item.vatRate ?? 0}%
+                </p>
+
+                {item.operationCategory && (
                   <p className="mt-0.5 text-xs text-slate-400">
-                    TVA {item.vatRate ?? 0}%
+                    {OperationCategoryLabels[item.operationCategory]}
                   </p>
-
-                  {item.operationCategory && (
-                    <p className="mt-0.5 text-xs text-slate-400">
-                      {item.operationCategory ?
-                      OperationCategoryLabels[item.operationCategory]
-                      : "-"
-                        }
-                    </p>
-                  )}
-                </div>
-
-                <p className="text-right text-sm text-slate-700">
-                  {quantity}
-                </p>
-
-                <p className="text-right text-sm text-slate-700">
-                  {unitPrice.toFixed(2)}
-                </p>
-
-                <p className="text-right text-sm font-bold text-slate-900">
-                  {lineTotal.toFixed(2)}
-                </p>
+                )}
               </div>
-            );
-          })}
+
+              <p className="text-right text-sm text-slate-700">
+                {quantity}
+              </p>
+
+              
+
+              <p className="text-right text-sm text-slate-700">
+                {unitPrice.toFixed(2)}
+              </p>
+
+              {/* Total HT before discount */}
+              <p className="text-right text-sm text-slate-700">
+                {subtotal.toFixed(2)}
+              </p>
+
+              {/* Discount */}
+              <p className="text-right text-sm text-slate-700">
+                {getDiscountLabel(item,currency)}
+              </p>
+
+              {/* Total HT */}
+              <p className="text-right text-sm font-bold text-slate-900">
+                {lineTotal.toFixed(2)}
+              </p>
+            </div>
+          );
+        })}
         </div>
       )}
 
       <div className="mt-4 flex flex-col items-end gap-2">
-        <TotalLine label="Sous-total HT" value={subtotal} />
+        <TotalLine label="Total Net HT" value={subtotal} />
+
+        <TotalLine
+          label="Total remise"
+          value={`-${totalDiscount.toFixed(2)}`}
+        />
 
         <TotalLine label="Total TVA" value={vat.toFixed(2)} />
 

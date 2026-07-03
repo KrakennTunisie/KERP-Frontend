@@ -24,7 +24,7 @@ export default function useSuppliersLists() {
   
   const debouncedSearchQuery = useDebounce(searchQuery, 2000);
 
-const cities = useMemo(() => Array.from(new Set(suppliers.map((c) => c.billingAddress.region))), [suppliers]);
+const cities = useMemo(() => Array.from(new Set(suppliers.map((c) => c.billingAddress!.region))), [suppliers]);
 
 const fetchClients = async () => {
     try {

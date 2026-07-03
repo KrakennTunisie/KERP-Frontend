@@ -1,20 +1,52 @@
 import { Modal } from "@/shared/components/ui/modal";
+import { formatDateLongWithTime } from "@/shared/utils/formatDate";
 
-type DeleteInvoiceModalProps = {
-    open: boolean;
-    onClose: () => void;
-    onConfirm: () => void | Promise<void>;
-    invoiceRef?: string;
-    loading?: boolean;
+type DocumentType = "invoice" | "credit-note" | "purchase-order"| "payment";
+
+type DeleteDocumentModalProps = {
+  open: boolean;
+  onClose: () => void;
+  onConfirm: () => void | Promise<void>;
+  documentRef?: string;
+  documentType: DocumentType;
+  loading?: boolean;
 };
+
+const documentConfig = {
+  "invoice": {
+    title: "Supprimer la facture",
+    label: "facture",
+    referenceLabel: "Référence facture",
+  },
+  "credit-note": {
+    title: "Supprimer l'avoir",
+    label: "avoir",
+    referenceLabel: "Référence avoir",
+  },
+  "purchase-order": {
+    title: "Supprimer le bon de commande",
+    label: "bon de commande",
+    referenceLabel: "Référence bon de commande",
+  },
+  "payment": {
+    title: "Supprimer le paiement",
+    label: "paiement",
+    referenceLabel: "Référence paiement",
+  },
+} as const;
 
 export function DeleteInvoiceModal({
     open,
     onClose,
     onConfirm,
-    invoiceRef,
+    documentRef,
+    documentType,
     loading,
-}: DeleteInvoiceModalProps) {
+}: DeleteDocumentModalProps) {
+
+
+const config = documentConfig[documentType];
+
     const handleConfirm = async () => {
         await onConfirm();
     };
@@ -82,7 +114,7 @@ export function DeleteInvoiceModal({
     return (
         <Modal
             open={open}
-            title="Supprimer la facture"
+            title={config.title ?? "Suppression"}
             onClose={onClose}
             footer={footer}
         >
@@ -105,33 +137,31 @@ export function DeleteInvoiceModal({
                     </svg>
                 </div>
                 <p className="text-sm text-red-800 leading-relaxed">
-                    Cette action est <span className="font-semibold">irréversible</span>. La facture sera définitivement supprimée et ne pourra pas être récupérée.
-                </p>
+                        Cette action est <span className="font-semibold">irréversible</span>.{" "}
+                        {`Le ${config.label} sera définitivement supprimé et ne pourra pas être récupéré.`}   
+               </p>
             </div>
 
             {/* Detail row */}
             <div className="bg-gray-50 rounded-2xl px-4 py-3 flex flex-col gap-2 text-sm text-gray-700">
-                {invoiceRef && (
+                {documentRef && (
                     <div className="flex items-center justify-between">
-                        <span className="text-gray-500">Référence facture</span>
-                        <span className="font-semibold text-gray-900 font-mono">{invoiceRef}</span>
+                        <span className="text-gray-500">{config.referenceLabel}</span>
+                        <span className="font-semibold text-gray-900 font-mono">{documentRef}</span>
                     </div>
                 )}
                 <div className="flex items-center justify-between">
                     <span className="text-gray-500">Date de suppression</span>
                     <span className="font-semibold text-gray-900">
-                        {new Date().toLocaleDateString("fr-TN", {
-                            day: "2-digit",
-                            month: "long",
-                            year: "numeric",
-                        })}
+                    
+                        {formatDateLongWithTime(new Date())}
                     </span>
                 </div>
             </div>
 
             {/* Confirmation question */}
             <p className="mt-4 text-sm text-gray-600">
-                Êtes-vous sûr de vouloir supprimer définitivement cette facture ?
+                Êtes-vous sûr de vouloir supprimer définitivement ce {config.label} ?
             </p>
         </Modal>
     );

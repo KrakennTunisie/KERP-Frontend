@@ -16,6 +16,7 @@ import { DocumentTopBar } from "../widgets/documentTopBar";
 import { SectionLabel } from "../widgets/sectionLabel";
 import { SendDocumentModal } from "../widgets/sendInvoiceModal";
 import { SendToTTNModal } from "../widgets/ttnConfirmationModal";
+import { invoiceTypeSchema } from "../../types/invoiceType";
 
 export default function CreditNoteDetails({ params }: PropsCreditNote) {
     const { updateStatus, previewDocument, setPreviewDocument, setStatusPaiement, invoice, 
@@ -60,14 +61,14 @@ export default function CreditNoteDetails({ params }: PropsCreditNote) {
                             label: "Cloner",
                             icon: Copy,
                             onClick: () => console.log("Cloner", invoice?.idInvoiceCreditNote),
-                            visible: false
+                            visible: invoice?.invoice.invoiceType == invoiceTypeSchema.enum.SALE
                         },
                         {
                             label: "Envoyer",
                             icon: Send,
                             onClick: () => setSendOpen(true),
                             disabled: invoice?.invoiceCreditNoteStatus === "CANCELLED",
-                            visible: false
+                            visible: true
                         },
                         {
                             label: "Supprimer",
@@ -76,7 +77,7 @@ export default function CreditNoteDetails({ params }: PropsCreditNote) {
                             hover: "hover:bg-rose-50",
                             onClick: () => setDeleteOpen(true),
                             disabled: invoice?.invoiceCreditNoteStatus !== "DRAFT",
-                            visible: false
+                            visible: true
                         },
                     ]}
             />
@@ -152,7 +153,7 @@ export default function CreditNoteDetails({ params }: PropsCreditNote) {
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                                 <div className="bg-gray-50 dark:bg-neutral-800 rounded-lg p-3">
                                     <p className="text-[11px] font-medium tracking-wide uppercase text-gray-400 mb-1">Client</p>
-                                    <p className="text-sm font-medium text-gray-900 dark:text-white">{invoice?.invoice.partner.partnerName}</p>
+                                    <p className="text-sm font-medium text-gray-900 dark:text-white">{invoice?.invoice.partner.companyName}</p>
                                 </div>
                                 <div className="bg-gray-50 dark:bg-neutral-800 rounded-lg p-3">
                                     <p className="text-[11px] font-medium tracking-wide uppercase text-gray-400 mb-1">N° Facture originale</p>
@@ -427,7 +428,9 @@ export default function CreditNoteDetails({ params }: PropsCreditNote) {
                 onClose={() => setSendOpen(false)}
             />
 
-            <DeleteInvoiceModal 
+            <DeleteInvoiceModal
+                documentType="credit-note"
+                documentRef={invoice?.invoiceCreditNoteNumber} 
                 open={deleteOpen} 
                 onClose={()=> setDeleteOpen(false)} 
                 onConfirm={deleteCreditNote}

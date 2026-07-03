@@ -1,19 +1,24 @@
 import {  z } from "zod";
 import { v4 as uuidv4 } from "uuid";
 import { operationCategorySchema } from "../types/operationCategory";
+import { discountTypeSchema } from "../types/discountType";
 
 
 // schema de base commun
 export const baseItemSchema = z.object({
-    description: z.string(),
-    quantity: z.number(),
-    unityPriceEXclTax: z.number(),
+    description: z.string().min(1, "La description est obligatoire"),
+    quantity: z.number().min(1, "La quantité est obligatoire"),
+    unityPriceEXclTax: z.number().min(1, "Le prix unitaire est obligatoire"),
     vatRate: z.number(),
     itemTotalExclTax: z.number(),
     itemTaxAmount: z.number(),
     itemTotalInclTax: z.number(),
     operationCategory: operationCategorySchema,
+    
+    discountType: discountTypeSchema.nullable(),
+    discountValue: z.number().nullable(),
 });
+
 
 // invoice item
 export const invoiceItemSchema = baseItemSchema.extend({
@@ -65,7 +70,9 @@ export const defaultInvoiceItem = (): InvoiceItem => ({
     itemTotalInclTax: 0,
     operationCategory: "SERVICE_PROVISION",
     invoice: null,
-    creditedQuantity: 0
+    creditedQuantity: 0,
+    discountType: discountTypeSchema.enum.PERCENTAGE,
+    discountValue: 0,
 });
 
 // models/purchaseOrderItem.ts
@@ -73,7 +80,7 @@ export const defaultPurchaseOrderItem = (): PurchaseOrderItem => ({
     idPurchaseOrderItem: uuidv4(),
     description: "",
     quantity: 1,
-    invoicedQuantity:0,
+    invoicedQuantity: 0,
     unityPriceEXclTax: 0,
     vatRate: 0,
     itemTotalExclTax: 0,
@@ -81,6 +88,8 @@ export const defaultPurchaseOrderItem = (): PurchaseOrderItem => ({
     itemTotalInclTax: 0,
     operationCategory: "SERVICE_PROVISION",
     purchaseOrder: null,
+    discountType: null,
+    discountValue: null
 });
 
 export const defaultCreditNoteItem = (): CreditNoteItem => ({
@@ -94,6 +103,8 @@ export const defaultCreditNoteItem = (): CreditNoteItem => ({
     itemTotalInclTax: 0,
     operationCategory: "SERVICE_PROVISION",
     originalItem: null,
+    discountType: null,
+    discountValue: null
 });
 
 

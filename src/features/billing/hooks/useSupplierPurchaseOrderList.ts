@@ -70,7 +70,7 @@ export function useSupplierPurchaseOrderList() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [debouncedSearchQuery]);
+  }, [filtre, debouncedSearchQuery]);
 
   useEffect(() => {
 

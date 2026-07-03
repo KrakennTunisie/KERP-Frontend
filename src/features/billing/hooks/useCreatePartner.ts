@@ -102,7 +102,7 @@ export default function UseCreatePartner({ type, mode, partnerId }: pageProps) {
             shouldValidate: true,
             shouldDirty: true,
         });
-        console.log(getValues("shippingAddress.region"));
+        console.log(watch("shippingAddress.region"));
 };
     const fetchPartner = async () => {
         try {
@@ -174,8 +174,6 @@ export default function UseCreatePartner({ type, mode, partnerId }: pageProps) {
             shortName: "",
             currency: "TND",
             email: "",
-            workPhone: "",
-            mobilePhone: "",
             billingAddress: any,
             shippingAddress: any,
             language: "",
@@ -199,35 +197,41 @@ export default function UseCreatePartner({ type, mode, partnerId }: pageProps) {
             formData.append("maritalStatus", data.maritalStatus ?? "");
             formData.append("partnerName", `${data.firstName ?? ""} ${data.lastName ?? ""}`.trim());
             formData.append("companyName", data.companyName);
-            formData.append("displayName", data.shortName ?? "");
+            formData.append("displayName",  (data.shortName as string) ?? "");
 
-            formData.append("currency", data.currency);
-            formData.append("email", data.email);
-            formData.append("personnelPhoneNumber", data.mobilePhone ?? "");
-            formData.append("professionnalPhoneNumber", data.workPhone ?? "");
+            formData.append("currency", data.currency!);
+            formData.append("email", data.email! ?? null);
+            formData.append("personnelPhoneNumber", data.mobilePhone!.toString() ?? null);
+            formData.append("professionnalPhoneNumber", data.workPhone!.toString()?? null);
             formData.append("Language", data.language ?? "");
 
-            formData.append("taxRegistrationNumber", data.taxId);
+            formData.append("taxRegistrationNumber", data.taxId! ?? "");
             formData.append("iban", data.iban ?? "");
-            formData.append("TaxRate", data.taxRate);
-            formData.append("paymentCondition", data.paymentTerms);
+            formData.append("TaxRate", data.taxRate! ?? "");
+            formData.append("paymentCondition", data.paymentTerms! ?? "");
             formData.append("enablePortal", String(data.enablePortal));
 
             formData.append("billingAddress.region", data.billingAddress?.region ?? "");
             formData.append("billingAddress.state", data.billingAddress?.state ?? "");
             formData.append("billingAddress.city", data.billingAddress?.city ?? "");
             formData.append("billingAddress.street1", data.billingAddress?.street1 ?? "");
-            formData.append("billingAddress.addressType", data.billingAddress.addressType ?? "");
+            formData.append("billingAddress.addressType", data.billingAddress!.addressType ?? "");
             formData.append("billingAddress.street2", data.billingAddress?.street2 ?? "");
             formData.append("billingAddress.zipCode", data.billingAddress?.zipCode ?? "");
 
             formData.append("shippingAddress.region", data.shippingAddress?.region ?? "");
             formData.append("shippingAddress.state", data.shippingAddress?.state ?? "");
             formData.append("shippingAddress.city", data.shippingAddress?.city ?? "");
-            formData.append("shippingAddress.addressType", data.shippingAddress.addressType ?? "");
+            formData.append("shippingAddress.addressType", data.shippingAddress!.addressType ?? "");
             formData.append("shippingAddress.street1", data.shippingAddress?.street1 ?? "");
             formData.append("shippingAddress.street2", data.shippingAddress?.street2 ?? "");
             formData.append("shippingAddress.zipCode", data.shippingAddress?.zipCode ?? "");
+            console.log(data.rne)
+            console.log(data.contract)
+            console.log(data.patente)
+            if (data.rne instanceof File) formData.append("rne", data.rne);
+            if (data.contract instanceof File) formData.append("contract", data.contract);
+           if (data.patente instanceof File) formData.append("patente", data.patente);
             console.log(Object.fromEntries(formData));
                 if (type == partnerTypeSchema.enum.SUPPLIER) {
                     const createdSupplier = await partnersApi.updateSupplier(partnerId! ,formData);
@@ -263,32 +267,32 @@ export default function UseCreatePartner({ type, mode, partnerId }: pageProps) {
             formData.append("maritalStatus", data.maritalStatus ?? "");
             formData.append("partnerName", `${data.firstName ?? ""} ${data.lastName ?? ""}`.trim());
             formData.append("companyName", data.companyName);
-            formData.append("displayName", data.shortName ?? "");
+            formData.append("displayName",  (data.shortName as string) ?? "");
 
-            formData.append("currency", data.currency);
-            formData.append("email", data.email);
-            formData.append("personnelPhoneNumber", data.workPhone ?? "");
-            formData.append("professionnalPhoneNumber", data.mobilePhone ?? "");
+            formData.append("currency", data.currency!);
+            formData.append("email", data.email! ?? "");
+            formData.append("personnelPhoneNumber", data.workPhone?.toString() ?? "");
+            formData.append("professionnalPhoneNumber", data.mobilePhone?.toString() ?? "");
             formData.append("Language", data.language ?? "");
 
-            formData.append("taxRegistrationNumber", data.taxId);
+            formData.append("taxRegistrationNumber", data.taxId!);
             formData.append("iban", data.iban ?? "");
-            formData.append("TaxRate", data.taxRate);
-            formData.append("paymentCondition", data.paymentTerms);
+            formData.append("TaxRate", data.taxRate!);
+            formData.append("paymentCondition", data.paymentTerms!);
             formData.append("enablePortal", String(data.enablePortal));
 
             formData.append("billingAddress.region", data.billingAddress?.region ?? "");
             formData.append("billingAddress.state", data.billingAddress?.state ?? "");
             formData.append("billingAddress.city", data.billingAddress?.city ?? "");
             formData.append("billingAddress.street1", data.billingAddress?.street1 ?? "");
-            formData.append("billingAddress.addressType", data.billingAddress.addressType ?? "");
+            formData.append("billingAddress.addressType", data.billingAddress!.addressType ?? "");
             formData.append("billingAddress.street2", data.billingAddress?.street2 ?? "");
             formData.append("billingAddress.zipCode", data.billingAddress?.zipCode ?? "");
 
             formData.append("shippingAddress.region", data.shippingAddress?.region ?? "");
             formData.append("shippingAddress.state", data.shippingAddress?.state ?? "");
             formData.append("shippingAddress.city", data.shippingAddress?.city ?? "");
-            formData.append("shippingAddress.addressType", data.shippingAddress.addressType ?? "");
+            formData.append("shippingAddress.addressType", data.shippingAddress!.addressType ?? "");
             formData.append("shippingAddress.street1", data.shippingAddress?.street1 ?? "");
             formData.append("shippingAddress.street2", data.shippingAddress?.street2 ?? "");
             formData.append("shippingAddress.zipCode", data.shippingAddress?.zipCode ?? "");

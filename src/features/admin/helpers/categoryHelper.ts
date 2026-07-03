@@ -4,6 +4,8 @@ export const getCategoryLabel = (
   category: PermissionCategory|string
 ): string => {
   switch (category) {
+    case "ALL":
+      return "Tous"
     case "USER":
       return "Utilisateurs";
 

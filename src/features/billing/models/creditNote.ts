@@ -64,6 +64,7 @@ export const invoiceCreditNoteSchema = baseInvoiceCreditNoteSchema.extend({
   totalInclTax: z.number(),
   vatAmount: z.number(),
   originalInvoice: invoiceSchema,
+  comment: z.string()
 });
 
 /**

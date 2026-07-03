@@ -31,6 +31,7 @@ export interface User {
   firstName: string;
   lastName: string;
   email: string;
+  phone:string;
 
   role: UserRole;
   status: UserStatus;
@@ -47,6 +48,7 @@ export const mockUsers: User[] = [
     role: "ADMIN",
     status: "ACTIVE",
     createdAt: new Date("2026-01-15"),
+    phone: "12345689"
   },
 
   {
@@ -57,6 +59,7 @@ export const mockUsers: User[] = [
     role: "MANAGER",
     status: "ACTIVE",
     createdAt: new Date("2026-02-10"),
+    phone: ""
   },
 
   {
@@ -67,6 +70,7 @@ export const mockUsers: User[] = [
     role: "ACCOUNTANT",
     status: "INACTIVE",
     createdAt: new Date("2025-12-01"),
+    phone: ""
   },
 
   {
@@ -77,6 +81,7 @@ export const mockUsers: User[] = [
     role: "USER",
     status: "ACTIVE",
     createdAt: new Date("2026-03-21"),
+    phone: ""
   },
 
   {
@@ -87,6 +92,7 @@ export const mockUsers: User[] = [
     role: "USER",
     status: "BLOCKED",
     createdAt: new Date("2025-11-18"),
+    phone: ""
   },
 
   {
@@ -97,6 +103,7 @@ export const mockUsers: User[] = [
     role: "MANAGER",
     status: "ACTIVE",
     createdAt: new Date("2026-04-02"),
+    phone: ""
   },
 
   {
@@ -107,6 +114,7 @@ export const mockUsers: User[] = [
     role: "ACCOUNTANT",
     status: "ACTIVE",
     createdAt: new Date("2026-02-28"),
+    phone: ""
   },
 
   {
@@ -117,5 +125,6 @@ export const mockUsers: User[] = [
     role: "USER",
     status: "INACTIVE",
     createdAt: new Date("2025-10-14"),
+    phone: ""
   },
 ];

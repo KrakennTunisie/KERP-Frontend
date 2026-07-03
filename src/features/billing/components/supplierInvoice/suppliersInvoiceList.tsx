@@ -7,7 +7,7 @@ import { getSupplierInvoiceAllowedNextStatuses, invoiceStatusColors, invoiceStat
 import { StatusFilterBar } from "../widgets/billingFilterBar";
 import { BillingPageHeader } from "../widgets/billingHeader";
 import { BillingTable } from "../widgets/billingTable";
-import { UpdateInvoiceStatusModal } from "../widgets/updateStatusModal";
+import { Status, UpdateDocumentStatusModal } from "../widgets/updateStatusModal";
 import { DeleteInvoiceModal } from "../widgets/deleteInvoiceModal";
 
 
@@ -85,9 +85,10 @@ export default function SuppliersInvoiceList() {
             </div>
 
             <DeleteInvoiceModal
+                documentType="invoice"
                 open={deleteOpen}
                 onClose={() => setDeleteOpen(false)}
-                invoiceRef={invoiceRef}
+                documentRef={invoiceRef}
                 onConfirm={deleteSupplierInvoice}
                 loading={deleteLoading} />
 
@@ -105,14 +106,14 @@ export default function SuppliersInvoiceList() {
                 onDownloadFitered={()=>console.log("onDownloadFitered")}
             />
 
-            <UpdateInvoiceStatusModal
+            <UpdateDocumentStatusModal
+                documentType="invoice"
                 open={updateOpen}
                 onClose={() => setUpdateOpen(false)}
                 onConfirm={updateStatus}
-                invoiceNumber={selectedInvoice?.invoiceNumber}
+                documentNumber={selectedInvoice?.invoiceNumber}
                 currentStatus={selectedInvoice?.invoiceStatus}
-                nextStatus={nextStatus}
-                type="invoice"
+                nextStatus={nextStatus as Status}
                 onNextStatusChange={setNextStatus}
                 allowedStatuses={
                     selectedInvoice
@@ -123,60 +124,42 @@ export default function SuppliersInvoiceList() {
             />
 
             {/* Table */}
-                                <BillingTable<InvoicePageItem>
-                                    items={suppliersInvoices}
-                                    variant="invoice"
-                                    secondColumnLabel="Client"
-                                    currentPage={currentPage}
-                                    totalPages={totalPages}
-                                    totalElements={totalElements}
-                                    loading={loading}
-                                    onPageChange={setCurrentPage}
-                                    onView={(invoice) => {
-                                        router.push(`/billing/invoices/suppliers/details/${invoice.idInvoice}`);
-                                    }}
-                                    onUpdateStatus={(invoice) => {
-                                        setSelectedInvoice(invoice);
-                                        setInvoiceId(invoice.idInvoice);
-                                        setUpdateOpen(true);
-                                    }}
-                                    canUpdateStatus={(invoice) =>
-                                        getSupplierInvoiceAllowedNextStatuses(invoice.invoiceStatus).length > 0
-                                    }
-                                    onDelete={(invoice) => {
-
-                                            setSelectedInvoice(invoice);
-                                            setInvoiceId(invoice.idInvoice);
-                                            setDeleteOpen(true);                                    
-                                        }}
-                                    getNumber={(invoice) => invoice.invoiceNumber}
-                                    getPartnerName={(invoice) => invoice.partner?.partnerName}
-                                    getStatus={(invoice) => invoice.invoiceStatus}
-                                    getAmountEUR={(invoice) => invoice.totalInclTaxEUR}
-                                    getAmountTND={(invoice) => invoice.totalInclTaxTND}
-                                    getDate={(invoice) => invoice.dueDate ?? invoice.issueDate}
-                                    getStatusLabel={(status) => invoiceStatusLabels[status]}
-                                    getStatusColor={(status) =>
-                                        status !== "ALL" ? invoiceStatusColors[status] : ""
-                                    }
-                                />
-
-                                
-            <UpdateInvoiceStatusModal
-                open={updateOpen}
-                onClose={() => setUpdateOpen(false)}
-                onConfirm={updateStatus}
-                invoiceNumber={selectedInvoice?.invoiceNumber}
-                currentStatus={selectedInvoice?.invoiceStatus}
-                type="invoice"
-                nextStatus={nextStatus}
-                onNextStatusChange={setNextStatus}
-                allowedStatuses={
-                    selectedInvoice
-                        ? getSupplierInvoiceAllowedNextStatuses(selectedInvoice.invoiceStatus)
-                        : []
+            <BillingTable<InvoicePageItem>
+                items={suppliersInvoices}
+                variant="invoice"
+                secondColumnLabel="Client"
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalElements={totalElements}
+                loading={loading}
+                onPageChange={setCurrentPage}
+                onView={(invoice) => {
+                    router.push(`/billing/invoices/suppliers/details/${invoice.idInvoice}`);
+                }}
+                onUpdateStatus={(invoice) => {
+                    setSelectedInvoice(invoice);
+                    setInvoiceId(invoice.idInvoice);
+                    setUpdateOpen(true);
+                }}
+                canUpdateStatus={(invoice) =>
+                    getSupplierInvoiceAllowedNextStatuses(invoice.invoiceStatus).length > 0
                 }
-                isSubmitting={updateLoading}
+                onDelete={(invoice) => {
+
+                        setSelectedInvoice(invoice);
+                        setInvoiceId(invoice.idInvoice);
+                        setDeleteOpen(true);                                    
+                    }}
+                getNumber={(invoice) => invoice.invoiceNumber}
+                getPartnerName={(invoice) => invoice.partner?.companyName}
+                getStatus={(invoice) => invoice.invoiceStatus}
+                getAmountEUR={(invoice) => invoice.totalInclTaxEUR}
+                getAmountTND={(invoice) => invoice.totalInclTaxTND}
+                getDate={(invoice) => invoice.dueDate ?? invoice.issueDate}
+                getStatusLabel={(status) => invoiceStatusLabels[status]}
+                getStatusColor={(status) =>
+                    status !== "ALL" ? invoiceStatusColors[status] : ""
+                }
             />
         </div>
 

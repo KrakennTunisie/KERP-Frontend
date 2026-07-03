@@ -9,6 +9,7 @@ import {
   FileText,
   Hash,
   Info,
+  MessageSquare,
   Pencil,
   ReceiptText,
   Send,
@@ -328,7 +329,7 @@ return (
 
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-lg font-black text-slate-950">
-                    {partner?.partnerName ?? "—"}
+                    {partner?.companyName ?? "—"}
                   </p>
 
                   <p className="mt-1 text-sm font-semibold text-slate-500">
@@ -338,7 +339,7 @@ return (
                   <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-3">
                     <MiniInfo
                       label="Téléphone"
-                      value={partner?.professionnalPhoneNumber}
+                    value={partner?.professionnalPhoneNumber?.toString() ?? ""}
                     />
 
                     <MiniInfo
@@ -389,7 +390,7 @@ return (
 
               <AmountLine
                 label="Reste à payer"
-                value={Number((invoiceTotal - payment?.amount).toFixed(2))}
+                value={payment.invoice.remainingAmount}
                 currency={relatedInvoice?.invoiceCurrency ?? "EUR"}
               />
             </div>
@@ -437,11 +438,45 @@ return (
                     invoice={payment}
                     setPreviewDocument={setPreviewDocument}
                   />
+                      <Card>
+                        <SectionLabel>Commentaires</SectionLabel>
+                  
+                        {payment && payment.comment?.trim() ? (
+                          <div className="mt-4 rounded-xl bg-slate-50 p-4">
+                            <div className="flex items-start gap-3">
+                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50">
+                                <MessageSquare className="h-5 w-5 text-blue-600" />
+                              </div>
+                  
+                              <div className="min-w-0 flex-1">
+                  
+                                <p className="mt-2 whitespace-pre-wrap break-words text-sm leading-6 text-slate-600">
+                                  {payment.comment}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="mt-4 rounded-xl border border-dashed border-slate-200 bg-slate-50 p-5 text-center">
+                            <MessageSquare className="mx-auto h-7 w-7 text-slate-300" />
+                  
+                            <p className="mt-2 text-sm font-bold text-slate-500">
+                              Aucun commentaire
+                            </p>
+                  
+                            <p className="mt-1 text-xs font-medium text-slate-400">
+                              {"Aucun commentaire n'a été ajouté à cette facture."}
+                            </p>
+                          </div>
+                        )}
+                      </Card>
         </aside>
       </section>
     </main>
 
                 <DeleteInvoiceModal 
+                    documentType={"payment"}
+                    documentRef={payment.reference}
                     open={deleteOpen} 
                     onClose={()=> setDeleteOpen(false)} 
                     onConfirm={deletePayment}

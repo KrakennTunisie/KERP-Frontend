@@ -3,21 +3,24 @@ import {  ReceiptText, RefreshCw } from "lucide-react";
 import Card from "./card";
 import { BillingTable } from "./billingTable";
 import { InvoiceCreditNotePageItem } from "../../models/creditNote";
-import { InvoiceStatus, invoiceStatusColors, invoiceStatusLabels, invoiceStatusSchema } from "../../types/invoiceStatus";
+import { getCreditNoteAllowedNextStatuses, InvoiceStatus, invoiceStatusColors, invoiceStatusLabels, invoiceStatusSchema } from "../../types/invoiceStatus";
 import { useCreditNoteListTab } from "../../hooks/useCreditNoteListTab";
 import Link from "next/link";
 import { StatusFilterBar } from "./billingFilterBar";
 import { DeleteInvoiceModal } from "./deleteInvoiceModal";
 import { SendDocumentModal } from "./sendInvoiceModal";
+import { Status, UpdateDocumentStatusModal } from "./updateStatusModal";
 
 type InvoiceCreditNotesTabProps = {
   invoiceId: string;
   type: "CLIENT" | "SUPPLIER";
+  isDisabled: boolean,
 };
 
 export function InvoiceCreditNotesTab({
   invoiceId,
   type,
+  isDisabled
 }: InvoiceCreditNotesTabProps) {
     const {   router,
      search,
@@ -36,8 +39,10 @@ export function InvoiceCreditNotesTab({
      totalElements,
      totalPages,
      loading,
-     setDeleteId,
+     setDeleteId,updateLoading, updateStatus,
      selectedCreditNote, setSelectedCreditNote,
+     nextStatus, setNextStatus,
+     updateStatusOpen, setUpdateStatusOpen,
     refresh}= useCreditNoteListTab({invoiceId, type})
 
             const invoiceStatuses = invoiceStatusSchema.options
@@ -47,6 +52,7 @@ export function InvoiceCreditNotesTab({
                 status !== invoiceStatusSchema.enum.PAID &&
                 status !== invoiceStatusSchema.enum.TO_COLLECT &&
                 status !== invoiceStatusSchema.enum.TO_PAY &&
+                status !== invoiceStatusSchema.enum.OVERDUE &&
                 status !== invoiceStatusSchema.enum.DRAFT            )
             .map((status) => ({
                 value: status,
@@ -87,7 +93,15 @@ export function InvoiceCreditNotesTab({
       {type === "CLIENT" &&  (
         <Link
           href={`/billing/invoices/clients/${invoiceId}/credit-note/create`}
-          className="inline-flex items-center gap-1.5 rounded-md bg-red-500 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-red-600"
+          className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold text-white transition 
+            ${
+            isDisabled
+              ? "cursor-not-allowed bg-red-100 text-slate-500"
+              : "cursor-pointer bg-red-500 hover:bg-red-600"
+            
+            }
+            
+            `}
         >
           + Avoir
         </Link>
@@ -136,7 +150,12 @@ export function InvoiceCreditNotesTab({
     }}
     onDelete={(creditNote) => {
       setDeleteId(creditNote.idInvoiceCreditNote);
+      setSelectedCreditNote(creditNote)
       setDeleteOpen(true);
+    }}
+    onUpdateStatus={(creditNote)=>{
+      setSelectedCreditNote(creditNote);
+      setUpdateStatusOpen(true)
     }}
     getNumber={(creditNote) => creditNote.invoiceCreditNoteNumber}
     getDate={(creditNote) => creditNote.issueDate}
@@ -151,16 +170,18 @@ export function InvoiceCreditNotesTab({
         : invoiceStatusColors[status]
     }
     canUpdateStatus={(creditNote) =>
-      creditNote.invoiceCreditNoteStatus !== "CANCELLED"
+      creditNote.invoiceCreditNoteStatus !==  invoiceStatusSchema.enum.CANCELLED
+      && creditNote.invoiceCreditNoteStatus !== invoiceStatusSchema.enum.ARCHIVED
     }
     emptyMessage="Aucun avoir lié"
   />
 
   {/* Modals */}
   <DeleteInvoiceModal
+    documentType={"credit-note"}
     open={deleteOpen}
     onClose={() => setDeleteOpen(false)}
-    invoiceRef={creditNoteRef}
+    documentRef={selectedCreditNote?.invoiceCreditNoteNumber}
     onConfirm={() => onDelete()}
   />
 
@@ -170,6 +191,24 @@ export function InvoiceCreditNotesTab({
     isOpen={open}
     onClose={() => setOpen(false)}
   />
+
+              <UpdateDocumentStatusModal
+                documentType="credit-note"
+                open={updateStatusOpen}
+                onClose={() => setUpdateStatusOpen(false)}
+                onConfirm={updateStatus}
+                documentNumber={selectedCreditNote?.invoiceCreditNoteNumber}
+                currentStatus={selectedCreditNote?.invoiceCreditNoteStatus}
+                nextStatus={nextStatus as Status}
+                onNextStatusChange={setNextStatus}
+                allowedStatuses={
+                    selectedCreditNote
+                        ? getCreditNoteAllowedNextStatuses(selectedCreditNote.invoiceCreditNoteStatus)
+                        : []
+                }
+                isSubmitting={updateLoading}
+            />
+
 </Card>
   );
 }
