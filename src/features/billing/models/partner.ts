@@ -20,10 +20,10 @@ export const partnerSchema = z.object({
   email: z.string()
     .nullable(),
   professionnalPhoneNumber: z
-    .union([z.number(), z.nan(), z.literal("")])
+    .union([z.number(), z.nan(), z.string()])
     .nullable(),
   personnelPhoneNumber:  z
-    .union([z.number(), z.nan(), z.literal("")])
+    .union([z.number(), z.nan(), z.string()])
     .nullable(),
   taxRegistrationNumber: z.string().min(1).nullable().or(z.literal("")),
   currency: currencyTypeSchema.nullable(),
