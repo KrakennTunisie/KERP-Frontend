@@ -97,7 +97,7 @@ export function InvoiceCreditNotesTab({
             ${
             isDisabled
               ? "cursor-not-allowed bg-red-100 text-slate-500"
-              : "cursor-pointer hover:bg-red-600"
+              : "cursor-pointer bg-red-500 hover:bg-red-600"
             
             }
             
