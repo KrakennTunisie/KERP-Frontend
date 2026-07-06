@@ -313,23 +313,6 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
 
   // Validation des données obligatoire
   const canCreateInvoice = true
-   //(mode == "create" ? isDirty : true) && 
-    // isValid &&
-    /* !!previewData.partner &&
-    !!previewData.invoiceItems?.length &&
-    !!previewData.dueDate &&
-    !!previewData.issueDate &&
-    !!previewData.paymentCondition &&
-    !!previewData.paymentMethod &&
-    previewData.invoiceItems.every(
-      (item) =>
-        item.description?.trim() &&
-        item.operationCategory?.trim() &&
-        item.quantity! > 0 &&
-        item.unityPriceEXclTax! >= 0 &&
-        item.vatRate! >= 0
-    ); */
-
 
 
   //Filtrage de la liste des clients lors de la recherche 

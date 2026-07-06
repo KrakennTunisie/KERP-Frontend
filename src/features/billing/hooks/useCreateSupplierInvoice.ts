@@ -32,7 +32,9 @@ type UpdateableField =
     | "quantity"
     | "unityPriceEXclTax"
     | "vatRate"
-    | "operationCategory";
+    | "operationCategory"
+    | "discountType"
+    | "discountValue";
 
 export type InvoiceFormModalProps = {
     open: boolean;
@@ -193,6 +195,19 @@ export default function useCreateSupplierInvoice() {
     const [showDropdown, setShowDropdown] = useState(false);
     const previousCurrencyRef = useRef<CurrencyType>("TND");
     const previewData = getValues();
+
+    const getError = (field: keyof InvoiceCreate) => {
+              return errors[field]?.message as string | undefined;
+          };
+
+    const getItemError = (
+          index: number,
+          field: keyof InvoiceItem
+        ) => {
+          return errors.invoiceItems?.[index]?.[field]?.message as
+            | string
+            | undefined;
+        };
 
     // Validation des données obligatoire
     const canSaveInvoice =
@@ -631,6 +646,8 @@ export default function useCreateSupplierInvoice() {
 
         canSaveInvoice,
         errors,
+        getItemError,
+        getError,
 
         //dueDate
         calculateDueDate,
