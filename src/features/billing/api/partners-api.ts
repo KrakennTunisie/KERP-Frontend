@@ -1,6 +1,6 @@
 // src/features/billing/api/partners.api.ts
 import { apiClient } from "@/shared/api/api-client";
-import { AUDITLOGS_ENDPOINTS, BILLING_ENDPOINTS, DASHBOARD_ENDPOINTS, EXCHANGE_RATE_ENDPOINTS, INVOICES_CREDIT_NOTE_ENDPOINTS, INVOICES_ENDPOINTS, MAILING_ENDPOINTS, PAYMENT_ENDPIONTS, PURCHASE_ORDER_ENDPOINTS } from "@/shared/api/endpoints";
+import { AUDITLOGS_ENDPOINTS, BILLING_ENDPOINTS, DASHBOARD_ENDPOINTS, EXCHANGE_RATE_ENDPOINTS, INVOICES_CREDIT_NOTE_ENDPOINTS, INVOICES_ENDPOINTS, MAILING_ENDPOINTS, OPERATION_CATEGORY_ENDPOINTS, PAYMENT_ENDPIONTS, PURCHASE_ORDER_ENDPOINTS } from "@/shared/api/endpoints";
 import { ExchangeRateParams, GetListParams, PageResponse } from "@/shared/api/types";
 import { InvoiceCreditNoteCreate, InvoiceCreditNoteDetails, InvoiceCreditNotePageItem } from "../models/creditNote";
 import { Invoice, InvoiceCreate, InvoicePageItem, } from "../models/invoice";
@@ -274,4 +274,22 @@ export const MailingAPI ={
 export const AuditLogAPI = {
   getAuditLogs: (id: string)=> apiClient.get<AuditLog[]>(AUDITLOGS_ENDPOINTS.getAuditLogsByIdClient(id)),
   getAuditLogsBySupplier: (id: string)=> apiClient.get<AuditLog[]>(AUDITLOGS_ENDPOINTS.getAuditLogsByIdSupplier(id))
+}
+
+export const OperationCategoryAPI = {
+  getAllOperationCategories: () => apiClient.get(OPERATION_CATEGORY_ENDPOINTS.getAllOperationCategories()),
+
+  getOperationCategory: (id: string) => apiClient.get(OPERATION_CATEGORY_ENDPOINTS.getOperationCategory(id)),
+
+  getOperationCategoryByCode: (code: string) => apiClient.get(OPERATION_CATEGORY_ENDPOINTS.getOperationCategoryByCode(code)),
+
+  getOperationCategoryByLabel: (label: string) => apiClient.get(OPERATION_CATEGORY_ENDPOINTS.getOperationCategoryByLabel(label)),
+
+  createOperationCategory: (payload: FormData) => apiClient.post(OPERATION_CATEGORY_ENDPOINTS.createOperationCategory(), payload),
+
+  updateOperationCategory: (id: string, payload: FormData) => apiClient.put(OPERATION_CATEGORY_ENDPOINTS.updateOperationCategory(id), payload),
+
+  activateOperationCategory: (id: string) => apiClient.patch(OPERATION_CATEGORY_ENDPOINTS.activateOperationCategory(id)),
+
+  deactivateOperationCategory: (id: string) =>apiClient.patch(OPERATION_CATEGORY_ENDPOINTS.deactivateOperationCategory(id))
 }
