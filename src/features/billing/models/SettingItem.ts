@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { SettingTypeSchema } from "../types/settingType";
 
 export const SettingBaseSchema = z.object({
   code: z.string().min(1),
@@ -6,7 +7,7 @@ export const SettingBaseSchema = z.object({
   description: z.string().default(""),
   isActive: z.boolean(),
   badge: z.string().optional(),
-  type: z.string(),
+  type: SettingTypeSchema,
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
 });
