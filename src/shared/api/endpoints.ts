@@ -137,3 +137,26 @@ export const  AUDITLOGS_ENDPOINTS = {
  getAuditLogsByIdClient: (id: string) => `/logs/logs-clients/${id}`, 
  getAuditLogsByIdSupplier: (id: string) => `/logs/logs-suppliers/${id}`, 
 }  
+
+export const OPERATION_CATEGORY_ENDPOINTS = {
+  getAllOperationCategories: () => "/operation-categories",
+
+  getOperationCategory: (id: string) => `/operation-categories/${id}`,
+
+  getOperationCategoryByCode: (code: string) =>
+    `/operation-categories/code/${code}`,
+
+  getOperationCategoryByLabel: (label: string) =>
+    `/operation-categories/label/${label}`,
+
+  createOperationCategory: () => "/operation-categories",
+
+  updateOperationCategory: (id: string) =>
+    `/operation-categories/${id}`,
+
+  activateOperationCategory: (id: string) =>
+    `/operation-categories/${id}/activate`,
+
+  deactivateOperationCategory: (id: string) =>
+    `/operation-categories/${id}/deactivate`
+}

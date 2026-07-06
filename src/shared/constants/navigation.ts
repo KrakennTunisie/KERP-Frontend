@@ -69,6 +69,7 @@ export const NAVIGATION_ITEMS = [
           { title: "Paiements Clients", href: "/billing/payments" },
           { title: "Bons des commandes clients", href: "/billing/purchaseOrder/clients" },
           { title: "Bons des commandes Fournisseurs", href: "/billing/purchaseOrder/suppliers" },
+          { title: "Paramètres", href: "/billing/parameters" },
         ],
       },
       {
