@@ -62,7 +62,7 @@ export default function useCreateCreditNote({ invoiceId }: InvoiceDetailsProps) 
     const form = useForm<creditNoteFormValues>({
         resolver: zodResolver(invoiceCreditNoteCreateSchema),
         defaultValues: {
-            invoiceCreditNoteNumber: uuidv4(),
+            invoiceCreditNoteNumber: "",
             issueDate: new Date(),
             creationDate: new Date(),
             sentToclientDate: null,
@@ -88,7 +88,9 @@ export default function useCreateCreditNote({ invoiceId }: InvoiceDetailsProps) 
         keyName: "fieldId",
     });
     const previewData = useWatch({ control });
-
+  const getError = (field: keyof creditNoteFormValues) => {
+          return errors[field]?.message as string | undefined;
+      };
     useEffect(() => {
         if (nextNumber?.value) {
             form.setValue("invoiceCreditNoteNumber", nextNumber.value, {
@@ -408,6 +410,7 @@ export default function useCreateCreditNote({ invoiceId }: InvoiceDetailsProps) 
         setCreditNoteItemMap,
         filteredItems,
         syncItems,
-        getMaxQuantity
+        getMaxQuantity,
+        getError
     }
 }

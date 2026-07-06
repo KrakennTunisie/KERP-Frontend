@@ -24,6 +24,7 @@ import {
 import useCreatePayment from "../../hooks/useCreateUpdatePayment";
 import { invoiceStatusLabels } from "../../types/invoiceStatus";
 import { DocumentPreviewModal } from "@/shared/components/ui/documentPreviewModal";
+import { Textarea } from "@/shared/components/ui/textArea";
 
 type PaymentFormPageProps = {
   mode: "create" | "update" | "clone";
@@ -207,6 +208,17 @@ const submitLoading = createLoading || updateLoading;
                   ))}
                 </FormSelect>
               </div>
+
+
+                <div className="mt-4">
+                    <Textarea
+                        label="Commentaires"
+                        placeholder="Ajouter un commentaire..."
+                        rows={3}
+                        {...register("comment")}
+                        error={getError("comment")}
+                    />
+                </div>
             </Card>
           </div>
 
@@ -235,7 +247,7 @@ const submitLoading = createLoading || updateLoading;
                     </p>
 
                     <p className="mt-1 text-xs font-semibold text-slate-500">
-                      {selectedInvoice.partner?.partnerName ?? "—"}
+                      {selectedInvoice.partner?.companyName ?? "—"}
                     </p>
                   </div>
 

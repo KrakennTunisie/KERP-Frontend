@@ -143,7 +143,7 @@ export function SearchableInvoiceSelect({
 
       {selectedInvoice && !open && (
         <p className="text-xs font-medium text-slate-500">
-          {selectedInvoice.partner.partnerName} · Reste à payer :{" "}
+          {selectedInvoice.partner.companyName} · Reste à payer :{" "}
           <span className="font-bold text-slate-800">
             {selectedInvoice.remainingAmount.toFixed(2)+" "+selectedInvoice.invoiceCurrency}
           </span>
@@ -195,7 +195,7 @@ export function SearchableInvoiceSelect({
                     </p>
 
                     <p className="mt-0.5 truncate text-xs font-medium text-slate-500">
-                    {invoice.partner.partnerName}
+                    {invoice.partner.companyName}
                     </p>
                 </div>
 

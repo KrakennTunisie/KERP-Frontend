@@ -1,5 +1,5 @@
 import { BaseItem } from "@/features/billing/models/invoiceItem";
-import { PdfDocumentType,  PdfTotals } from "./types";
+import { PdfDocumentType,  PdfLineItem,  PdfTotals } from "./types";
 
 export function formatPdfDate(value?: Date | string | null): string {
   if (!value) return "-";
@@ -97,21 +97,20 @@ export function formatMoney(
   }
 }
 
-export function calculateLineHT(item: BaseItem): number {
+export function calculateLineHT(item: PdfLineItem): number {
   const gross = item.quantity * item.unityPriceEXclTax;
   return gross ;
 }
 
-export function calculateLineTax(item: BaseItem): number {
-  return calculateLineHT(item) * ((item.vatRate || 0) / 100);
+export function calculateLineTax(item: PdfLineItem): number {
+  return (calculateLineHT(item)- (item.discountTotal ?? 0)) * ((item.vatRate || 0) / 100);
 }
 
-export function calculatePdfTotals(items: BaseItem[]): PdfTotals {
+export function calculatePdfTotals(items: PdfLineItem[]): PdfTotals {
   return items.reduce<PdfTotals>(
     (acc, item) => {
-      const gross = item.quantity * item.unityPriceEXclTax;
       const lineHT = calculateLineHT(item);
-      const discount = gross - lineHT;
+      const discount = item.discountTotal ?? 0;
       const tax = calculateLineTax(item);
 
       acc.subtotalHT += lineHT;

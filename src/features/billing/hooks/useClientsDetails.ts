@@ -16,6 +16,7 @@ import { PurchaseOrderPageItem } from "../models/purchaseOrder";
 import { InvoiceCreditNotePageItem } from "../models/creditNote";
 import { DocumentOrFile } from "@/shared/components/ui/documentPreviewModal";
 import { PartnerDocumentType } from "../types/documentType";
+import { PaymentListItem } from "../models/payment";
 
 
 export type PartnerDetailsProps = {
@@ -74,10 +75,12 @@ export default function UseClientsDetails({ partner, onRefresh }: PartnerDetails
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deletePOrderOpen, setDeletePOrderOpen] = useState(false);
   const [deleteCNoteOpen, setDeleteCNoteOpen] = useState(false);
+  const [deletePaymentOpen, setDeletePaymentOpen] = useState(false);
   const [modalPurchaseOrderOpen, setModalPurchaseOrderOpen] = useState(false);
   const [modalSupplierPurchaseOrderOpen, setModalSupplierPurchaseOrderOpen] = useState(false);
   const [sendeMailOpen, setSendMailOpen] = useState(false);
-  const [selected, setSelected] = useState<InvoicePageItem | InvoiceCreditNotePageItem | PurchaseOrderPageItem | null>();
+  const [selected, setSelected] = useState<InvoicePageItem | InvoiceCreditNotePageItem | PurchaseOrderPageItem |null>();
+  const [selectedDelete, setSelectedDelete] = useState<InvoicePageItem | InvoiceCreditNotePageItem | PurchaseOrderPageItem |PaymentListItem |null>();
   const [selectedEmail, setSelectedEmail] = useState<string | null>(null)
   const [invoiceRef, setInvoiceRef] = useState("");
   const [invoiceId, setInvoiceId] = useState("");
@@ -282,6 +285,6 @@ export default function UseClientsDetails({ partner, onRefresh }: PartnerDetails
     , TotalIcon, HeaderIcon, open, setOpen, openSections, pageConfig, fetchPartnerStats, clientRevenue, totalRevenue, sendeMailOpen, setSendMailOpen,
     updatePartnerStatus, deletePartnerOpen, setDeletePartnerOpen, updatePartnerStatusOpen, setUpdatePartnerStatusOpen, deleteCreditInvoice,
     setDeleteCNoteOpen, deleteCNoteOpen, creditNoteId, setCreditNoteId, modalSupplierPurchaseOrderOpen, setModalSupplierPurchaseOrderOpen, selected, setSelected, invoiceType, setInvoiceType,
-    addDocumentLoading, addDocumentType, setAddDocumentType, onAddDocument,
+    addDocumentLoading, addDocumentType, setAddDocumentType, onAddDocument, deletePaymentOpen, setDeletePaymentOpen, selectedDelete, setSelectedDelete
   };
 }

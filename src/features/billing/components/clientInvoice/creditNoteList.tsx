@@ -61,9 +61,10 @@ export default function CreditNoteList({ invoiceId, type }: InvoiceDetailsProps)
                 </Link>}
             </div>
             <DeleteInvoiceModal
+                documentType="credit-note"
                 open={deleteOpen}
                 onClose={() => setDeleteOpen(false)}
-                invoiceRef={creditNoteRef}
+                documentRef={creditNoteRef}
                 onConfirm={deleteClientInvoice} />
             
             <SendDocumentModal

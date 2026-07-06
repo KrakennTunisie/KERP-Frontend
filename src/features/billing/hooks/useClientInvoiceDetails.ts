@@ -9,6 +9,7 @@ import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 import { DocumentOrFile } from "@/shared/components/ui/documentPreviewModal";
 import { openDocumentInNewTab } from "@/shared/pdf/pdfGenerator";
 import { InvoiceStatus, invoiceStatusSchema, InvoiceStatusWithoutAll } from "../types/invoiceStatus";
+import { InvoiceCreditNotePageItem } from "../models/creditNote";
 export type InvoiceDetailsProps = {
   invoiceId: string,
   type: "CLIENT"|"SUPPLIER"
@@ -192,6 +193,6 @@ function sendToTTN ()
         nextStatus,
         sendOpen, setSendOpen,
         deleteClientInvoice,
-        telecharger
+        telecharger,
     })
 }

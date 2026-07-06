@@ -137,9 +137,9 @@ export default function useSupplierInvoiceList() {
   };
 
 
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [debouncedSearchQuery]);
+    useEffect(() => {
+      setCurrentPage(1);
+    }, [filtre, debouncedSearchQuery]);
 
   useEffect(() => {
 

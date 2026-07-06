@@ -54,7 +54,7 @@ export function usePaymentList() {
   
       useEffect(() => {
         setCurrentPage(1);
-      }, [debouncedSearchQuery]);
+      }, [methodFilter, debouncedSearchQuery]);
   
       useEffect(() => {
         

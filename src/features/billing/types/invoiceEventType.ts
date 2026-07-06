@@ -20,6 +20,46 @@ export const InvoiceEventTypeSchema = z.enum([
   'FX_RATE_APPLIED',
 ])
 
+export const UserEventTypeSchema = z.enum([
+  "CREATED",
+  "UPDATED",
+  "DELETED",
+  "ACTIVATED",
+  "DEACTIVATED",
+  "BLOCKED",
+  "UNBLOCKED",
+  "ROLE_ASSIGNED",
+  "ROLE_REMOVED",
+  "PASSWORD_RESET_REQUESTED",
+  "PASSWORD_RESET",
+  "PASSWORD_CHANGED",
+  "EMAIL_CHANGED",
+  "LOGIN_SUCCEEDED",
+  "LOGIN_FAILED",
+  "LOGOUT",
+]);
+
+export type UserEventType = z.infer<typeof UserEventTypeSchema>;
+
+export const UserEventTypeLabels: Record<UserEventType, string> = {
+  CREATED: "Création",
+  UPDATED: "Modification",
+  DELETED: "Suppression",
+  ACTIVATED: "Activation",
+  DEACTIVATED: "Désactivation",
+  BLOCKED: "Blocage",
+  UNBLOCKED: "Déblocage",
+  ROLE_ASSIGNED: "Attribution d'un rôle",
+  ROLE_REMOVED: "Retrait d'un rôle",
+  PASSWORD_RESET_REQUESTED: "Demande de réinitialisation du mot de passe",
+  PASSWORD_RESET: "Réinitialisation du mot de passe",
+  PASSWORD_CHANGED: "Changement du mot de passe",
+  EMAIL_CHANGED: "Modification de l'adresse e-mail",
+  LOGIN_SUCCEEDED: "Connexion réussie",
+  LOGIN_FAILED: "Échec de connexion",
+  LOGOUT: "Déconnexion",
+};
+
 export type InvoiceEventType = z.infer<typeof InvoiceEventTypeSchema>
 
 export const InvoiceEventLabels: Record<InvoiceEventType, string> = {

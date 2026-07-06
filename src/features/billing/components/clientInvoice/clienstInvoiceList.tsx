@@ -9,7 +9,7 @@ import { BillingPageHeader } from "../widgets/billingHeader";
 import { StatusFilterBar } from "../widgets/billingFilterBar";
 import { BillingTable } from "../widgets/billingTable";
 import { InvoicePageItem } from "../../models/invoice";
-import { UpdateInvoiceStatusModal } from "../widgets/updateStatusModal";
+import { Status, UpdateDocumentStatusModal } from "../widgets/updateStatusModal";
 
 export default function ClientsInvoiceList() {
 
@@ -101,21 +101,22 @@ export default function ClientsInvoiceList() {
                     variant="emerald"
                 />
                 <DeleteInvoiceModal
+                    documentType="invoice"
                     open={deleteOpen}
                     onClose={() => setDeleteOpen(false)}
-                    invoiceRef={invoiceRef}
+                    documentRef={selectedInvoice?.invoiceNumber}
                     onConfirm={deleteClientInvoice}
                     loading={deleteLoading} />
 
             </div>
-            <UpdateInvoiceStatusModal
+            <UpdateDocumentStatusModal
+                documentType="invoice"
                 open={updateOpen}
                 onClose={() => setUpdateOpen(false)}
                 onConfirm={updateStatus}
-                invoiceNumber={selectedInvoice?.invoiceNumber}
+                documentNumber={selectedInvoice?.invoiceNumber}
                 currentStatus={selectedInvoice?.invoiceStatus}
-                nextStatus={nextStatus}
-                type="invoice"
+                nextStatus={nextStatus as Status}
                 onNextStatusChange={setNextStatus}
                 allowedStatuses={
                     selectedInvoice
@@ -185,23 +186,6 @@ export default function ClientsInvoiceList() {
                         status !== "ALL" ? invoiceStatusColors[status] : ""
                     }
                 />
-
-            <UpdateInvoiceStatusModal
-                open={updateOpen}
-                onClose={() => setUpdateOpen(false)}
-                onConfirm={updateStatus}
-                invoiceNumber={selectedInvoice?.invoiceNumber}
-                currentStatus={selectedInvoice?.invoiceStatus}
-                type="invoice"
-                nextStatus={nextStatus}
-                onNextStatusChange={setNextStatus}
-                allowedStatuses={
-                    selectedInvoice
-                        ? getClientInvoiceAllowedNextStatuses(selectedInvoice.invoiceStatus)
-                        : []
-                }
-                isSubmitting={updateLoading}
-            />
         </div>
 
 

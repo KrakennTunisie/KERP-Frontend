@@ -7,7 +7,7 @@ import { getSupplierInvoiceAllowedNextStatuses, invoiceStatusColors, invoiceStat
 import { StatusFilterBar } from "../widgets/billingFilterBar";
 import { BillingPageHeader } from "../widgets/billingHeader";
 import { BillingTable } from "../widgets/billingTable";
-import { UpdateInvoiceStatusModal } from "../widgets/updateStatusModal";
+import { Status, UpdateDocumentStatusModal } from "../widgets/updateStatusModal";
 import { DeleteInvoiceModal } from "../widgets/deleteInvoiceModal";
 import UploadInvoiceModal from "../widgets/uploadInvoiceModal";
 import InvoiceFormModal from "./createSupplierInvoice";
@@ -21,7 +21,7 @@ export default function SuppliersInvoiceList() {
         setUpdateOpen,
         updateOpen,
         updateLoading,
-        updateStatus, invoiceRef, handleUpload, 
+        updateStatus, invoiceRef, handleUpload,
         selectedInvoice, setSelectedInvoice, deleteSupplierInvoice,
         nextStatus, setNextStatus, deleteOpen, deleteLoading, setDeleteOpen,
         loading, suppliersInvoiceStats, isUploadInvoiceOpen, setIsUploadInvoiceOpen } = useSupplierInvoiceList();
@@ -89,9 +89,10 @@ export default function SuppliersInvoiceList() {
             </div>
 
             <DeleteInvoiceModal
+                documentType="invoice"
                 open={deleteOpen}
                 onClose={() => setDeleteOpen(false)}
-                invoiceRef={invoiceRef}
+                documentRef={invoiceRef}
                 onConfirm={deleteSupplierInvoice}
                 loading={deleteLoading} />
 
@@ -109,14 +110,14 @@ export default function SuppliersInvoiceList() {
                 onDownloadFitered={() => console.log("onDownloadFitered")}
             />
 
-            <UpdateInvoiceStatusModal
+            <UpdateDocumentStatusModal
+                documentType="invoice"
                 open={updateOpen}
                 onClose={() => setUpdateOpen(false)}
                 onConfirm={updateStatus}
-                invoiceNumber={selectedInvoice?.invoiceNumber}
+                documentNumber={selectedInvoice?.invoiceNumber}
                 currentStatus={selectedInvoice?.invoiceStatus}
-                nextStatus={nextStatus}
-                type="invoice"
+                nextStatus={nextStatus as Status}
                 onNextStatusChange={setNextStatus}
                 allowedStatuses={
                     selectedInvoice
@@ -154,7 +155,7 @@ export default function SuppliersInvoiceList() {
                     setDeleteOpen(true);
                 }}
                 getNumber={(invoice) => invoice.invoiceNumber}
-                getPartnerName={(invoice) => invoice.partner?.partnerName}
+                getPartnerName={(invoice) => invoice.partner?.companyName}
                 getStatus={(invoice) => invoice.invoiceStatus}
                 getAmountEUR={(invoice) => invoice.totalInclTaxEUR}
                 getAmountTND={(invoice) => invoice.totalInclTaxTND}
@@ -166,14 +167,14 @@ export default function SuppliersInvoiceList() {
             />
 
 
-            <UpdateInvoiceStatusModal
+            <UpdateDocumentStatusModal
                 open={updateOpen}
                 onClose={() => setUpdateOpen(false)}
                 onConfirm={updateStatus}
-                invoiceNumber={selectedInvoice?.invoiceNumber}
+                documentNumber={selectedInvoice?.invoiceNumber}
                 currentStatus={selectedInvoice?.invoiceStatus}
-                type="invoice"
-                nextStatus={nextStatus}
+                documentType="invoice"
+                nextStatus={nextStatus as Status}
                 onNextStatusChange={setNextStatus}
                 allowedStatuses={
                     selectedInvoice
@@ -189,7 +190,7 @@ export default function SuppliersInvoiceList() {
                 onClose={() => setIsUploadInvoiceOpen(false)}
                 onUpload={handleUpload}
             />
-            
+
         </div>
 
     );

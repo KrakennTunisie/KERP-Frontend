@@ -6,7 +6,7 @@ type NotAuthorizedProps = {
 };
 
 export const NotAuthorized = ({
-  resource = "ressource",
+  resource ,
   message,
   actionLabel,
   onAction,
@@ -21,7 +21,7 @@ export const NotAuthorized = ({
 
       <p className="text-sm text-slate-500 mt-1">
         {message ||
-          `Vous n'avez pas l'autorisation d'accéder à ce${resource ? " " + resource : "tte ressource"}.`}
+          `Vous n'avez pas l'autorisation d'accéder à ${resource ? " " + resource : "cette ressource"}.`}
       </p>
 
       {actionLabel && onAction && (

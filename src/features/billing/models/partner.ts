@@ -13,14 +13,19 @@ export const partnerSchema = z.object({
   idPartner: z.uuid(),
   active: z.boolean(),
   enablePortal: z.boolean,
-  maritalStatus: z.string().min(1).or(z.literal("")).nullable(),
-  partnerName: z.string().min(3, "Le nom doit contenir au moins 3 caractères").or(z.literal("")).nullable(),
+  maritalStatus: z.string().nullable().or(z.literal("")),
+  partnerName: z.string().min(3, "Le nom doit contenir au moins 3 caractères").nullable().or(z.literal("")),
   companyName: z.string().min(3, "Le nom doit contenir au moins 3 caractères"),
   displayName: z.string().min(3, "Le nom doit contenir au moins 3 caractères").or(z.literal("")).nullable(),
-  email: z.email("Email invalide").or(z.literal("")).nullable(),
-  professionnalPhoneNumber: z.number().min(8, "Le numéro de téléphone est invalide").or(z.literal("")).nullable(),
-  personnelPhoneNumber: z.number().min(8, "Le numéro de téléphone est invalide").or(z.literal("")).nullable(),
-  taxRegistrationNumber: z.string().min(1, "La matricule fiscale est obligatoire").or(z.literal("")).nullable(),
+  email: z.string().or(z.literal(""))
+    .nullable(),
+  professionnalPhoneNumber: z
+    .union([z.number(), z.nan(), z.string()])
+    .nullable(),
+  personnelPhoneNumber:  z
+    .union([z.number(), z.nan(), z.string()])
+    .nullable(),
+  taxRegistrationNumber: z.string().min(1).nullable().or(z.literal("")),
   currency: currencyTypeSchema.or(z.literal("")).nullable(),
   taxRate: tvaRateStringSchema.or(z.literal("")).nullable(),
   paymentCondition: PaymentConditionSchema.or(z.literal("")).nullable(),
@@ -200,6 +205,8 @@ export const partnerSummarySchema = partnerSchema.pick({
   professionnalPhoneNumber: true,
   taxRegistrationNumber: true,
   partnerType: true,
+  currency: true,
+  taxRate: true,
 });
 export const upadtePartnerSchema = addPartnerSchema.pick({
   partnerType: true,

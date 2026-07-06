@@ -55,7 +55,8 @@ export default function PartnerDetails({ partner, clientRevenueInitial, supplier
     , TotalIcon, HeaderIcon, open, setOpen, openSections, pageConfig, fetchPartnerStats,clientRevenue, totalRevenue ,sendeMailOpen, setSendMailOpen,
     updatePartnerStatus, deletePartnerOpen, setDeletePartnerOpen, updatePartnerStatusOpen, setUpdatePartnerStatusOpen,deleteCreditInvoice,
     addDocumentLoading, setDeleteCNoteOpen,deleteCNoteOpen,creditNoteId,setCreditNoteId, modalSupplierPurchaseOrderOpen, setModalSupplierPurchaseOrderOpen, selected, setSelected, invoiceType, setInvoiceType
-    ,onAddDocument ,addDocument ,sendDocumentOpen, setSendDocumentOpen, setShowDetails, showDetails, selectedEmail, setSelectedEmail, openAddDocument, setOpenAddDocument} = UseClientsDetails({ partner, partnerStats, clientRevenueInitial, supplierDespensesInitial, totalRevenueInitial, totalDespensesInitial, onRefresh});
+    ,onAddDocument ,addDocument ,sendDocumentOpen, setSendDocumentOpen, setShowDetails, showDetails, selectedEmail, setSelectedEmail, openAddDocument, setOpenAddDocument
+  } = UseClientsDetails({ partner, partnerStats, clientRevenueInitial, supplierDespensesInitial, totalRevenueInitial, totalDespensesInitial, onRefresh});
   const router = useRouter();
   const onAction = ()=>{
     if(partner && partner.partnerType === partnerTypeSchema.enum.CLIENT){
@@ -81,18 +82,28 @@ export default function PartnerDetails({ partner, clientRevenueInitial, supplier
         onUpdate={onAction}
        />
       <DeleteInvoiceModal
+        documentType="invoice"
         open={deleteOpen}
         onClose={() => setDeleteOpen(false)}
         onConfirm={() => deleteClientInvoice(invoiceType)}
         loading={deleteLoading} />
 
       <DeleteInvoiceModal
+        documentType="purchase-order"
         open={deletePOrderOpen}
         onClose={() => setDeletePOrderOpen(false)}
         onConfirm={() => deletePurchaseOrder(purchaseOrderId)}
         loading={deleteLoading} />
 
       <DeleteInvoiceModal
+        documentType="credit-note"
+        open={deleteCNoteOpen}
+        onClose={() => setDeleteCNoteOpen(false)}
+        onConfirm={() => deleteCreditInvoice()}
+        loading={deleteLoading} />
+      
+      <DeleteInvoiceModal
+        documentType="payment"
         open={deleteCNoteOpen}
         onClose={() => setDeleteCNoteOpen(false)}
         onConfirm={() => deleteCreditInvoice()}
@@ -290,7 +301,7 @@ export default function PartnerDetails({ partner, clientRevenueInitial, supplier
                     menuTitle="Actions facture"
                     getNumber={(item) => item.invoiceNumber}
                     getDate={(item) => item.issueDate}
-                    getAmount={(item) => item.invoiceCurrency == currencyTypeSchema.enum.EUR ? item.totalInclTaxEUR : item.invoiceCurrency == currencyTypeSchema.enum.USD ? item.totalInclTaxTND : item.totalInclTaxUSD}
+                    getAmount={(item) => item.invoiceCurrency == currencyTypeSchema.enum.EUR ? item.totalInclTaxEUR : item.invoiceCurrency == currencyTypeSchema.enum.USD ? item.totalInclTaxUSD : item.totalInclTaxTND}
                     getCurrency={(item) => item.invoiceCurrency}
                     getStatus={(item) => item.invoiceStatus}
                     statusLabels={invoiceStatusLabels}

@@ -1,0 +1,171 @@
+name: CI/CD - Next.js
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  #------------------------
+  # 1. TEST
+  #------------------------
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4       
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4      
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Installer les dépendances
+        run: npm ci
+
+      - name: Vérification du lint
+        run: npm run lint
+
+      - name: Vérification du Typescript
+        run: npm run type-check --if-present
+
+  #----------------------------
+  # 2. BUILD
+  #----------------------------
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4      
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Installer les dépendances
+        run: npm ci
+
+      - name: Build Next.js
+        run: npm run build
+
+      - name: Install Docker Compose   
+        run: |
+          sudo curl -L "https://github.com/docker/compose/releases/download/v2.6.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+          docker-compose --version
+
+      - name: Login to GHCR             
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate lowercase image name   
+        id: image
+        run: |
+          IMAGE_NAME=$(echo "ghcr.io/${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          echo "name=$IMAGE_NAME" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and Push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ steps.image.outputs.name }}:latest
+
+      - name: Cleanup
+        run: docker system prune -f
+
+  #---------------------------------
+  # 3. DEPLOY
+  #---------------------------------
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    needs: build                        
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          password: ${{ secrets.SERVER_PASSWORD }}
+          script: |
+            set -e
+            cd /home/oumaima
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+            docker compose pull kerp-frontend
+            docker compose up -d kerp-frontend
+            docker image prune -f    
+  #---------------------------------
+  # 4. SMOKE TEST
+  #---------------------------------
+  smoke-test:
+    runs-on: ubuntu-latest
+    needs: deploy
+    steps:
+      - name: Wait for services to start
+        run: sleep 30
+
+      - name: Check Eureka
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            http://${{ secrets.SERVER_HOST }}:8761/actuator/health)
+          [ "$STATUS" = "200" ] || (echo "Eureka KO ($STATUS)" && exit 1)
+
+      - name: Check Config Server
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            http://${{ secrets.SERVER_HOST }}:8888/actuator/health)
+          [ "$STATUS" = "200" ] || (echo "Config Server KO ($STATUS)" && exit 1)
+
+     
+      - name: Check Billing Service
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            http://${{ secrets.SERVER_HOST }}:8081/actuator/health)
+          [ "$STATUS" = "200" ] || (echo "Billing KO ($STATUS)" && exit 1)
+
+      - name: Check Frontend via Nginx
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" -L \
+            https://kerp-web.duckdns.org/)
+          [[ "$STATUS" = "200" || "$STATUS" = "401" ]] || (echo "Frontend KO ($STATUS)" && exit 1)
+  #---------------------------------
+  # 5. Deploy prod
+  #---------------------------------
+  deploy-prod:
+    runs-on: ubuntu-latest
+    needs: smoke-test
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.PRO_SERVER_IP }}
+          username: root
+          key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
+          debug: true
+          script: |
+            set -eux
+            whoami
+            cd /root/opt/kerp
+
+            # (optionnel mais recommandé si registry privé ou token)
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+            docker compose pull kerp-frontend
+            docker compose up -d kerp-frontend
+
+            docker image prune -f

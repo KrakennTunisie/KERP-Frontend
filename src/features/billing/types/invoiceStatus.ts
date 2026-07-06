@@ -10,6 +10,7 @@ export const invoiceStatusSchema = z.enum([
   "PAID",
   "OVERDUE",
   "CANCELLED",
+  "ARCHIVED",
   "REFUNDED",
   "NOT_REFUNDED",
   "IN_PROGRESS"
@@ -22,6 +23,7 @@ export const invoiceStatusSchemaWithoutAll = z.enum([
   "PARTIALLY_PAID",
   "PAID",
   "OVERDUE",
+  "ARCHIVED",
   "CANCELLED",
   "REFUNDED",
   "NOT_REFUNDED",
@@ -43,6 +45,7 @@ export const invoiceStatusLabels: Record<InvoiceStatus, string> = {
   PAID: "PAYÉE",
   OVERDUE: "EN RETARD",
   CANCELLED: "ANNULÉE",
+  ARCHIVED: "ARCHIVÉE",
   REFUNDED: "REMBOURSÉE",
   NOT_REFUNDED: "NON REMBOURSÉE",
   IN_PROGRESS: "En cours",
@@ -59,51 +62,55 @@ export const invoiceStatusColors: Record<
   PAID: "bg-emerald-100 text-emerald-700 border border-emerald-200",
   OVERDUE:"bg-red-100 text-red-700 border border-red-200",
   CANCELLED: "bg-red-100 text-red-700 border border-red-200",
+  ARCHIVED: "bg-gray-100 text-gray-700 border border-gray-200",
   REFUNDED: "bg-emerald-100 text-emerald-700 border border-emerald-200",
   NOT_REFUNDED: "bg-red-100 text-red-700 border border-red-200",
   IN_PROGRESS: "bg-indigo-100 text-indigo-700 border border-indigo-200",
 };
 
 export const CLIENT_INVOICES_STATUS_PASSAGE_POLICY: Record<InvoiceStatus, InvoiceStatus[]> = {
-  DRAFT: [ "TO_COLLECT", "CANCELLED"],
+  DRAFT: ["TO_COLLECT", "CANCELLED"],
   TO_PAY: [],
   TO_COLLECT: ["PAID", "CANCELLED"],
-  PARTIALLY_PAID: ["PARTIALLY_PAID","PAID", "CANCELLED"],
+  PARTIALLY_PAID: ["PARTIALLY_PAID", "PAID", "CANCELLED"],
   PAID: [],
-  OVERDUE:["PARTIALLY_PAID","PAID", "CANCELLED"],
+  OVERDUE: ["PARTIALLY_PAID", "PAID", "CANCELLED"],
   CANCELLED: [],
   ALL: [],
   REFUNDED: [],
   NOT_REFUNDED: [],
-  IN_PROGRESS: ["PAID"]
+  IN_PROGRESS: ["PAID"],
+  ARCHIVED: []
 };
 
 export const SUPPLIER_STATUS_PASSAGE_POLICY: Record<InvoiceStatus, InvoiceStatus[]> = {
   DRAFT: ["TO_PAY", "CANCELLED"],
   TO_PAY: ["PAID", "CANCELLED"],
   TO_COLLECT: [],
-  PARTIALLY_PAID: ["PARTIALLY_PAID","PAID", "CANCELLED"],
+  PARTIALLY_PAID: ["PARTIALLY_PAID", "PAID", "CANCELLED"],
   PAID: [],
-  OVERDUE:[],
-  CANCELLED: ["PARTIALLY_PAID","PAID"],
+  OVERDUE: [],
+  CANCELLED: ["PARTIALLY_PAID", "PAID"],
   ALL: [],
   REFUNDED: [],
   NOT_REFUNDED: [],
-  IN_PROGRESS: ["PAID"]
+  IN_PROGRESS: ["PAID"],
+  ARCHIVED: []
 };
 
 export const CREDIT_NOTE_STATUS_PASSAGE_POLICY: Record<InvoiceStatus, InvoiceStatus[]> = {
-  DRAFT: [ "CANCELLED", "IN_PROGRESS"],
+  DRAFT: ["CANCELLED", "IN_PROGRESS"],
   TO_PAY: [],
   TO_COLLECT: [],
   PARTIALLY_PAID: [],
   PAID: [],
-  OVERDUE:[],
+  OVERDUE: [],
   CANCELLED: [],
   ALL: [],
   REFUNDED: [],
   NOT_REFUNDED: [],
-  IN_PROGRESS: ["REFUNDED","NOT_REFUNDED"]
+  IN_PROGRESS: ["REFUNDED", "NOT_REFUNDED"],
+  ARCHIVED: []
 };
 
 export const getClientInvoiceAllowedNextStatuses = (

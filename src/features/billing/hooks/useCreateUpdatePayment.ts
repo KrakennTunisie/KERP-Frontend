@@ -10,6 +10,7 @@ import {
   CreatePaymentFormInput,
   CreatePaymentFormValues,
   UpdatePaymentFormValues,
+  Payment,
 } from "../models/payment";
 
 import { getApiErrorMessage } from "@/shared/api/handle-api-error";
@@ -51,6 +52,7 @@ export default function useCreatePayment({
   const [pdf, setPdf]= useState<File | null>(null)
   const[max, setMax]= useState(0)
   const[total, setTotal]= useState(0)
+  const [payment, setPayment]= useState<Payment| null>(null)
 
   const debouncedSearchQuery = useDebounce(search, 500);
 
@@ -61,6 +63,7 @@ export default function useCreatePayment({
     method: "method" as Path<CreatePaymentFormInput>,
     invoiceNumber: "invoiceNumber" as Path<CreatePaymentFormInput>,
     currency: "currency" as Path<CreatePaymentFormInput>,
+    comment: "comment" as Path<CreatePaymentFormInput>,
   };
 
   const {
@@ -83,6 +86,7 @@ export default function useCreatePayment({
       paymentDocument: null,
       paymentNumber: "",
       invoice: null,
+      comment:""
     },
   });
 
@@ -206,6 +210,7 @@ const fetchPaymentDetails = async () => {
       invoice: null,
       paymentDocument: null,
       paymentNumber: paymentNumber,
+      comment: payment.comment ?? "",
     });
 
     if (payment.invoice) {
@@ -213,6 +218,7 @@ const fetchPaymentDetails = async () => {
           ...payment.invoice
       }  as InvoicePageItem);
     }
+    setPayment(payment as unknown as Payment)
   } catch (error) {
     appToast.error(
       isClone
@@ -280,6 +286,7 @@ const fetchPaymentDetails = async () => {
     formData.append("amount", String(data.amount));
     formData.append("currency", data.currency);
     formData.append("method", data.method);
+    formData.append("comment", data.comment)
     
     if( data.paymentDocument)
     formData.append("paymentDocument", data.paymentDocument)
@@ -366,8 +373,15 @@ function getInvoiceTotalByCurrency(invoice: InvoicePageItem): number {
 }
 
   useEffect(()=>{
-        setMax(selectedInvoice ?  selectedInvoice.remainingAmount : 0);
+    if(mode=="create")
+    {
+      setMax(selectedInvoice ?  selectedInvoice.remainingAmount : 0);
+      setTotal(selectedInvoice ? getInvoiceTotalByCurrency(selectedInvoice) : 0)
+    }
+    if(mode=="update"){
+        setMax(payment ?  payment.amount : 0);
         setTotal(selectedInvoice ? getInvoiceTotalByCurrency(selectedInvoice) : 0)
+    }
   },[selectedInvoice])
 
   return {

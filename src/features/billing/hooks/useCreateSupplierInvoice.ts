@@ -291,6 +291,8 @@ export default function useCreateSupplierInvoice() {
                     itemTotalInclTax: (quantity * item.unityPriceEXclTax) * (1 + item.vatRate / 100),
                     operationCategory: item.operationCategory,
                     quantity,
+                    discountType: item.discountType,
+                    discountValue: item.discountValue,
                     purchaseOrderItem: cleanPurchaseOrderItem,
                     creditedQuantity: 0,
                 };
@@ -480,7 +482,7 @@ export default function useCreateSupplierInvoice() {
      }, [open, extractedData, form]);*/
 
     const handleAddOption = async (value: string) => {
-       
+
         if (addModalTarget === "paymentCondition") {
             // ...
         }

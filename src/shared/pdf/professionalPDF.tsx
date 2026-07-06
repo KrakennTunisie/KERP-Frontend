@@ -9,6 +9,8 @@ import {
 import { PdfDocumentData, PdfParty } from "./types";
 import { calculateLineHT, calculatePdfTotals, formatMoney, formatNumber, formatPdfDate, formatPdfDateTime, getAccentColor, getBuyerLabel, getDocumentNumberPrefix, getDocumentSoftColor, getDocumentTitle, getMainTotalLabel, getPaymentLabel } from "./utils";
 import { OperationCategoryLabels } from "@/features/billing/types/operationCategory";
+import { getDiscountLabel } from "@/features/billing/lib/invoiceItemHelpers";
+import { CurrencyType } from "@/features/billing/types/currency";
 
 const styles = StyleSheet.create({
   page: {
@@ -550,6 +552,26 @@ paymentTotalCard: {
   backgroundColor: "#F8FAFC",
   border: "1 solid #E7ECF5",
 },
+
+thDiscount: {
+  width: "12%",
+  textAlign: "right",
+},
+
+thNet: {
+  width: "12%",
+  textAlign: "right",
+},
+
+tdDiscount: {
+  width: "12%",
+  textAlign: "right",
+},
+
+tdNet: {
+  width: "12%",
+  textAlign: "right",
+},
 });
 
 type ProfessionalDocumentPdfProps = {
@@ -679,6 +701,8 @@ function ItemsTable({ data }: { data: PdfDocumentData }) {
         <Text style={styles.thQty}>Qté</Text>
         <Text style={styles.thPrice}>P.U HT</Text>
         <Text style={styles.thTotal}>Total HT</Text>
+        <Text style={styles.thDiscount}>Remise</Text>
+        <Text style={styles.thNet}>Net HT</Text>
       </View>
 
       {data.items.length === 0 ? (
@@ -703,7 +727,15 @@ function ItemsTable({ data }: { data: PdfDocumentData }) {
             </View>
             <Text style={styles.tdQty}>{item.quantity}</Text>
             <Text style={styles.tdPrice}>{formatNumber(item.unityPriceEXclTax)}</Text>
-            <Text style={styles.tdTotal}>{formatNumber(calculateLineHT(item))}</Text>
+            <Text style={styles.tdTotal}>{formatNumber(item.itemTotalExclTax)}</Text>
+
+              <Text style={styles.tdDiscount}>
+                {getDiscountLabel(item, data.currency as CurrencyType)}
+              </Text>
+
+              <Text style={styles.tdNet}>
+                {formatNumber(item.netHT)}
+              </Text>
           </View>
         ))
       )}
@@ -714,31 +746,51 @@ function ItemsTable({ data }: { data: PdfDocumentData }) {
 function Totals({ data }: { data: PdfDocumentData }) {
   const totals = calculatePdfTotals(data.items);
 
+  const netHT = totals.subtotalHT - totals.discountTotal;
+  const totalTTC = netHT + totals.taxTotal;
+
   return (
     <View style={styles.totalsZone}>
       <View style={styles.totalLine}>
         <Text style={styles.totalLabel}>Total HT</Text>
-        <Text style={styles.totalValue}>{formatMoney(totals.subtotalHT, data.currency)}</Text>
+        <Text style={styles.totalValue}>
+          {formatMoney(totals.subtotalHT, data.currency)}
+        </Text>
       </View>
 
-      {totals.discountTotal > 0 && (
-        <View style={styles.totalLine}>
-          <Text style={styles.totalLabel}>Remise</Text>
-          <Text style={styles.totalValue}>-{formatMoney(totals.discountTotal, data.currency)}</Text>
-        </View>
-      )}
+      <View style={styles.totalLine}>
+        <Text style={styles.totalLabel}>Remise totale</Text>
+        <Text style={styles.totalValue}>
+          -{formatMoney(totals.discountTotal, data.currency)}
+        </Text>
+      </View>
+
+      <View style={styles.totalLine}>
+        <Text style={styles.totalLabel}>Net HT</Text>
+        <Text style={styles.totalValue}>
+          {formatMoney(netHT, data.currency)}
+        </Text>
+      </View>
 
       <View style={styles.totalLine}>
         <Text style={styles.totalLabel}>Total TVA</Text>
-        <Text style={styles.totalValue}>{formatMoney(totals.taxTotal, data.currency)}</Text>
+        <Text style={styles.totalValue}>
+          {formatMoney(totals.taxTotal, data.currency)}
+        </Text>
       </View>
 
       <View style={styles.totalSeparator} />
 
       <View style={styles.grandTotalLine}>
-        <Text style={styles.grandTotalLabel}>{getMainTotalLabel(data.type)}</Text>
+        <Text style={styles.grandTotalLabel}>
+          {getMainTotalLabel(data.type)}
+        </Text>
+
         <Text style={styles.grandTotalValue}>
-          {formatNumber(totals.totalTTC)} <Text style={styles.grandTotalCurrency}>{data.currency}</Text>
+          {formatNumber(totalTTC)}{" "}
+          <Text style={styles.grandTotalCurrency}>
+            {data.currency}
+          </Text>
         </Text>
       </View>
     </View>
@@ -878,6 +930,11 @@ function PaymentNotice({ data }: { data: PdfDocumentData }) {
         été enregistré pour la facture {invoiceNumber}. Il ne remplace pas la
         facture originale.
       </Text>
+      {data.notes && (
+        <Text style={[styles.paymentNoticeText, { marginTop: 6 }]}>
+          {data.notes}
+        </Text>
+      )}
     </View>
   );
 }

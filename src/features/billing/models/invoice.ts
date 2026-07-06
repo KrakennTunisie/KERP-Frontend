@@ -41,6 +41,7 @@ const baseInvoiceSchema = z.object({
     }, {
       message: "Les lignes de facture doivent être uniques",
     }),
+  comment: z.string(),
 });
 
 const withDueDateValidation = <T extends z.ZodTypeAny>(schema: T) =>
@@ -154,6 +155,7 @@ export const invoiceCreateSchema = withDueDateValidation(
     invoiceItems: true,
     totalExclTax: true,
     totalInclTax: true,
+    comment: true,
   })
   .extend({
     invoiceDocument: fileSchema.nullable(),
@@ -167,7 +169,15 @@ export const invoiceCreateSchema = withDueDateValidation(
     invoiceComplianceStatus: invoiceComplianceStatusSchema.nullable(),
     partner: z.lazy(() => partnerSummarySchema).nullable(),
     purchaseOrder:z.lazy(() => purchaseOrderSummaryDTO).nullable()
-  })
+  }).superRefine((data, ctx) => {
+      if (!data.partner) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["partner"],
+          message: "Le client est obligatoire",
+        });
+      }
+    })
 );
 
 export const invoiceUpdateSchema = withDueDateValidation(
