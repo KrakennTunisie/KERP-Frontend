@@ -9,6 +9,8 @@ import { BillingPageHeader } from "../widgets/billingHeader";
 import { BillingTable } from "../widgets/billingTable";
 import { UpdateInvoiceStatusModal } from "../widgets/updateStatusModal";
 import { DeleteInvoiceModal } from "../widgets/deleteInvoiceModal";
+import UploadInvoiceModal from "../widgets/uploadInvoiceModal";
+import InvoiceFormModal from "./createSupplierInvoice";
 
 
 export default function SuppliersInvoiceList() {
@@ -19,10 +21,10 @@ export default function SuppliersInvoiceList() {
         setUpdateOpen,
         updateOpen,
         updateLoading,
-        updateStatus,invoiceRef,
+        updateStatus, invoiceRef, handleUpload, 
         selectedInvoice, setSelectedInvoice, deleteSupplierInvoice,
         nextStatus, setNextStatus, deleteOpen, deleteLoading, setDeleteOpen,
-        loading, suppliersInvoiceStats } = useSupplierInvoiceList();
+        loading, suppliersInvoiceStats, isUploadInvoiceOpen, setIsUploadInvoiceOpen } = useSupplierInvoiceList();
     const invoiceStatuses = invoiceStatusSchema.options
         .filter(
             (status) =>
@@ -41,6 +43,8 @@ export default function SuppliersInvoiceList() {
             <BillingPageHeader
                 title="Factures Fournisseurs"
                 description="Consultation et suivi des factures d’achat"
+                createLabel="Nouvelle facture fournisseur"
+                onCreateClick={() => setIsUploadInvoiceOpen(true)}
             />
             {/* Stats */}
             <div className="flex gap-4 mb-8">
@@ -100,9 +104,9 @@ export default function SuppliersInvoiceList() {
                 defaultStatus={invoiceStatusSchema.enum.TO_COLLECT}
                 statuses={invoiceStatuses}
                 searchPlaceholder="Référence ou client..."
-                onDownloadAll={()=>console.log("DownloadALL")}
-                onDownloadCurrentYear={()=>console.log("onDownloadCurrentYear")}
-                onDownloadFitered={()=>console.log("onDownloadFitered")}
+                onDownloadAll={() => console.log("DownloadALL")}
+                onDownloadCurrentYear={() => console.log("onDownloadCurrentYear")}
+                onDownloadFitered={() => console.log("onDownloadFitered")}
             />
 
             <UpdateInvoiceStatusModal
@@ -123,45 +127,45 @@ export default function SuppliersInvoiceList() {
             />
 
             {/* Table */}
-                                <BillingTable<InvoicePageItem>
-                                    items={suppliersInvoices}
-                                    variant="invoice"
-                                    secondColumnLabel="Client"
-                                    currentPage={currentPage}
-                                    totalPages={totalPages}
-                                    totalElements={totalElements}
-                                    loading={loading}
-                                    onPageChange={setCurrentPage}
-                                    onView={(invoice) => {
-                                        router.push(`/billing/invoices/suppliers/details/${invoice.idInvoice}`);
-                                    }}
-                                    onUpdateStatus={(invoice) => {
-                                        setSelectedInvoice(invoice);
-                                        setInvoiceId(invoice.idInvoice);
-                                        setUpdateOpen(true);
-                                    }}
-                                    canUpdateStatus={(invoice) =>
-                                        getSupplierInvoiceAllowedNextStatuses(invoice.invoiceStatus).length > 0
-                                    }
-                                    onDelete={(invoice) => {
+            <BillingTable<InvoicePageItem>
+                items={suppliersInvoices}
+                variant="invoice"
+                secondColumnLabel="Client"
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalElements={totalElements}
+                loading={loading}
+                onPageChange={setCurrentPage}
+                onView={(invoice) => {
+                    router.push(`/billing/invoices/suppliers/details/${invoice.idInvoice}`);
+                }}
+                onUpdateStatus={(invoice) => {
+                    setSelectedInvoice(invoice);
+                    setInvoiceId(invoice.idInvoice);
+                    setUpdateOpen(true);
+                }}
+                canUpdateStatus={(invoice) =>
+                    getSupplierInvoiceAllowedNextStatuses(invoice.invoiceStatus).length > 0
+                }
+                onDelete={(invoice) => {
 
-                                            setSelectedInvoice(invoice);
-                                            setInvoiceId(invoice.idInvoice);
-                                            setDeleteOpen(true);                                    
-                                        }}
-                                    getNumber={(invoice) => invoice.invoiceNumber}
-                                    getPartnerName={(invoice) => invoice.partner?.partnerName}
-                                    getStatus={(invoice) => invoice.invoiceStatus}
-                                    getAmountEUR={(invoice) => invoice.totalInclTaxEUR}
-                                    getAmountTND={(invoice) => invoice.totalInclTaxTND}
-                                    getDate={(invoice) => invoice.dueDate ?? invoice.issueDate}
-                                    getStatusLabel={(status) => invoiceStatusLabels[status]}
-                                    getStatusColor={(status) =>
-                                        status !== "ALL" ? invoiceStatusColors[status] : ""
-                                    }
-                                />
+                    setSelectedInvoice(invoice);
+                    setInvoiceId(invoice.idInvoice);
+                    setDeleteOpen(true);
+                }}
+                getNumber={(invoice) => invoice.invoiceNumber}
+                getPartnerName={(invoice) => invoice.partner?.partnerName}
+                getStatus={(invoice) => invoice.invoiceStatus}
+                getAmountEUR={(invoice) => invoice.totalInclTaxEUR}
+                getAmountTND={(invoice) => invoice.totalInclTaxTND}
+                getDate={(invoice) => invoice.dueDate ?? invoice.issueDate}
+                getStatusLabel={(status) => invoiceStatusLabels[status]}
+                getStatusColor={(status) =>
+                    status !== "ALL" ? invoiceStatusColors[status] : ""
+                }
+            />
 
-                                
+
             <UpdateInvoiceStatusModal
                 open={updateOpen}
                 onClose={() => setUpdateOpen(false)}
@@ -178,6 +182,14 @@ export default function SuppliersInvoiceList() {
                 }
                 isSubmitting={updateLoading}
             />
+
+            <UploadInvoiceModal
+                open={isUploadInvoiceOpen}
+                loading={loading}
+                onClose={() => setIsUploadInvoiceOpen(false)}
+                onUpload={handleUpload}
+            />
+            
         </div>
 
     );

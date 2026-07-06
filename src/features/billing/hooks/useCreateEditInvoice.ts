@@ -606,8 +606,6 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
   const onSubmit = handleSubmit(
     async () => {
       const values = getValues();
-
-      console.log(getValues("purchaseOrder"))
       const pdfFile = await generatePdfFile(invoiceToPdfData(values));
       if (pdfFile) {
         setValue("invoiceDocument", pdfFile, { shouldValidate: true, shouldDirty: true });
