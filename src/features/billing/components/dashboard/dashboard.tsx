@@ -184,7 +184,7 @@ console.log("suppliersByMonth: ",suppliersByMonth)
       }
 
   return (
-    <div className="flex min-h-screen flex-col bg-gray-50/30">
+    <div className="flex min-h-screen bg-white flex-col bg-gray-50/30">
     <header className="border-b border-slate-200 bg-white px-5 py-4">
   <div className="mx-auto">
 

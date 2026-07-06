@@ -4,9 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
 
-import { BaseItem,  PurchaseOrderItem, } from "../models/invoiceItem";
-import {defaultPurchaseOrderItem} from "../models/invoiceItem";
-import {  PartnerSummary } from "../models/partner";
+import { BaseItem, PurchaseOrderItem, } from "../models/invoiceItem";
+import { defaultPurchaseOrderItem } from "../models/invoiceItem";
+import { PartnerSummary } from "../models/partner";
 import {
   calculateInvoiceTotals,
   calculUnityPrice,
@@ -87,7 +87,7 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
     try {
       setLoadingEdit(true)
       console.log(purchaseOrderId)
-      const po = await PurchaseOrderAPI.getSupplierPurchaseOrderById(purchaseOrderId !);
+      const po = await PurchaseOrderAPI.getSupplierPurchaseOrderById(purchaseOrderId!);
       setPurchaseOrder(po);
     } catch (error) {
       appToast.error("Erreur Fetch du fournisseur:", getApiErrorMessage(error));
@@ -108,7 +108,7 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
       }
     }
     catch (error: any) {
-       console.error("Erreur complète:", error); 
+      console.error("Erreur complète:", error);
       appToast.error("Erreur de fetch des bon de commande: ", getApiErrorMessage(error))
     }
   }
@@ -160,30 +160,30 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
   }, [selectedCurrency, mode]);
 
 
-    useEffect(() => {
-      if (mode !== "create") return;
-  
-      if (selectedCurrency === "TND") {
-        form.setValue("appliedExchangeRate", 1, {
-          shouldValidate: true,
-          shouldDirty: false,
-        });
-        return;
-      }
-  
-      if (exchangeRate?.quote) {
-        form.setValue("appliedExchangeRate", exchangeRate.quote, {
-          shouldValidate: true,
-          shouldDirty: false,
-        });
-      }
-    }, [exchangeRate, selectedCurrency, mode]);
+  useEffect(() => {
+    if (mode !== "create") return;
+
+    if (selectedCurrency === "TND") {
+      form.setValue("appliedExchangeRate", 1, {
+        shouldValidate: true,
+        shouldDirty: false,
+      });
+      return;
+    }
+
+    if (exchangeRate?.quote) {
+      form.setValue("appliedExchangeRate", exchangeRate.quote, {
+        shouldValidate: true,
+        shouldDirty: false,
+      });
+    }
+  }, [exchangeRate, selectedCurrency, mode]);
 
 
 
   useEffect(() => {
     if (mode === "edit" && purchaseOrder) {
-     console.log("Status reçu:", purchaseOrder?.purchaseOrderStatus);
+      console.log("Status reçu:", purchaseOrder?.purchaseOrderStatus);
       reset({
         idPurchaseOrder: purchaseOrder.idPurchaseOrder,
         purchaseOrderNumber: purchaseOrder.purchaseOrderNumber,
@@ -216,7 +216,7 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
           exchangeRateSourceSchema.enum.EXTERNAL_API,
         purchaseOrderDocument: null,
         purchaseOrderStatus: purchaseOrder.purchaseOrderStatus,
-        purchaseOrderType : purchaseOrder.purchaseOrderType
+        purchaseOrderType: purchaseOrder.purchaseOrderType
       });
       console.log(purchaseOrder)
     }
@@ -224,7 +224,7 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
 
   // UI state only
   const [supplierSearch, setSupplierSearch] = useState("");
-  const [clients, setClients] = useState<PartnerSummary[] | []>([])
+  const [suppliers, setSuppliers] = useState<PartnerSummary[] | []>([])
   const [loadingSuppliers, setLoadingSuppliers] = useState(false)
   const [showDropdown, setShowDropdown] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -270,7 +270,14 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
         keyword: keyword,
       });
 
-      setClients(response);
+      const castedSuppliers = response.map((supplier) => ({
+        ...supplier,
+        professionnalPhoneNumber: supplier.professionnalPhoneNumber
+          ? Number(supplier.professionnalPhoneNumber)
+          : null,
+      }));
+
+      setSuppliers(castedSuppliers);
     } catch (error) {
       appToast.error("Erreur de fetch fournisseurs: ", getApiErrorMessage(error))
     } finally {
@@ -286,18 +293,18 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
   //Synchronisation des items lors d'un nouveau item
   const syncItems = (newItems: BaseItem[]) => {
     const mappedItems: PurchaseOrderItem[] = newItems.map(item => ({
-        ...item,
-        idPurchaseOrderItem: (item as PurchaseOrderItem).idPurchaseOrderItem ?? uuidv4(),
-        purchaseOrder: (item as PurchaseOrderItem).purchaseOrder ?? null,
-        invoicedQuantity: (item as PurchaseOrderItem).invoicedQuantity ?? 0,
+      ...item,
+      idPurchaseOrderItem: (item as PurchaseOrderItem).idPurchaseOrderItem ?? uuidv4(),
+      purchaseOrder: (item as PurchaseOrderItem).purchaseOrder ?? null,
+      invoicedQuantity: (item as PurchaseOrderItem).invoicedQuantity ?? 0,
     }));
 
     replace(mappedItems);
     setValue("purchaseOrderItems", mappedItems, {
-        shouldValidate: true,
-        shouldDirty: true,
+      shouldValidate: true,
+      shouldDirty: true,
     });
-};
+  };
 
 
   // Ajout d'un card qui permet l'ajout les données d'unt item (P.U ,QT , TVA)
@@ -372,8 +379,8 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
   /* eslint-disable react-hooks/refs */
   const onSubmit = handleSubmit(
     async () => {
-            const pdfFile = await generatePdfFile(purchaseOrderToPdfData(getValues()));
-      
+      const pdfFile = await generatePdfFile(purchaseOrderToPdfData(getValues()));
+
       if (pdfFile) {
         setValue("purchaseOrderDocument", pdfFile, { shouldValidate: true, shouldDirty: true });
         setPdfUrl(pdfFile);
@@ -392,9 +399,9 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
 
   //Création de bon commande
   async function createPurchaseOrder() {
-  
+
     try {
-  
+
       setLoadingForm(true)
 
       const values = getValues();
@@ -448,83 +455,83 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
       const message = getApiErrorMessage(e);
       appToast.error("Échec de création, veuillez réessayer.", message);
     }
-    finally{
-            setLoadingForm(false)
+    finally {
+      setLoadingForm(false)
     }
   }
   const updatePurchaseOrder = async () => {
-  
 
-      try {
 
-        setLoadingForm(true)
+    try {
 
-        const values = getValues();
-        const documentFile = values.purchaseOrderDocument ?? pdfUrl;
-    
-        console.log("values: ", values)
-        if (!documentFile) {
-          appToast.error("Erreur de création", "Le document PDF est vide.");
-          return;
-        }
-    
-        if (!values.partner) {
-          appToast.error("Erreur de création", "Aucun client sélectionné.");
-          return;
-        }
-    
-        const formData = new FormData();
-  
-        formData.append("idPurchaseOrder", values.idPurchaseOrder);
-  
-        formData.append("purchaseOrderNumber", values.purchaseOrderNumber);
-        formData.append("issueDate", values.issueDate.toISOString());
-  
-        formData.append("purchaseOrderStatus", purchaseOrderStatusSchema.enum.IN_DELIVERY)
-        formData.append("purchaseOrderType", values.purchaseOrderType)
-        formData.append("purchaseCurrency", values.currency);
-        formData.append("vatRate", String(0));
-        formData.append("paymentMethod", values.paymentMethod);
-        formData.append("paymentCondition", values.paymentCondition);
-  
-        formData.append(
-          "exchangeRateReferenceDate", values.exchangeRateReferenceDate.toISOString()
-        );
-        formData.append(
-          "appliedExchangeRate",
-          String(values.appliedExchangeRate)
-        );
-        formData.append("exchangeRateSource", values.exchangeRateSource);
-  
-        formData.append("partner", values.partner.idPartner);
-  
-  
-        if (values.purchaseOrderItems?.length) {
-  
-          formData.append("purchaseOrderItemsList", JSON.stringify(values.purchaseOrderItems));
-        }
-  
-        formData.append("purchaseOrderDocument", documentFile);
-  
-        for (const pair of formData.entries()) {
-          console.log(pair[0], pair[1]);
-        }
-        const createdInvoice = await PurchaseOrderAPI.updateSupplierPurchaseOrder(formData);
-  
-        if (createdInvoice) {
-          appToast.success("Bon de commande mise à jour avec succès");
-          setIsModalOpen(false);
-          router.push("/billing/purchaseOrder/suppliers")
-        }
-      } catch (e: unknown) {
-        const message = getApiErrorMessage(e);
-        appToast.error("Échec de modification, veuillez réessayer.", message);
+      setLoadingForm(true)
+
+      const values = getValues();
+      const documentFile = values.purchaseOrderDocument ?? pdfUrl;
+
+      console.log("values: ", values)
+      if (!documentFile) {
+        appToast.error("Erreur de création", "Le document PDF est vide.");
+        return;
       }
-      finally{
-        setLoadingForm(false)
+
+      if (!values.partner) {
+        appToast.error("Erreur de création", "Aucun client sélectionné.");
+        return;
       }
-  
+
+      const formData = new FormData();
+
+      formData.append("idPurchaseOrder", values.idPurchaseOrder);
+
+      formData.append("purchaseOrderNumber", values.purchaseOrderNumber);
+      formData.append("issueDate", values.issueDate.toISOString());
+
+      formData.append("purchaseOrderStatus", purchaseOrderStatusSchema.enum.IN_DELIVERY)
+      formData.append("purchaseOrderType", values.purchaseOrderType)
+      formData.append("purchaseCurrency", values.currency);
+      formData.append("vatRate", String(0));
+      formData.append("paymentMethod", values.paymentMethod);
+      formData.append("paymentCondition", values.paymentCondition);
+
+      formData.append(
+        "exchangeRateReferenceDate", values.exchangeRateReferenceDate.toISOString()
+      );
+      formData.append(
+        "appliedExchangeRate",
+        String(values.appliedExchangeRate)
+      );
+      formData.append("exchangeRateSource", values.exchangeRateSource);
+
+      formData.append("partner", values.partner.idPartner);
+
+
+      if (values.purchaseOrderItems?.length) {
+
+        formData.append("purchaseOrderItemsList", JSON.stringify(values.purchaseOrderItems));
+      }
+
+      formData.append("purchaseOrderDocument", documentFile);
+
+      for (const pair of formData.entries()) {
+        console.log(pair[0], pair[1]);
+      }
+      const createdInvoice = await PurchaseOrderAPI.updateSupplierPurchaseOrder(formData);
+
+      if (createdInvoice) {
+        appToast.success("Bon de commande mise à jour avec succès");
+        setIsModalOpen(false);
+        router.push("/billing/purchaseOrder/suppliers")
+      }
+    } catch (e: unknown) {
+      const message = getApiErrorMessage(e);
+      appToast.error("Échec de modification, veuillez réessayer.", message);
     }
+    finally {
+      setLoadingForm(false)
+    }
+
+  }
 
 
 
@@ -545,7 +552,7 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
     // Client UI
     supplierSearch,
     setSupplierSearch,
-    clients,
+    suppliers,
     showDropdown,
     setShowDropdown,
     selectSupplier,

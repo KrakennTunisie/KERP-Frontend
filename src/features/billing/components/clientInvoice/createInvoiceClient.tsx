@@ -43,7 +43,7 @@ export default function CreateInvoiceClient({ mode,
     }
 
     return (
-    <div className={`flex flex-col {${showPreview ? "overflow-y-auto" : "overflow-hidden"}`}>
+    <div className={`flex flex-col  bg-white min-h-screen {${showPreview ? "overflow-y-auto" : "overflow-hidden"}` }>
             {/* ── Header ── */}
             <header className="sticky top-0 z-30 bg-white border-b border-slate-100 px-6 py-4 flex items-center justify-between shadow-sm">
                 <div className="flex items-center gap-4">

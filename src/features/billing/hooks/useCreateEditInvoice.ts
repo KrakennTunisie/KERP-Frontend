@@ -520,7 +520,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
   const selectClient = (client: PartnerSummary) => {
     setValue("partner", client, { shouldValidate: true, shouldDirty: true, });
     setClientSearch(client.partnerName!);
-    setValue("invoiceCurrency", client.currency!, {
+    setValue("invoiceCurrency", client.currency as CurrencyType, {
     shouldValidate: true,
     shouldDirty: true,
   });
@@ -650,8 +650,6 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
   const onSubmit = handleSubmit(
     async () => {
       const values = getValues();
-
-      console.log(getValues("purchaseOrder"))
       const pdfFile = await generatePdfFile(invoiceToPdfData(values));
       if (pdfFile) {
         setValue("invoiceDocument", pdfFile, { shouldValidate: true, shouldDirty: true });

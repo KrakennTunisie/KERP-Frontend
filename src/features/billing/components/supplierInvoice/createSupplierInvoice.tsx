@@ -1,0 +1,579 @@
+"use client";
+
+import { useEffect } from "react";
+import { SectionTitle } from "../widgets/sectionTitle";
+import { OperationCategoryLabels, operationCategorySchema } from "../../types/operationCategory";
+import { tvaRateSchema } from "../../types/tvaRate";
+import ErrorForm from "../widgets/errorForm";
+import { invoiceTypeSchema } from "../../types/invoiceType";
+import { paymentMethodLabels, paymentMethodSchema } from "../../types/paymentMethod";
+import { PaymentCondition, PaymentConditionLabels, PaymentConditionSchema } from "../../types/paymentCondition";
+import { currencyTypeSchema } from "../../types/currency";
+import { purchaseOrderStatusLabels } from "../../types/purchaseOrderStatus";
+import { Controller } from "react-hook-form";
+import { Modal } from "@/shared/components/ui/modal";
+import useCreateSupplierInvoice, { InvoiceFormModalProps } from "../../hooks/useCreateSupplierInvoice";
+import { DocumentViewer } from "@/shared/components/ui/DocumentViewer";
+import { useParams, useRouter } from "next/navigation";
+import AddSupplierModal from "../widgets/addPartnerModal";
+import AddPartnerModal from "../widgets/addPartnerModal";
+import { partnerTypeSchema } from "../../types/partnerType";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select";
+import AddParameterModal from "@/shared/components/ui/addParameterValue";
+
+
+export default function CreateSupplierInvoice() {
+  const {
+    form, errors, linkedToPO, selectedPO, suppliers, supplierSearch, setSupplierSearch, showDropdown, setShowDropdown, previewData, purchaseOrders, getMaxQuantity,
+    invoiceSupplier, handleSave, selectSupplier, clearSupplier, loadingSave, addItem, removeItem, updateItem, handleTogglePO, register, canSaveInvoice, showAddPCModal,
+    setShowAddPCModal, showAddTVAModal, setShowAddTVAModal, showAddOPCModal, setShowAddOPCModal, addModalTarget, setAddModalTarget, handleAddOption
+    , invoiceSupplierType, loadingDraft, showAddSupplierModal, setShowAddSupplierModal, newSupplierName, setNewSupplierName } = useCreateSupplierInvoice();
+  const router = useRouter();
+
+  if (loadingDraft || !invoiceSupplier) {
+    return (
+      <div className="flex items-center justify-center bg-white  h-[calc(100vh-80px)]">
+        <p className="text-sm text-slate-400">Chargement de la facture extraite...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col overflow-hidden  bg-white min-h-screen">
+      {/* ── Header ── */}
+      <header className="sticky top-0 z-30 bg-white border-b border-slate-100 px-6 py-4 flex items-center justify-between shadow-sm">
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => router.back()}
+            className="w-9 h-9 rounded-xl border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-50 transition cursor-pointer"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <div>
+            <h1 className="text-xl font-bold text-slate-900 tracking-tight">
+              Validation de la facture fournisseur
+            </h1>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Contrôlez les données extraites face au document original avant enregistrement
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => router.back()}
+            className="px-5 py-2.5 text-sm font-semibold text-slate-600 hover:text-slate-900 transition cursor-pointer"
+          >
+            Annuler
+          </button>
+
+          <button
+            onClick={handleSave}
+            disabled={!canSaveInvoice || loadingSave}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold shadow-md transition ${!canSaveInvoice || loadingSave
+              ? "bg-gray-300 cursor-not-allowed text-gray-500 shadow-none"
+              : "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-200 cursor-pointer"
+              }`}
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+            {loadingSave ? "Enregistrement..." : "Valider & Enregistrer"}
+          </button>
+        </div>
+      </header>
+
+      <AddPartnerModal
+        isOpen={showAddSupplierModal}
+        initialCompanyName={newSupplierName}
+        partnerType={partnerTypeSchema.enum.SUPPLIER}
+        onClose={() => setShowAddSupplierModal(false)}
+      />
+      {addModalTarget === "tva" && (
+        <AddParameterModal
+          isOpen={showAddTVAModal}
+          title="Nouveau taux de TVA"
+          label="Taux TVA (%)"
+          placeholder="Ex: 19"
+          inputType="number"
+          min={1}
+          validate={(value) => {
+            const num = Number(value);
+            if (value.trim() === "" || Number.isNaN(num)) return "Le taux doit être un nombre";
+            if (num < 0 || num > 100) return "Le taux doit être compris entre 0 et 100";
+            return null;
+          }}
+          onClose={() => setShowAddTVAModal(false)}
+          onAdd={handleAddOption}
+        />
+      )}
+      {addModalTarget === "operationCategory" && (
+        <AddParameterModal
+          isOpen={showAddOPCModal}
+          title="Nouveau catégorie"
+          label="Nom de la catégorie"
+          placeholder="Prestation de service"
+          inputType="text"
+          validate={(value) => {
+
+            if (value.trim() === "") return "Le nom est obligatoire";
+            return null;
+          }}
+          onClose={() => setShowAddOPCModal(false)}
+          onAdd={handleAddOption}
+        />
+      )}
+
+      {addModalTarget === "paymentCondition" && (
+        <AddParameterModal
+          isOpen={showAddPCModal}
+          title="Nouvelle condition de paiement"
+          label="Nom de la condition"
+          placeholder="Ex: Net 60 jours"
+          validate={(value) => (value.trim().length < 2 ? "Le nom doit contenir au moins 2 caractères" : null)}
+          onClose={() => setShowAddPCModal(false)}
+          onAdd={handleAddOption}
+        />
+      )}
+
+      {/* ── Body : 2 colonnes ── */}
+      <div className="flex h-[calc(100vh-80px)]">
+
+        {/* ── Colonne formulaire (60 %) ── */}
+        <div className="w-3/5 overflow-y-auto">
+          <div className="max-w-4xl mx-auto p-6 flex flex-col gap-5">
+
+            {/* Bandeau d'alerte extraction */}
+            <div className="flex items-start gap-3 rounded-2xl border border-amber-100 bg-amber-50/60 px-4 py-3">
+              <svg className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+              </svg>
+              <p className="text-xs text-amber-700 leading-relaxed">
+                Ces champs ont été pré-remplis automatiquement à partir du document. Vérifiez chaque valeur en la comparant au document affiché à droite avant de valider.
+              </p>
+            </div>
+
+            {/* Section 01 — Référence */}
+            <section>
+              <SectionTitle number="01" invoiceType={invoiceTypeSchema.enum.PURCHASE} label="Référence" />
+              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 flex flex-col gap-4 mt-3">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-slate-500 mb-1">
+                      N° Facture
+                    </label>
+                    <input
+                      type="text"
+                      {...register("invoiceNumber")}
+                      className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-500 mb-1">
+                      {"Date d'émission"}
+                    </label>
+                    <Controller
+                      control={form.control}
+                      name="issueDate"
+                      render={({ field }) => (
+                        <input
+                          type="date"
+                          value={field.value ? (() => {
+                            const d = new Date(field.value);
+                            const year = d.getFullYear();
+                            const month = String(d.getMonth() + 1).padStart(2, "0");
+                            const day = String(d.getDate()).padStart(2, "0");
+                            return `${year}-${month}-${day}`;
+                          })() : ""}
+                          onChange={(e) => field.onChange(new Date(e.target.value))}
+                          className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
+                        />
+                      )}
+                    />
+                  </div>
+                </div>
+
+                {/* Toggle bon de commande */}
+                <div className="pt-3 border-t border-slate-100">
+                  <div className="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-slate-500">
+                        Lié à un bon de commande
+                      </p>
+                      <p className="text-sm text-slate-500 mt-1 leading-snug">
+                        Les champs seront rapprochés automatiquement de la commande sélectionnée.
+                      </p>
+                    </div>
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={linkedToPO}
+                        onChange={(e) => handleTogglePO(e.target.checked)}
+                        className="w-5 h-5 rounded-xl border-2 border-slate-200 bg-white accent-blue-600 cursor-pointer transition"
+                      />
+                    </label>
+                  </div>
+
+                  {linkedToPO && (
+                    <div className="mt-4">
+                      <label className="block text-xs font-medium text-slate-500 mb-1">
+                        Sélectionner le bon de commande
+                      </label>
+                      <select
+                        onChange={(e) => {
+                          const po = purchaseOrders.find((p) => p.idPurchaseOrder === e.target.value);
+
+                        }}
+                        className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
+                      >
+                        <option value="">-- Choisir une commande --</option>
+                        {purchaseOrders.map((po) => (
+                          <option key={po.idPurchaseOrder} value={po.idPurchaseOrder}>
+                            {po.purchaseOrderNumber} — {purchaseOrderStatusLabels[po.purchaseOrderStatus]}
+                          </option>
+                        ))}
+                      </select>
+
+                      {selectedPO && (
+                        <div className="mt-3 bg-blue-50/50 border border-blue-100 rounded-xl p-3 flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-xl bg-blue-100 flex items-center justify-center shrink-0">
+                            <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-blue-700 truncate">{selectedPO.purchaseOrderNumber}</p>
+                            <p className="text-xs text-blue-500 mt-0.5 truncate">{selectedPO.partner?.partnerName}</p>
+                          </div>
+                          <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wide bg-blue-100 px-2.5 py-1 rounded-full">
+                            {selectedPO.purchaseCurrency}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </section>
+
+            {/* Section 02 — Fournisseur */}
+            <section>
+              <SectionTitle number="02" invoiceType={invoiceTypeSchema.enum.PURCHASE} label="Fournisseur" />
+              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 flex flex-col gap-3 mt-3">
+                <div>
+                  <label className="block text-xs font-medium text-slate-500 mb-1">
+                    Sélectionner un fournisseur
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Rechercher un fournisseur..."
+                      value={supplierSearch}
+                      onChange={(e) => { setSupplierSearch(e.target.value); setShowDropdown(true); }}
+                      onFocus={() => setShowDropdown(true)}
+                      onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
+                      className="w-full px-3 py-2.5 pr-9 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
+                    />
+                    <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+                      <svg
+                        className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${showDropdown ? "rotate-180" : ""}`}
+                        fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                    {showDropdown && (
+                      <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-20 max-h-48 overflow-y-auto">
+                        {suppliers.map((supplier) => (
+                          <button
+                            key={supplier.idPartner}
+                            type="button"
+                            onMouseDown={(e) => { e.preventDefault(); selectSupplier(supplier); setSupplierSearch(supplier.companyName); }}
+                            className="w-full text-left px-4 py-3 hover:bg-blue-50 transition border-b border-slate-50 last:border-0"
+                          >
+                            <p className="text-sm font-bold text-slate-800">{supplier.companyName}</p>
+                            <p className="text-xs text-slate-400 mt-0.5">{supplier.billingAddress!.city}</p>
+                          </button>
+                        ))}
+                        {/* Lien pour ajouter un fournisseur inexistant */}
+                        <button
+                          type="button"
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            setNewSupplierName(supplierSearch);
+                            setShowAddSupplierModal(true);
+                            setShowDropdown(false);
+                          }}
+                          className="w-full text-left px-4 py-3 flex items-center gap-2 text-blue-600 hover:bg-blue-50 transition"
+                        >
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                          </svg>
+                          <span className="text-sm font-medium">Ajouter "{supplierSearch}" comme nouveau fournisseur</span>
+                        </button>
+                      </div>
+
+
+                    )}
+                  </div>
+                </div>
+
+                {previewData.partner && previewData.partner.email != "" && (
+                  <div className="border-2 border-blue-100 bg-blue-50/40 rounded-xl p-4">
+                    <div className="flex items-start justify-between mb-1">
+                      <p className="text-sm font-semibold text-slate-700">{previewData.partner.partnerName}</p>
+                      <button
+                        type="button"
+                        onClick={clearSupplier}
+                        disabled={linkedToPO && !!selectedPO}
+                        className="text-slate-300 hover:text-red-400 transition"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+
+
+                    <p className="text-xs text-blue-500 mb-2">{previewData.partner.billingAddress!.region}</p>
+                    <div className="grid grid-cols-2 gap-4">
+                      <span className="text-xs text-blue-500">{previewData.partner.email}</span>
+                      <span className="text-xs text-blue-500">{previewData.partner.professionnalPhoneNumber}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </section>
+
+            {/* Section 03 — Devise & Paiement */}
+            <section>
+              <SectionTitle number="03" invoiceType={invoiceTypeSchema.enum.PURCHASE} label="Devise & Paiement" />
+              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 mt-3">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-slate-500 mb-1">Devise</label>
+                    <select
+                      {...register("invoiceCurrency")}
+                      className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition disabled:opacity-50"
+                    >
+                      {currencyTypeSchema.options.map((currency) => (
+                        <option key={currency} value={currency}>{currency}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-slate-500 mb-1">Taux de change</label>
+                    <input
+                      type="text"
+                      {...register("appliedExchangeRate", { valueAsNumber: true })}
+                      className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-slate-500 mb-1">Condition de paiement</label>
+                    <Select
+                      {...register("paymentCondition")}
+                      defaultValue={PaymentConditionSchema.enum.NET_15}
+                    >
+                      <SelectTrigger className="bg-white">
+                        <SelectValue placeholder="Sélectionner une condition" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PaymentConditionSchema.options.map((condition) => (
+                          <SelectItem key={condition} value={condition}>
+                            {PaymentConditionLabels[condition]}
+                          </SelectItem>
+                        ))}
+                        <div
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setAddModalTarget("paymentCondition")
+                            setShowAddPCModal(true);
+                            console.log("hi")
+                          }}
+                          className="mt-1 cursor-pointer border-t border-slate-100 px-2 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50"
+                        >
+                          + Ajouter une condition de paiement
+                        </div>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-slate-500 mb-1">Méthode de paiement</label>
+                    <select
+                      {...register("paymentMethod")}
+                      className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
+                    >
+                      {paymentMethodSchema.options.map((method) => (
+                        <option key={method} value={method}>{paymentMethodLabels[method]}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Section 04 — Services */}
+            <section>
+              <div className="flex items-center justify-between">
+                <SectionTitle number="04" invoiceType={invoiceTypeSchema.enum.PURCHASE} label="Services" />
+                <button
+                  type="button"
+                  onClick={addItem}
+                  className="w-8 h-8 rounded-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center shadow-md shadow-blue-200 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="flex flex-col gap-3 mt-3">
+                {(previewData.invoiceItems ?? []).map((item, index) => {
+                  const lineTotal = item.quantity * item.unityPriceEXclTax;
+                  return (
+                    <div key={item.idInvoiceItem ?? index} className="rounded-xl border border-slate-200 bg-white p-4">
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="text-xs font-medium text-slate-500">Désignation</label>
+                        <button
+                          type="button"
+                          onClick={() => removeItem(item.idInvoiceItem!)}
+                          className="text-slate-300 hover:text-red-400 transition"
+                        >
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </div>
+                      <input
+                        type="text"
+                        value={item.description}
+                        onChange={(e) => updateItem(item.idInvoiceItem!, "description", e.target.value)}
+                        className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition mb-3"
+                      />
+
+                      <div className="mb-3">
+                        <label className="block text-xs font-medium text-slate-500 mb-1">Catégorie</label>
+                        <Select
+                          value={item.operationCategory}
+                          onValueChange={(value) => updateItem(item.idInvoiceItem!, "operationCategory", value)}
+
+                        >
+                          <SelectTrigger className="bg-white">
+                            <SelectValue placeholder="Sélectionner une catégorie" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {operationCategorySchema.options.map((value) => (
+                              <SelectItem key={value} value={value}>
+                                {OperationCategoryLabels[value]}
+                              </SelectItem>
+                            ))}
+                            <div
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setAddModalTarget("operationCategory")
+                                setShowAddOPCModal(true);
+                              }}
+                              className="mt-1 cursor-pointer border-t border-slate-100 px-2 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50"
+                            >
+                              + Ajouter une catégorie
+                            </div>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="grid grid-cols-4 gap-3">
+                        <div>
+                          <label className="block text-xs font-medium text-slate-500 mb-1">Qté</label>
+                          <input
+                            type="number"
+                            max={getMaxQuantity(item)}
+                            min={1}
+                            value={item.quantity}
+                            onChange={(e) => updateItem(item.idInvoiceItem!, "quantity", parseFloat(e.target.value) || 0)}
+                            className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 text-center focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-slate-500 mb-1">PU HT</label>
+                          <input
+                            type="text"
+                            defaultValue={item.unityPriceEXclTax}
+                            onBlur={(e) => updateItem(item.idInvoiceItem!, "unityPriceEXclTax", parseFloat(e.target.value))}
+                            className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 text-center focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-slate-500 mb-1">TVA</label>
+                          <Select
+                            value={item.vatRate.toString()}
+                            onValueChange={(value) => updateItem(item.idInvoiceItem!, "vatRate", value)}
+                          >
+                            <SelectTrigger className="bg-white">
+                              <SelectValue placeholder="Sélectionner un taux de TVA %" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {tvaRateSchema.options.map((rate) => (
+                                <SelectItem key={rate.value} value={rate.value.toString()}>
+                                  {rate.value}%
+                                </SelectItem>
+                              ))}
+                              <div
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  setAddModalTarget("tva")
+                                  setShowAddTVAModal(true);
+                                }}
+                                className="mt-1 cursor-pointer border-t border-slate-100 px-2 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50"
+                              >
+                                + Ajouter un taux TVA
+                              </div>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-slate-500 mb-1">Total HT</label>
+                          <input
+                            type="text"
+                            readOnly
+                            value={lineTotal.toFixed(2)}
+                            className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-100 text-sm font-semibold text-slate-700 text-center focus:outline-none transition"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              {errors.invoiceItems?.message && (
+                <ErrorForm error={errors.invoiceItems?.message} />
+              )}
+            </section>
+
+            {/* Section 05 — Commentaires */}
+            <section>
+              <SectionTitle number="05" invoiceType={invoiceTypeSchema.enum.PURCHASE} label="Commentaires" />
+              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 mt-3">
+                <textarea
+                  value={"test"}
+                  placeholder="Ajouter un commentaire..."
+                  className="w-full min-h-[100px] px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition resize-y"
+                />
+              </div>
+            </section>
+
+          </div>
+        </div>
+
+        {/* ── Colonne document réel (40 %) ── */}
+        <div className="w-2/5">
+          <DocumentViewer fileUrl={invoiceSupplier} fileType={invoiceSupplierType?.type === "application/pdf" ? "pdf" : "image"} />
+        </div>
+      </div>
+    </div>
+  );
+}
