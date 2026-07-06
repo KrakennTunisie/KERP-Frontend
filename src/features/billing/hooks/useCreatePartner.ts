@@ -200,9 +200,10 @@ export default function UseCreatePartner({ type, mode, partnerId }: pageProps) {
             formData.append("displayName",  (data.shortName as string) ?? "");
 
             formData.append("currency", data.currency!);
-            formData.append("email", data.email! ?? null);
-            formData.append("personnelPhoneNumber", data.mobilePhone!.toString() ?? null);
-            formData.append("professionnalPhoneNumber", data.workPhone!.toString()?? null);
+            formData.append("email", data.email ?? "");
+            
+            formData.append("personnelPhoneNumber", data.workPhone?.toString() ?? "");
+            formData.append("professionnalPhoneNumber", data.mobilePhone?.toString() ?? "");
             formData.append("Language", data.language ?? "");
 
             formData.append("taxRegistrationNumber", data.taxId! ?? "");
