@@ -6,19 +6,19 @@ import { tvaRateSchema } from "../../types/tvaRate";
 
 
 
-export function VatRateCard( {onDelete, onShow, onToggleActive, onAction}: cardProps) {
+export function VatRateCard({ onDelete, onShow, onToggleActive, onAction }: cardProps) {
 
-const vatRates: SettingItem[] = tvaRateSchema.options
-                                    .map((item)=>({
-                                        id: item.value.toString(),
-                                        code:"code",
-                                        label: item.value+"%",
-                                        type:"TVA",
-                                        description: "description",
-                                        isActive: true,
-                                        createdAt: new Date(),
-                                        updatedAt: new Date()
-                                      }))
+  const vatRates: SettingItem[] = tvaRateSchema.options
+    .map((item) => ({
+      id: item.value.toString(),
+      code: "code",
+      label: item.value + "%",
+      type: "TVA",
+      description: "description",
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }))
   return (
     <SettingCard
       title="Taux de TVA"

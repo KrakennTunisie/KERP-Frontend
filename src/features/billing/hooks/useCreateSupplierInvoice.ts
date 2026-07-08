@@ -70,6 +70,14 @@ export default function useCreateSupplierInvoice() {
         fetchPurchaseOrderSummary()
     }, [])
 
+    useEffect(() => {
+        const stored = sessionStorage.getItem('extractedInvoiceData');
+        if (stored) {
+            const data = JSON.parse(stored);
+            sessionStorage.removeItem('extractedInvoiceData');
+        }
+    }, []);
+
     /***** Initialisation .... */
     const form = useForm<InvoiceCreate>({
         resolver: zodResolver(invoiceCreateSchema),
@@ -98,6 +106,7 @@ export default function useCreateSupplierInvoice() {
             complianceQRcode: "",
             invoiceComplianceStatus: invoiceComplianceStatusSchema.enum.RECEIVED,
             invoiceDocument: null,
+            comment: "",
             vatAmount: 0,
         },
         mode: "onChange",
@@ -183,7 +192,6 @@ export default function useCreateSupplierInvoice() {
     const [showAddPCModal, setShowAddPCModal] = useState(false);
     const [showAddOPCModal, setShowAddOPCModal] = useState(false);
     const [showAddTVAModal, setShowAddTVAModal] = useState(false);
-    const [addModalTarget, setAddModalTarget] = useState("");
 
 
     // UI state only
@@ -193,40 +201,20 @@ export default function useCreateSupplierInvoice() {
     const [loadingSave, setLoadingSave] = useState(false)
     const [loadingDraft, setLoadingDraft] = useState(false)
     const [showDropdown, setShowDropdown] = useState(false);
-    const previousCurrencyRef = useRef<CurrencyType>("TND");
     const previewData = getValues();
 
     const getError = (field: keyof InvoiceCreate) => {
-              return errors[field]?.message as string | undefined;
-          };
+        return errors[field]?.message as string | undefined;
+    };
 
     const getItemError = (
-          index: number,
-          field: keyof InvoiceItem
-        ) => {
-          return errors.invoiceItems?.[index]?.[field]?.message as
+        index: number,
+        field: keyof InvoiceItem
+    ) => {
+        return errors.invoiceItems?.[index]?.[field]?.message as
             | string
             | undefined;
-        };
-
-    // Validation des données obligatoire
-    const canSaveInvoice =
-        isDirty &&
-        isValid &&
-        !!previewData.partner &&
-        !!previewData.invoiceItems?.length &&
-        !!previewData.dueDate &&
-        !!previewData.issueDate &&
-        !!previewData.paymentCondition &&
-        !!previewData.paymentMethod &&
-        previewData.invoiceItems.every(
-            (item) =>
-                item.description?.trim() &&
-                item.operationCategory?.trim() &&
-                item.quantity! > 0 &&
-                item.unityPriceEXclTax! >= 0 &&
-                item.vatRate! >= 0
-        );
+    }
 
 
 
@@ -278,51 +266,7 @@ export default function useCreateSupplierInvoice() {
 
     };
 
-    /***** Synchronisation des items lorsque la facture est réliée à un bon de commande */
-    const SyncPurchaseOrderItems = (newItems: BaseItem[], isInitialSync: boolean = false) => {
-        const mappedItems: InvoiceItem[] = newItems
-            .map((item: any) => {
-                const sourcePOItem = item.purchaseOrderItem ?? item;
 
-                const {
-                    idInvoiceItem,
-                    invoice,
-                    purchaseOrderItem,
-                    ...cleanPurchaseOrderItem
-                } = sourcePOItem;
-
-                const quantity = isInitialSync
-                    ? (sourcePOItem.quantity ?? 0) - (sourcePOItem.invoicedQuantity ?? 0)
-                    : (item.quantity ?? 0);
-
-                return {
-                    idInvoiceItem: item.idInvoiceItem ?? uuidv4(),
-                    invoice: item.invoice ?? null,
-                    description: item.description,
-                    unityPriceEXclTax: item.unityPriceEXclTax,
-                    vatRate: item.vatRate,
-                    itemTotalExclTax: (quantity * item.unityPriceEXclTax),
-                    itemTaxAmount: (quantity * item.unityPriceEXclTax) * (item.vatRate / 100),
-                    itemTotalInclTax: (quantity * item.unityPriceEXclTax) * (1 + item.vatRate / 100),
-                    operationCategory: item.operationCategory,
-                    quantity,
-                    discountType: item.discountType,
-                    discountValue: item.discountValue,
-                    purchaseOrderItem: cleanPurchaseOrderItem,
-                    creditedQuantity: 0,
-                };
-            })
-            .filter(item => item.quantity > 0);
-
-        console.log(mappedItems);
-
-        replace(mappedItems);
-
-        setValue("invoiceItems", mappedItems, {
-            shouldValidate: true,
-            shouldDirty: true,
-        });
-    };
 
     // Ajout d'un card qui permet l'ajout les données d'unt item (P.U ,QT , TVA)
     const addItem = () => {
@@ -373,11 +317,8 @@ export default function useCreateSupplierInvoice() {
         setValue("totalExclTax", totals.totalHT, { shouldValidate: true, shouldDirty: true });
         setValue("vatAmount", totals.totalTVA, { shouldValidate: true, shouldDirty: true });
         setValue("totalInclTax", totals.totalTTC, { shouldValidate: true, shouldDirty: true });
-        if (linkedToPO && selectedPO || invoice?.purchaseOrder != null) {
-            SyncPurchaseOrderItems(updatedItems, false);
-        } else {
-            syncItems(updatedItems);
-        }
+        syncItems(updatedItems);
+
     };
 
     // récupération de la quantité initiale d'un item lors de la modification => pour faire la référence
@@ -431,39 +372,6 @@ export default function useCreateSupplierInvoice() {
             setLoadingPurchaseOrders(false)
         }
     }
-    // récupérer un bon de commande séléctionnée
-    const fetchPurchaseOrder = async (idPurchaseOrder: string) => {
-        try {
-            //   setLoading(true)
-            const purchaseOrder = await PurchaseOrderAPI.getSupplierPurchaseOrderById(idPurchaseOrder);
-            return purchaseOrder;
-        } catch (error) {
-            appToast.error("Erreur Fetch du client:", getApiErrorMessage(error));
-        }
-        finally {
-            //   setLoading(false)
-        }
-    };
-
-    // désélectionnée un bon de commande
-    function handleTogglePO(checked: boolean) {
-        setLinkedToPO(checked);
-        if (!checked) {
-            setSelectedPO(null);
-
-            clearSupplier();
-            setValue("invoiceItems", [defaultInvoiceItem()], { shouldValidate: true, shouldDirty: true, });
-            setValue("issueDate", new Date(), { shouldValidate: true, shouldDirty: true, });
-            setValue("invoiceCurrency", currencyTypeSchema.enum.TND, { shouldValidate: true, shouldDirty: true, });
-            setValue("paymentCondition", PaymentConditionSchema.enum.NET_15, { shouldValidate: true, shouldDirty: true, });
-            setValue("paymentMethod", paymentMethodSchema.enum.BANK_TRANSFER, { shouldValidate: true, shouldDirty: true, });
-            setValue("totalExclTax", 0, { shouldValidate: true, shouldDirty: true });
-            setValue("vatAmount", 0, { shouldValidate: true, shouldDirty: true });
-            setValue("totalInclTax", 0, { shouldValidate: true, shouldDirty: true });
-            setValue("purchaseOrder", null);
-        }
-    }
-
 
 
 
@@ -480,27 +388,10 @@ export default function useCreateSupplierInvoice() {
         setValue("dueDate", date, { shouldValidate: true });
         return date;
     };
-    // Pré-remplissage à chaque ouverture avec les données extraites
-    /* useEffect(() => {
-       if (open && extractedData) {
-         form.reset({
-           invoiceNumber: extractedData.invoiceNumber ?? "",
-           issueDate: extractedData.issueDate ?? new Date(),
-           invoiceCurrency: extractedData.currency ?? "TND",
-           appliedExchangeRate: extractedData.exchangeRate ?? 1,
-           paymentCondition: extractedData.paymentTerms ?? "NET_15",
-           paymentMethod: extractedData.paymentMethod ?? "TRANSFER",
-           invoiceItems: extractedData.items ?? [],
-           // ... mappe les autres champs extraits vers ton schema de form
-         });
-       }
-     }, [open, extractedData, form]);*/
+
 
     const handleAddOption = async (value: string) => {
 
-        if (addModalTarget === "paymentCondition") {
-            // ...
-        }
     };
 
     const handleClose = () => {
@@ -508,6 +399,7 @@ export default function useCreateSupplierInvoice() {
     };
 
     const handleSave = form.handleSubmit(async (data) => {
+        console.log("hi")
         setLoadingSave(true)
         await createInvoice();
         setLoadingSave(false)
@@ -637,14 +529,12 @@ export default function useCreateSupplierInvoice() {
         linkedToPO,
         setLinkedToPO,
         selectedPO,
-        handleTogglePO,
 
 
         purchaseOrders,
 
         //data validation
 
-        canSaveInvoice,
         errors,
         getItemError,
         getError,
@@ -666,8 +556,7 @@ export default function useCreateSupplierInvoice() {
         setShowAddTVAModal,
         showAddOPCModal,
         setShowAddOPCModal,
-        addModalTarget,
-        setAddModalTarget,
+
         handleAddOption,
 
 

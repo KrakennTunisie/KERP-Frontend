@@ -6,19 +6,19 @@ import { PaymentConditionLabels, PaymentConditionSchema } from "../../types/paym
 
 
 
-export function PaymentConditionCard({onDelete, onShow, onToggleActive, onAction}: cardProps) {
-  
-const paymentConditions: SettingItem[] = Object.values(PaymentConditionSchema.enum)
-                                    .map((item)=>({
-                                        id:item,
-                                        code:"uuu",
-                                        label: PaymentConditionLabels[item],
-                                        type:"PaymentCondition",
-                                        description: "description",
-                                        isActive: false,
-                                        createdAt: new Date(),
-                                        updatedAt: new Date()
-                                      }))
+export function PaymentConditionCard({ onDelete, onShow, onToggleActive, onAction }: cardProps) {
+
+  const paymentConditions: SettingItem[] = Object.values(PaymentConditionSchema.enum)
+    .map((item) => ({
+      id: item,
+      code: "uuu",
+      label: PaymentConditionLabels[item],
+      type: "PaymentCondition",
+      description: "description",
+      isActive: false,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }))
   return (
     <SettingCard
       title="Conditions de paiement"

@@ -19,18 +19,18 @@ import AddSupplierModal from "../widgets/addPartnerModal";
 import AddPartnerModal from "../widgets/addPartnerModal";
 import { partnerTypeSchema } from "../../types/partnerType";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select";
-import AddParameterModal from "@/shared/components/ui/addParameterValue";
 import { FieldError } from "@/shared/components/ui/fieldError";
 import { discountTypeOptions, discountTypeSchema } from "../../types/discountType";
 import { Input } from "@/shared/components/ui/input";
 import { Textarea } from "@/shared/components/ui/textArea";
+import AddSettingModal from "../parameters/addSettingItem";
 
 
 export default function CreateSupplierInvoice() {
   const {
-    form, errors, linkedToPO, selectedPO, suppliers, supplierSearch, setSupplierSearch, showDropdown, setShowDropdown, previewData, purchaseOrders, getMaxQuantity,getError,
-    invoiceSupplier, handleSave, selectSupplier, clearSupplier, loadingSave, addItem, removeItem, updateItem, handleTogglePO, register, canSaveInvoice, showAddPCModal,
-    setShowAddPCModal, showAddTVAModal, setShowAddTVAModal, showAddOPCModal, setShowAddOPCModal, addModalTarget, setAddModalTarget, handleAddOption, getItemError
+    form, errors, linkedToPO, selectedPO, suppliers, supplierSearch, setSupplierSearch, showDropdown, setShowDropdown, previewData, purchaseOrders, getMaxQuantity, getError,
+    invoiceSupplier, handleSave, selectSupplier, clearSupplier, loadingSave, addItem, removeItem, updateItem, register, showAddPCModal,
+    setShowAddPCModal, showAddTVAModal, setShowAddTVAModal, showAddOPCModal, setShowAddOPCModal, handleAddOption, getItemError, setLinkedToPO
     , invoiceSupplierType, loadingDraft, showAddSupplierModal, setShowAddSupplierModal, newSupplierName, setNewSupplierName } = useCreateSupplierInvoice();
   const router = useRouter();
 
@@ -75,8 +75,8 @@ export default function CreateSupplierInvoice() {
 
           <button
             onClick={handleSave}
-            disabled={!canSaveInvoice || loadingSave}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold shadow-md transition ${!canSaveInvoice || loadingSave
+            disabled={loadingSave}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold shadow-md transition ${loadingSave
               ? "bg-gray-300 cursor-not-allowed text-gray-500 shadow-none"
               : "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-200 cursor-pointer"
               }`}
@@ -95,7 +95,28 @@ export default function CreateSupplierInvoice() {
         partnerType={partnerTypeSchema.enum.SUPPLIER}
         onClose={() => setShowAddSupplierModal(false)}
       />
-     
+      <AddSettingModal
+        title="Condition de paiement"
+        open={showAddPCModal}
+        loading={true}
+        onClose={() => setShowAddPCModal(false)}
+        onSubmit={() => handleAddOption}
+      />
+      <AddSettingModal
+        title="TVA"
+        open={showAddTVAModal}
+        loading={true}
+        onClose={() => setShowAddTVAModal(false)}
+        onSubmit={() => handleAddOption}
+      />
+      <AddSettingModal
+        title="Catégorie"
+        open={showAddOPCModal}
+        loading={true}
+        onClose={() => setShowAddOPCModal(false)}
+        onSubmit={() => handleAddOption}
+      />
+
       {/* ── Body : 2 colonnes ── */}
       <div className="flex h-[calc(100vh-80px)]">
 
@@ -136,20 +157,24 @@ export default function CreateSupplierInvoice() {
                       control={form.control}
                       name="issueDate"
                       render={({ field }) => (
-                        <input
-                          type="date"
-                          value={field.value ? (() => {
-                            const d = new Date(field.value);
-                            const year = d.getFullYear();
-                            const month = String(d.getMonth() + 1).padStart(2, "0");
-                            const day = String(d.getDate()).padStart(2, "0");
-                            return `${year}-${month}-${day}`;
-                          })() : ""}
-                          onChange={(e) => field.onChange(new Date(e.target.value))}
-                          className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
-                        />
+                        <>
+                          <input
+                            type="date"
+                            value={field.value ? (() => {
+                              const d = new Date(field.value);
+                              const year = d.getFullYear();
+                              const month = String(d.getMonth() + 1).padStart(2, "0");
+                              const day = String(d.getDate()).padStart(2, "0");
+                              return `${year}-${month}-${day}`;
+                            })() : ""}
+                            onChange={(e) => field.onChange(new Date(e.target.value))}
+                            className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
+                          />
+                          <FieldError error={getError("issueDate")} />
+                        </>
                       )}
                     />
+
                   </div>
                 </div>
 
@@ -168,7 +193,7 @@ export default function CreateSupplierInvoice() {
                       <input
                         type="checkbox"
                         checked={linkedToPO}
-                        onChange={(e) => handleTogglePO(e.target.checked)}
+                        onChange={(e) => { setLinkedToPO(!linkedToPO) }}
                         className="w-5 h-5 rounded-xl border-2 border-slate-200 bg-white accent-blue-600 cursor-pointer transition"
                       />
                     </label>
@@ -247,7 +272,12 @@ export default function CreateSupplierInvoice() {
                           <button
                             key={supplier.idPartner}
                             type="button"
-                            onMouseDown={(e) => { e.preventDefault(); selectSupplier(supplier); setSupplierSearch(supplier.companyName); }}
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              selectSupplier(supplier);
+                              setSupplierSearch(supplier.companyName);
+                              form.setValue("partner", supplier, { shouldValidate: true });
+                            }}
                             className="w-full text-left px-4 py-3 hover:bg-blue-50 transition border-b border-slate-50 last:border-0"
                           >
                             <p className="text-sm font-bold text-slate-800">{supplier.companyName}</p>
@@ -275,6 +305,7 @@ export default function CreateSupplierInvoice() {
 
                     )}
                   </div>
+                  <FieldError error={getError("partner")} />
                 </div>
 
                 {previewData.partner && previewData.partner.email != "" && (
@@ -334,6 +365,12 @@ export default function CreateSupplierInvoice() {
                     <label className="block text-xs font-medium text-slate-500 mb-1">Condition de paiement</label>
                     <Select
                       {...register("paymentCondition")}
+                      onValueChange={(value) => {
+                        if (value === "__add_pc__") {
+                          setShowAddOPCModal(true);
+                          return;
+                        }
+                      }}
                       defaultValue={PaymentConditionSchema.enum.NET_15}
                     >
                       <SelectTrigger className="bg-white">
@@ -345,17 +382,12 @@ export default function CreateSupplierInvoice() {
                             {PaymentConditionLabels[condition]}
                           </SelectItem>
                         ))}
-                        <div
-                          onClick={(e) => {
-                            e.preventDefault();
-                            setAddModalTarget("paymentCondition")
-                            setShowAddPCModal(true);
-                            console.log("hi")
-                          }}
-                          className="mt-1 cursor-pointer border-t border-slate-100 px-2 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50"
+                        <SelectItem
+                          value="__add_pc__"
+                          className="mt-1 cursor-pointer border-t border-slate-100 text-sm font-medium text-blue-600 hover:bg-blue-50 focus:bg-blue-50"
                         >
                           + Ajouter une condition de paiement
-                        </div>
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -392,7 +424,6 @@ export default function CreateSupplierInvoice() {
 
               <div className="flex flex-col gap-3 mt-3">
                 {(previewData.invoiceItems ?? []).map((item, index) => {
-                  const lineTotal = item.quantity * item.unityPriceEXclTax;
                   return (
                     <div key={item.idInvoiceItem ?? index} className="rounded-xl border border-slate-200 bg-white p-4">
                       <div className="flex items-center justify-between mb-1">
@@ -408,11 +439,12 @@ export default function CreateSupplierInvoice() {
                         </button>
                       </div>
 
-                      <input
+                      <Input
                         type="text"
                         value={item.description}
                         onChange={(e) => updateItem(item.idInvoiceItem!, "description", e.target.value)}
                         className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition mb-3"
+                        error={getItemError(index, "description")}
                       />
 
                       <div className="mb-3">
@@ -421,7 +453,6 @@ export default function CreateSupplierInvoice() {
                           value={item.operationCategory}
                           onValueChange={(value) => {
                             if (value === "__add_category__") {
-                              setAddModalTarget("operationCategory");
                               setShowAddOPCModal(true);
                               return;
                             }
@@ -445,6 +476,9 @@ export default function CreateSupplierInvoice() {
                             </SelectItem>
                           </SelectContent>
                         </Select>
+                        <FieldError
+                          error={getItemError(index, "operationCategory")}
+                        />
                       </div>
 
                       <div className="grid grid-cols-3 gap-3">
@@ -471,7 +505,13 @@ export default function CreateSupplierInvoice() {
                           <label className="block text-xs font-medium text-slate-500 mb-1">TVA</label>
                           <Select
                             value={String(item.vatRate)}
-                            onValueChange={(value) => updateItem(item.idInvoiceItem!, "vatRate", Number(value))}
+                            onValueChange={(value) => {
+                              if (value === "__add_tva__") {
+                                setShowAddTVAModal(true);
+                                return;
+                              }
+                              updateItem(item.idInvoiceItem!, "vatRate", Number(value))
+                            }}
                           >
                             <SelectTrigger>
                               <SelectValue />
@@ -482,6 +522,12 @@ export default function CreateSupplierInvoice() {
                                   {rate.value}%
                                 </SelectItem>
                               ))}
+                              <SelectItem
+                                value="__add_tva__"
+                                className="mt-1 cursor-pointer border-t border-slate-100 text-sm font-medium text-blue-600 hover:bg-blue-50 focus:bg-blue-50"
+                              >
+                                + Ajouter un taux TVA %
+                              </SelectItem>
                             </SelectContent>
                           </Select>
                           <FieldError error={errors.invoiceItems?.[index]?.vatRate?.message} />
