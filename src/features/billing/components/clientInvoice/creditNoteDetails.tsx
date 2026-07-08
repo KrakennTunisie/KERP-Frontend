@@ -41,7 +41,7 @@ export default function CreditNoteDetails({ params }: PropsCreditNote) {
                 />
             }
     return (
-        <div className="min-h-screen bg-gray-50 font-sans">
+        <div className="min-h-screen font-sans">
 
             {/* TOP BAR */}
             <DocumentTopBar

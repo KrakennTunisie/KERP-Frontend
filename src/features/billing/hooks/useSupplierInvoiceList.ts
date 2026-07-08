@@ -137,9 +137,9 @@ export default function useSupplierInvoiceList() {
   };
 
 
-    useEffect(() => {
-      setCurrentPage(1);
-    }, [filtre, debouncedSearchQuery]);
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filtre, debouncedSearchQuery]);
 
   useEffect(() => {
 
@@ -164,24 +164,48 @@ export default function useSupplierInvoiceList() {
       setInvoiceId("")
     }
   }
-  
+
   const setFile = useInvoiceStore(state => state.setFile);
   const setFileUrl = useInvoiceStore(state => state.setFileUrl);
 
   const handleUpload = async (file: File) => {
-    setLoading(true);
-    try {
-      setIsUploadOpen(false);
-      setFile(file);
-      const url = URL.createObjectURL(file);
-      setFileUrl(url);
+  setLoading(true);
+  try {
+    setIsUploadOpen(false);
+    setFile(file);
+    const url = URL.createObjectURL(file);
+    setFileUrl(url);
 
-      router.push(`/billing/invoices/suppliers/create`)
+    const extractedData = await extractInvoice(file);
 
-    } finally {
-      setLoading(false);
-    }
-  };
+    // Stash the result so the create page can read it after navigation
+    sessionStorage.setItem('extractedInvoiceData', JSON.stringify(extractedData));
+
+    router.push(`/billing/invoices/suppliers/create`);
+  } catch (error) {
+    console.error('Extraction failed:', error);
+    // Still navigate so the user can fill the form manually
+    router.push(`/billing/invoices/suppliers/create`);
+  } finally {
+    setLoading(false);
+  }
+};
+
+async function extractInvoice(file: File) {
+  const formData = new FormData();
+  formData.append('data', file); // 'data' is the binary property name n8n expects
+
+  const res = await fetch('http://localhost:5678/webhook-test/2cc77c51-b677-4f7a-bfca-c30d5b4e43bb', {
+    method: 'POST',
+    body: formData,
+  });
+
+  if (!res.ok) {
+    throw new Error(`Extraction request failed with status ${res.status}`);
+  }
+
+  return res.json();
+}
 
 
   return {
@@ -215,6 +239,7 @@ export default function useSupplierInvoiceList() {
     suppliersInvoiceStats,
     isUploadInvoiceOpen, setIsUploadInvoiceOpen,
     handleUpload,
+
 
   }
 

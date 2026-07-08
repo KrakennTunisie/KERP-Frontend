@@ -12,7 +12,7 @@ import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 
 
 
-export function OperationCategoryCard({ onShow, onToggleActive, onAction}: cardProps) {
+export function OperationCategoryCard({ onShow, onToggleActive, onAction, onFetchReady}: cardProps) {
 
     const [operationCategories, setOperationCategories]=useState<OperationCategoryPageItem[]|[]>([])
     const [fetchLoading, setFetchLoading]=useState(false)
@@ -30,20 +30,10 @@ export function OperationCategoryCard({ onShow, onToggleActive, onAction}: cardP
     }
 
     useEffect(()=>{
-        fetchCategories()
+        onFetchReady?.(fetchCategories);
     },[])
 
 
-/*     const categories: SettingItem[] = operationCategorySchema.options.map((item)=>({
-                                        idOperationCategory:item,
-                                        code:"oviir",
-                                        label: OperationCategoryLabels[item],
-                                        description: "description",
-                                        isActive: true,
-                                        type: "OPERATION_CATEGORY",
-                                        createdAt: new Date(),
-                                        updatedAt: new Date()
-                                      })) */
   return (
     <SettingCard
       title="Catégories d'opérations"

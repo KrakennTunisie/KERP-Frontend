@@ -280,7 +280,10 @@ export const AuditLogAPI = {
 }
 
 export const OperationCategoryAPI = {
+  
   getAllOperationCategories: () => apiClient.get<OperationCategoryPageItem[]>(OPERATION_CATEGORY_ENDPOINTS.getAllOperationCategories),
+
+  getAllActiveOperationCategories: () => apiClient.get<OperationCategoryPageItem[]>(OPERATION_CATEGORY_ENDPOINTS.getAllActiveOperationCategories),
 
   getOperationCategory: (id: string) => apiClient.get<OperationCategory>(OPERATION_CATEGORY_ENDPOINTS.getOperationCategory(id)),
 
@@ -300,6 +303,8 @@ export const OperationCategoryAPI = {
 export const PaymentConditionAPI = {
   getAllPaymentConditions: () => apiClient.get<PaymentConditionPageItem[]>(PAYMENT_CONDITION_ENDPOINTS.getAllPaymentConditions),
 
+  getAllActivePaymentConditions: () => apiClient.get<PaymentConditionPageItem[]>(PAYMENT_CONDITION_ENDPOINTS.getAllActivePaymentConditions),
+
   getPaymentCondition: (id: string) => apiClient.get<PaymentCondition>(PAYMENT_CONDITION_ENDPOINTS.getPaymentCondition(id)),
 
   getPaymentConditionByCode: (code: string) => apiClient.get<PaymentCondition>(PAYMENT_CONDITION_ENDPOINTS.getPaymentConditionByCode(code)),
@@ -317,6 +322,8 @@ export const PaymentConditionAPI = {
 
 export const TvaRateAPI = {
   getAllTvaRates: () => apiClient.get<TVARatePageItem[]>(TVA_RATE_ENDPOINTS.getAllTvaRates),
+
+  getAllActiveTvaRates: () => apiClient.get<TVARatePageItem[]>(TVA_RATE_ENDPOINTS.getAllActiveTvaRates),
 
   getTvaRate: (id: string) => apiClient.get<TVARate>(TVA_RATE_ENDPOINTS.getTvaRate(id)),
 

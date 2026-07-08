@@ -141,6 +141,8 @@ export const  AUDITLOGS_ENDPOINTS = {
 export const OPERATION_CATEGORY_ENDPOINTS = {
   getAllOperationCategories: "/operation-categories",
 
+  getAllActiveOperationCategories: "/operation-categories/active",
+
   getOperationCategory: (id: string) => `/operation-categories/${id}`,
 
   getOperationCategoryByCode: (code: string) =>
@@ -164,6 +166,8 @@ export const OPERATION_CATEGORY_ENDPOINTS = {
 export const PAYMENT_CONDITION_ENDPOINTS = {
   getAllPaymentConditions: "/payment-conditions",
 
+  getAllActivePaymentConditions: "/payment-conditions/active",
+
   getPaymentCondition: (id: string) => `/payment-conditions/${id}`,
 
   getPaymentConditionByCode: (code: string) =>
@@ -186,6 +190,8 @@ export const PAYMENT_CONDITION_ENDPOINTS = {
 
 export const TVA_RATE_ENDPOINTS = {
   getAllTvaRates: "/tva-rates",
+
+  getAllActiveTvaRates: "/tva-rates/active",
 
   getTvaRate: (id: string) => `/tva-rates/${id}`,
 

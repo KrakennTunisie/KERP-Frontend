@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { SectionTitle } from "../widgets/sectionTitle";
 import { OperationCategoryLabels, operationCategorySchema } from "../../types/operationCategory";
 import { tvaRateSchema } from "../../types/tvaRate";
@@ -19,16 +19,30 @@ import AddSupplierModal from "../widgets/addPartnerModal";
 import AddPartnerModal from "../widgets/addPartnerModal";
 import { partnerTypeSchema } from "../../types/partnerType";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select";
-import AddParameterModal from "@/shared/components/ui/addParameterValue";
+import { FieldError } from "@/shared/components/ui/fieldError";
+import { discountTypeOptions, discountTypeSchema } from "../../types/discountType";
+import { Input } from "@/shared/components/ui/input";
+import { Textarea } from "@/shared/components/ui/textArea";
+import AddSettingModal from "../parameters/addSettingItem";
+import { SettingType, SettingTypeSchema } from "../../types/settingType";
+import UseSetting from "../../hooks/useSettings";
+import { Plus } from "lucide-react";
 
 
 export default function CreateSupplierInvoice() {
   const {
-    form, errors, linkedToPO, selectedPO, suppliers, supplierSearch, setSupplierSearch, showDropdown, setShowDropdown, previewData, purchaseOrders, getMaxQuantity,
-    invoiceSupplier, handleSave, selectSupplier, clearSupplier, loadingSave, addItem, removeItem, updateItem, handleTogglePO, register, canSaveInvoice, showAddPCModal,
-    setShowAddPCModal, showAddTVAModal, setShowAddTVAModal, showAddOPCModal, setShowAddOPCModal, addModalTarget, setAddModalTarget, handleAddOption
+    form, errors, linkedToPO, selectedPO, suppliers, supplierSearch, setSupplierSearch, showDropdown, setShowDropdown, previewData, purchaseOrders, getMaxQuantity, getError,
+    invoiceSupplier, handleSave, selectSupplier, clearSupplier, loadingSave, addItem, removeItem, updateItem, register, showAddPCModal,
+    setShowAddPCModal, showAddTVAModal, setShowAddTVAModal, showAddOPCModal, setShowAddOPCModal, handleAddOption, getItemError, setLinkedToPO
     , invoiceSupplierType, loadingDraft, showAddSupplierModal, setShowAddSupplierModal, newSupplierName, setNewSupplierName } = useCreateSupplierInvoice();
   const router = useRouter();
+
+    const {      
+             typeAdd,  openAddModal, setOpenAddModal, loadingAddModal, 
+    
+             onAction, handleCreate, getTitleAddModal
+    
+        } = UseSetting()
 
   if (loadingDraft || !invoiceSupplier) {
     return (
@@ -71,8 +85,8 @@ export default function CreateSupplierInvoice() {
 
           <button
             onClick={handleSave}
-            disabled={!canSaveInvoice || loadingSave}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold shadow-md transition ${!canSaveInvoice || loadingSave
+            disabled={loadingSave}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold shadow-md transition ${loadingSave
               ? "bg-gray-300 cursor-not-allowed text-gray-500 shadow-none"
               : "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-200 cursor-pointer"
               }`}
@@ -91,52 +105,36 @@ export default function CreateSupplierInvoice() {
         partnerType={partnerTypeSchema.enum.SUPPLIER}
         onClose={() => setShowAddSupplierModal(false)}
       />
-      {addModalTarget === "tva" && (
-        <AddParameterModal
-          isOpen={showAddTVAModal}
-          title="Nouveau taux de TVA"
-          label="Taux TVA (%)"
-          placeholder="Ex: 19"
-          inputType="number"
-          min={1}
-          validate={(value) => {
-            const num = Number(value);
-            if (value.trim() === "" || Number.isNaN(num)) return "Le taux doit être un nombre";
-            if (num < 0 || num > 100) return "Le taux doit être compris entre 0 et 100";
-            return null;
-          }}
-          onClose={() => setShowAddTVAModal(false)}
-          onAdd={handleAddOption}
-        />
-      )}
-      {addModalTarget === "operationCategory" && (
-        <AddParameterModal
-          isOpen={showAddOPCModal}
-          title="Nouveau catégorie"
-          label="Nom de la catégorie"
-          placeholder="Prestation de service"
-          inputType="text"
-          validate={(value) => {
+{/*       <AddSettingModal
+        title="Condition de paiement"
+        open={showAddPCModal}
+        loading={true}
+        onClose={() => setShowAddPCModal(false)}
+        onSubmit={() => handleAddOption}
+      />
+      <AddSettingModal
+        title="TVA"
+        open={showAddTVAModal}
+        loading={true}
+        onClose={() => setShowAddTVAModal(false)}
+        onSubmit={() => handleAddOption}
+      />
+      <AddSettingModal
+        title="Catégorie"
+        open={showAddOPCModal}
+        loading={true}
+        onClose={() => setShowAddOPCModal(false)}
+        onSubmit={() => handleAddOption}
+      /> */}
 
-            if (value.trim() === "") return "Le nom est obligatoire";
-            return null;
-          }}
-          onClose={() => setShowAddOPCModal(false)}
-          onAdd={handleAddOption}
-        />
-      )}
-
-      {addModalTarget === "paymentCondition" && (
-        <AddParameterModal
-          isOpen={showAddPCModal}
-          title="Nouvelle condition de paiement"
-          label="Nom de la condition"
-          placeholder="Ex: Net 60 jours"
-          validate={(value) => (value.trim().length < 2 ? "Le nom doit contenir au moins 2 caractères" : null)}
-          onClose={() => setShowAddPCModal(false)}
-          onAdd={handleAddOption}
-        />
-      )}
+      {typeAdd && <AddSettingModal
+                      open={openAddModal}
+                      title={getTitleAddModal()}
+                      loading={loadingAddModal}
+                      onClose={() => setOpenAddModal(false)}
+                      onSubmit={handleCreate} 
+                      settingType={typeAdd}       
+              />}
 
       {/* ── Body : 2 colonnes ── */}
       <div className="flex h-[calc(100vh-80px)]">
@@ -178,20 +176,24 @@ export default function CreateSupplierInvoice() {
                       control={form.control}
                       name="issueDate"
                       render={({ field }) => (
-                        <input
-                          type="date"
-                          value={field.value ? (() => {
-                            const d = new Date(field.value);
-                            const year = d.getFullYear();
-                            const month = String(d.getMonth() + 1).padStart(2, "0");
-                            const day = String(d.getDate()).padStart(2, "0");
-                            return `${year}-${month}-${day}`;
-                          })() : ""}
-                          onChange={(e) => field.onChange(new Date(e.target.value))}
-                          className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
-                        />
+                        <>
+                          <input
+                            type="date"
+                            value={field.value ? (() => {
+                              const d = new Date(field.value);
+                              const year = d.getFullYear();
+                              const month = String(d.getMonth() + 1).padStart(2, "0");
+                              const day = String(d.getDate()).padStart(2, "0");
+                              return `${year}-${month}-${day}`;
+                            })() : ""}
+                            onChange={(e) => field.onChange(new Date(e.target.value))}
+                            className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
+                          />
+                          <FieldError error={getError("issueDate")} />
+                        </>
                       )}
                     />
+
                   </div>
                 </div>
 
@@ -210,7 +212,7 @@ export default function CreateSupplierInvoice() {
                       <input
                         type="checkbox"
                         checked={linkedToPO}
-                        onChange={(e) => handleTogglePO(e.target.checked)}
+                        onChange={(e) => { setLinkedToPO(!linkedToPO) }}
                         className="w-5 h-5 rounded-xl border-2 border-slate-200 bg-white accent-blue-600 cursor-pointer transition"
                       />
                     </label>
@@ -289,7 +291,12 @@ export default function CreateSupplierInvoice() {
                           <button
                             key={supplier.idPartner}
                             type="button"
-                            onMouseDown={(e) => { e.preventDefault(); selectSupplier(supplier); setSupplierSearch(supplier.companyName); }}
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              selectSupplier(supplier);
+                              setSupplierSearch(supplier.companyName);
+                              form.setValue("partner", supplier, { shouldValidate: true });
+                            }}
                             className="w-full text-left px-4 py-3 hover:bg-blue-50 transition border-b border-slate-50 last:border-0"
                           >
                             <p className="text-sm font-bold text-slate-800">{supplier.companyName}</p>
@@ -317,6 +324,7 @@ export default function CreateSupplierInvoice() {
 
                     )}
                   </div>
+                  <FieldError error={getError("partner")} />
                 </div>
 
                 {previewData.partner && previewData.partner.email != "" && (
@@ -376,6 +384,12 @@ export default function CreateSupplierInvoice() {
                     <label className="block text-xs font-medium text-slate-500 mb-1">Condition de paiement</label>
                     <Select
                       {...register("paymentCondition")}
+                      onValueChange={(value) => {
+                        if (value === "__add_pc__") {
+                          onAction(SettingTypeSchema.enum.PAYMENT_CONDITION)
+                          return;
+                        }
+                      }}
                       defaultValue={PaymentConditionSchema.enum.NET_15}
                     >
                       <SelectTrigger className="bg-white">
@@ -387,17 +401,12 @@ export default function CreateSupplierInvoice() {
                             {PaymentConditionLabels[condition]}
                           </SelectItem>
                         ))}
-                        <div
-                          onClick={(e) => {
-                            e.preventDefault();
-                            setAddModalTarget("paymentCondition")
-                            setShowAddPCModal(true);
-                            console.log("hi")
-                          }}
-                          className="mt-1 cursor-pointer border-t border-slate-100 px-2 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50"
+                        <SelectItem
+                          value="__add_pc__"
+                          className="mt-1 cursor-pointer border-t border-slate-100 text-sm font-medium text-blue-600 hover:bg-blue-50 focus:bg-blue-50"
                         >
                           + Ajouter une condition de paiement
-                        </div>
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -434,7 +443,6 @@ export default function CreateSupplierInvoice() {
 
               <div className="flex flex-col gap-3 mt-3">
                 {(previewData.invoiceItems ?? []).map((item, index) => {
-                  const lineTotal = item.quantity * item.unityPriceEXclTax;
                   return (
                     <div key={item.idInvoiceItem ?? index} className="rounded-xl border border-slate-200 bg-white p-4">
                       <div className="flex items-center justify-between mb-1">
@@ -449,19 +457,26 @@ export default function CreateSupplierInvoice() {
                           </svg>
                         </button>
                       </div>
-                      <input
+
+                      <Input
                         type="text"
                         value={item.description}
                         onChange={(e) => updateItem(item.idInvoiceItem!, "description", e.target.value)}
                         className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition mb-3"
+                        error={getItemError(index, "description")}
                       />
 
                       <div className="mb-3">
                         <label className="block text-xs font-medium text-slate-500 mb-1">Catégorie</label>
                         <Select
                           value={item.operationCategory}
-                          onValueChange={(value) => updateItem(item.idInvoiceItem!, "operationCategory", value)}
-
+                          onValueChange={(value) => {
+                            if (value === "__add_category__") {
+                              onAction(SettingTypeSchema.enum.OPERATION_CATEGORY);
+                              return;
+                            }
+                            updateItem(item.idInvoiceItem!, "operationCategory", value);
+                          }}
                         >
                           <SelectTrigger className="bg-white">
                             <SelectValue placeholder="Sélectionner une catégorie" />
@@ -472,83 +487,101 @@ export default function CreateSupplierInvoice() {
                                 {OperationCategoryLabels[value]}
                               </SelectItem>
                             ))}
-                            <div
-                              onClick={(e) => {
-                                e.preventDefault();
-                                setAddModalTarget("operationCategory")
-                                setShowAddOPCModal(true);
-                              }}
-                              className="mt-1 cursor-pointer border-t border-slate-100 px-2 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50"
+                            <SelectItem
+                              value="__add_category__"
+                              className="mt-1 cursor-pointer border-t border-slate-100 text-sm font-medium text-blue-600 hover:bg-blue-50 focus:bg-blue-50"
                             >
                               + Ajouter une catégorie
-                            </div>
+                            </SelectItem>
                           </SelectContent>
                         </Select>
+                        <FieldError
+                          error={getItemError(index, "operationCategory")}
+                        />
                       </div>
 
-                      <div className="grid grid-cols-4 gap-3">
-                        <div>
-                          <label className="block text-xs font-medium text-slate-500 mb-1">Qté</label>
-                          <input
-                            type="number"
-                            max={getMaxQuantity(item)}
-                            min={1}
-                            value={item.quantity}
-                            onChange={(e) => updateItem(item.idInvoiceItem!, "quantity", parseFloat(e.target.value) || 0)}
-                            className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 text-center focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-medium text-slate-500 mb-1">PU HT</label>
-                          <input
-                            type="text"
-                            defaultValue={item.unityPriceEXclTax}
-                            onBlur={(e) => updateItem(item.idInvoiceItem!, "unityPriceEXclTax", parseFloat(e.target.value))}
-                            className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 text-center focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
-                          />
-                        </div>
+                      <div className="grid grid-cols-3 gap-3">
+                        <Input
+                          label="Qté"
+                          type="number"
+                          max={getMaxQuantity(item)}
+                          min={1}
+                          value={item.quantity}
+                          onChange={(e) => updateItem(item.idInvoiceItem!, "quantity", Number(e.target.value))}
+                          error={getItemError(index, "quantity")}
+                        />
+
+                        <Input
+                          label="PU HT"
+                          type="number"
+                          min={0}
+                          defaultValue={item.unityPriceEXclTax}
+                          onBlur={(e) => updateItem(item.idInvoiceItem!, "unityPriceEXclTax", Number(e.target.value))}
+                          error={getItemError(index, "unityPriceEXclTax")}
+                        />
+
                         <div>
                           <label className="block text-xs font-medium text-slate-500 mb-1">TVA</label>
                           <Select
-                            value={item.vatRate.toString()}
-                            onValueChange={(value) => updateItem(item.idInvoiceItem!, "vatRate", value)}
+                            value={String(item.vatRate)}
+                            onValueChange={(value) => {
+                              if (value === "__add_tva__") {
+                                onAction(SettingTypeSchema.enum.TVA_RATE);
+                                return;
+                              }
+                              updateItem(item.idInvoiceItem!, "vatRate", Number(value))
+                            }}
                           >
-                            <SelectTrigger className="bg-white">
-                              <SelectValue placeholder="Sélectionner un taux de TVA %" />
+                            <SelectTrigger>
+                              <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
                               {tvaRateSchema.options.map((rate) => (
-                                <SelectItem key={rate.value} value={rate.value.toString()}>
+                                <SelectItem key={rate.value} value={String(rate.value)}>
                                   {rate.value}%
                                 </SelectItem>
                               ))}
-                              <div
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  setAddModalTarget("tva")
-                                  setShowAddTVAModal(true);
-                                }}
-                                className="mt-1 cursor-pointer border-t border-slate-100 px-2 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50"
-                              >
-                                + Ajouter un taux TVA
-                              </div>
                             </SelectContent>
                           </Select>
+                          <FieldError error={errors.invoiceItems?.[index]?.vatRate?.message} />
                         </div>
-                        <div>
-                          <label className="block text-xs font-medium text-slate-500 mb-1">Total HT</label>
-                          <input
-                            type="text"
-                            readOnly
-                            value={lineTotal.toFixed(2)}
-                            className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-100 text-sm font-semibold text-slate-700 text-center focus:outline-none transition"
-                          />
+
+                        <div className="col-span-2">
+                          <label className="block text-xs font-medium text-slate-500 mb-1">Discount</label>
+                          <div className="flex gap-2">
+                            <input
+                              type="number"
+                              min={0}
+                              value={item.discountValue ?? 0}
+                              onChange={(e) => updateItem(item.idInvoiceItem!, "discountValue", Number(e.target.value))}
+                              className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition mb-3"
+                            />
+                            <Select
+                              value={item.discountType ?? "PERCENTAGE"}
+                              onValueChange={(value) => updateItem(item.idInvoiceItem!, "discountType", value)}
+                            >
+                              <SelectTrigger className="w-28">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {discountTypeOptions.map((discountType) => (
+                                  <SelectItem key={discountType.value} value={discountType.value}>
+                                    {discountType.value === discountTypeSchema.enum.AMOUNT
+                                      ? form.getValues("invoiceCurrency")
+                                      : discountType.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <FieldError error={errors.invoiceItems?.[index]?.discountValue?.message} />
                         </div>
                       </div>
                     </div>
                   );
                 })}
               </div>
+
               {errors.invoiceItems?.message && (
                 <ErrorForm error={errors.invoiceItems?.message} />
               )}
@@ -558,8 +591,13 @@ export default function CreateSupplierInvoice() {
             <section>
               <SectionTitle number="05" invoiceType={invoiceTypeSchema.enum.PURCHASE} label="Commentaires" />
               <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 mt-3">
-                <textarea
-                  value={"test"}
+                <Textarea
+                  value={form.watch("comment") ?? ""}
+                  onChange={(e) => form.setValue("comment", e.target.value, {
+                    shouldDirty: true,
+                    shouldValidate: true,
+                  })}
+                  error={getError("comment")}
                   placeholder="Ajouter un commentaire..."
                   className="w-full min-h-[100px] px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition resize-y"
                 />

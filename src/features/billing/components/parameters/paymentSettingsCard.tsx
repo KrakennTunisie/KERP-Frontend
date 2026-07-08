@@ -11,7 +11,7 @@ import { PaymentConditionPageItem } from "../../models/paymentCondition";
 
 
 
-export function PaymentConditionCard({ onShow, onToggleActive, onAction}: cardProps) {
+export function PaymentConditionCard({ onShow, onToggleActive, onAction, onFetchReady}: cardProps) {
 
     const [paymentConditions, setPaymentConditions]=useState<PaymentConditionPageItem[]|[]>([])
     const [fetchLoading, setFetchLoading]=useState(false)
@@ -29,7 +29,7 @@ export function PaymentConditionCard({ onShow, onToggleActive, onAction}: cardPr
     }
 
     useEffect(()=>{
-        fetchPaymentConditions()
+        onFetchReady?.(fetchPaymentConditions);
     },[])
 
   return (

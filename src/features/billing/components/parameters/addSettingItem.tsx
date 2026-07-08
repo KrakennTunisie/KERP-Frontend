@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Modal } from "@/shared/components/ui/modal";
 import { CreateSetting } from "../../models/SettingItem";
-import { SettingType } from "../../types/settingType";
+import { SettingType, SettingTypeSchema } from "../../types/settingType";
 import { CreateOperationCategorySchema } from "../../models/operationCategory";
 import { CreatePaymentConditionSchema } from "../../models/paymentCondition";
 import { CreateTVARateSchema } from "../../models/TVArate";
@@ -64,7 +64,7 @@ const schema = createSchemaMap[settingType];
   const submit = (data: CreateSetting) => {
     console.log("errors", errors)
     onSubmit(data);
-    reset();
+   // reset();
   };
 
 
@@ -139,7 +139,12 @@ const schema = createSchemaMap[settingType];
 
           <input
             {...register("label")}
-            placeholder="Ex : Vente"
+            placeholder={
+                settingType==SettingTypeSchema.enum.PAYMENT_CONDITION ? 
+                        "Ex: 20 (en jours)" :
+                            settingType==SettingTypeSchema.enum.TVA_RATE ?
+                                "Ex: 20 (en %)" :  
+                                    "Ex : Prestation des services"}
             className={`w-full rounded-xl border px-3 py-2 text-sm outline-none transition
               ${
                 errors.label

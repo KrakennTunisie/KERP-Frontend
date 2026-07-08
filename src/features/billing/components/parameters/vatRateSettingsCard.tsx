@@ -11,7 +11,7 @@ import { appToast } from "@/shared/lib/toast";
 
 
 
-export function VatRateCard( { onShow, onToggleActive, onAction}: cardProps) {
+export function VatRateCard( { onShow, onToggleActive, onAction, onFetchReady}: cardProps) {
 
 /* const vatRates: SettingItem[] = tvaRateSchema.options
                                     .map((item)=>({
@@ -40,7 +40,7 @@ export function VatRateCard( { onShow, onToggleActive, onAction}: cardProps) {
         }
     
         useEffect(()=>{
-            fetchPaymentConditions()
+            onFetchReady?.(fetchPaymentConditions)
         },[])
     
   return (

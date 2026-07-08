@@ -13,8 +13,12 @@ export const CreateTVARateSchema = CreateSettingSchema.extend({
     settingType: z.literal("TVA_RATE"),
     label: z
     .string()
-    .min(1, "Label est obligatoire") 
-    .regex(/^\d{1,3}%$/, "Le libellé doit être au format '20%'"),
+    .min(1, "Le libellé est obligatoire")
+    .regex(/^\d+$/, "Le libellé doit être un nombre")
+    .refine((value) => {
+        const number = Number(value);
+        return number > 0 && number <= 100;
+    }, "Le libellé doit être un nombre positif inférieur ou égal à 100"),
 });
 
 export type CreateTVARate = z.infer<

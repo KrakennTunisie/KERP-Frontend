@@ -7,7 +7,7 @@ import { PaymentCondition} from "../../models/paymentCondition";
 import { TVARate} from "../../models/TVArate";
 import { SettingType } from "../../types/settingType";
 import { SettingPageItem } from "../../models/SettingItem";
-import { getSettingItemId } from "../../lib/settingItemHelpers";
+import { formatShowLabel, getSettingItemId } from "../../lib/settingItemHelpers";
 import PageLoader from "@/shared/components/ui/pageLoader";
 
 
@@ -18,6 +18,8 @@ export type cardProps = {
     onShow: (selectedItem: SettingPageItem)=> void;
     onToggleActive: (selectedItem: SettingPageItem)=> void;
     onAction: (type: SettingType)=> void;
+    onFetchReady?: (refresh: () => Promise<void>) => void;
+
 
 }
 
@@ -174,7 +176,7 @@ export function SettingCard({
                         }
                         `}
                     >
-                        {item.label}
+                        {formatShowLabel(item.label)}
                     </span>
                     </div>
 

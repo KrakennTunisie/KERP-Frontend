@@ -46,7 +46,7 @@ export default function ClientsInvoiceList() {
             label: invoiceStatusLabels[status],
         }));
     return (
-        <div className="min-h-screen bg-gray-50 p-8 font-sans">
+        <div className="min-h-screen p-8 font-sans">
             <SendDocumentModal
                 document={selectedInvoice}
                 variant="invoice"

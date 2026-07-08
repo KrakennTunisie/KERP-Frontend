@@ -4,13 +4,12 @@ import { formatDateLongWithTime } from "@/shared/utils/formatDate";
 import { SettingPageItem } from "../../models/SettingItem";
 import { useEffect, useState } from "react";
 import { SettingItem } from "./settingCard";
-import { getSettingItemId } from "../../lib/settingItemHelpers";
+import { formatShowLabel, getSettingItemId } from "../../lib/settingItemHelpers";
 import { appToast } from "@/shared/lib/toast";
 import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 import { SettingTypeSchema } from "../../types/settingType";
 import { OperationCategoryAPI, PaymentConditionAPI, TvaRateAPI } from "../../api/partners-api";
 import PageLoader from "@/shared/components/ui/pageLoader";
-import { NotFound } from "@/shared/components/widgets/notFound";
 
 type SettingDetailsModalProps = {
   open: boolean;
@@ -85,7 +84,7 @@ export default function SettingDetailsModal({
 
         <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
           <h3 className="text-lg font-semibold text-slate-900">
-            {fetchedItem.label}
+            {formatShowLabel(fetchedItem.label)}
           </h3>
 
           <p className="mt-1 text-sm text-slate-500">
@@ -104,7 +103,7 @@ export default function SettingDetailsModal({
           <DetailRow
             icon={<Tag className="h-4 w-4" />}
             label="Libellé"
-            value={fetchedItem.label}
+            value={formatShowLabel(fetchedItem.label)}
           />
 
           <DetailRow

@@ -6,6 +6,7 @@ import {
   CheckIcon,
   ChevronDownIcon,
   ChevronUpIcon,
+  Plus,
 } from "lucide-react";
 
 import { cn } from "@/shared/utils/cn";
@@ -32,9 +33,11 @@ function SelectTrigger({
   className,
   size = "default",
   children,
+  onAdd,
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Trigger> & {
   size?: "sm" | "default";
+  onAdd?: () => void;
 }) {
   return (
     <SelectPrimitive.Trigger
@@ -55,9 +58,36 @@ function SelectTrigger({
     >
       {children}
 
+
+
+    <div className="flex items-center gap-1">
+      {onAdd && (
+        <button
+          type="button"
+          onPointerDown={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onAdd();
+          }}
+          className="
+            flex h-7 w-7 items-center justify-center rounded-md
+            text-slate-500 transition
+            hover:bg-blue-50 hover:text-blue-600
+            cursor-pointer
+          "
+        >
+          <Plus className="h-4 w-4" />
+        </button>
+      )}
+
       <SelectPrimitive.Icon asChild>
-        <ChevronDownIcon className="size-4 text-slate-400 transition-transform duration-200 data-[state=open]:rotate-180" />
+        <ChevronDownIcon className="size-4 text-slate-400" />
       </SelectPrimitive.Icon>
+    </div>
     </SelectPrimitive.Trigger>
   );
 }
@@ -142,6 +172,7 @@ function SelectItem({
     </SelectPrimitive.Item>
   );
 }
+
 function SelectSeparator({
   className,
   ...props

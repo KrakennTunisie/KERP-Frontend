@@ -89,16 +89,16 @@ const invoiceObjectSchema = baseInvoiceSchema.extend({
 
 export const invoiceSchema = withDueDateValidation(
   invoiceObjectSchema.extend({
-   invoiceDocument: documentSchema.nullable(), 
-   totalExclTaxEUR: z.number(),
-   totalInclTaxEUR: z.number(),
-   totalExclTaxTND: z.number(),
-   totalInclTaxTND: z.number(),
-   totalExclTaxUSD: z.number(),
-   totalInclTaxUSD: z.number(),
-   remainingAmount: z.number(),
-   invoiceEvents: z.array(z.lazy(()=> InvoiceEventSchema)).optional(),
-   hasInvoiceCreditNotes: z.boolean().nullable(),
+    invoiceDocument: documentSchema.nullable(),
+    totalExclTaxEUR: z.number(),
+    totalInclTaxEUR: z.number(),
+    totalExclTaxTND: z.number(),
+    totalInclTaxTND: z.number(),
+    totalExclTaxUSD: z.number(),
+    totalInclTaxUSD: z.number(),
+    remainingAmount: z.number(),
+    invoiceEvents: z.array(z.lazy(() => InvoiceEventSchema)).optional(),
+    hasInvoiceCreditNotes: z.boolean().nullable(),
   })
 );
 
@@ -113,9 +113,9 @@ export const invoicePageItemSchema = invoiceObjectSchema.pick({
   invoiceCurrency: true,
   vatRate: true,
   appliedExchangeRate: true,
-  
+
 }).extend({
-  
+
   totalExclTaxEUR: z.number(),
   totalInclTaxEUR: z.number(),
   totalExclTaxTND: z.number(),
@@ -123,7 +123,7 @@ export const invoicePageItemSchema = invoiceObjectSchema.pick({
   totalExclTaxUSD: z.number(),
   totalInclTaxUSD: z.number(),
   remainingAmount: z.number(),
-  invoiceDocument: documentSchema.nullable(), 
+  invoiceDocument: documentSchema.nullable(),
   partner: z.lazy(() => partnerSummarySchema)
 });
 
@@ -135,7 +135,7 @@ export const invoicePageItemSchema2 = invoiceObjectSchema.pick({
   invoiceType: true,
   invoiceStatus: true,
   invoiceCurrency: true,
-  totalInclTax:true
+  totalInclTax: true
 });
 
 export const invoiceCreateSchema = withDueDateValidation(
@@ -157,24 +157,25 @@ export const invoiceCreateSchema = withDueDateValidation(
     totalInclTax: true,
     comment: true,
   })
-  .extend({
-    invoiceDocument: fileSchema.nullable(),
-    idInvoice: z.string(),
-    sentToTTNDate: z.date().nullable(),
-    sentToclientDate: z.date().nullable(),
-    creationDate: z.date().nullable(),
-    invoiceStatus: invoiceStatusSchema,
-    complianceQRcode: z.string(),
-    vatAmount: z.number().nullable(),
-    invoiceComplianceStatus: invoiceComplianceStatusSchema.nullable(),
-    partner: z.lazy(() => partnerSummarySchema).nullable(),
-    purchaseOrder:z.lazy(() => purchaseOrderSummaryDTO).nullable()
-  }).superRefine((data, ctx) => {
+    .extend({
+      invoiceDocument: fileSchema.nullable(),
+      idInvoice: z.string(),
+      sentToTTNDate: z.date().nullable(),
+      sentToclientDate: z.date().nullable(),
+      creationDate: z.date().nullable(),
+      invoiceStatus: invoiceStatusSchema,
+      complianceQRcode: z.string(),
+      vatAmount: z.number().nullable(),
+      invoiceComplianceStatus: invoiceComplianceStatusSchema.nullable(),
+      partner: z.lazy(() => partnerSummarySchema).nullable(),
+      purchaseOrder: z.lazy(() => purchaseOrderSummaryDTO).nullable()
+    }).superRefine((data, ctx) => {
+      const isPurchase = data.invoiceType === invoiceTypeSchema.enum.PURCHASE;
       if (!data.partner) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: ["partner"],
-          message: "Le client est obligatoire",
+          message: isPurchase ? "Le fournisseur est obligatoire" : "Le client est obligatoire",
         });
       }
     })
@@ -193,7 +194,7 @@ export const invoiceSummarySchema = z.object({
   issueDate: z.date(),
   invoiceType: invoiceTypeSchema,
   invoiceStatus: invoiceStatusSchema,
-  invoiceComplianceStatus:invoiceComplianceStatusSchema,
+  invoiceComplianceStatus: invoiceComplianceStatusSchema,
   invoiceCurrency: currencyTypeSchema,
   totalExclTaxEUR: z.number(),
   totalInclTaxEUR: z.number(),
@@ -205,7 +206,7 @@ export const invoiceSummarySchema = z.object({
 })
 
 export const invoiceDetailedSummarySchema = invoiceSummarySchema.extend({
-  partner : partnerSummarySchema
+  partner: partnerSummarySchema
 })
 
 
