@@ -3,18 +3,23 @@ import { CreateSettingSchema, SettingBaseSchema, SettingPageItemSchema, UpdateSe
 
 
 export const PaymentConditionSchema = SettingBaseSchema.extend({
-    idPaymentCondition: z.string()
+    idPaymentCondition: z.string(),
+    type: z.literal("PAYMENT_CONDITION"),
   });
 
 export type PaymentCondition = z.infer<typeof PaymentConditionSchema>;
 
-export const CreatePaymentConditionSchema = CreateSettingSchema.extend({});
+export const CreatePaymentConditionSchema = CreateSettingSchema.extend({
+    settingType: z.literal("PAYMENT_CONDITION"),
+});
 
 export type CreatePaymentCondition = z.infer<
   typeof CreatePaymentConditionSchema
 >;
 
-export const UpdatePaymentConditionSchema = UpdateSettingSchema.extend({});
+export const UpdatePaymentConditionSchema = UpdateSettingSchema.extend({
+    settingType: z.literal("PAYMENT_CONDITION"),
+});
 
 export type UpdatePaymentCondition = z.infer<
   typeof UpdatePaymentConditionSchema
@@ -22,7 +27,8 @@ export type UpdatePaymentCondition = z.infer<
 
 export const PaymentConditionPageItemSchema =
   SettingPageItemSchema.extend({
-    idPaymentCondition: z.string()
+    idPaymentCondition: z.string(),
+    settingType: z.literal("PAYMENT_CONDITION"),
   });
 
 export type PaymentConditionPageItem = z.infer<

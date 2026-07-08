@@ -5,78 +5,45 @@ import { OperationCategoryCard } from "./operationCategorySettingsCrad";
 import { VatRateCard } from "./vatRateSettingsCard";
 import { PaymentConditionCard } from "./paymentSettingsCard";
 import { BillingPageHeader } from "../widgets/billingHeader";
-import DeleteSettingModal from "./deleteSettingItem";
 import { useState } from "react";
-import { SettingItem } from "./settingCard";
 import { appToast } from "@/shared/lib/toast";
 import SettingDetailsModal from "./detailsSettingItem";
 import ToggleSettingStatusModal from "./activateConfirmationModal";
-import AddSettingModal, { SettingFormData } from "./addSettingItem";
+import AddSettingModal from "./addSettingItem";
+import { CreateSetting, SettingPageItem } from "../../models/SettingItem";
+import { SettingType, SettingTypeSchema } from "../../types/settingType";
+import { OperationCategoryAPI, PaymentConditionAPI, TvaRateAPI } from "../../api/partners-api";
+import { getSettingItemId } from "../../lib/settingItemHelpers";
 
 
 export default function BillingSettingsPage() {
-    const [deleteModalOpen, setDeleteModalOpen]=useState(false)
-    const [deleteLoading, setDeleteLoading]=useState(false)
+    
 
     const [detailsModalOpen, setDetailsModalOpen]=useState(false)
 
     const [toggleModalOpen, setToggleModalOpen] = useState(false);
     const [toggleLoading, setToggleLoading] = useState(false);
 
-    const [selectedItem, setSelectedItem]=useState<SettingItem| null>(null);
+    const [selectedItem, setSelectedItem]=useState<SettingPageItem| null>(null);
 
-    const [typeAdd, setTypeAdd]=useState<String| null>(null);
+    const [typeAdd, setTypeAdd]=useState<SettingType| null>(null);
 
     
     const [openAddModal, setOpenAddModal] = useState(false);
     const [loadingAddModal, setLoadingAddModal] = useState(false);
   
-    const handleDelete = async ()=>{
-        if(selectedItem==null) return;
-        setDeleteLoading(true)
 
-        try {
-           await new Promise<void>((resolve) => {
-                setTimeout(() => {
-                resolve();
-                }, 2000); // 2 secondes
-            });
-            switch(selectedItem.type){
-                case "TVA" : console.log('delete tva'); break;
-                case "OperationCategory" : console.log('delete OperationCategory'); break;
-                case "PaymentCondition" : console.log('delete PaymentCondition'); break;
-                default: console.log("Not recognized")
-            }
-
-            appToast.success('Deleted successfully')
-
-            setDeleteModalOpen(false)
-            
-        } catch (error) {
-            appToast.error("Erreurr suppression", "errreur")
-        }
-        finally{
-            setDeleteLoading(false)
-        }
-
-    }
-
-    const onDelete = (item: SettingItem)=>{
-        setDeleteModalOpen(true);
-        setSelectedItem(item)
-    }
-
-    const onShowDetails = (item: SettingItem)=>{
+    const onShowDetails = (item: SettingPageItem)=>{
         setDetailsModalOpen(true);
         setSelectedItem(item)
     }
 
-    const onActivate = (item: SettingItem)=>{
+    const onActivate = (item: SettingPageItem)=>{
         setSelectedItem(item);
         setToggleModalOpen(true)
     }
 
-    const onAction = (type: string)=>{
+    const onAction = (type: SettingType)=>{
         setTypeAdd(type)
         setOpenAddModal(true)
     }
@@ -86,40 +53,76 @@ export default function BillingSettingsPage() {
 
         setToggleLoading(true);
 
+        let idSettingItem = getSettingItemId(selectedItem)
+
         try {
             // Mock API
-            await new Promise((resolve) => setTimeout(resolve, 2000));
+            switch(selectedItem.settingType){
+                case SettingTypeSchema.enum.TVA_RATE :
+                    selectedItem.active ?
+                        await TvaRateAPI.deactivateTvaRate(idSettingItem)
+                        : await TvaRateAPI.activateTvaRate(idSettingItem) ; 
+                        break;
+                case SettingTypeSchema.enum.OPERATION_CATEGORY : 
+                    selectedItem.active ?
+                        await OperationCategoryAPI.deactivateOperationCategory(idSettingItem)
+                        : await OperationCategoryAPI.activateOperationCategory(idSettingItem) ; 
+                        break;
+                case SettingTypeSchema.enum.PAYMENT_CONDITION : 
+                    selectedItem.active ?
+                        await PaymentConditionAPI.deactivatePaymentCondition(idSettingItem)
+                        : await PaymentConditionAPI.activatePaymentCondition(idSettingItem) ; 
+                        break;
 
+                default: appToast.error("Type de configuration Non reconnu"); return;
+            }
 
+            appToast.success('Mise à jour de statut avec succès')
             setToggleModalOpen(false);
         } finally {
             setToggleLoading(false);
         }
-        };
+        
+    };
 
+        
+    const buildFormData = (data: CreateSetting): FormData=>{
+        const formData = new FormData()
+        formData.append("label", data.label)
+        formData.append("description", data.description)
 
-        const handleCreate = async (data: SettingFormData) => {
-            setLoadingAddModal(true);
+        return formData;
+    }
 
-            try {
-                await new Promise((resolve) => setTimeout(resolve, 1500));
-
-                console.log(data);
-
-                setOpenAddModal(false);
-            } finally {
-                setLoadingAddModal(false);
-            }
-        };
-        const getTitleAddModal = ():string=>{
-            if(!typeAdd) return "Ajouter configuration";
+    const handleCreate = async (data: CreateSetting) => {
+        setLoadingAddModal(true);
+        const formData = buildFormData(data)
+        try {
             switch(typeAdd){
-                case "TVA" : return "Ajouter un taux TVA";
-                case "OperationCategory" : return "Ajouter une catégorie d'opération";
-                case "PaymentCondition" : return "Ajouter une condition de paiement";
-                default: return "Ajouter configuration"
+                case SettingTypeSchema.enum.TVA_RATE : await TvaRateAPI.createTvaRate(formData) ; break;
+                case SettingTypeSchema.enum.OPERATION_CATEGORY : await OperationCategoryAPI.createOperationCategory(formData); break;
+                case SettingTypeSchema.enum.PAYMENT_CONDITION : await PaymentConditionAPI.createPaymentCondition(formData) ; break;
+                default: appToast.error("Type de configuration Non reconnu")
             }
+
+            console.log(data);
+
+            setOpenAddModal(false);
+        } finally {
+            setLoadingAddModal(false);
         }
+    };
+
+
+    const getTitleAddModal = ():string=>{
+        if(!typeAdd) return "Ajouter configuration";
+        switch(typeAdd){
+            case SettingTypeSchema.enum.TVA_RATE : return "Ajouter un taux TVA";
+            case SettingTypeSchema.enum.OPERATION_CATEGORY: return "Ajouter une catégorie d'opération";
+            case SettingTypeSchema.enum.PAYMENT_CONDITION : return "Ajouter une condition de paiement";
+            default: return "Ajouter configuration"
+        }
+    }
 
     return (
         <div className="flex flex-col gap-8 p-6">
@@ -135,35 +138,23 @@ export default function BillingSettingsPage() {
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
 
             <OperationCategoryCard
-                onDelete={onDelete}
                 onShow={onShowDetails}
                 onToggleActive={onActivate}
                 onAction={onAction}
             />
             <PaymentConditionCard 
-                onDelete={onDelete}
                 onShow={onShowDetails}
                 onToggleActive={onActivate}
                 onAction={onAction}
             />
 
             <VatRateCard 
-                onDelete={onDelete}
                 onShow={onShowDetails}
                 onToggleActive={onActivate}
                 onAction={onAction}
             />
 
         </div>
-
-        <DeleteSettingModal
-                open={deleteModalOpen}
-                itemType="la catégorie d'opération"
-                itemName={selectedItem?.label}
-                onClose={() => setDeleteModalOpen(false)}
-                onSubmit={handleDelete}
-                deleteLoading={deleteLoading}
-            />
 
         <SettingDetailsModal
                 open={detailsModalOpen}
@@ -176,18 +167,19 @@ export default function BillingSettingsPage() {
             open={toggleModalOpen}
             loading={toggleLoading}
             itemName={selectedItem?.label}
-            isActive={selectedItem?.isActive ?? false}
+            isActive={selectedItem?.active ?? false}
             onClose={() => setToggleModalOpen(false)}
             onSubmit={handleToggleStatus}
         />
 
-        <AddSettingModal
-            open={openAddModal}
-            title={getTitleAddModal()}
-            loading={loadingAddModal}
-            onClose={() => setOpenAddModal(false)}
-            onSubmit={handleCreate}
-        />
+        {typeAdd && <AddSettingModal
+                open={openAddModal}
+                title={getTitleAddModal()}
+                loading={loadingAddModal}
+                onClose={() => setOpenAddModal(false)}
+                onSubmit={handleCreate} 
+                settingType={typeAdd}       
+        />}
         </div>
     );
 }

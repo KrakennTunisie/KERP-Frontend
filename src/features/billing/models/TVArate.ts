@@ -3,18 +3,27 @@ import { z } from "zod";
 import { CreateSettingSchema, SettingBaseSchema, SettingPageItemSchema, UpdateSettingSchema } from "./SettingItem";
 
 export const TVARateSchema = SettingBaseSchema.extend({
-    idTVARate: z.string()
+    idTVARate: z.string(),
+    settingType: z.literal("TVA_RATE"),
   });
 
 export type TVARate = z.infer<typeof TVARateSchema>;
 
-export const CreateTVARateSchema = CreateSettingSchema.extend({});
+export const CreateTVARateSchema = CreateSettingSchema.extend({
+    settingType: z.literal("TVA_RATE"),
+    label: z
+    .string()
+    .min(1, "Label est obligatoire") 
+    .regex(/^\d{1,3}%$/, "Le libellé doit être au format '20%'"),
+});
 
 export type CreateTVARate = z.infer<
   typeof CreateTVARateSchema
 >;
 
-export const UpdateTVARateSchema = UpdateSettingSchema.extend({});
+export const UpdateTVARateSchema = UpdateSettingSchema.extend({
+    settingType: z.literal("TVA_RATE"),
+});
 
 export type UpdateTVARate = z.infer<
   typeof UpdateTVARateSchema
@@ -22,7 +31,8 @@ export type UpdateTVARate = z.infer<
 
 export const TVARatePageItemSchema =
   SettingPageItemSchema.extend({
-    idTVARate: z.string()
+    idTVARate: z.string(),
+    settingType: z.literal("TVA_RATE"),
   });
 
 export type TVARatePageItem = z.infer<
