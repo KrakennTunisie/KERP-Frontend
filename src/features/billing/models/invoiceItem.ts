@@ -1,6 +1,5 @@
 import {  z } from "zod";
 import { v4 as uuidv4 } from "uuid";
-import { operationCategorySchema } from "../types/operationCategory";
 import { discountTypeSchema } from "../types/discountType";
 
 
@@ -13,10 +12,8 @@ export const baseItemSchema = z.object({
     itemTotalExclTax: z.number(),
     itemTaxAmount: z.number(),
     itemTotalInclTax: z.number(),
-    operationCategory: operationCategorySchema,
+    operationCategory: z.string(),
     
-    discountType: discountTypeSchema.nullable(),
-    discountValue: z.number().nullable(),
 });
 
 
@@ -26,6 +23,9 @@ export const invoiceItemSchema = baseItemSchema.extend({
     invoice: z.string().nullable(),
     purchaseOrderItem :z.lazy(() => purchaseOrderItemSchema).nullable(),
     creditedQuantity: z.number(),
+    
+    discountType: discountTypeSchema.nullable(),
+    discountValue: z.number().nullable(),
 });
 // invoice item
 export const creditNoteItemSchema = baseItemSchema.extend({
@@ -68,7 +68,7 @@ export const defaultInvoiceItem = (): InvoiceItem => ({
     itemTotalExclTax: 0,
     itemTaxAmount: 0,
     itemTotalInclTax: 0,
-    operationCategory: "SERVICE_PROVISION",
+    operationCategory: "Prestation des services",
     invoice: null,
     creditedQuantity: 0,
     discountType: discountTypeSchema.enum.PERCENTAGE,
@@ -86,10 +86,8 @@ export const defaultPurchaseOrderItem = (): PurchaseOrderItem => ({
     itemTotalExclTax: 0,
     itemTaxAmount: 0,
     itemTotalInclTax: 0,
-    operationCategory: "SERVICE_PROVISION",
-    purchaseOrder: null,
-    discountType: null,
-    discountValue: null
+    operationCategory: "Prestation des services",
+    purchaseOrder: null
 });
 
 export const defaultCreditNoteItem = (): CreditNoteItem => ({
@@ -101,10 +99,8 @@ export const defaultCreditNoteItem = (): CreditNoteItem => ({
     itemTotalExclTax: 0,
     itemTaxAmount: 0,
     itemTotalInclTax: 0,
-    operationCategory: "SERVICE_PROVISION",
+    operationCategory: "Prestation des services",
     originalItem: null,
-    discountType: null,
-    discountValue: null
 });
 
 

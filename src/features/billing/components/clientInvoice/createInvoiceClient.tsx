@@ -6,11 +6,9 @@ import { Controller } from "react-hook-form"
 import { InvoiceFormClientProps, useCreateInvoice } from "../../hooks/useCreateEditInvoice"
 import { CurrencyType, currencyTypeSchema } from "../../types/currency"
 import { invoiceTypeSchema } from "../../types/invoiceType"
-import { OperationCategoryLabels, operationCategorySchema } from "../../types/operationCategory"
-import { PaymentCondition, PaymentConditionLabels, PaymentConditionSchema } from "../../types/paymentCondition"
+import { PaymentCondition } from "../../types/paymentCondition"
 import { paymentMethod, paymentMethodLabels, paymentMethodSchema } from "../../types/paymentMethod"
 import { purchaseOrderStatusLabels } from "../../types/purchaseOrderStatus"
-import { tvaRateSchema } from "../../types/tvaRate"
 import ErrorForm from "../widgets/errorForm"
 import InvoicePreview from "../widgets/invoicePreview"
 import { SectionTitle } from "../widgets/sectionTitle"
@@ -27,6 +25,8 @@ import { Textarea } from "@/shared/components/ui/textArea"
 import AddSettingModal from "../parameters/addSettingItem"
 import UseSetting from "../../hooks/useSettings"
 import { SettingTypeSchema } from "../../types/settingType"
+import { extractTvaRate, formatShowLabel } from "../../lib/settingItemHelpers"
+import { useFetchSettings } from "../../hooks/useFetchSetting"
 
 export default function CreateInvoiceClient({ mode,
     invoiceId, }: InvoiceFormClientProps) {
@@ -35,8 +35,15 @@ export default function CreateInvoiceClient({ mode,
         linkedToPO, selectedPO, handleSelectPO, loadingTTN, handleTogglePO, selectClient, clearClient, 
         updateInvoice, clients, previewData, form, onSubmit, isModalOpen, router, calculateDueDate, onCloseDocumentModal, 
         createInvoice, sendToTTN, watch, setValue,
-        loadingClients, loadingEdit, loadingForm, getMaxQuantity, invoice, sendOpen, setSendOpen, createdInvoice, getError, getItemError
+        loadingClients, loadingEdit, loadingForm, getMaxQuantity, invoice, sendOpen, setSendOpen, createdInvoice, getError, getItemError,
     } = useCreateInvoice({ mode, invoiceId })
+
+    const {
+        vatRates,
+        operationCategories,
+        paymentConditions,
+        fetchPaymentConditions, fetchCategories, fetchTvaRates
+      } = useFetchSettings()
 
     const [showPreview, setShowPreview] = useState(true);
 
@@ -89,7 +96,6 @@ export default function CreateInvoiceClient({ mode,
                     </button>
                     <button
                         onClick={onSubmit}
-                        disabled={!canCreateInvoice}
                         className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold shadow-md transition ${!canCreateInvoice
                             ? "bg-gray-300 cursor-not-allowed text-gray-500 shadow-none"
                             : "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-200 cursor-pointer"
@@ -171,9 +177,9 @@ export default function CreateInvoiceClient({ mode,
                                 {/* N° Facture + Date émission sur une ligne */}
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-xs font-medium text-slate-500 mb-1">
+                                        <Label>
                                             N° Facture
-                                        </label>
+                                        </Label>
                                         <input
                                             readOnly
                                             disabled
@@ -184,9 +190,9 @@ export default function CreateInvoiceClient({ mode,
                                         <FieldError error={getError("invoiceNumber")} />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-medium text-slate-500 mb-1">
+                                        <Label>
                                             {"Date d'émission"}
-                                        </label>
+                                        </Label>
                                         <Controller
                                             control={form.control}
                                             name="issueDate"
@@ -255,9 +261,9 @@ export default function CreateInvoiceClient({ mode,
 
                                         {linkedToPO && (
                                             <div className="mt-4">
-                                                <label className="block text-xs font-medium text-slate-500 mb-1">
+                                                <Label>
                                                     Sélectionner le bon de commande
-                                                </label>
+                                                </Label>
                                                 <select
                                                     onChange={(e) => {
                                                         const po = purchaseOrders.find((p) => p.idPurchaseOrder === e.target.value);
@@ -301,9 +307,9 @@ export default function CreateInvoiceClient({ mode,
                             <SectionTitle number="02" label="Client" invoiceType={invoiceTypeSchema.enum.SALE} />
                             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 flex flex-col gap-3 mt-3">
                                 <div>
-                                    <label className="block text-xs font-medium text-slate-500 mb-1">
+                                    <Label>
                                         Sélectionner un client
-                                    </label>
+                                    </Label>
                                     <div className="relative">
                                         <input
                                             type="text"
@@ -390,11 +396,12 @@ export default function CreateInvoiceClient({ mode,
                                 <div className="grid grid-cols-2 gap-4">
                                     {/* Devise */}
                                     <div>
-                                        <label className="block text-xs font-medium text-slate-500 mb-1">
+                                        <Label>
                                             Devise
-                                        </label>
+                                        </Label>
 
                                         <Select value={watch("invoiceCurrency") ?? ""}
+                                                disabled={mode==="edit"}
                                                 onValueChange={(value) =>
                                                     {setValue("invoiceCurrency", value as CurrencyType, {
                                                         shouldValidate: true,
@@ -419,9 +426,9 @@ export default function CreateInvoiceClient({ mode,
 
                                     {/* Taux de change */}
                                     <div>
-                                        <label className="block text-xs font-medium text-slate-500 mb-1">
+                                        <Label>
                                             Taux de change
-                                        </label>
+                                        </Label>
                                         <input
                                             type="text"
                                             readOnly
@@ -433,9 +440,9 @@ export default function CreateInvoiceClient({ mode,
 
                                     {/* Conditions de paiement */}
                                     <div>
-                                        <label className="block text-xs font-medium text-slate-500 mb-1">
+                                        <Label>
                                             Condition de paiement
-                                        </label>
+                                        </Label>
                                         <Select value={watch("paymentCondition") ?? ""}
                                                 onValueChange={(value) =>
                                                     {setValue("paymentCondition", value as PaymentCondition, {
@@ -446,13 +453,15 @@ export default function CreateInvoiceClient({ mode,
                                                 
                                                 }
                                             }>
-                                            <SelectTrigger className="bg-slate-50" onAdd={()=>onAction(SettingTypeSchema.enum.PAYMENT_CONDITION)}>
+                                            <SelectTrigger className="bg-slate-50" 
+                                                onAdd={()=>onAction(SettingTypeSchema.enum.PAYMENT_CONDITION)}
+                                                onRefresh={fetchPaymentConditions}>
                                                 <SelectValue placeholder="Méthode de paiement" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                              {PaymentConditionSchema.options.map((condition) => (
-                                                    <SelectItem key={condition} value={condition}>
-                                                        {PaymentConditionLabels[condition]}
+                                              {paymentConditions.map((condition) => (
+                                                    <SelectItem key={condition.code} value={condition.label}>
+                                                        {formatShowLabel(condition.label)}
                                                     </SelectItem>                                                
                                                 ))}
                                             </SelectContent>
@@ -461,9 +470,9 @@ export default function CreateInvoiceClient({ mode,
 
                                     {/* Méthode de paiement */}
                                     <div>
-                                        <label className="block text-xs font-medium text-slate-500 mb-1">
+                                        <Label>
                                             Méthode de paiement
-                                        </label>
+                                        </Label>
                                         <Select value={watch("paymentMethod") ?? ""}
                                                 onValueChange={(value) =>
                                                     setValue("paymentMethod", value as paymentMethod, {
@@ -536,7 +545,7 @@ export default function CreateInvoiceClient({ mode,
 
                                             {/* Catégorie */}
                                             <div className="mb-3 mt-3 space-y-2">
-                                                <Label className="block text-xs font-medium text-slate-500 mb-1">
+                                                <Label >
                                                     Catégorie
                                                 </Label>
                                                 <Select
@@ -550,17 +559,19 @@ export default function CreateInvoiceClient({ mode,
                                                         )
                                                     }
                                                 >
-                                                    <SelectTrigger onAdd={()=>onAction(SettingTypeSchema.enum.OPERATION_CATEGORY)}>
+                                                    <SelectTrigger 
+                                                            onAdd={()=>onAction(SettingTypeSchema.enum.OPERATION_CATEGORY)}
+                                                            onRefresh={fetchCategories}>
                                                         <SelectValue placeholder="Sélectionner une catégorie" />
                                                     </SelectTrigger>
 
                                                     <SelectContent>
-                                                        {operationCategorySchema.options.map((category) => (
+                                                        {operationCategories.map((category) => (
                                                             <SelectItem
-                                                                key={category}
-                                                                value={category}
+                                                                key={category.code}
+                                                                value={category.label}
                                                             >
-                                                                {OperationCategoryLabels[category]}
+                                                                {formatShowLabel(category.label)}
                                                             </SelectItem>
                                                         ))}
                                                     </SelectContent>
@@ -605,7 +616,9 @@ export default function CreateInvoiceClient({ mode,
                                                     error={getItemError(index, "unityPriceEXclTax")}
                                                 />
                                                 <div className="md-5">
-                                                    <label className="block text-xs font-medium text-slate-500 mb-1">TVA</label>
+                                                    <Label className="mb-3">
+                                                        TVA
+                                                    </Label>
                                                     <Select
                                                         value={String(item.vatRate)}
                                                         disabled={linkedToPO && !!selectedPO || invoice?.purchaseOrder != null}
@@ -613,17 +626,19 @@ export default function CreateInvoiceClient({ mode,
                                                             updateItem(item.idInvoiceItem!, "vatRate", Number(value))
                                                         }
                                                     >
-                                                        <SelectTrigger onAdd={()=>onAction(SettingTypeSchema.enum.TVA_RATE)}>
+                                                        <SelectTrigger 
+                                                                onAdd={()=>onAction(SettingTypeSchema.enum.TVA_RATE)}
+                                                                onRefresh={fetchTvaRates}>
                                                             <SelectValue />
                                                         </SelectTrigger>
 
                                                         <SelectContent>
-                                                            {tvaRateSchema.options.map((rate) => (
+                                                            {vatRates.map((rate) => (
                                                                 <SelectItem
-                                                                    key={rate.value}
-                                                                    value={String(rate.value)}
+                                                                    key={rate.code}
+                                                                    value={String(extractTvaRate(rate.label))}
                                                                 >
-                                                                    {rate.value}%
+                                                                    {formatShowLabel(rate.label)}
                                                                 </SelectItem>
                                                             ))}
                                                         </SelectContent>
@@ -633,9 +648,9 @@ export default function CreateInvoiceClient({ mode,
                                                 </div>
                                                 {/* Discount */}
                                                 <div className="col-span-2">
-                                                    <label className="block text-xs font-medium text-slate-500 mb-1">
+                                                    <Label>
                                                         Discount
-                                                    </label>
+                                                    </Label>
 
                                                     <div className="flex gap-2">
                                                         <Input
@@ -684,7 +699,7 @@ export default function CreateInvoiceClient({ mode,
                                                     <FieldError error={errors.invoiceItems?.[index]?.discountValue?.message} />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-xs font-medium text-slate-500 mb-1">Total HT</label>
+                                                    <Label>Total HT</Label>
                                                     <input
                                                         type="text"
                                                         readOnly

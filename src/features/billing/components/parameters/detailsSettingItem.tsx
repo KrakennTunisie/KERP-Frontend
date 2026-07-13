@@ -36,7 +36,7 @@ export default function SettingDetailsModal({
             setLoadingFetch(true)
 
             if(item && getSettingItemId(item)){
-                let idSettingItem = getSettingItemId(item)
+                const idSettingItem = getSettingItemId(item)
                 switch(item.settingType){
                                 case SettingTypeSchema.enum.TVA_RATE : 
                                     const response = await TvaRateAPI.getTvaRate(idSettingItem) ; 

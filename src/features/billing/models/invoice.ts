@@ -4,7 +4,6 @@ import { exchangeRateSourceSchema } from "../types/exchangeRateSource";
 import { invoiceComplianceStatusSchema } from "../types/invoiceComplianceStatus";
 import { invoiceStatusSchema, invoiceStatusSchemaWithoutAll } from "../types/invoiceStatus";
 import { invoiceTypeSchema } from "../types/invoiceType";
-import { PaymentConditionSchema } from "../types/paymentCondition";
 import { paymentMethodSchema } from "../types/paymentMethod";
 import { fileSchema } from "../types/pdfSchema";
 import { documentSchema } from "./document";
@@ -12,6 +11,8 @@ import { InvoiceEventSchema } from "./invoiceEvent";
 import { invoiceItemSchema } from "./invoiceItem";
 import { partnerSchema, partnerSummarySchema } from "./partner";
 import { basePurchaseOrderSchema, purchaseOrderSummaryDTO } from "./purchaseOrder";
+import { extractPaymentConditionDays } from "../lib/settingItemHelpers";
+import { formatDateLong } from "@/shared/utils/formatDate";
 
 const baseInvoiceSchema = z.object({
   invoiceNumber: z.string(),
@@ -21,7 +22,7 @@ const baseInvoiceSchema = z.object({
   invoiceCurrency: currencyTypeSchema,
   vatRate: z.number(),
   paymentMethod: paymentMethodSchema,
-  paymentCondition: PaymentConditionSchema,
+  paymentCondition: z.string(),
   exchangeRateReferenceDate: z.date(),
   appliedExchangeRate: z.number(),
   exchangeRateSource: exchangeRateSourceSchema,
@@ -49,24 +50,16 @@ const withDueDateValidation = <T extends z.ZodTypeAny>(schema: T) =>
     const { issueDate, dueDate, paymentCondition } = data as {
       issueDate: Date;
       dueDate: Date;
-      paymentCondition: "NET_15" | "NET_30" | "IMMEDIATE";
+      paymentCondition: string;
     };
 
     if (!issueDate || !dueDate || !paymentCondition) return;
 
     const minDueDate = new Date(issueDate);
-
-    switch (paymentCondition) {
-      case "NET_15":
-        minDueDate.setDate(minDueDate.getDate() + 15);
-        break;
-      case "NET_30":
-        minDueDate.setDate(minDueDate.getDate() + 30);
-        break;
-      case "IMMEDIATE":
-        break;
-    }
-
+   
+    minDueDate.setDate(minDueDate.getDate() + Number(extractPaymentConditionDays(paymentCondition)));
+    console.log("issueDate:", formatDateLong(issueDate))
+    console.log("dueDate:", formatDateLong(dueDate))
     if (dueDate < minDueDate) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,

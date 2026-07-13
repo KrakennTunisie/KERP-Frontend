@@ -18,10 +18,9 @@ export type cardProps = {
     onShow: (selectedItem: SettingPageItem)=> void;
     onToggleActive: (selectedItem: SettingPageItem)=> void;
     onAction: (type: SettingType)=> void;
-    onFetchReady?: (refresh: () => Promise<void>) => void;
-
-
+    onFetchReady: (refresh: () => Promise<void>) => void;
 }
+
 
 export type SettingCardProps = {
   title: string;
@@ -36,6 +35,8 @@ export type SettingCardProps = {
   onRefresh: ()=>void;
   loading: boolean;
   footer?: ReactNode;
+  open:boolean;
+  setOpen: (op: boolean)=> void;
 };
 
 export function SettingCard({
@@ -50,9 +51,10 @@ export function SettingCard({
   onRefresh,
   footer,
   loading,
-  onToggleActive
+  onToggleActive,
+  open= false, 
+  setOpen
 }: SettingCardProps) {
-  const [open, setOpen] = useState(false);
 
 
 
@@ -103,7 +105,7 @@ export function SettingCard({
         {/* Expand / Collapse */}
         <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => setOpen(!open)}
         className="rounded-md p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 cursor-pointer"
         title={open ? "Réduire" : "Développer"}
         >

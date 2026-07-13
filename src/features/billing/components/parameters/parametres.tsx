@@ -9,6 +9,7 @@ import SettingDetailsModal from "./detailsSettingItem";
 import ToggleSettingStatusModal from "./activateConfirmationModal";
 import AddSettingModal from "./addSettingItem";
 import UseSetting from "../../hooks/useSettings";
+import { formatShowLabel } from "../../lib/settingItemHelpers";
 
 
 export default function BillingSettingsPage() {
@@ -38,20 +39,20 @@ export default function BillingSettingsPage() {
                     onShow={onShowDetails}
                     onToggleActive={onActivate}
                     onAction={onAction}
-                    onFetchReady={setRefreshCategories}
+                    onFetchReady={(fn) => setRefreshCategories(() => fn)}
                 />
                 <PaymentConditionCard 
                     onShow={onShowDetails}
                     onToggleActive={onActivate}
                     onAction={onAction}
-                    onFetchReady={setRefreshPaymentConditions}
+                    onFetchReady={(fn) => setRefreshPaymentConditions(() => fn)}
                 />
 
                 <VatRateCard 
                     onShow={onShowDetails}
                     onToggleActive={onActivate}
                     onAction={onAction}
-                    onFetchReady={setRefreshTvaRates}
+                    onFetchReady={(fn) => setRefreshTvaRates(() => fn)}
                 />
 
                 <SettingDetailsModal
@@ -61,14 +62,14 @@ export default function BillingSettingsPage() {
                         onClose={() => setDetailsModalOpen(false)}
                     />
 
-                <ToggleSettingStatusModal
+                {selectedItem && <ToggleSettingStatusModal
                     open={toggleModalOpen}
                     loading={toggleLoading}
-                    itemName={selectedItem?.label}
+                    itemName={formatShowLabel(selectedItem?.label)}
                     isActive={selectedItem?.active ?? false}
                     onClose={() => setToggleModalOpen(false)}
                     onSubmit={handleToggleStatus}
-                />
+                />}
             </div>
 
 

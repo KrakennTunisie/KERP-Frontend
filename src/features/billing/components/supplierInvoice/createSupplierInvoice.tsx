@@ -1,21 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { SectionTitle } from "../widgets/sectionTitle";
 import { OperationCategoryLabels, operationCategorySchema } from "../../types/operationCategory";
 import { tvaRateSchema } from "../../types/tvaRate";
 import ErrorForm from "../widgets/errorForm";
 import { invoiceTypeSchema } from "../../types/invoiceType";
 import { paymentMethodLabels, paymentMethodSchema } from "../../types/paymentMethod";
-import { PaymentCondition, PaymentConditionLabels, PaymentConditionSchema } from "../../types/paymentCondition";
+import {   PaymentConditionSchema } from "../../types/paymentCondition";
 import { currencyTypeSchema } from "../../types/currency";
 import { purchaseOrderStatusLabels } from "../../types/purchaseOrderStatus";
 import { Controller } from "react-hook-form";
-import { Modal } from "@/shared/components/ui/modal";
-import useCreateSupplierInvoice, { InvoiceFormModalProps } from "../../hooks/useCreateSupplierInvoice";
+import useCreateSupplierInvoice from "../../hooks/useCreateSupplierInvoice";
 import { DocumentViewer } from "@/shared/components/ui/DocumentViewer";
-import { useParams, useRouter } from "next/navigation";
-import AddSupplierModal from "../widgets/addPartnerModal";
 import AddPartnerModal from "../widgets/addPartnerModal";
 import { partnerTypeSchema } from "../../types/partnerType";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select";
@@ -24,9 +20,11 @@ import { discountTypeOptions, discountTypeSchema } from "../../types/discountTyp
 import { Input } from "@/shared/components/ui/input";
 import { Textarea } from "@/shared/components/ui/textArea";
 import AddSettingModal from "../parameters/addSettingItem";
-import { SettingType, SettingTypeSchema } from "../../types/settingType";
+import {  SettingTypeSchema } from "../../types/settingType";
 import UseSetting from "../../hooks/useSettings";
-import { Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { formatShowLabel } from "../../lib/settingItemHelpers";
+import { useFetchSettings } from "../../hooks/useFetchSetting";
 
 
 export default function CreateSupplierInvoice() {
@@ -398,7 +396,7 @@ export default function CreateSupplierInvoice() {
                       <SelectContent>
                         {PaymentConditionSchema.options.map((condition) => (
                           <SelectItem key={condition} value={condition}>
-                            {PaymentConditionLabels[condition]}
+                            {formatShowLabel(condition)}
                           </SelectItem>
                         ))}
                         <SelectItem
@@ -409,6 +407,7 @@ export default function CreateSupplierInvoice() {
                         </SelectItem>
                       </SelectContent>
                     </Select>
+                    
                   </div>
 
                   <div>

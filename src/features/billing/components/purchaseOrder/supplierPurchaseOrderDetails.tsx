@@ -4,12 +4,12 @@ import { DocumentPreviewModal } from "@/shared/components/ui/documentPreviewModa
 import React from "react";
 import useSupplierPurchaseOrderDetails from "../../hooks/useSupplierPurchaseOrderDetails";
 import { currencyTypeSchema } from "../../types/currency";
-import { PaymentConditionLabels } from "../../types/paymentCondition";
 import { paymentMethodLabels } from "../../types/paymentMethod";
 import Card from "../widgets/card";
 import { SectionLabel } from "../widgets/sectionLabel";
 import Link from "next/link";
 import { partnerTypeSchema } from "../../types/partnerType";
+import { formatShowLabel } from "../../lib/settingItemHelpers";
 
 
 type ModalProps = {
@@ -166,7 +166,7 @@ export function SupplierPurchaseOrderModalContent({
               <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">
                 Condition de paiement
               </p>
-              <p className="text-sm font-semibold text-gray-700">{purchaseOrder?.paymentCondition ? PaymentConditionLabels[purchaseOrder.paymentCondition] : "—"}</p>
+              <p className="text-sm font-semibold text-gray-700">{purchaseOrder?.paymentCondition ? formatShowLabel(purchaseOrder.paymentCondition) : "—"}</p>
             </div>
           </div>
 
@@ -252,7 +252,7 @@ export function SupplierPurchaseOrderModalContent({
                 {item.unityPriceEXclTax}
               </p>
               <p className="text-sm font-bold text-gray-900 text-right">
-                {item.itemTotalExclTax}
+                {item.quantity * item.unityPriceEXclTax}
               </p>
             </div>
           ))}
@@ -292,15 +292,6 @@ export function SupplierPurchaseOrderModalContent({
         </div>
       </Card>
 
-      {/* Footer buttons */}
-      <div className="flex justify-end gap-3 pt-2">
-        <button
-          onClick={onClose}
-          className="px-5 py-2.5 rounded-xl border border-blue-200 text-sm font-semibold text-blue-600 hover:bg-blue-50 transition"
-        >
-          Fermer
-        </button>
-      </div>
 
                 <DocumentPreviewModal
             open={!!previewDocument}

@@ -1,11 +1,11 @@
 import { z } from "zod";
-import { baseInvoiceCreditNoteItemSchema, creditNoteItemSchema, invoiceItemSchema } from "./invoiceItem";
+import { baseInvoiceCreditNoteItemSchema, creditNoteItemSchema } from "./invoiceItem";
 import { CreditNoteTypeSchema } from "../types/creditNoteType";
 import { invoiceComplianceStatusSchema } from "../types/invoiceComplianceStatus";
 import { invoiceStatusSchema } from "../types/invoiceStatus";
 import { fileSchema } from "../types/pdfSchema";
 import { documentSchema } from "./document";
-import { invoiceDetailedSummarySchema, invoiceSchema, invoiceSummarySchema } from "./invoice";
+import { invoiceDetailedSummarySchema, invoiceSchema } from "./invoice";
 import { InvoiceCreditNoteEventSchema } from "./invoiceEvent";
 
 const detailsInvoiceCreditNoteItemSchema = z.object({

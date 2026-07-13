@@ -120,7 +120,7 @@ export function InvoiceItemsCard({ invoice }: InvoiceItemsCardProps) {
 
                 {item.operationCategory && (
                   <p className="mt-0.5 text-xs text-slate-400">
-                    {OperationCategoryLabels[item.operationCategory]}
+                    {item.operationCategory}
                   </p>
                 )}
               </div>

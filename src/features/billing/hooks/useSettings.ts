@@ -3,7 +3,7 @@ import { OperationCategoryAPI, PaymentConditionAPI, TvaRateAPI } from "../api/pa
 import { SettingType, SettingTypeSchema } from "../types/settingType";
 import { CreateSetting, SettingPageItem } from "../models/SettingItem";
 import { getSettingItemId } from "../lib/settingItemHelpers";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 
 
@@ -26,6 +26,11 @@ export default function UseSetting() {
     const [refreshPaymentConditions, setRefreshPaymentConditions] = useState<(() => Promise<void>) | null>(null);
 
     const [refreshTvaRates, setRefreshTvaRates] = useState<(() => Promise<void>) | null>(null);
+
+
+    useEffect(() => {
+        console.log("refreshCategories =", refreshCategories);
+    }, [refreshCategories]);
 
     const onCloseAddModal = ()=>{
         setOpenAddModal(false);
@@ -62,16 +67,19 @@ export default function UseSetting() {
                     selectedItem.active ?
                         await TvaRateAPI.deactivateTvaRate(idSettingItem)
                         : await TvaRateAPI.activateTvaRate(idSettingItem) ; 
+                        await refreshTvaRates?.(); 
                         break;
                 case SettingTypeSchema.enum.OPERATION_CATEGORY : 
                     selectedItem.active ?
                         await OperationCategoryAPI.deactivateOperationCategory(idSettingItem)
                         : await OperationCategoryAPI.activateOperationCategory(idSettingItem) ; 
+                        await refreshCategories?.(); 
                         break;
                 case SettingTypeSchema.enum.PAYMENT_CONDITION : 
                     selectedItem.active ?
                         await PaymentConditionAPI.deactivatePaymentCondition(idSettingItem)
                         : await PaymentConditionAPI.activatePaymentCondition(idSettingItem) ; 
+                        await refreshPaymentConditions?.();
                         break;
 
                 default: appToast.error("Type de configuration Non reconnu"); return;

@@ -15,6 +15,7 @@ export function PaymentConditionCard({ onShow, onToggleActive, onAction, onFetch
 
     const [paymentConditions, setPaymentConditions]=useState<PaymentConditionPageItem[]|[]>([])
     const [fetchLoading, setFetchLoading]=useState(false)
+    const [open, setOpen]=useState(false)
 
     const fetchPaymentConditions = async ()=>{
         try {
@@ -29,8 +30,14 @@ export function PaymentConditionCard({ onShow, onToggleActive, onAction, onFetch
     }
 
     useEffect(()=>{
-        onFetchReady?.(fetchPaymentConditions);
-    },[])
+        if(open)
+        fetchPaymentConditions();
+    },[open])
+
+    useEffect(()=>{
+        if(open)
+        onFetchReady(fetchPaymentConditions);
+    },[open])
 
   return (
     <SettingCard
@@ -45,6 +52,8 @@ export function PaymentConditionCard({ onShow, onToggleActive, onAction, onFetch
       onShow={onShow}
       onRefresh={fetchPaymentConditions}
       onToggleActive={onToggleActive}
+      open={open}
+      setOpen={setOpen}
     />
   );
 }

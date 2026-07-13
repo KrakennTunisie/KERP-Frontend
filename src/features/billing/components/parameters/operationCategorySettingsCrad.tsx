@@ -16,6 +16,8 @@ export function OperationCategoryCard({ onShow, onToggleActive, onAction, onFetc
 
     const [operationCategories, setOperationCategories]=useState<OperationCategoryPageItem[]|[]>([])
     const [fetchLoading, setFetchLoading]=useState(false)
+    const [open, setOpen]=useState(false)
+
 
     const fetchCategories = async ()=>{
         try {
@@ -28,10 +30,15 @@ export function OperationCategoryCard({ onShow, onToggleActive, onAction, onFetc
             setFetchLoading(false)
         }
     }
+    useEffect(()=>{
+        if(open)
+        fetchCategories();
+    },[open])
 
     useEffect(()=>{
-        onFetchReady?.(fetchCategories);
-    },[])
+        if(open)
+        onFetchReady(fetchCategories);
+    },[open])
 
 
   return (
@@ -47,6 +54,8 @@ export function OperationCategoryCard({ onShow, onToggleActive, onAction, onFetc
       onShow={onShow}
       onRefresh={fetchCategories}
       onToggleActive={onToggleActive}
+      open={open}
+      setOpen={setOpen}
     />
   );
 }

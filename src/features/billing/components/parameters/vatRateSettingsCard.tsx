@@ -13,21 +13,13 @@ import { appToast } from "@/shared/lib/toast";
 
 export function VatRateCard( { onShow, onToggleActive, onAction, onFetchReady}: cardProps) {
 
-/* const vatRates: SettingItem[] = tvaRateSchema.options
-                                    .map((item)=>({
-                                        idTVARate: item.value.toString(),
-                                        code:"code",
-                                        label: item.value+"%",
-                                        type:"TVA_RATE",
-                                        description: "description",
-                                        isActive: true,
-                                        createdAt: new Date(),
-                                        updatedAt: new Date()
-                                      }) */
+
     const [vatRates, setVatRates]=useState<TVARatePageItem[]|[]>([])
-        const [fetchLoading, setFetchLoading]=useState(false)
+    const [fetchLoading, setFetchLoading]=useState(false)
+    const [open, setOpen]=useState(false)
+
     
-        const fetchPaymentConditions = async ()=>{
+        const fetchTvaRates = async ()=>{
             try {
                 setFetchLoading(true)
                 const response = await TvaRateAPI.getAllTvaRates()
@@ -38,10 +30,16 @@ export function VatRateCard( { onShow, onToggleActive, onAction, onFetchReady}: 
                 setFetchLoading(false)
             }
         }
-    
-        useEffect(()=>{
-            onFetchReady?.(fetchPaymentConditions)
-        },[])
+
+    useEffect(()=>{
+        if(open)
+        fetchTvaRates();
+    },[open])
+
+    useEffect(()=>{
+        if(open)
+        onFetchReady(fetchTvaRates);
+    },[open])
     
   return (
     <SettingCard
@@ -54,8 +52,10 @@ export function VatRateCard( { onShow, onToggleActive, onAction, onFetchReady}: 
       loading={fetchLoading}
       onAction={onAction}
       onShow={onShow}
-      onRefresh={fetchPaymentConditions}
+      onRefresh={fetchTvaRates}
       onToggleActive={onToggleActive}
+      open={open}
+      setOpen={setOpen}
     />
   );
 }

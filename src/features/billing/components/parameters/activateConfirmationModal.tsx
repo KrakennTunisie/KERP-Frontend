@@ -140,7 +140,7 @@ export default function ToggleSettingStatusModal({
                 {activate ? "activer" : "désactiver"}
               </span>{" "}
               <span className="font-semibold text-slate-900">
-                "{itemName}"
+                {itemName}
               </span>{" "}
               ?
             </p>

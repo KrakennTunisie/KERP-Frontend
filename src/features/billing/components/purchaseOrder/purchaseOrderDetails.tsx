@@ -4,10 +4,10 @@ import { DocumentPreviewModal } from "@/shared/components/ui/documentPreviewModa
 import PageLoader from "@/shared/components/ui/pageLoader";
 import React from "react";
 import usePurchaseOrderDetails from "../../hooks/usePurchaseOrderDetails";
-import { PaymentConditionLabels } from "../../types/paymentCondition";
 import { paymentMethodLabels } from "../../types/paymentMethod";
 import Card from "../widgets/card";
 import { SectionLabel } from "../widgets/sectionLabel";
+import { formatShowLabel } from "../../lib/settingItemHelpers";
 
 
 type ModalProps = {
@@ -173,7 +173,7 @@ export function PurchaseOrderModalContent({
               <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">
                 Condition de paiement
               </p>
-              <p className="text-sm font-semibold text-gray-700">{purchaseOrder?.paymentCondition ? PaymentConditionLabels[purchaseOrder.paymentCondition] : "—"}</p>
+              <p className="text-sm font-semibold text-gray-700">{purchaseOrder?.paymentCondition ? formatShowLabel(purchaseOrder.paymentCondition) : "—"}</p>
             </div>
           </div>
 
@@ -252,7 +252,7 @@ export function PurchaseOrderModalContent({
                 <p className="text-sm font-semibold text-gray-900">
                   {item.description}
                 </p>
-                <p className="text-xs text-gray-400 mt-0.5">TVA {item.vatRate}%</p>
+                <p className="text-xs text-gray-400 mt-0.5">TVA {item.vatRate}</p>
               </div>
               <p className="text-sm text-gray-700 text-right">{item.quantity}</p>
               <p className="text-sm text-gray-700 text-right">
