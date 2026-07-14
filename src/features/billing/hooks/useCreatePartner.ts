@@ -26,6 +26,7 @@ export interface supplierProps {
 
 export default function UseCreatePartner({ type, mode, partnerId }: pageProps) {
     const router = useRouter();
+    
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const useFormAny = useForm as unknown as (opts: any) => ReturnType<typeof useForm<AddPartnerFormData>>;
     type FormValues = z.infer<AddPartnerFormData>;
@@ -103,7 +104,7 @@ export default function UseCreatePartner({ type, mode, partnerId }: pageProps) {
             shouldDirty: true,
         });
         console.log(watch("shippingAddress.region"));
-};
+    };
     const fetchPartner = async () => {
         try {
             if (mode == "edit" && type == partnerTypeSchema.enum.CLIENT) {
@@ -125,17 +126,17 @@ export default function UseCreatePartner({ type, mode, partnerId }: pageProps) {
     useEffect(() => {
         fetchPartner();
     }, [partnerId]);
-    
+
     useEffect(() => {
         if (mode === "edit" && partner) {
             const fullName = partner.partnerName?.trim() ?? "";
             const [firstName, ...lastNameParts] = fullName.split(/\s+/);
             reset({
-                partnerType:  (partner.partnerType ?? type) as "CLIENT" | "SUPPLIER" ,
+                partnerType: (partner.partnerType ?? type) as "CLIENT" | "SUPPLIER",
                 active: partner.active,
                 maritalStatus: partner.maritalStatus,
                 firstName: firstName,
-                lastName:lastNameParts.join(" ") ?? "",
+                lastName: lastNameParts.join(" ") ?? "",
                 companyName: partner.companyName,
                 shortName: partner.displayName,
                 currency: partner.currency,
@@ -153,7 +154,7 @@ export default function UseCreatePartner({ type, mode, partnerId }: pageProps) {
             })
         };
     }, [partner])
-    
+
     const {
         register,
         handleSubmit,
@@ -188,22 +189,22 @@ export default function UseCreatePartner({ type, mode, partnerId }: pageProps) {
     const getError = (field: keyof AddPartnerFormData) => {
         return errors[field]?.message as string | undefined;
     };
-    
-    const updatePartnerr = async (data :UpdatePartner)=>{
-        try{
-         const formData = new FormData();
+
+    const updatePartnerr = async (data: UpdatePartner) => {
+        try {
+            const formData = new FormData();
             formData.append("active", String(data.active));
             formData.append("partnerType", type);
             formData.append("maritalStatus", data.maritalStatus ?? "");
             formData.append("partnerName", `${data.firstName ?? ""} ${data.lastName ?? ""}`.trim());
             formData.append("companyName", data.companyName);
-            formData.append("displayName",  (data.shortName as string) ?? "");
+            formData.append("displayName", (data.shortName as string) ?? "");
 
             formData.append("currency", data.currency!);
             formData.append("email", data.email ?? "");
-            
-            formData.append("personnelPhoneNumber", data.workPhone?.toString() ?? "");
-            formData.append("professionnalPhoneNumber", data.mobilePhone?.toString() ?? "");
+
+            formData.append("professionnalPhoneNumber", data.workPhone?.toString() ?? "");
+            formData.append("personnelPhoneNumber", data.mobilePhone?.toString() ?? "");
             formData.append("Language", data.language ?? "");
 
             formData.append("taxRegistrationNumber", data.taxId! ?? "");
@@ -232,24 +233,24 @@ export default function UseCreatePartner({ type, mode, partnerId }: pageProps) {
             console.log(data.patente)
             if (data.rne instanceof File) formData.append("rne", data.rne);
             if (data.contract instanceof File) formData.append("contract", data.contract);
-           if (data.patente instanceof File) formData.append("patente", data.patente);
+            if (data.patente instanceof File) formData.append("patente", data.patente);
             console.log(Object.fromEntries(formData));
-                if (type == partnerTypeSchema.enum.SUPPLIER) {
-                    const createdSupplier = await partnersApi.updateSupplier(partnerId! ,formData);
-                    if (createdSupplier) {
-                        appToast.success("Fournisseur modifiée avec succès");
-                        router.back();
-                    }
+            if (type == partnerTypeSchema.enum.SUPPLIER) {
+                const createdSupplier = await partnersApi.updateSupplier(partnerId!, formData);
+                if (createdSupplier) {
+                    appToast.success("Fournisseur modifiée avec succès");
+                    router.back();
                 }
-                else {
-                    const createdClient = await partnersApi.updateClient(partnerId!,formData);
+            }
+            else {
+                const createdClient = await partnersApi.updateClient(partnerId!, formData);
 
-                    if (createdClient) {
-                        appToast.success("Client modifiée avec succès");
-                        router.back();
+                if (createdClient) {
+                    appToast.success("Client modifiée avec succès");
+                    router.back();
 
-                    }
                 }
+            }
 
         } catch (e: unknown) {
             const message = getApiErrorMessage(e);
@@ -258,17 +259,16 @@ export default function UseCreatePartner({ type, mode, partnerId }: pageProps) {
         }
     }
 
-    const createPartner = async(data :AddPartnerFormData)=>{
-         try {
-            console.log(data.partnerType)
-
+    const createPartner = async (data: AddPartnerFormData | Partial<AddPartnerFormData>  , fromCreationPage: boolean) => {
+        try {
+         
             const formData = new FormData();
             formData.append("active", String(data.active));
             formData.append("partnerType", type);
             formData.append("maritalStatus", data.maritalStatus ?? "");
             formData.append("partnerName", `${data.firstName ?? ""} ${data.lastName ?? ""}`.trim());
-            formData.append("companyName", data.companyName);
-            formData.append("displayName",  (data.shortName as string) ?? "");
+            formData.append("companyName", data.companyName ?? "");
+            formData.append("displayName", (data.shortName as string) ?? "");
 
             formData.append("currency", data.currency!);
             formData.append("email", data.email! ?? "");
@@ -286,14 +286,14 @@ export default function UseCreatePartner({ type, mode, partnerId }: pageProps) {
             formData.append("billingAddress.state", data.billingAddress?.state ?? "");
             formData.append("billingAddress.city", data.billingAddress?.city ?? "");
             formData.append("billingAddress.street1", data.billingAddress?.street1 ?? "");
-            formData.append("billingAddress.addressType", data.billingAddress!.addressType ?? "");
+            formData.append("billingAddress.addressType", data.billingAddress?.addressType ?? "");
             formData.append("billingAddress.street2", data.billingAddress?.street2 ?? "");
             formData.append("billingAddress.zipCode", data.billingAddress?.zipCode ?? "");
 
             formData.append("shippingAddress.region", data.shippingAddress?.region ?? "");
             formData.append("shippingAddress.state", data.shippingAddress?.state ?? "");
             formData.append("shippingAddress.city", data.shippingAddress?.city ?? "");
-            formData.append("shippingAddress.addressType", data.shippingAddress!.addressType ?? "");
+            formData.append("shippingAddress.addressType", data.shippingAddress?.addressType ?? "");
             formData.append("shippingAddress.street1", data.shippingAddress?.street1 ?? "");
             formData.append("shippingAddress.street2", data.shippingAddress?.street2 ?? "");
             formData.append("shippingAddress.zipCode", data.shippingAddress?.zipCode ?? "");
@@ -303,38 +303,41 @@ export default function UseCreatePartner({ type, mode, partnerId }: pageProps) {
             if (data.contract) formData.append("contract", data.contract);
 
             console.log(Object.fromEntries(formData));
-                if (type == partnerTypeSchema.enum.SUPPLIER) {
-                    const createdSupplier = await partnersApi.createSupplier(formData);
-                    if (createdSupplier) {
-                        appToast.success("Fournisseur créé avec succès");
-                        router.back();
-                    }
+            if (type == partnerTypeSchema.enum.SUPPLIER) {
+                const createdSupplier = await partnersApi.createSupplier(formData);
+                if (createdSupplier && fromCreationPage) {
+                    appToast.success("Fournisseur créé avec succès");
+                    router.back();
+                } else {
+                    appToast.success("Fournisseur créé avec succès");
                 }
-                else {
-                    const createdClient = await partnersApi.createClient(formData);
+            }
+            else {
+                const createdClient = await partnersApi.createClient(formData);
 
-                    if (createdClient) {
-                        appToast.success("Client créé avec succès");
-                        router.back();
+                if (createdClient && fromCreationPage) {
+                    appToast.success("Client créé avec succès");
+                    router.back();
 
-                    }
+                }else{
+                    appToast.success("Client créé avec succès"); 
                 }
-           
+            }
+
         } catch (e: unknown) {
             const message = getApiErrorMessage(e);
             appToast.error('Échec de création , Veuillez réessayer.', message);
 
         }
     }
-    const onSubmit = async (data: AddPartnerFormData | UpdatePartner) => {
+    const onSubmit = async (data: AddPartnerFormData | Partial<AddPartnerFormData>  | UpdatePartner, fromCreationPage: boolean) => {
 
-        if(mode ==="create")
-        {
-            createPartner(data as AddPartnerFormData)
-        }else{
+        if (mode === "create") {
+            createPartner(data as AddPartnerFormData, fromCreationPage)
+        } else {
             updatePartnerr(data as UpdatePartner)
         }
-       
+
     };
 
     const setValueAny = setValue as (field: string, value: unknown, options?: object) => void;

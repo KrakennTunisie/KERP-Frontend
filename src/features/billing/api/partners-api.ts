@@ -37,6 +37,10 @@ export const partnersApi = {
   getSupplierById: (id: string) =>
     apiClient.get<PartnerAllDetails>(BILLING_ENDPOINTS.supplierById(id)),
 
+  existsByCompanyName : (companyName:String)=> apiClient.get<boolean>(BILLING_ENDPOINTS.existByCompanyName(companyName)),
+
+  getSupplierByCompanyName : (companyName: string) => apiClient.get<PartnerSummary>(BILLING_ENDPOINTS.getSupplierByCompanyName(companyName)),
+
   createClient: (payload: FormData) =>
     apiClient.post<CreatePartner>(BILLING_ENDPOINTS.clients, payload),
 

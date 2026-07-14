@@ -210,6 +210,44 @@ export const invoiceDetailedSummarySchema = invoiceSummarySchema.extend({
 })
 
 
+/*** Schema pour un item de facture extrait ***/
+const extractedInvoiceItemSchema = z.object({
+    description: z.string(),
+    quantity: z.number(),
+    unityPriceExclTax: z.number(),
+    itemTotalInclTax: z.number(),
+    operationCategory: z.string(),
+    vatRate: z.number(),
+    itemTotalExclTax: z.number(),
+    discountValue: z.number(),
+});
+
+/*** Schema pour les données de facture extraites via IA/OCR ***/
+const extractedInvoiceSchema = z.object({
+    invoiceNumber: z.string(),
+    issueDate: z.string(), 
+    dueDate: z.string(),
+    invoiceCurrency: z.string(), 
+    vatRate: z.number(),
+    totalExclTax: z.number(),
+    totalInclTax: z.number(),
+    companyName: z.string(),
+    issuerTaxId: z.string(),
+    companyAddress: z.string(),
+    issuerEmail: z.string(),
+    issuerPhone: z.string(),
+    invoiceItems: z.array(extractedInvoiceItemSchema).default([]),
+    termsAndConditions: z.string().nullable(),
+    comments: z.string().nullable(),
+});
+
+/*** Le workflow n8n renvoie un tableau (souvent avec un seul élément) ***/
+const extractedInvoiceResponseSchema = z.array(extractedInvoiceSchema);
+
+/*** Types inférés ***/
+export type ExtractedInvoice = z.infer<typeof extractedInvoiceSchema>;
+
+
 export type Invoice = z.infer<typeof invoiceSchema>;
 export type InvoicePageItem = z.infer<typeof invoicePageItemSchema>;
 export type InvoicePageItemV2 = z.infer<typeof invoicePageItemSchema2>;

@@ -24,14 +24,15 @@ import { discountTypeOptions, discountTypeSchema } from "../../types/discountTyp
 import { Input } from "@/shared/components/ui/input";
 import { Textarea } from "@/shared/components/ui/textArea";
 import AddSettingModal from "../parameters/addSettingItem";
+import { Plus } from "lucide-react";
 
 
 export default function CreateSupplierInvoice() {
   const {
     form, errors, linkedToPO, selectedPO, suppliers, supplierSearch, setSupplierSearch, showDropdown, setShowDropdown, previewData, purchaseOrders, getMaxQuantity, getError,
-    invoiceSupplier, handleSave, selectSupplier, clearSupplier, loadingSave, addItem, removeItem, updateItem, register, showAddPCModal,
-    setShowAddPCModal, showAddTVAModal, setShowAddTVAModal, showAddOPCModal, setShowAddOPCModal, handleAddOption, getItemError, setLinkedToPO
-    , invoiceSupplierType, loadingDraft, showAddSupplierModal, setShowAddSupplierModal, newSupplierName, setNewSupplierName } = useCreateSupplierInvoice();
+    invoiceSupplier, handleSave, selectSupplier, clearSupplier, loadingSave, addItem, removeItem, updateItem, register, showAddPCModal, supplierExist, handleSupplierAdded,
+    setShowAddPCModal, showAddTVAModal, setShowAddTVAModal, showAddOPCModal, setShowAddOPCModal, handleAddOption, getItemError, setLinkedToPO, newSupplier
+    , invoiceSupplierType, loadingDraft, showAddSupplierModal, setShowAddSupplierModal, supplierSummary, setNewSupplierName } = useCreateSupplierInvoice();
   const router = useRouter();
 
   if (loadingDraft || !invoiceSupplier) {
@@ -91,9 +92,10 @@ export default function CreateSupplierInvoice() {
 
       <AddPartnerModal
         isOpen={showAddSupplierModal}
-        initialCompanyName={newSupplierName}
+        partner={newSupplier}
         partnerType={partnerTypeSchema.enum.SUPPLIER}
         onClose={() => setShowAddSupplierModal(false)}
+        onSuccess={handleSupplierAdded}
       />
       <AddSettingModal
         title="Condition de paiement"
@@ -138,7 +140,7 @@ export default function CreateSupplierInvoice() {
             <section>
               <SectionTitle number="01" invoiceType={invoiceTypeSchema.enum.PURCHASE} label="Référence" />
               <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 flex flex-col gap-4 mt-3">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid  gap-4">
                   <div>
                     <label className="block text-xs font-medium text-slate-500 mb-1">
                       N° Facture
@@ -149,6 +151,8 @@ export default function CreateSupplierInvoice() {
                       className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
                     />
                   </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-medium text-slate-500 mb-1">
                       {"Date d'émission"}
@@ -174,7 +178,33 @@ export default function CreateSupplierInvoice() {
                         </>
                       )}
                     />
+                  </div>
 
+                  <div>
+                    <label className="block text-xs font-medium text-slate-500 mb-1">
+                      {"Date d'échéance"}
+                    </label>
+                    <Controller
+                      control={form.control}
+                      name="dueDate"
+                      render={({ field }) => (
+                        <>
+                          <input
+                            type="date"
+                            value={field.value ? (() => {
+                              const d = new Date(field.value);
+                              const year = d.getFullYear();
+                              const month = String(d.getMonth() + 1).padStart(2, "0");
+                              const day = String(d.getDate()).padStart(2, "0");
+                              return `${year}-${month}-${day}`;
+                            })() : ""}
+                            onChange={(e) => field.onChange(new Date(e.target.value))}
+                            className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
+                          />
+                          <FieldError error={getError("dueDate")} />
+                        </>
+                      )}
+                    />
                   </div>
                 </div>
 
@@ -281,7 +311,6 @@ export default function CreateSupplierInvoice() {
                             className="w-full text-left px-4 py-3 hover:bg-blue-50 transition border-b border-slate-50 last:border-0"
                           >
                             <p className="text-sm font-bold text-slate-800">{supplier.companyName}</p>
-                            <p className="text-xs text-slate-400 mt-0.5">{supplier.billingAddress!.city}</p>
                           </button>
                         ))}
                         {/* Lien pour ajouter un fournisseur inexistant */}
@@ -307,15 +336,14 @@ export default function CreateSupplierInvoice() {
                   </div>
                   <FieldError error={getError("partner")} />
                 </div>
-
-                {previewData.partner && previewData.partner.email != "" && (
+                {/* supplier sélectionné */}
+                {previewData.partner && supplierExist && (
                   <div className="border-2 border-blue-100 bg-blue-50/40 rounded-xl p-4">
                     <div className="flex items-start justify-between mb-1">
-                      <p className="text-sm font-semibold text-slate-700">{previewData.partner.partnerName}</p>
+                      <p className="text-sm font-semibold text-slate-700">{previewData.partner.companyName}</p>
                       <button
                         type="button"
                         onClick={clearSupplier}
-                        disabled={linkedToPO && !!selectedPO}
                         className="text-slate-300 hover:text-red-400 transition"
                       >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -323,13 +351,74 @@ export default function CreateSupplierInvoice() {
                         </svg>
                       </button>
                     </div>
+                    <p className="text-xs text-blue-500 mb-2">{previewData.partner?.billingAddress?.street1?? "-"}</p>
 
-
-                    <p className="text-xs text-blue-500 mb-2">{previewData.partner.billingAddress!.region}</p>
+                    {/* Email + Téléphone sur une ligne */}
                     <div className="grid grid-cols-2 gap-4">
-                      <span className="text-xs text-blue-500">{previewData.partner.email}</span>
-                      <span className="text-xs text-blue-500">{previewData.partner.professionnalPhoneNumber}</span>
+                      <span className="flex items-center gap-1.5 text-xs text-blue-500">
+                        <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                        {previewData.partner.email ?? "-"}
+                      </span>
+                      {previewData.partner.professionnalPhoneNumber && <span className="flex items-center gap-1.5 text-xs text-blue-500">
+                        <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                        </svg>
+                        {previewData.partner.professionnalPhoneNumber != null ? previewData.partner.professionnalPhoneNumber : "-"}
+                      </span>}
                     </div>
+                  </div>
+                )}
+
+                {!supplierExist && (
+
+                  <div className="flex items-center justify-between gap-4 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-100">
+                        <svg
+                          className="h-5 w-5 text-blue-600"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth={2}
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M12 9v3.75m0 3.75h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                      </div>
+
+                      <div>
+                        <p className="text-sm font-medium text-slate-800">
+                          Fournisseur introuvable
+                        </p>
+                        <p className="text-xs text-slate-500">
+                          Créez <span className="font-medium">"{supplierSearch}"</span> pour continuer.
+                        </p>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setShowAddSupplierModal(true)}
+                      className="
+                        flex h-7 w-7 items-center justify-center
+                        rounded-full
+                        bg-blue-600
+                        text-white
+                        shadow-sm
+                        transition-all
+                        hover:bg-blue-800
+                        hover:scale-105
+                        active:scale-95
+                        "
+                      title="Ajouter un fournisseur"
+                    >
+                      <Plus className="h-5 w-5" />
+                    </button>
                   </div>
                 )}
               </div>
@@ -450,7 +539,7 @@ export default function CreateSupplierInvoice() {
                       <div className="mb-3">
                         <label className="block text-xs font-medium text-slate-500 mb-1">Catégorie</label>
                         <Select
-                          value={item.operationCategory}
+                          value={item.operationCategory!}
                           onValueChange={(value) => {
                             if (value === "__add_category__") {
                               setShowAddOPCModal(true);
@@ -532,6 +621,16 @@ export default function CreateSupplierInvoice() {
                           </Select>
                           <FieldError error={errors.invoiceItems?.[index]?.vatRate?.message} />
                         </div>
+                        <div>
+                          <Input
+                            label="Total HT"
+                            type="number"
+                            min={0}
+                            defaultValue={item.itemTotalExclTax}
+                            disabled={true}
+                            error={getItemError(index, "itemTotalExclTax")}
+                          />
+                        </div>
 
                         <div className="col-span-2">
                           <label className="block text-xs font-medium text-slate-500 mb-1">Discount</label>
@@ -568,15 +667,45 @@ export default function CreateSupplierInvoice() {
                   );
                 })}
               </div>
-
               {errors.invoiceItems?.message && (
                 <ErrorForm error={errors.invoiceItems?.message} />
               )}
             </section>
 
-            {/* Section 05 — Commentaires */}
+
+            {/* Section 05 — Totaux */}
+
             <section>
-              <SectionTitle number="05" invoiceType={invoiceTypeSchema.enum.PURCHASE} label="Commentaires" />
+              <div className="flex flex-col gap-3">
+                <SectionTitle number="05" invoiceType={invoiceTypeSchema.enum.PURCHASE} label="Totaux" />
+
+                <div className="border border-slate-200 rounded-2xl p-4 bg-white">
+                  <div className="flex flex-col gap-4">
+                    <Input
+                      label="Total TTC"
+                      type="number"
+                      min={0}
+                      {...register("totalInclTax")}
+                      disabled={true}
+                      className="disabled:bg-slate-50 disabled:text-slate-700 disabled:opacity-100 disabled:font-semibold disabled:cursor-not-allowed"
+                    />
+
+                    <Input
+                      label="Total THT"
+                      type="number"
+                      min={0}
+                      {...register("totalExclTax")}
+                      disabled={true}
+                      className="disabled:bg-slate-50 disabled:text-slate-700 disabled:opacity-100 disabled:font-semibold disabled:cursor-not-allowed"
+                    />
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Section 06 — Commentaires */}
+            <section>
+              <SectionTitle number="06" invoiceType={invoiceTypeSchema.enum.PURCHASE} label="Commentaires" />
               <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 mt-3">
                 <Textarea
                   value={form.watch("comment") ?? ""}

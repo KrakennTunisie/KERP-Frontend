@@ -22,7 +22,7 @@ export function DocumentViewer({ fileUrl, fileType }: DocumentViewerProps) {
             className="w-full h-full min-h-[80vh] rounded-xl border border-slate-200 bg-white"
           />
         ) : (
-          <div className="w-full h-190 overflow-hidden flex items-center justify-center shrink-0">
+          <div className="w-full h-160 overflow-hidden flex items-center justify-center shrink-0">
             <img
               src={fileUrl}
               alt="Facture fournisseur"

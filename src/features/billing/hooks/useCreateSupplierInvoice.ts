@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import { Invoice, InvoiceCreate, invoiceCreateSchema } from "../models/invoice";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { ExtractedInvoice, Invoice, InvoiceCreate, invoiceCreateSchema } from "../models/invoice";
 import { ExchangeRate } from "../types/exchangeRate";
 import { ExchangeRateAPI, InvoicesAPI, partnersApi, PurchaseOrderAPI } from "../api/partners-api";
 import { appToast } from "@/shared/lib/toast";
@@ -17,11 +17,16 @@ import { exchangeRateSourceSchema } from "../types/exchangeRateSource";
 import { invoiceComplianceStatusSchema } from "../types/invoiceComplianceStatus";
 import { useRouter } from "next/navigation";
 import { PurchaseOrderDetails, PurchaseOrderSummary } from "../models/purchaseOrder";
-import { PartnerSummary } from "../models/partner";
+import { AddPartnerFormData, PartnerSummary } from "../models/partner";
 import { useDebounce } from "@/shared/hooks/useDebounce";
 import { calculateInvoiceTotals, calculateInvoiceTotalsFromPurchaseOrder, calculUnityPrice, recalculate } from "../lib/invoiceCalculation";
 import { InvoiceData } from "../components/widgets/invoicePreview";
 import { useInvoiceStore } from "./useSupplierInvoiceList";
+import { OperationCategory } from "../types/operationCategory";
+import { discountTypeOptions, discountTypeSchema } from "../types/discountType";
+import { partnerTypeSchema } from "../types/partnerType";
+import UseCreatePartner from "./useCreatePartner";
+import { tvaRateSchema, tvaRateStringSchema } from "../types/tvaRate";
 export type InvoiceFormClientProps = {
     mode: "create" | "edit" | "clone";
     invoiceId?: string
@@ -52,8 +57,13 @@ export default function useCreateSupplierInvoice() {
     const [invoice, setInvoice] = useState<Invoice>()
     const invoiceSupplier = useInvoiceStore(state => state.fileUrl);
     const invoiceSupplierType = useInvoiceStore(state => state.file);
+    const [extractedData, setExtractedData] = useState<Partial<ExtractedInvoice> | null>(null);
+    const [newSupplier, setNewSupplier] = useState<PartnerSummary>();
+    const [newSupplierName, setNewSupplierName] = useState<string>("");
+    const [supplierSummary, setSupplierSummary] = useState<PartnerSummary>();
+    const [supplierExist, setSupplierExist] = useState<boolean>(false)
     const router = useRouter()
-
+    const { onSubmit } = UseCreatePartner({ mode: "create", type: "SUPPLIER" });
     /*** Affichage le nombre suivant du facture => Série des nombre */
     const fetchNextNumber = async () => {
         try {
@@ -71,10 +81,10 @@ export default function useCreateSupplierInvoice() {
     }, [])
 
     useEffect(() => {
-        const stored = sessionStorage.getItem('extractedInvoiceData');
+        const stored = localStorage.getItem('extractedInvoiceData');
         if (stored) {
-            const data = JSON.parse(stored);
-            sessionStorage.removeItem('extractedInvoiceData');
+            setExtractedData(JSON.parse(stored));
+            localStorage.removeItem('extractedInvoiceData');
         }
     }, []);
 
@@ -86,7 +96,7 @@ export default function useCreateSupplierInvoice() {
             invoiceNumber: nextNumber?.value,
             idInvoice: uuidv4(),
             invoiceStatus: invoiceStatusSchema.enum["DRAFT"],
-            issueDate: new Date(),
+            issueDate: undefined,
             creationDate: new Date(),
             sentToclientDate: null,
             sentToTTNDate: null,
@@ -95,8 +105,8 @@ export default function useCreateSupplierInvoice() {
             totalExclTax: 0,
             totalInclTax: 0,
             vatRate: 0,
-            paymentCondition: PaymentConditionSchema.enum.NET_15,
-            paymentMethod: paymentMethodSchema.enum.BANK_TRANSFER,
+            paymentCondition: PaymentConditionSchema.enum.IMMEDIATE,
+            paymentMethod: paymentMethodSchema.enum.CASH,
             partner: null,
             purchaseOrder: null,
             invoiceCurrency: currencyTypeSchema.enum.TND,
@@ -172,6 +182,123 @@ export default function useCreateSupplierInvoice() {
             });
         }
     }, [exchangeRate, selectedCurrency]);
+
+    useEffect(() => {
+        console.log(extractedData?.invoiceItems![0].unityPriceExclTax)
+        if (extractedData) {
+            reset({
+                ...getValues(), // garde les valeurs déjà saisies/par défaut
+                issueDate: extractedData.issueDate ? new Date(extractedData.issueDate) : undefined,
+                dueDate: extractedData.dueDate ? new Date(extractedData.dueDate) : undefined,
+                invoiceItems: extractedData.invoiceItems
+                    ? extractedData.invoiceItems.map((item) => ({
+                        idInvoiceItem: crypto.randomUUID(),
+                        invoice: "",
+                        description: item.description ?? "",
+                        quantity: item.quantity ?? 1,
+                        unityPriceEXclTax: item.unityPriceExclTax ?? 0,
+                        vatRate: item.vatRate ?? extractedData.vatRate ?? 0,
+                        itemTotalExclTax: item.itemTotalExclTax ?? 0,
+                        itemTaxAmount: 0,
+                        itemTotalInclTax: item.itemTotalInclTax ?? 0,
+                        discountType: discountTypeSchema.enum.AMOUNT,
+                        discountValue: item.discountValue ?? 0,
+                        operationCategory:  "OTHER" as OperationCategory,
+                        purchaseOrderItem: null,
+                        creditedQuantity: 0,
+                    }))
+                    : [defaultInvoiceItem()],
+                totalExclTax: extractedData.totalExclTax ?? 0,
+                totalInclTax: extractedData.totalInclTax ?? 0,
+                partner: {
+                    companyName: extractedData.companyName ?? undefined,
+                    email: extractedData.issuerEmail ?? undefined,
+                    professionnalPhoneNumber: extractedData.issuerPhone ?? undefined,
+                    taxRegistrationNumber: extractedData.issuerTaxId ?? undefined,
+                    billingAddress: {
+                        street1: extractedData.companyAddress ?? undefined,
+                    },
+                },
+                invoiceCurrency: extractedData?.invoiceCurrency === "TND"
+                    ? currencyTypeSchema.enum.TND
+                    : extractedData?.invoiceCurrency === "EUR"
+                        ? currencyTypeSchema.enum.EUR
+                        : extractedData?.invoiceCurrency === "USD"
+                            ? currencyTypeSchema.enum.USD
+                            : currencyTypeSchema.enum.TND,
+                comment: extractedData.comments ?? "",
+            });
+            setNewSupplier(
+                {
+                    companyName: extractedData.companyName ?? "",
+                    email: extractedData.issuerEmail ?? null,
+                    professionnalPhoneNumber: Number(extractedData.issuerPhone) ?? null,
+                    taxRegistrationNumber: extractedData.issuerTaxId ?? null,
+                    currency: extractedData?.invoiceCurrency === "TND"
+                        ? currencyTypeSchema.enum.TND
+                        : extractedData?.invoiceCurrency === "EUR"
+                            ? currencyTypeSchema.enum.EUR
+                            : extractedData?.invoiceCurrency === "USD"
+                                ? currencyTypeSchema.enum.USD
+                                : currencyTypeSchema.enum.TND,
+                    taxRate: "",
+                    billingAddress: {
+                        street1: extractedData.companyAddress ?? null,
+                        street2: null,
+                        city: null,
+                        state: null,
+                        zipCode: null,
+                        addressType: "Billing Address"
+                    },
+                    maritalStatus: "",
+                    partnerName: "",
+                    partnerType: "SUPPLIER",
+                    idPartner: crypto.randomUUID(),
+                }
+            )
+        }
+    }, [extractedData]);
+
+    const checkSupplierExists = useCallback(async () => {
+        if (!newSupplier?.companyName) return;
+        try {
+            console.log("debug1")
+            const exists = await partnersApi.existsByCompanyName(newSupplier.companyName);
+            setSupplierExist(exists);
+
+            if (exists) {
+                console.log("exisiting supplier");
+                try {
+                    const getExistedSupplier = await partnersApi.getSupplierByCompanyName(newSupplier.companyName);
+                    selectSupplier(getExistedSupplier);
+                } catch (error) {
+                    console.error("Erreur lors de la récupération du fournisseur:", error);
+                }
+            } else {
+                selectSupplier(newSupplier);
+            }
+        } catch (error) {
+            console.error("Erreur lors de la vérification du fournisseur:", error);
+        }
+    }, [newSupplier]);
+
+    const handleSupplierAdded = async () => {
+        try {
+            console.log("debug1")
+            await getClients();
+            await checkSupplierExists();
+
+        } catch (error) {
+            console.error("Erreur lors du rafraîchissement après ajout:", error);
+        }
+    };
+    useEffect(() => {
+        checkSupplierExists();
+        getClients();
+    }, [newSupplier]);
+
+
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [TtnModalOpen, setTtnModalOpen] = useState(false);
     const [loadingForm, setLoadingForm] = useState(false);
@@ -187,7 +314,7 @@ export default function useCreateSupplierInvoice() {
     const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrderSummary[] | []>([])
 
     const [showAddSupplierModal, setShowAddSupplierModal] = useState(false);
-    const [newSupplierName, setNewSupplierName] = useState("");
+
 
     const [showAddPCModal, setShowAddPCModal] = useState(false);
     const [showAddOPCModal, setShowAddOPCModal] = useState(false);
@@ -223,6 +350,7 @@ export default function useCreateSupplierInvoice() {
 
     const getClients = async () => {
         try {
+            console.log("debug")
             setLoadingSuppliers(true);
             const keyword =
                 debouncedSearchQuery.trim().length >= 3
@@ -343,10 +471,10 @@ export default function useCreateSupplierInvoice() {
 
         return undefined;
     };
-    // Sélection d'un client
+    // Sélection d'un fournisseur
     const selectSupplier = (client: PartnerSummary) => {
         setValue("partner", client, { shouldValidate: true, shouldDirty: true, });
-        setSupplierSearch(client.partnerName!);
+        setSupplierSearch(client.companyName!);
         setShowDropdown(false);
     };
 
@@ -505,10 +633,14 @@ export default function useCreateSupplierInvoice() {
         supplierSearch,
         setSupplierSearch,
         suppliers,
+        supplierExist,
         showDropdown,
         setShowDropdown,
         selectSupplier,
         clearSupplier,
+        supplierSummary,
+        newSupplier,
+        handleSupplierAdded,
 
 
         setTtnModalOpen,

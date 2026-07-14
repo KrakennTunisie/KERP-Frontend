@@ -13,7 +13,7 @@ export const baseItemSchema = z.object({
     itemTotalExclTax: z.number(),
     itemTaxAmount: z.number(),
     itemTotalInclTax: z.number(),
-    operationCategory: operationCategorySchema,
+    operationCategory: operationCategorySchema.nullable(),
     
     discountType: discountTypeSchema.nullable(),
     discountValue: z.number().nullable(),
@@ -68,7 +68,7 @@ export const defaultInvoiceItem = (): InvoiceItem => ({
     itemTotalExclTax: 0,
     itemTaxAmount: 0,
     itemTotalInclTax: 0,
-    operationCategory: "SERVICE_PROVISION",
+    operationCategory: operationCategorySchema.enum.OTHER,
     invoice: null,
     creditedQuantity: 0,
     discountType: discountTypeSchema.enum.PERCENTAGE,

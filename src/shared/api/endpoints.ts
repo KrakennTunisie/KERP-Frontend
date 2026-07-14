@@ -18,6 +18,8 @@ export const BILLING_ENDPOINTS = {
   supplierInvoiceById: (id: string) => `/invoices/suppliers/${id}`,
   getClientsInvoices: (idClient:string) => `/invoices/last/client-invoices/${idClient}`,
   getSuppliersInvoices: (idSupplier:string) => `/invoices/last/supplier-invoices/${idSupplier}`,
+  existByCompanyName: (companyName:String)=> `/partners/suppliers/existByCompanyName/${companyName}`,
+  getSupplierByCompanyName :(companyName:String) => `/partners/suppliers/companyName/${companyName}`,
 
 
   updatestatus: (id: string, statusClient: boolean) => `/partners/clients/updateStatus/${id}?statusClient=${statusClient}`,
