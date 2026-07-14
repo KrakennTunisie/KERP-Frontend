@@ -13,13 +13,25 @@ import {
   USER_STATUS_OPTIONS,
 } from "../../mocks/mock-users";
 import { getUserRoleColor, getUserRoleLabel, getUserStatusColor, getUserStatusLabel } from "../../helpers/userHelpers";
-import { useRouter } from "next/navigation";
+import { useUsersList } from "../../hooks/useUsersList";
 
 export default function ListUsers() {
-  const [search, setSearch] = useState("");
   const [role, setRole] = useState("ALL");
   const [status, setStatus] = useState("ALL");
-  const router = useRouter()
+
+  const {
+     router,
+     search,
+     setSearch,
+     filtre,
+     setFiltre,
+     users,
+     currentPage,
+     setCurrentPage,
+     totalElements,
+     totalPages,
+     loading,
+  }=useUsersList()
 
   const totalUsers = mockUsers.length;
 
@@ -114,7 +126,7 @@ export default function ListUsers() {
 
     {/* TABLE */}
       <UserTable<User>
-        items={mockUsers}
+        items={users}
         variant="user"
         currentPage={1}
         totalPages={1}

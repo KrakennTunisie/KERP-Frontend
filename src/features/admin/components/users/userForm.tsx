@@ -1,9 +1,7 @@
 'use client'
 
-import { ArrowLeft, Check, Save, User } from "lucide-react"
-import { useRouter } from "next/navigation"
-import { UserRole, UserStatus } from "../../mocks/mock-users"
-import { useState } from "react"
+import { ArrowLeft, User } from "lucide-react"
+import { CreateUser,  USER_ROLE_OPTIONS, USER_STATUS_OPTIONS } from "../../mocks/mock-users"
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import {
@@ -15,6 +13,7 @@ import {
 } from "@/shared/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select";
 import { Button } from "@/shared/components/ui/button"
+import { useCreateEditUser } from "../../hooks/useCreateEditUser"
 export type PropsForm = {
   userId?: string,
   mode: "create" |"edit"
@@ -22,33 +21,17 @@ export type PropsForm = {
 
 
 export default function UserForm ({userId, mode}:PropsForm) {
-     const router = useRouter();
-
-  const [form, setForm] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    role: "USER" as UserRole,
-    status: "ACTIVE" as UserStatus,
-  });
-
-  const handleChange = (
-    field: keyof typeof form,
-    value: string
-  ) => {
-    setForm((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
-
-  const handleSubmit = () => {
-    if (mode === "create") {
-      console.log("Create user", form);
-    } else {
-      console.log("Update user", userId, form);
-    }
-  };
+ 
+const {
+        onSubmit,
+        register,
+      handleSubmit,
+      reset,
+      setValue,
+      watch,
+      errors, isSubmitting,
+      router
+    } = useCreateEditUser({userId, mode});
 
   return (
     <div className="bg-gray-50">
@@ -89,7 +72,10 @@ export default function UserForm ({userId, mode}:PropsForm) {
 
       {/* FORM */}
       <main className="flex-1 overflow-y-auto p-8">
-        <form className="mx-auto space-y-6 pb-10">
+        <form
+            id="userForm"     
+            onSubmit={handleSubmit(onSubmit)}
+            className="mx-auto space-y-6 pb-10">
 
             {/* GENERAL */}
             <Card className="border-slate-200 bg-white shadow-sm">
@@ -111,13 +97,15 @@ export default function UserForm ({userId, mode}:PropsForm) {
                 <Input
                     label="Prénom"
                     placeholder="John"
-                    required
+                    {...register("firstName")}
+                    error={errors.firstName?.message}
                 />
 
                 <Input
                     label="Nom"
                     placeholder="Doe"
-                    required
+                    {...register("lastName")}
+                    error={errors.lastName?.message}
                 />
 
                 <Input
@@ -126,6 +114,8 @@ export default function UserForm ({userId, mode}:PropsForm) {
                     required
                     type="email"
                     className="md:col-span-2"
+                    {...register("email")}
+                    error={errors.email?.message}
                 />
 
                 <Input
@@ -134,6 +124,8 @@ export default function UserForm ({userId, mode}:PropsForm) {
                     required
                     type="text"
                     className="md:col-span-2"
+                    {...register("phone")}
+                    error={errors.phone?.message}
                 />
 
                 </div>
@@ -170,36 +162,35 @@ export default function UserForm ({userId, mode}:PropsForm) {
                     Rôle
                     </Label>
 
-                    <Select>
-                    <SelectTrigger className="bg-slate-50">
-                        <SelectValue placeholder="Choisir un rôle" />
-                    </SelectTrigger>
+                    <Select
+                      value={watch("role")}
+                      onValueChange={(value) =>
+                          setValue("role", value as CreateUser["role"], {
+                              shouldValidate: true,
+                          })
+                      }
+                  >
+                      <SelectTrigger className="bg-slate-50">
+                          <SelectValue />
+                      </SelectTrigger>
 
-                    <SelectContent>
+                      <SelectContent>
+                          {USER_ROLE_OPTIONS.map((role) => (
+                              <SelectItem
+                                  key={role.value}
+                                  value={role.value}
+                              >
+                                  {role.label}
+                              </SelectItem>
+                          ))}
+                      </SelectContent>
+                  </Select>
 
-                        <SelectItem value="MANAGER">
-                        Manager
-                        </SelectItem>
-
-                        <SelectItem value="ACCOUNTANT">
-                        Comptable
-                        </SelectItem>
-
-                        <SelectItem value="CLIENT">
-                        Client
-                        </SelectItem>
-
-                        <SelectItem value="SUPPLIER">
-                        Fournisseur
-                        </SelectItem>
-
-                        <SelectItem value="USER">
-                        Utilisateur
-                        </SelectItem>
-
-                    </SelectContent>
-
-                    </Select>
+                  {errors.role && (
+                      <p className="text-sm text-red-500">
+                          {errors.role.message}
+                      </p>
+                  )}
 
                 </div>
 
@@ -212,29 +203,35 @@ export default function UserForm ({userId, mode}:PropsForm) {
                         Statut
                     </Label>
 
-                    <Select>
-
+                    <Select
+                        value={watch("status")}
+                        onValueChange={(value) =>
+                            setValue("status", value as CreateUser["status"], {
+                                shouldValidate: true,
+                            })
+                        }
+                    >
                         <SelectTrigger className="bg-slate-50">
-                        <SelectValue placeholder="Choisir le statut" />
-                    </SelectTrigger>
+                            <SelectValue />
+                        </SelectTrigger>
 
                         <SelectContent>
-
-                        <SelectItem className="" value="ACTIVE">
-                            Actif
-                        </SelectItem>
-
-                        <SelectItem value="INACTIVE">
-                            Inactif
-                        </SelectItem>
-
-                        <SelectItem value="BLOCKED">
-                            Bloqué
-                        </SelectItem>
-
+                            {USER_STATUS_OPTIONS.map((status) => (
+                                <SelectItem
+                                    key={status.value}
+                                    value={status.value}
+                                >
+                                    {status.label}
+                                </SelectItem>
+                            ))}
                         </SelectContent>
-
                     </Select>
+
+                    {errors.status && (
+                        <p className="text-sm text-red-500">
+                            {errors.status.message}
+                        </p>
+                    )}
 
                     </div>
 
@@ -252,17 +249,20 @@ export default function UserForm ({userId, mode}:PropsForm) {
                 <Button
                 type="button"
                 variant="outline"
+                disabled={isSubmitting}
                 onClick={() => router.back()}
                 >
                 Annuler
                 </Button>
 
-                <Button type="submit">
-
-                {mode === "create"
-                    ? "Créer l'utilisateur"
-                    : "Mettre à jour"}
-
+                <Button
+                    form="userForm"
+                    type="submit"
+                    disabled={isSubmitting}
+                >
+                    {mode === "create"
+                        ? "Créer l'utilisateur"
+                        : "Mettre à jour"}
                 </Button>
 
             </CardContent>
