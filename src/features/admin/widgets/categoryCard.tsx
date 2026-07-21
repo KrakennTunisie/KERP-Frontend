@@ -1,20 +1,19 @@
 import { Plus, ShieldCheck } from "lucide-react";
 import { getCategoryLabel } from "../helpers/categoryHelper";
-import { Permission } from "../mocks/mock-permission";
+import { ClientPermissions, Permission } from "../models/permission";
 
 export type CategoryCardProps={
-    category: string,
+    category: ClientPermissions,
     permissions: Permission[]|[],
     setSelectedPermission: (permission: Permission)=>void;
     setOpen:(status: boolean)=>void;
-    handleOpenAdd: (category: string)=> void
 }
 
 
-export default function CategoryCard({category, permissions, setSelectedPermission, setOpen, handleOpenAdd}:CategoryCardProps) {
+export default function CategoryCard({category, permissions, setSelectedPermission, setOpen}:CategoryCardProps) {
   return (
         <div
-          key={category}
+          key={category.clientId}
           className="
             group rounded-2xl
             border border-slate-200
@@ -37,7 +36,7 @@ export default function CategoryCard({category, permissions, setSelectedPermissi
 
                 <div>
                 <h2 className="text-sm font-bold text-slate-900">
-                    {getCategoryLabel(category)}
+                    {category.clientId}
                 </h2>
 
                 <p className="text-xs text-slate-500">
@@ -51,27 +50,6 @@ export default function CategoryCard({category, permissions, setSelectedPermissi
                 <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
                 {permissions.length} 
                 </span>
-
-                <button
-                onClick={() => handleOpenAdd(category)}
-                className="
-                    h-7
-                    px-1.5
-                    rounded-lg
-                    bg-blue-500
-                    text-white
-                    text-sm
-                    font-medium
-                    flex
-                    items-center
-                    cursor-pointer
-                    transition-all
-                    hover:bg-blue-700
-                    hover:shadow-sm
-                "
-                >
-                <Plus className="h-4 w-4" />
-                </button>
             </div>
 
         </div>
@@ -81,7 +59,7 @@ export default function CategoryCard({category, permissions, setSelectedPermissi
 
             {permissions.map((permission) => (
               <div
-                key={permission.key}
+                key={permission.name}
                 onClick={() => {
                   setSelectedPermission(permission);
                   setOpen(true);
@@ -98,11 +76,11 @@ export default function CategoryCard({category, permissions, setSelectedPermissi
                 "
               >
                 <p className="text-[11px] font-semibold text-slate-800">
-                  {permission.label}
+                  {permission.name}
                 </p>
 
                 <p className="text-[10px] text-slate-400">
-                  {permission.key}
+                  {permission.description}
                 </p>
               </div>
             ))}

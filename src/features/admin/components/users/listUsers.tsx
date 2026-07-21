@@ -8,12 +8,10 @@ import { UserFilterBar } from "@/shared/components/widgets/barFilter";
 
 import {
   mockUsers,
-  User,
-  USER_ROLE_OPTIONS,
-  USER_STATUS_OPTIONS,
 } from "../../mocks/mock-users";
 import { getUserRoleColor, getUserRoleLabel, getUserStatusColor, getUserStatusLabel } from "../../helpers/userHelpers";
 import { useUsersList } from "../../hooks/useUsersList";
+import { User, USER_ROLE_OPTIONS, USER_STATUS_OPTIONS } from "../../models/user";
 
 export default function ListUsers() {
   const [role, setRole] = useState("ALL");
@@ -33,17 +31,16 @@ export default function ListUsers() {
      loading,
   }=useUsersList()
 
-  const totalUsers = mockUsers.length;
 
-  const activeUsers = useMemo(
-    () => mockUsers.filter((u) => u.status === "ACTIVE").length,
-    []
-  );
+const activeUsers = useMemo(
+  () => users.filter((u) => u.enabled === true).length,
+  [users]
+);
 
-  const blockedUsers = useMemo(
-    () => mockUsers.filter((u) => u.status === "BLOCKED").length,
-    []
-  );
+const blockedUsers = useMemo(
+  () => users.filter((u) => u.enabled === false).length,
+  [users]
+);
 
   return (
 <div className="min-h-screen">
@@ -81,7 +78,7 @@ export default function ListUsers() {
 
         <p className="text-xs text-slate-500">Total utilisateurs</p>
         <h2 className="mt-1 text-2xl font-semibold text-slate-900">
-          {totalUsers}
+          {totalElements}
         </h2>
       </div>
 

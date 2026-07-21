@@ -1,18 +1,18 @@
 /* ================= PERMISSIONS ================= */
 
 import { useMemo } from "react";
-import { Permission } from "../mocks/mock-permission";
+import {  PermissionDTO } from "../models/permission";
 
 export default function PermissionsMatrix({
   permissions,
 }: {
-  permissions: Permission[];
+  permissions: PermissionDTO[];
 }) {
   const grouped = useMemo(
     () =>
-      permissions.reduce<Record<string, Permission[]>>((acc, p) => {
-        acc[p.category] = acc[p.category] || [];
-        acc[p.category].push(p);
+      permissions.reduce<Record<string, PermissionDTO[]>>((acc, p) => {
+        acc[p.clientId] = acc[p.clientId] || [];
+        acc[p.clientId].push(p);
         return acc;
       }, {}),
     [permissions]
@@ -33,10 +33,10 @@ export default function PermissionsMatrix({
             <div className="flex flex-wrap gap-1.5">
               {perms.map((p) => (
                 <span
-                  key={p.key}
+                  key={p.name}
                   className="text-[11px] px-2 py-0.5 rounded-md bg-slate-50 border border-slate-200 text-slate-600"
                 >
-                  {p.label}
+                  {p.name}
                 </span>
               ))}
             </div>

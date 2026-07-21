@@ -315,7 +315,7 @@ export default function CreateSupplierInvoice() {
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                           </svg>
-                          <span className="text-sm font-medium">Ajouter "{supplierSearch}" comme nouveau fournisseur</span>
+                          <span className="text-sm font-medium">{`Ajouter '${supplierSearch}' comme nouveau fournisseur`}</span>
                         </button>
                       </div>
 

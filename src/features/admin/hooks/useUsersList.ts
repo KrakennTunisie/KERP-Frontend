@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { User } from "../mocks/mock-users";
 import { usersAPI } from "../services/api";
 import { useDebounce } from "@/shared/hooks/useDebounce";
 import { appToast } from "@/shared/lib/toast";
 import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 import { useRouter } from "next/navigation";
+import { User } from "../models/user";
 
 
 export function useUsersList(){
@@ -33,6 +33,8 @@ export function useUsersList(){
                 filter: filtre?.toString(),
                 page: currentPage - 1,
             });
+
+            console.log(response)
 
             setUsers(response.content);
             setTotalPages(response.totalPages);

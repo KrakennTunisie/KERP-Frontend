@@ -1,5 +1,4 @@
 import { PropsForm } from "../components/users/userForm";
-import { CreateUser, CreateUserSchema } from "../mocks/mock-users";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
@@ -7,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { usersAPI } from "../services/api";
 import { appToast } from "@/shared/lib/toast";
 import { getApiErrorMessage } from "@/shared/api/handle-api-error";
+import { CreateUser, CreateUserSchema } from "../models/user";
 
 
 export function useCreateEditUser({ userId, mode }: PropsForm){
@@ -48,6 +48,7 @@ export function useCreateEditUser({ userId, mode }: PropsForm){
     }, [mode, userId, reset]);
 
     const buildForm = (user: CreateUser): FormData => {
+        console.log("hello")
         const formData = new FormData();
 
         formData.append("username", user.firstName);

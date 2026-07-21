@@ -3,7 +3,7 @@
 import { mockPermissions } from "../../mocks/mock-permission";
 import { AuditLog, mockAuditLogs } from "@/features/billing/models/AuditLogs";
 import { formatDateLong } from "@/shared/utils/formatDate";
-import { mockUsers, User } from "../../mocks/mock-users";
+import { mockUsers } from "../../mocks/mock-users";
 import {
   Phone,
   Calendar,
@@ -20,6 +20,7 @@ import ActivityHeatmap, { HeatmapItem, mockHeatmap } from "../../widgets/activit
 import PermissionsMatrix from "../../widgets/permissionsMatrix";
 import AuditLogs from "../../widgets/auditLogs";
 import PageLoader from "@/shared/components/ui/pageLoader";
+import { User } from "../../models/user";
 
 /* ================= SKELETON ================= */
 
