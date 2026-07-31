@@ -151,7 +151,7 @@ export default function PartnerCollapsibleSection<T>({
                     </button>
                   )}
                 <Badge variant="secondary" className="font-bold">
-                  {count}
+                {totalElements}
                 </Badge>
               </div>
             </div>

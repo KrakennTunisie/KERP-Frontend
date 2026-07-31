@@ -6,12 +6,14 @@ import { X, Send, Mail, Paperclip } from "lucide-react";
 import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 import { appToast } from "@/shared/lib/toast";
 
-import { MailingAPI } from "../../api/partners-api";
+import { InvoicesAPI, InvoicesCreditNoteAPI, MailingAPI, paymentsAPI } from "../../api/partners-api";
 
 import { Invoice, InvoicePageItem } from "../../models/invoice";
 import { PurchaseOrderPageItem } from "../../models/purchaseOrder";
 import { InvoiceCreditNotePageItem } from "../../models/creditNote";
-import {  PaymentDetails } from "../../models/payment";
+import { PaymentDetails } from "../../models/payment";
+import { paymentStatusTypeSchema } from "../../types/paymentStatus";
+import { invoiceStatusSchema } from "../../types/invoiceStatus";
 
 type SendDocumentVariant =
   | "invoice"
@@ -169,6 +171,8 @@ const getDocumentEmail = (
   }
 };
 
+
+
 const getDocumentSalutation = (
   document: SendableDocument | null | undefined,
   variant: SendDocumentVariant
@@ -243,7 +247,7 @@ const getDocumentAmount = (
   if (variant === "payment") {
     const payment = document as PaymentDetails;
 
-    return payment.amount +" "+ payment.currency;
+    return payment.amount + " " + payment.currency;
   }
 
   const item = document as Invoice | InvoicePageItem | PurchaseOrderPageItem;
@@ -281,6 +285,9 @@ export function SendDocumentModal({
     () => getDocumentSalutation(document, variant),
     [document, variant]
   );
+  const idEntity = useMemo(
+    () => getDocumentId(document, variant), 
+    [document, variant]);
 
   const amount = useMemo(
     () => getDocumentAmount(document, variant),
@@ -320,6 +327,10 @@ export function SendDocumentModal({
       switch (variant) {
         case "invoice":
           await MailingAPI.sendEmailWithInvoice(documentId, payload);
+          const status = new FormData();
+          console.log("ho")
+          status.append("status",invoiceStatusSchema.enum.TO_COLLECT)
+          await InvoicesAPI.updateClientInvoiceStatus(idEntity,status);
           break;
 
         case "purchaseOrder":
@@ -328,10 +339,14 @@ export function SendDocumentModal({
 
         case "invoiceCreditNote":
           await MailingAPI.sendEmailWithCreditNote(documentId, payload);
+          const formData = new FormData();
+          formData.append("status",invoiceStatusSchema.enum.IN_PROGRESS)
+          await InvoicesCreditNoteAPI.updateInvoiceCreditNoteStatus(documentNumber, formData);
           break;
 
         case "payment":
           await MailingAPI.sendEmailWithPayment(documentId, payload);
+          await paymentsAPI.updatePaymentStatus(idEntity, paymentStatusTypeSchema.enum.SENT);
           break;
       }
 

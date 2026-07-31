@@ -43,10 +43,12 @@ export default function useSupplierInvoiceList() {
   const [filtre, setFiltre] = useState<InvoiceStatus>("ALL");
   const [loading, setLoading] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(false)
+  const [archiveLoading, setArchiveLoading] = useState(false)
   const [updateLoading, setUpdateLoading] = useState(false)
   const [invoiceId, setInvoiceId] = useState("")
   const [open, setOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [archiveOpen, setArchiveOpen] = useState(false);
   const [updateOpen, setUpdateOpen] = useState(false);
   const [invoiceRef, setInvoiceRef] = useState("");
   const [suppliersInvoices, setSuppliersInvoices] = useState<InvoicePageItem[] | []>([])
@@ -111,6 +113,7 @@ export default function useSupplierInvoiceList() {
       setDeleteLoading(false);
     }
   }
+  
 
   const fetchSuppliersInvoices = async () => {
     try {
@@ -164,6 +167,22 @@ export default function useSupplierInvoiceList() {
       setInvoiceId("")
     }
   }
+
+  const archiveInvoice = async()=>{
+         try {
+            setArchiveLoading(true);
+            const formData = new FormData();
+            formData.append("status",  "ARCHIVED");
+            await InvoicesAPI.updateSupplierInvoiceStatus(invoiceId, formData);
+            appToast.success('Facture archivée avec succés.')
+            setArchiveOpen(false)
+            await fetchSuppliersInvoices()
+          } catch (error) {
+            appToast.error("Erreur d'archivage: ",getApiErrorMessage(error))
+          } finally {
+            setArchiveLoading(false);
+          }
+      }
 
   const setFile = useInvoiceStore(state => state.setFile);
   const setFileUrl = useInvoiceStore(state => state.setFileUrl);
@@ -237,6 +256,10 @@ async function extractInvoice(file: File) {
     suppliersInvoiceStats,
     isUploadInvoiceOpen, setIsUploadInvoiceOpen,
     handleUpload,
+    archiveLoading,
+    archiveOpen,
+    setArchiveOpen,
+    archiveInvoice
 
 
   }

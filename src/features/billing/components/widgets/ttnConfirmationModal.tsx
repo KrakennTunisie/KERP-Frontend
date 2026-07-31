@@ -1,5 +1,6 @@
 import { Modal } from "@/shared/components/ui/modal";
 import { Loader2, Mail, Send } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 
 type SendToTTNModalProps = {
@@ -8,6 +9,7 @@ type SendToTTNModalProps = {
     onConfirm: () => void | Promise<void>;
     invoiceRef?: string;
     loading?: boolean;
+    emailExist? :boolean;
     invoiceSent?: boolean
     successMessage?: string,
     onSendToClient?: ()=>void,
@@ -19,10 +21,12 @@ export function SendToTTNModal({
     onConfirm,
     invoiceRef,
     loading,
+    emailExist,
     invoiceSent,
     successMessage,
     onSendToClient
 }: SendToTTNModalProps) {
+    const router = useRouter();
 const footer = (
   <>
     {/* Cancel */}
@@ -38,7 +42,7 @@ const footer = (
     {onSendToClient && 
     <button
       onClick={onSendToClient}
-      disabled={loading || invoiceSent}
+      disabled={loading || invoiceSent || emailExist}
       className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-blue-200 bg-blue-50 text-blue-700 text-sm font-semibold hover:bg-blue-100 transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
     >
       <Mail className="h-4 w-4" />
@@ -70,7 +74,7 @@ const footer = (
         <Modal
             open={open}
             title="Envoyer la facture aux autorités fiscales (TTN)"
-            onClose={onClose}
+            onClose={()=> {onClose() ;router.back() ;}}
             footer={footer}
         >
             {/* Warning banner */}

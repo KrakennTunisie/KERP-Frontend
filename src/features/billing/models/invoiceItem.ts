@@ -1,18 +1,19 @@
 import {  z } from "zod";
 import { v4 as uuidv4 } from "uuid";
 import { discountTypeSchema } from "../types/discountType";
+import { operationCategorySchema } from "../types/operationCategory";
 
 
 // schema de base commun
 export const baseItemSchema = z.object({
     description: z.string().min(1, "La description est obligatoire"),
     quantity: z.number().min(1, "La quantité est obligatoire"),
-    unityPriceEXclTax: z.number().min(1, "Le prix unitaire est obligatoire"),
-    vatRate: z.number(),
+    unityPriceEXclTax: z.number().positive("Le prix unitaire est obligatoire"),
+    vatRate: z.number().nullable(),
     itemTotalExclTax: z.number(),
     itemTaxAmount: z.number(),
     itemTotalInclTax: z.number(),
-    operationCategory: operationCategorySchema.nullable(),
+    operationCategory: z.string().nullable().optional(),
     
 });
 
@@ -42,7 +43,9 @@ export const baseInvoiceCreditNoteItemSchema= z.object({
 export const purchaseOrderItemSchema = baseItemSchema.extend({
     idPurchaseOrderItem: z.uuid(),
     purchaseOrder: z.string().nullable(),
-    invoicedQuantity : z.number()
+    invoicedQuantity : z.number(),
+    discountType:  discountTypeSchema.nullable(),
+    discountValue:  z.number().nullable(),
 }).strict();
 
 // type partagé pour les composants réutilisables
@@ -86,8 +89,10 @@ export const defaultPurchaseOrderItem = (): PurchaseOrderItem => ({
     itemTotalExclTax: 0,
     itemTaxAmount: 0,
     itemTotalInclTax: 0,
-    operationCategory: "Prestation des services",
-    purchaseOrder: null
+    operationCategory: operationCategorySchema.enum.BANK,
+    purchaseOrder: null,
+    discountType: discountTypeSchema.enum.PERCENTAGE,
+    discountValue: 0,
 });
 
 export const defaultCreditNoteItem = (): CreditNoteItem => ({
@@ -99,7 +104,7 @@ export const defaultCreditNoteItem = (): CreditNoteItem => ({
     itemTotalExclTax: 0,
     itemTaxAmount: 0,
     itemTotalInclTax: 0,
-    operationCategory: "Prestation des services",
+    operationCategory:  operationCategorySchema.enum.DEPRECIABLE_EQUIPMENT,
     originalItem: null,
 });
 

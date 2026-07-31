@@ -19,3 +19,23 @@ export const paymentMethodWithAllLabels: Record<paymentMethodWithAll, string> = 
     BANK_TRANSFER: "Virement",
     CASH:          "Espèces",
 };
+
+export const paymentMethodAliases: Record<string, paymentMethod> = {
+  // Virement
+  "virement": "BANK_TRANSFER",
+  "virement bancaire": "BANK_TRANSFER",
+  "transfert bancaire": "BANK_TRANSFER",
+
+  // Chèque
+  "cheque": "CHECK",
+  "chèque": "CHECK",
+  "cheque bancaire": "CHECK",
+   "CB Cheque" : "CHECK",
+
+  // Espèces
+  "especes": "CASH",
+  "espèces": "CASH",
+  "cash": "CASH",
+  "liquide": "CASH",
+  "comptant": "CASH",
+};

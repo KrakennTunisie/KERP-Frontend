@@ -3,173 +3,146 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { NAVIGATION_ITEMS } from "@/shared/constants/navigation";
 
+type NavItem = {
+  title: string;
+  href?: string;
+  icon?: React.ComponentType<{ className?: string }>;
+  subMenu?: NavItem[];
+};
+
 export function Sidebar() {
- const pathname = usePathname();
+  const pathname = usePathname();
   const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({});
 
-  const isActive = (href: string) => {
+  const isActive = (href?: string) => {
+    if (!href) return false;
     if (href === "/") return pathname === "/";
     return pathname === href || pathname.startsWith(href + "/") || pathname.startsWith(href);
   };
 
-  const isMenuActive = (subMenu?: Array<{ href: string }>) => {
-    if (!subMenu) return false;
-    return subMenu.some((item) => isActive(item.href));
+  const isMenuActive = (item: NavItem): boolean => {
+    if (item.href) return isActive(item.href);
+    if (!item.subMenu) return false;
+    return item.subMenu.some((sub) => isMenuActive(sub));
   };
 
-  const toggleMenu = (menuTitle: string) => {
+  const toggleMenu = (key: string) => {
     setExpandedMenus((prev) => ({
       ...prev,
-      [menuTitle]: !prev[menuTitle],
+      [key]: !prev[key],
     }));
   };
 
-  // Keep menus expanded if current route belongs to them (even after refresh)
+  // Garde les menus ouverts si la route active leur appartient (même après refresh)
   const computedExpandedMenus = useMemo(() => {
     const next = { ...expandedMenus };
-    NAVIGATION_ITEMS.forEach((section) => {
-      section.items.forEach((item) => {
+
+    const walk = (items: NavItem[], parentKey = "") => {
+      items.forEach((item) => {
+        const key = parentKey ? `${parentKey}>${item.title}` : item.title;
         if (item.subMenu?.length) {
-          const shouldBeOpen = isMenuActive(item.subMenu);
-          if (shouldBeOpen && next[item.title] === undefined) {
-            next[item.title] = true;
+          const shouldBeOpen = isMenuActive(item);
+          if (shouldBeOpen && next[key] === undefined) {
+            next[key] = true;
           }
+          walk(item.subMenu, key);
         }
       });
-    });
+    };
+
+    NAVIGATION_ITEMS.forEach((section) => walk(section.items as NavItem[]));
+
     return next;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname, expandedMenus]);
 
+ const renderItem = (item: NavItem, depth: number, parentKey = "") => {
+  const key = parentKey ? `${parentKey}>${item.title}` : item.title;
+  const hasSubMenu = !!item.subMenu?.length;
+  const isExpanded = computedExpandedMenus[key] ?? (hasSubMenu ? isMenuActive(item) : false);
+  const active = item.href ? isActive(item.href) : false;
+  const Icon = item.icon;
+
+  // Tailles dégressives selon la profondeur
+  const paddingLeft = depth === 0 ? "px-3" : depth === 1 ? "pl-6 pr-3" : "pl-9 pr-3";
+  const textSize = depth >= 2 ? "text-[11px]" : "text-xs";
+  const fontWeight = depth >= 1 ? "font-medium" : "font-semibold";
+
+  if (hasSubMenu) {
+    return (
+      <div key={key}>
+        <button
+          type="button"
+          onClick={() => toggleMenu(key)}
+          className={`w-full flex items-center gap-2.5 ${paddingLeft} py-2 rounded-lg transition text-gray-500 hover:text-gray-900 hover:bg-gray-50`}
+        >
+          {Icon && <Icon className="w-4 h-4 shrink-0" />}
+          <span className={`${textSize} ${fontWeight} flex-1 text-left`}>{item.title}</span>
+          <ChevronDown
+            className={`w-3 h-3 shrink-0 transition-transform ${isExpanded ? "rotate-180" : ""}`}
+          />
+        </button>
+
+        {isExpanded && (
+          <div className="space-y-0.5">
+            {item.subMenu!.map((subItem) => renderItem(subItem, depth + 1, key))}
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
-<aside className="w-72 bg-white border-r border-gray-100 flex flex-col p-3 overflow-y-auto">
-  {/* NAVIGATION */}
-  <nav className="flex-1">
-    <div className="space-y-6">
+    <Link
+      key={key}
+      href={item.href!}
+      className={`flex items-center gap-2.5 ${paddingLeft} py-2 rounded-lg transition ${
+        active
+          ? "bg-gray-100 text-gray-900 font-semibold"
+          : `text-gray-500 hover:text-gray-900 hover:bg-gray-50 ${fontWeight}`
+      }`}
+    >
+      {Icon && <Icon className="w-4 h-4 shrink-0" />}
+      <span className={textSize}>{item.title}</span>
+      {active && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />}
+    </Link>
+  );
+};
 
-      {NAVIGATION_ITEMS.map((section) => (
-        <div key={section.title}>
+  return (
+    <aside className="w-72 bg-white border-r border-gray-100 flex flex-col p-3 overflow-y-auto">
+      <nav className="flex-1">
+        <div className="space-y-6">
+          {NAVIGATION_ITEMS.map((section) => (
+            <div key={section.title}>
+              <div className="px-2 mb-2">
+                <h2 className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">
+                  {section.title}
+                </h2>
+              </div>
 
-          {/* SECTION TITLE */}
-          <div className="px-2 mb-2">
-            <h2 className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">
-              {section.title}
-            </h2>
-          </div>
-
-          {/* ITEMS */}
-          <div className="space-y-1">
-            {section.items.map((item) => {
-              const Icon = item.icon;
-              const hasSubMenu = !!item.subMenu?.length;
-              const isExpanded =
-                computedExpandedMenus[item.title] ??
-                (hasSubMenu ? isMenuActive(item.subMenu) : false);
-
-              const active = item.href ? isActive(item.href) : false;
-
-              if (hasSubMenu) {
-                return (
-                  <div key={item.title}>
-
-                    <button
-                      type="button"
-                      onClick={() => toggleMenu(item.title)}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition text-gray-500 hover:text-gray-900 hover:bg-gray-50"
-                    >
-                      <Icon className="w-4 h-4" />
-
-                      <span className="text-xs font-semibold flex-1 text-left">
-                        {item.title}
-                      </span>
-
-                      <ChevronDown
-                        className={`w-3.5 h-3.5 transition-transform ${
-                          isExpanded ? "rotate-180" : ""
-                        }`}
-                      />
-                    </button>
-
-                    {/* SUBMENU */}
-                    {isExpanded && (
-                      <div className="ml-8 mt-1 space-y-1">
-                        {item.subMenu!.map((subItem) => {
-                          const subActive = isActive(subItem.href);
-
-                          return (
-                            <Link
-                              key={subItem.href}
-                              href={subItem.href!}
-                              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition ${
-                                subActive
-                                  ? "bg-gray-100 text-gray-900 font-semibold"
-                                  : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"
-                              }`}
-                            >
-                              <span className="text-xs font-semibold">{subItem.title}</span>
-
-                              {subActive && (
-                                <div className="ml-auto w-1.5 h-1.5 rounded-full bg-blue-500" />
-                              )}
-                            </Link>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                );
-              }
-
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href!}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition ${
-                    active
-                      ? "bg-gray-100 text-gray-900 font-semibold"
-                      : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"
-                  }`}
-                >
-                  <Icon className="w-4 h-4" />
-                  <span className="text-xs font-semibold">{item.title}</span>
-
-                  {active && (
-                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-blue-500" />
-                  )}
-                </Link>
-              );
-            })}
-          </div>
-
+              <div className="space-y-1">
+                {section.items.map((item) => renderItem(item as NavItem, 0))}
+              </div>
+            </div>
+          ))}
         </div>
-      ))}
+      </nav>
 
-    </div>
-  </nav>
-
-  {/* PROFILE */}
-  <div className="pt-5 border-t border-gray-100">
-    <div className="p-3 bg-gray-50 rounded-xl flex items-center gap-3 border border-gray-100 hover:bg-white transition">
-
-      <div className="w-9 h-9 bg-gray-900 rounded-lg flex items-center justify-center text-white text-xs font-bold">
-        JD
+      <div className="pt-5 border-t border-gray-100">
+        <div className="p-3 bg-gray-50 rounded-xl flex items-center gap-3 border border-gray-100 hover:bg-white transition">
+          <div className="w-9 h-9 bg-gray-900 rounded-lg flex items-center justify-center text-white text-xs font-bold">
+            JD
+          </div>
+          <div className="flex-1 overflow-hidden">
+            <p className="text-xs font-semibold text-gray-900 truncate">Jean Dupont</p>
+            <p className="text-[10px] text-gray-500 uppercase truncate">Dir. Financier</p>
+          </div>
+        </div>
       </div>
-
-      <div className="flex-1 overflow-hidden">
-        <p className="text-xs font-semibold text-gray-900 truncate">
-          Jean Dupont
-        </p>
-        <p className="text-[10px] text-gray-500 uppercase truncate">
-          Dir. Financier
-        </p>
-      </div>
-
-    </div>
-  </div>
-</aside>
+    </aside>
   );
 }

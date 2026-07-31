@@ -49,7 +49,7 @@ export default function UploadInvoiceModal({
 
   const isImage = file?.type.startsWith("image/");
   const isPdf = file?.type === "application/pdf";
-
+  console.log(loading)
   return (
     <Modal
       open={open}

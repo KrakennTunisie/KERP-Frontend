@@ -1,13 +1,17 @@
 "use client";
 
 import {
+  Archive,
+  ArchiveRestore,
+  CheckCircle2,
+  CircleSlash,
   Edit,
   Send,
   Settings,
   Trash2,
 } from "lucide-react";
 
-import { InvoiceStatus } from "../../types/invoiceStatus";
+import { InvoiceStatus, invoiceStatusSchema } from "../../types/invoiceStatus";
 import { formatDateLong } from "@/shared/utils/formatDate";
 import {
   AmountCell,
@@ -15,6 +19,8 @@ import {
   StatusPill,
 } from "../../lib/invoiceTableRowHelpers";
 import { ActionMenu, ActionMenuItem } from "@/shared/components/ui/actionMenuItem";
+import { currencyTypeSchema } from "../../types/currency";
+import { paymentStatusTypeSchema, PaymentType } from "../../types/paymentStatus";
 
 export interface Payment {
   id: string;
@@ -34,15 +40,19 @@ type InvoiceTableRowProps<T> = {
   onView: (item: T) => void;
   onEdit?: (item: T) => void;
   onDelete?: (item: T) => void;
+  onArchive?: (item: T) => void;
   onSend?: (item: T) => void;
 
   onUpdateStatus?: (item: T) => void;
   canUpdateStatus?: (item: T) => boolean;
 
   getNumber: (item: T) => string;
+  getCurrency: (item: T) => string;
   getPartnerName?: (item: T) => string | null | undefined;
+  getPartnerEmail?: (item: T) => string | null | undefined;
   getStatus?: (item: T) => InvoiceStatus | null | undefined;
-  getDate: (item: T) =>  Date  | undefined;
+  getPaymentStatus?: (item: T) => PaymentType | null | undefined;
+  getDate: (item: T) => Date | undefined;
 
   getAmountEUR?: (item: T) => number | null | undefined;
   getAmountTND?: (item: T) => number | null | undefined;
@@ -60,12 +70,16 @@ export function InvoiceTableRow<T>({
   onView,
   onEdit,
   onDelete,
+  onArchive,
   onSend,
   onUpdateStatus,
   canUpdateStatus,
   getNumber,
+  getCurrency,
   getPartnerName,
+  getPartnerEmail,
   getStatus,
+  getPaymentStatus,
   getDate,
   getAmountEUR,
   getAmountTND,
@@ -75,140 +89,204 @@ export function InvoiceTableRow<T>({
   getStatusColor,
 }: InvoiceTableRowProps<T>) {
   const status = getStatus?.(item);
+  const paymentStatus = getPaymentStatus?.(item);
+  const statusUpdateDisabled = !onUpdateStatus || (canUpdateStatus ? !canUpdateStatus(item) : false);
 
-  const statusUpdateDisabled =
-    !onUpdateStatus || (canUpdateStatus ? !canUpdateStatus(item) : false);
+  console.log(paymentStatus)
+
+
 
   const actions: ActionMenuItem[] = [
-    ...(onEdit
+    ...(status && status != invoiceStatusSchema.enum.PAID &&
+      status != invoiceStatusSchema.enum.CANCELLED &&
+      status != invoiceStatusSchema.enum.ARCHIVED && onEdit
       ? [
-          {
-            label: "Modifier",
-            icon: Edit,
-            color: "text-amber-600",
-            hover: "hover:bg-amber-50",
-            onClick: () => onEdit(item),
-            visible: true
-          },
-        ]
+        {
+          label: "Modifier",
+          icon: Edit,
+          color: "text-amber-600",
+          hover: "hover:bg-amber-50",
+          onClick: () => onEdit(item),
+          visible: true
+
+        },
+      ]
+      : paymentStatus && paymentStatus != paymentStatusTypeSchema.enum.SENT && onEdit ? [{
+        label: "Modifier",
+        icon: Edit,
+        color: "text-amber-600",
+        hover: "hover:bg-amber-50",
+        onClick: () => onEdit(item),
+        visible: true
+
+      },
+      ] : []),
+
+    ...(status && getPartnerEmail?.(item) != "" &&
+      status == invoiceStatusSchema.enum.DRAFT &&
+      onSend
+      ? [
+        {
+          label: "Envoyer",
+          icon: Send,
+          color: "text-emerald-600",
+          hover: "hover:bg-emerald-50",
+          onClick: () => onSend(item),
+          visible: true,
+        },
+      ]
+
+      : paymentStatus && paymentStatus == paymentStatusTypeSchema.enum.NOT_SENT && getPartnerEmail?.(item) != "" &&
+        onSend ? [{
+          label: "Envoyer",
+          icon: Send,
+          color: "text-emerald-600",
+          hover: "hover:bg-emerald-50",
+          onClick: () => onSend(item),
+          visible: getPartnerEmail?.(item) != "",
+        },] : []),
+
+    ...(status != invoiceStatusSchema.enum.PAID &&
+      status != invoiceStatusSchema.enum.CANCELLED &&
+      status != invoiceStatusSchema.enum.ARCHIVED &&
+      status != invoiceStatusSchema.enum.REFUNDED &&
+      onUpdateStatus
+      ? [
+        {
+          label: "Mettre à jour le statut",
+          icon: Settings,
+          color: "text-violet-600",
+          hover: "hover:bg-violet-50",
+          disabled: statusUpdateDisabled,
+          onClick: () => onUpdateStatus(item),
+          visible: true,
+        },
+      ]
       : []),
 
-    ...(onSend
+    ...((status === invoiceStatusSchema.enum.DRAFT || status === invoiceStatusSchema.enum.CANCELLED) && onDelete
       ? [
-          {
-            label: "Envoyer",
-            icon: Send,
-            color: "text-emerald-600",
-            hover: "hover:bg-emerald-50",
-            onClick: () => onSend(item),
-            visible: true
-          },
-        ]
-      : []),
-
-    ...(onUpdateStatus
+        {
+          label: "Supprimer",
+          icon: Trash2,
+          color: "text-rose-600",
+          hover: "hover:bg-rose-50",
+          onClick: () => onDelete(item),
+          visible: true,
+        },
+      ]
+      : paymentStatus && paymentStatus != paymentStatusTypeSchema.enum.SENT && onDelete ? [{
+        label: "Supprimer",
+        icon: Trash2,
+        color: "text-rose-600",
+        hover: "hover:bg-rose-50",
+        onClick: () => onDelete(item),
+        visible: true,
+      },] : []),
+    ...((status === invoiceStatusSchema.enum.PAID || status === invoiceStatusSchema.enum.CANCELLED || status === invoiceStatusSchema.enum.REFUNDED) && onArchive
       ? [
-          {
-            label: "Mettre à jour le statut",
-            icon: Settings,
-            color: "text-violet-600",
-            hover: "hover:bg-violet-50",
-            disabled: statusUpdateDisabled,
-            onClick: () => onUpdateStatus(item),
-            visible: true
-          },
-        ]
-      : []),
-
-    ...(onDelete
-      ? [
-          {
-            label: "Supprimer",
-            icon: Trash2,
-            color: "text-rose-600",
-            hover: "hover:bg-rose-50",
-            onClick: () => onDelete(item),
-            visible: true
-          },
-        ]
+        {
+          label: "Archiver",
+          icon: Archive,
+          color: "text-rose-600",
+          hover: "hover:bg-rose-50",
+          onClick: () => onArchive(item),
+          visible: true,
+        },
+      ]
       : []),
   ];
-
   return (
-<tr className="transition-colors hover:bg-slate-50/60">
+    <tr className="transition-colors hover:bg-slate-50/60">
 
-  {/* NUMBER */}
-  <td className="px-4 py-2.5">
-    <button
-      onClick={() => onView(item)}
-      className="cursor-pointer text-[11px] font-semibold text-blue-600 underline-offset-4 transition hover:text-blue-700 hover:underline"
-    >
-      {getNumber(item)}
-    </button>
-  </td>
+      {/* NUMBER */}
+      <td className="px-4 py-2.5">
+        <button
+          onClick={() => onView(item)}
+          className="cursor-pointer text-[11px] font-semibold text-blue-600 underline-offset-4 transition hover:text-blue-700 hover:underline"
+        >
+          {getNumber(item)}
+        </button>
+      </td>
 
-  {/* NAME */}
-  <td className="px-4 py-2.5">
-    <p className="max-w-[200px] truncate text-[11px] font-semibold text-slate-800">
-      {variant === "payment"
-        ? getRelatedInvoiceNumber?.(item) ?? "—"
-        : getPartnerName?.(item) ?? "—"}
-    </p>
-  </td>
+      {/* NAME */}
+      <td className="px-4 py-2.5">
+        <p className="max-w-[200px] truncate text-[11px] font-semibold text-slate-800">
+          {variant === "payment"
+            ? getRelatedInvoiceNumber?.(item) ?? "—"
+            : getPartnerName?.(item) ?? "—"}
+        </p>
+      </td>
 
-  {/* STATUS / METHOD */}
-  <td className="px-4 py-2.5">
-    {variant === "payment" ? (
-      <span className="inline-flex rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-700">
-        {getPaymentMethod?.(item) ?? "—"}
-      </span>
-    ) : status && getStatusLabel && getStatusColor ? (
-      <StatusPill
-        status={status}
-        getStatusLabel={getStatusLabel}
-        getStatusColor={getStatusColor}
-      />
-    ) : (
-      <span className="text-[11px] text-slate-400">—</span>
-    )}
-  </td>
+      {/* STATUS / METHOD */}
+      <td className="px-4 py-2.5">
+        {variant === "payment" ? (
+          <span className="inline-flex rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-700">
+            {getPaymentMethod?.(item) ?? "—"}
+          </span>
+        ) : status && getStatusLabel && getStatusColor ? (
+          <StatusPill
+            status={status}
+            getStatusLabel={getStatusLabel}
+            getStatusColor={getStatusColor}
+          />
+        ) : (
+          <span className="text-[11px] text-slate-400">—</span>
+        )}
+      </td>
 
-  {/* AMOUNTS */}
-  <td className="px-4 py-2.5">
-    <AmountCell value={getAmountEUR?.(item)} currency="EUR" />
-  </td>
+      {/* AMOUNTS */}
+      <td className="px-4 py-2.5">
+        {getCurrency(item) == currencyTypeSchema.enum.EUR ?
+          <AmountCell value={getAmountEUR?.(item)} currency="EUR" /> :
+          <AmountCell value={getAmountTND?.(item)} currency="TND" />}
 
-  <td className="px-4 py-2.5">
-    <AmountCell value={getAmountTND?.(item)} currency="TND" />
-  </td>
+      </td>
 
-  {/* DATE */}
-  <td className="px-4 py-2.5">
-    <p className="whitespace-nowrap text-[11px] font-medium text-slate-600">
-      {formatDateLong(getDate(item))}
-    </p>
-  </td>
 
-  {/* COMPLIANCE */}
-  <td className="px-4 py-2.5 text-center">
-    {variant === "payment" ? (
-      <span className="text-[11px] font-medium text-slate-400">—</span>
-    ) : (
-      <ComplianceIcon />
-    )}
-  </td>
 
-  {/* ACTIONS */}
-  <td className="px-4 py-2.5">
-    <div className="flex items-center justify-end">
-      <ActionMenu
-        orientation="horizontal"
-        title={variant === "payment" ? "Actions paiement" : "Actions facture"}
-        items={actions}
-      />
-    </div>
-  </td>
+      {/* DATE */}
+      <td className="px-4 py-2.5">
+        <p className="whitespace-nowrap text-[11px] font-medium text-slate-600">
+          {formatDateLong(getDate(item))}
+        </p>
+      </td>
 
-</tr>
+      {/* COMPLIANCE */}
+      {variant != "payment" && <td className="px-4 py-2.5 text-center">
+        <ComplianceIcon />
+      </td>}
+
+
+      {/* ACTIONS */}
+      <td className="px-2 py-1 whitespace-nowrap">
+        <div className="flex items-center justify-center">
+          {variant === "payment" &&
+            paymentStatus === paymentStatusTypeSchema.enum.SENT ? (
+            <span
+              className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-600"
+              title="Paiement envoyé"
+            >
+              <CheckCircle2 className="h-3.5 w-3.5" />
+
+            </span>
+          ) : actions && actions.length === 0 ? (
+            <span
+              className="inline-flex h-8 w-8 items-center justify-center text-slate-300"
+              title="Aucune action disponible"
+            >
+              <CircleSlash className="h-5 w-5" />
+            </span>
+          ) : (
+            <ActionMenu
+              orientation="horizontal"
+              title={variant === "payment" ? "Actions paiement" : "Actions facture"}
+              items={actions}
+            />
+          )}
+        </div>
+      </td>
+
+    </tr>
   );
 }

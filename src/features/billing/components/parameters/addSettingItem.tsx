@@ -11,6 +11,7 @@ import { SettingType, SettingTypeSchema } from "../../types/settingType";
 import { CreateOperationCategorySchema } from "../../models/operationCategory";
 import { CreatePaymentConditionSchema } from "../../models/paymentCondition";
 import { CreateTVARateSchema } from "../../models/TVArate";
+import { useFetchSettings } from "../../hooks/useFetchSetting";
 
 const createSchemaMap = {
   OPERATION_CATEGORY: CreateOperationCategorySchema,
@@ -22,8 +23,10 @@ type AddSettingModalProps = {
   open: boolean;
   title: string;
   loading?: boolean;
+  newLabel?: string;
   onClose: () => void;
   onSubmit: (data: CreateSetting) => void;
+  onSuccess?: () => void;
   settingType: SettingType
 };
 
@@ -31,18 +34,21 @@ export default function AddSettingModal({
   open,
   title,
   loading = false,
+  newLabel ,
   onClose,
   onSubmit,
+  onSuccess,
   settingType
 }: AddSettingModalProps) {
 
 
 
-const schema = createSchemaMap[settingType];
+  const schema = createSchemaMap[settingType];
   const {
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<CreateSetting>({
     resolver: zodResolver(schema),
@@ -59,13 +65,20 @@ const schema = createSchemaMap[settingType];
     if (!open) {
       reset();
     }
+    if (newLabel != null) {
+      setValue("label", String(newLabel));
+    }
   }, [open, reset]);
 
-  const submit = (data: CreateSetting) => {
-    console.log("errors", errors)
-    onSubmit(data);
-   // reset();
-  };
+  const submit = async (data: CreateSetting) => {
+    try {
+        await onSubmit(data);
+        reset()
+        await onSuccess?.();
+    } catch (error) {
+        console.error("Erreur lors de la création:", error);
+    }
+};
 
 
   return (
@@ -93,7 +106,7 @@ const schema = createSchemaMap[settingType];
           <button
             type="submit"
             form="add-setting-form"
-            disabled={loading }
+            disabled={loading}
             className="inline-flex h-10 items-center gap-2 rounded-xl bg-blue-600 px-5 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-400"
           >
             <Plus className="h-4 w-4" />
@@ -117,10 +130,9 @@ const schema = createSchemaMap[settingType];
             {...register("code")}
             placeholder="Ex : SALE"
             className={`w-full rounded-xl border px-3 py-2 text-sm outline-none transition
-              ${
-                errors.code
-                  ? "border-rose-500 focus:border-rose-500"
-                  : "border-slate-300 focus:border-blue-500"
+              ${errors.code
+                ? "border-rose-500 focus:border-rose-500"
+                : "border-slate-300 focus:border-blue-500"
               }`}
           />
 
@@ -140,16 +152,15 @@ const schema = createSchemaMap[settingType];
           <input
             {...register("label")}
             placeholder={
-                settingType==SettingTypeSchema.enum.PAYMENT_CONDITION ? 
-                        "Ex: 20 (en jours)" :
-                            settingType==SettingTypeSchema.enum.TVA_RATE ?
-                                "Ex: 20 (en %)" :  
-                                    "Ex : Prestation des services"}
+              settingType == SettingTypeSchema.enum.PAYMENT_CONDITION ?
+                "Ex: 20 (en jours)" :
+                settingType == SettingTypeSchema.enum.TVA_RATE ?
+                  "Ex: 20 (en %)" :
+                  "Ex : Prestation des services"}
             className={`w-full rounded-xl border px-3 py-2 text-sm outline-none transition
-              ${
-                errors.label
-                  ? "border-rose-500 focus:border-rose-500"
-                  : "border-slate-300 focus:border-blue-500"
+              ${errors.label
+                ? "border-rose-500 focus:border-rose-500"
+                : "border-slate-300 focus:border-blue-500"
               }`}
           />
 
@@ -171,10 +182,9 @@ const schema = createSchemaMap[settingType];
             rows={4}
             placeholder="Décrivez cet élément..."
             className={`w-full resize-none rounded-xl border px-3 py-2 text-sm outline-none transition
-              ${
-                errors.description
-                  ? "border-rose-500 focus:border-rose-500"
-                  : "border-slate-300 focus:border-blue-500"
+              ${errors.description
+                ? "border-rose-500 focus:border-rose-500"
+                : "border-slate-300 focus:border-blue-500"
               }`}
           />
 

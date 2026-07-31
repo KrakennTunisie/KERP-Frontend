@@ -28,6 +28,7 @@ import { CurrencyType } from "../../types/currency";
 import UseCreatePartner, { pageProps } from "../../hooks/useCreatePartner";
 import { partnerTypeSchema } from "../../types/partnerType";
 import { PartnerSummary } from "../../models/partner";
+import { Form } from "react-hook-form";
 
 interface AddPartnerModalProps {
   isOpen: boolean;
@@ -47,6 +48,7 @@ export default function AddPartnerModal({
   const {
     register,
     watch,
+    reset,
     setValue,
     getError,
     documentFields,
@@ -94,6 +96,7 @@ export default function AddPartnerModal({
     async (data) => {
       await onSubmit(data, false);
       onSuccess();
+      reset()
       onClose();
     },
     (errors) => {

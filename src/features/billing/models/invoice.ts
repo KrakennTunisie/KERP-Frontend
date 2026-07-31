@@ -229,13 +229,14 @@ const extractedInvoiceSchema = z.object({
     companyAddress: z.string(),
     issuerEmail: z.string(),
     issuerPhone: z.string(),
+    paymentCondition: z.string(),
+    paymentMethod: z.string(),
     invoiceItems: z.array(extractedInvoiceItemSchema).default([]),
     termsAndConditions: z.string().nullable(),
     comments: z.string().nullable(),
 });
 
-/*** Le workflow n8n renvoie un tableau (souvent avec un seul élément) ***/
-const extractedInvoiceResponseSchema = z.array(extractedInvoiceSchema);
+
 
 /*** Types inférés ***/
 export type ExtractedInvoice = z.infer<typeof extractedInvoiceSchema>;

@@ -6,7 +6,7 @@ import { getClientInvoiceAllowedNextStatuses, getCreditNoteAllowedNextStatuses, 
 import { formatDateLong } from "@/shared/utils/formatDate"
 import PageLoader from "@/shared/components/ui/pageLoader"
 import { DocumentTopBar } from "../widgets/documentTopBar"
-import {  Copy, CreditCard, Download,  FileText, Pencil, ReceiptText, Send, Settings, Trash2 } from "lucide-react"
+import { Archive, Copy, CreditCard, Download, FileText, Pencil, ReceiptText, Send, Settings, Trash2 } from "lucide-react"
 import { useState } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs"
 import { InvoiceDetailsTab } from "../widgets/invoiceDetailsTab"
@@ -16,10 +16,11 @@ import { Status, UpdateDocumentStatusModal } from "../widgets/updateStatusModal"
 import { SendDocumentModal } from "../widgets/sendInvoiceModal"
 import { DeleteInvoiceModal } from "../widgets/deleteInvoiceModal"
 import { invoiceTypeSchema } from "../../types/invoiceType"
+import { ArchiveInvoiceModal } from "../widgets/archiveModal"
 
 export default function ClientInvoiceDetails({ invoiceId, type }: InvoiceDetailsProps) {
-    const {  invoice, previewDocument, setPreviewDocument, sendToTTN, TtnModalOpen, setTtnModalOpen,
-        hasCreditInvoice,loading, sent, successMessage, router, updateStatus,deleteLoading,
+    const { invoice, previewDocument, setPreviewDocument, sendToTTN, TtnModalOpen, setTtnModalOpen,
+        hasCreditInvoice, loading, sent, successMessage, router, updateStatus, deleteLoading,
         updateLoading,
         updateOpen,
         setUpdateOpen,
@@ -28,8 +29,9 @@ export default function ClientInvoiceDetails({ invoiceId, type }: InvoiceDetails
         sendOpen,
         setSendOpen,
         setDeleteOpen,
-        deleteOpen,
-        telecharger,
+        setArchiveOpen,
+        deleteOpen,archiveOpen,archiveInvoice,
+        telecharger,archiveLoading, setArchiveLoading,
         deleteClientInvoice } = useClientInvoiceDetails({ invoiceId, type });
 
     const [activeTab, setActiveTab] = useState("details");
@@ -40,190 +42,201 @@ export default function ClientInvoiceDetails({ invoiceId, type }: InvoiceDetails
     });
 
     const toggleSection = (section: keyof typeof openSections) => {
-    setOpenSections((prev) => ({
-        ...prev,
-        [section]: !prev[section],
-    }));
+        setOpenSections((prev) => ({
+            ...prev,
+            [section]: !prev[section],
+        }));
     };
+    console.log("ouma");
+    console.log(invoice?.invoiceStatus)
 
     const actions = [
-  {
-    label: "Cloner",
-    icon: Copy,
-    onClick: () =>
-      router.push(`/billing/invoices/clients/${invoice?.idInvoice}/clone`),
-    visible: invoice?.invoiceType === invoiceTypeSchema.enum.SALE,
-  },
-  {
-    label: "Télécharger",
-    icon: Download,
-    onClick: () => telecharger(),
-    visible: true,
-  },
-  {
-    label: "Mettre à jour statut",
-    icon: Settings,
-    onClick: () => setUpdateOpen(true),
-    disabled: invoice?.invoiceStatus === "CANCELLED",
-    visible: true,
-  },
-  {
-    label: "Envoyer",
-    icon: Send,
-    onClick: () => setSendOpen(true),
-    disabled: invoice?.invoiceStatus === "CANCELLED",
-    visible: invoice?.invoiceType === invoiceTypeSchema.enum.SALE,
-  },
-  {
-    label: "Modifier",
-    icon: Pencil,
-    onClick: () =>
-      router.push(`/billing/invoices/clients/${invoice?.idInvoice}/edit`),
-    disabled:
-      invoice?.invoiceStatus === "PAID" ||
-      invoice?.invoiceStatus === "CANCELLED",
-    visible: invoice?.invoiceType === invoiceTypeSchema.enum.SALE,
-  },
-  {
-    label: "Supprimer",
-    icon: Trash2,
-    color: "text-rose-600",
-    hover: "hover:bg-rose-50",
-    onClick: () => setDeleteOpen(true),
-    disabled: false,
-    visible: true,
-  },
-];
+        {
+            label: "Cloner",
+            icon: Copy,
+            onClick: () =>
+                router.push(`/billing/invoices/clients/${invoice?.idInvoice}/clone`),
+            visible: invoice?.invoiceType === invoiceTypeSchema.enum.SALE,
+        },
+        {
+            label: "Télécharger",
+            icon: Download,
+            onClick: () => telecharger(),
+            visible: true,
+        },
+        {
+            label: "Mettre à jour statut",
+            icon: Settings,
+            onClick: () => setUpdateOpen(true),
+            disabled: invoice?.invoiceStatus === "CANCELLED" || invoice?.invoiceStatus === "PAID",
+            visible: invoice?.invoiceStatus != "ARCHIVED",
+        },
+        {
+            label: "Envoyer",
+            icon: Send,
+            onClick: () => setSendOpen(true),
+            disabled: invoice?.invoiceStatus != "DRAFT",
+            visible: invoice?.partner!.email!="" && invoice?.invoiceType === invoiceTypeSchema.enum.SALE && invoice?.invoiceStatus == "DRAFT",
+        },
+        {
+            label: "Modifier",
+            icon: Pencil,
+            onClick: () =>
+                router.push(`/billing/invoices/clients/${invoice?.idInvoice}/edit`),
+            disabled:
+                invoice?.invoiceStatus === "PAID" ||
+                invoice?.invoiceStatus === "CANCELLED",
+            visible: invoice?.invoiceType === invoiceTypeSchema.enum.SALE && invoice?.invoiceStatus != "ARCHIVED",
+        },
+        {
+            label: "Supprimer",
+            icon: Trash2,
+            color: "text-rose-600",
+            hover: "hover:bg-rose-50",
+            onClick: () => setDeleteOpen(true),
+            disabled: false,
+            visible: invoice?.invoiceStatus === invoiceStatusSchema.enum.DRAFT,
+        },
+        {
+            label: "Archiver",
+            icon: Archive,
+            color: "text-rose-600",
+            hover: "hover:bg-rose-50",
+            onClick: () => setArchiveOpen(true),
+            disabled: false,
+            visible: invoice?.invoiceStatus === invoiceStatusSchema.enum.PAID,
+        },
+    ];
 
-const menuItems = actions.filter((action) => action.visible)
-        if(loading){
-            return(
-                <PageLoader label="Chargement de facture ..."/>
-            )
-        }
-        if(!invoice){
-                return (
-                <div className="p-6">
-                    <p className="text-sm font-semibold text-slate-500">
+    const menuItems = actions.filter((action) => action.visible)
+    if (loading) {
+        return (
+            <PageLoader label="Chargement de facture ..." />
+        )
+    }
+    if (!invoice) {
+        return (
+            <div className="p-6">
+                <p className="text-sm font-semibold text-slate-500">
                     Facture introuvable.
-                    </p>
-                </div>
-                );   
-     }
-    return (
-    <div className="min-h-screen font-sans">
-        {/* TOP BAR */}
-        <DocumentTopBar
-        documentTypeLabel="Facture"
-        documentNumber={invoice?.invoiceNumber}
-        statusLabel={
-            invoice?.invoiceStatus
-            ? invoiceStatusLabels[invoice.invoiceStatus]
-            : "-"
-        }
-        statusVariant="pending"
-        issueDate={formatDateLong(invoice?.issueDate)}
-        dueDate={formatDateLong(invoice?.dueDate)}
-        onBack={() => router.back()}
-        actionItems={menuItems}
-        />
-
-        <main className="mx-auto px-6 py-6">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            {/* Tabs Header */}
-            <div className="w-full">
-            <TabsList className="flex h-11 w-full rounded-xl bg-slate-100 p-1 gap-1">
-                <TabsTrigger
-                value="details"
-                className="flex flex-1 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold text-slate-500 transition-all data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm cursor-pointer"
-                >
-                <FileText className="h-4 w-4" />
-                Détails
-                </TabsTrigger>
-
-                
-                <TabsTrigger
-                value="payments"
-                className="flex flex-1 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold text-slate-500 transition-all data-[state=active]:bg-white data-[state=active]:text-emerald-600 data-[state=active]:shadow-sm cursor-pointer"
-                >
-                <CreditCard className="h-4 w-4" />
-                Paiements
-                </TabsTrigger>
-
-                <TabsTrigger
-                value="creditNotes"
-                className="flex flex-1 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold text-slate-500 transition-all data-[state=active]:bg-white data-[state=active]:text-rose-600 data-[state=active]:shadow-sm cursor-pointer"
-                >
-                <ReceiptText className="h-4 w-4" />
-                Factures d’avoirs
-                </TabsTrigger>
-
-            </TabsList>
+                </p>
             </div>
-
-            {/* Onglet Détails */}
-            <TabsContent value="details" className="space-y-5">
-            <InvoiceDetailsTab
-                invoice={invoice}
-                invoiceId={invoiceId}
-                type={type}
-                hasCreditInvoice={hasCreditInvoice}
-                TtnModalOpen={TtnModalOpen}
-                setTtnModalOpen={setTtnModalOpen}
-                sendToTTN={sendToTTN}
-                updateStatus={()=>updateStatus(invoiceStatusSchema.enum.PAID)}
-                loading={loading}
-                sent={sent}
-                successMessage={successMessage}
-                setPreviewDocument={setPreviewDocument}
-            />
-            </TabsContent>
-
-            {/* Onglet Factures d'avoirs */}
-            <TabsContent value="creditNotes" className="space-y-5">
-            <InvoiceCreditNotesTab
-                invoiceId={invoiceId}
-                type={type}
-                isDisabled={invoice.invoiceStatus === invoiceStatusSchema.enum.PAID || invoice.invoiceStatus === invoiceStatusSchema.enum.DRAFT ||
-                    invoice.invoiceStatus === invoiceStatusSchema.enum.CANCELLED || invoice.invoiceStatus === invoiceStatusSchema.enum.ARCHIVED
+        );
+    }
+    return (
+        <div className="min-h-screen font-sans">
+            {/* TOP BAR */}
+            <DocumentTopBar
+                documentTypeLabel="Facture"
+                documentNumber={invoice?.invoiceNumber}
+                statusLabel={
+                    invoice?.invoiceStatus
+                        ? invoiceStatusLabels[invoice.invoiceStatus]
+                        : "-"
                 }
+                statusVariant="pending"
+                issueDate={formatDateLong(invoice?.issueDate)}
+                dueDate={formatDateLong(invoice?.dueDate)}
+                onBack={() => router.back()}
+                actionItems={menuItems}
             />
-            </TabsContent>
 
-            {/* Onglet Paiements */}
-            <TabsContent value="payments" className="space-y-5">
-            <InvoicePaymentsTab
-                invoiceId={invoiceId}
-                open={openSections.payments}
-                onToggle={() => toggleSection("payments")}
-                isDisabled={invoice.invoiceStatus === invoiceStatusSchema.enum.PAID || invoice.invoiceStatus === invoiceStatusSchema.enum.DRAFT ||
-                    invoice.invoiceStatus === invoiceStatusSchema.enum.CANCELLED || invoice.invoiceStatus === invoiceStatusSchema.enum.ARCHIVED
-                }
+            <main className="mx-auto px-6 py-6">
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+                    {/* Tabs Header */}
+                    <div className="w-full">
+                        <TabsList className="flex h-11 w-full rounded-xl bg-slate-100 p-1 gap-1">
+                            <TabsTrigger
+                                value="details"
+                                className="flex flex-1 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold text-slate-500 transition-all data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm cursor-pointer"
+                            >
+                                <FileText className="h-4 w-4" />
+                                Détails
+                            </TabsTrigger>
+
+
+                            <TabsTrigger
+                                value="payments"
+                                className="flex flex-1 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold text-slate-500 transition-all data-[state=active]:bg-white data-[state=active]:text-emerald-600 data-[state=active]:shadow-sm cursor-pointer"
+                            >
+                                <CreditCard className="h-4 w-4" />
+                                Paiements
+                            </TabsTrigger>
+
+                            <TabsTrigger
+                                value="creditNotes"
+                                className="flex flex-1 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold text-slate-500 transition-all data-[state=active]:bg-white data-[state=active]:text-rose-600 data-[state=active]:shadow-sm cursor-pointer"
+                            >
+                                <ReceiptText className="h-4 w-4" />
+                                Factures d’avoirs
+                            </TabsTrigger>
+
+                        </TabsList>
+                    </div>
+
+                    {/* Onglet Détails */}
+                    <TabsContent value="details" className="space-y-5">
+                        <InvoiceDetailsTab
+                            invoice={invoice}
+                            invoiceId={invoiceId}
+                            type={type}
+                            hasCreditInvoice={hasCreditInvoice}
+                            TtnModalOpen={TtnModalOpen}
+                            setTtnModalOpen={setTtnModalOpen}
+                            sendToTTN={sendToTTN}
+                            updateStatus={() => updateStatus(invoiceStatusSchema.enum.PAID)}
+                            loading={loading}
+                            sent={sent}
+                            successMessage={successMessage}
+                            setPreviewDocument={setPreviewDocument}
+                        />
+                    </TabsContent>
+
+                    {/* Onglet Factures d'avoirs */}
+                    <TabsContent value="creditNotes" className="space-y-5">
+                        <InvoiceCreditNotesTab
+                            invoiceId={invoiceId}
+                            type={type}
+                            isDisabled={invoice.invoiceStatus === invoiceStatusSchema.enum.PAID || invoice.invoiceStatus === invoiceStatusSchema.enum.DRAFT ||
+                                invoice.invoiceStatus === invoiceStatusSchema.enum.CANCELLED || invoice.invoiceStatus === invoiceStatusSchema.enum.ARCHIVED
+                            }
+                        />
+                    </TabsContent>
+
+                    {/* Onglet Paiements */}
+                    <TabsContent value="payments" className="space-y-5">
+                        <InvoicePaymentsTab
+                            invoiceId={invoiceId}
+                            open={openSections.payments}
+                            onToggle={() => toggleSection("payments")}
+                            isDisabled={invoice.invoiceStatus === invoiceStatusSchema.enum.PAID || invoice.invoiceStatus === invoiceStatusSchema.enum.DRAFT ||
+                                invoice.invoiceStatus === invoiceStatusSchema.enum.CANCELLED || invoice.invoiceStatus === invoiceStatusSchema.enum.ARCHIVED
+                            }
+                        />
+                    </TabsContent>
+                </Tabs>
+            </main>
+
+            <DocumentPreviewModal
+                open={!!previewDocument}
+                onClose={() => setPreviewDocument(null)}
+                document={previewDocument}
             />
-            </TabsContent>
-        </Tabs>
-        </main>
-
-        <DocumentPreviewModal
-        open={!!previewDocument}
-        onClose={() => setPreviewDocument(null)}
-        document={previewDocument}
-        />
             <UpdateDocumentStatusModal
-            documentType="invoice"
-            open={updateOpen}
-            onClose={()=> setUpdateOpen(false)}
-            onConfirm={()=>updateStatus()}
-            documentNumber={invoice?.invoiceNumber}
-            currentStatus={invoice?.invoiceStatus}
-            nextStatus={nextStatus as Status}
-            onNextStatusChange={setNextStatus}
-            allowedStatuses={
-                invoice
-                ? getClientInvoiceAllowedNextStatuses(invoice.invoiceStatus)
-                : []
-            }
-            isSubmitting={updateLoading}
+                documentType="invoice"
+                open={updateOpen}
+                onClose={() => setUpdateOpen(false)}
+                onConfirm={() => updateStatus()}
+                documentNumber={invoice?.invoiceNumber}
+                currentStatus={invoice?.invoiceStatus}
+                nextStatus={nextStatus as Status}
+                onNextStatusChange={setNextStatus}
+                allowedStatuses={
+                    invoice
+                        ? getClientInvoiceAllowedNextStatuses(invoice.invoiceStatus)
+                        : []
+                }
+                isSubmitting={updateLoading}
             />
 
 
@@ -235,14 +248,20 @@ const menuItems = actions.filter((action) => action.visible)
                 onClose={() => setSendOpen(false)}
             />
 
-            <DeleteInvoiceModal 
+            <DeleteInvoiceModal
                 documentType="invoice"
                 documentRef={invoice.invoiceNumber}
-                open={deleteOpen} 
-                onClose={()=> setDeleteOpen(false)} 
+                open={deleteOpen}
+                onClose={() => setDeleteOpen(false)}
                 onConfirm={deleteClientInvoice}
-                loading={deleteLoading}      
+                loading={deleteLoading}
             />
-    </div>
+            <ArchiveInvoiceModal
+                documentType="invoice"
+                open={archiveOpen}
+                onClose={() => setArchiveOpen(false)}
+                onConfirm={archiveInvoice}
+                loading={archiveLoading} />
+        </div>
     );
 }

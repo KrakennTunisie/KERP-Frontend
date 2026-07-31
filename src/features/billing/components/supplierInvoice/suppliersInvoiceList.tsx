@@ -11,6 +11,7 @@ import { Status, UpdateDocumentStatusModal } from "../widgets/updateStatusModal"
 import { DeleteInvoiceModal } from "../widgets/deleteInvoiceModal";
 import UploadInvoiceModal from "../widgets/uploadInvoiceModal";
 import InvoiceFormModal from "./createSupplierInvoice";
+import { ArchiveInvoiceModal } from "../widgets/archiveModal";
 
 
 export default function SuppliersInvoiceList() {
@@ -20,7 +21,9 @@ export default function SuppliersInvoiceList() {
         setInvoiceId,
         setUpdateOpen,
         updateOpen,
-        updateLoading,
+        updateLoading, archiveLoading,
+        archiveOpen,
+        setArchiveOpen,archiveInvoice,
         updateStatus, invoiceRef, handleUpload,
         selectedInvoice, setSelectedInvoice, deleteSupplierInvoice,
         nextStatus, setNextStatus, deleteOpen, deleteLoading, setDeleteOpen,
@@ -96,6 +99,14 @@ export default function SuppliersInvoiceList() {
                 onConfirm={deleteSupplierInvoice}
                 loading={deleteLoading} />
 
+            <ArchiveInvoiceModal
+                documentType="invoice"
+                open={archiveOpen}
+                onClose={() => setArchiveOpen(false)}
+                documentRef={invoiceRef}
+                onConfirm={archiveInvoice}
+                loading={archiveLoading} />
+
             {/* Search + Filters */}
             <StatusFilterBar
                 search={search}
@@ -149,16 +160,25 @@ export default function SuppliersInvoiceList() {
                     getSupplierInvoiceAllowedNextStatuses(invoice.invoiceStatus).length > 0
                 }
                 onDelete={(invoice) => {
-
-                    setSelectedInvoice(invoice);
-                    setInvoiceId(invoice.idInvoice);
-                    setDeleteOpen(true);
+                    if (invoice.invoiceStatus == invoiceStatusSchema.enum.DRAFT || invoice.invoiceStatus == invoiceStatusSchema.enum.CANCELLED) {
+                        setSelectedInvoice(invoice);
+                        setInvoiceId(invoice.idInvoice);
+                        setDeleteOpen(true);
+                    }
+                }}
+                onArchive={(invoice) => {
+                    if (invoice.invoiceStatus == invoiceStatusSchema.enum.PAID || invoice.invoiceStatus == invoiceStatusSchema.enum.CANCELLED) {
+                        setSelectedInvoice(invoice);
+                        setInvoiceId(invoice.idInvoice);
+                        setArchiveOpen(true);
+                    }
                 }}
                 getNumber={(invoice) => invoice.invoiceNumber}
                 getPartnerName={(invoice) => invoice.partner?.companyName}
                 getStatus={(invoice) => invoice.invoiceStatus}
                 getAmountEUR={(invoice) => invoice.totalInclTaxEUR}
                 getAmountTND={(invoice) => invoice.totalInclTaxTND}
+                getCurrency={(invoice)=> invoice.invoiceCurrency}
                 getDate={(invoice) => invoice.dueDate ?? invoice.issueDate}
                 getStatusLabel={(status) => invoiceStatusLabels[status]}
                 getStatusColor={(status) =>

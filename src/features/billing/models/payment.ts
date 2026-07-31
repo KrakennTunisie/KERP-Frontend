@@ -4,6 +4,7 @@ import { currencyTypeSchema } from "../types/currency";
 import { invoiceDetailedSummarySchema, invoicePageItemSchema, invoiceSummarySchema } from "./invoice";
 import { fileSchema } from "../types/pdfSchema";
 import { documentSchema } from "./document";
+import { paymentStatusTypeSchema } from "../types/paymentStatus";
 
 
 export const paymentSchema = z.object({
@@ -27,18 +28,20 @@ export const paymentSchema = z.object({
 
   method: paymentMethodSchema,
 
+  paymentStatus: paymentStatusTypeSchema,
+
   invoiceNumber: z
     .string()
     .min(1, "Le numéro de facture est obligatoire"),
-    
+
   paymentDocument: fileSchema.nullable(),
 
   paymentNumber: z.string().nullable(),
 
   invoice: invoicePageItemSchema.nullable(),
 
-  comment : z.string(),
-  
+  comment: z.string(),
+
 });
 
 
@@ -52,7 +55,7 @@ export const paymentListItemSchema = z.object({
   currency: currencyTypeSchema,
 
   paymentDate: z
-    .string()
+    .date()
     .min(1, "La date du paiement est obligatoire"),
 
   amount: z
@@ -63,7 +66,16 @@ export const paymentListItemSchema = z.object({
 
   method: paymentMethodSchema,
 
-  invoice: invoiceSummarySchema,
+  paymentStatus: paymentStatusTypeSchema,
+
+  invoice: invoiceDetailedSummarySchema,
+
+  paymentDocument: documentSchema.nullable(),
+
+  comment: z.string(),
+
+
+  createdAt: z.date(),
 });
 
 export const paymentDetailsSchema = z.object({
@@ -86,12 +98,15 @@ export const paymentDetailsSchema = z.object({
 
   method: paymentMethodSchema,
 
+  paymentStatus: paymentStatusTypeSchema,
+
   invoice: invoiceDetailedSummarySchema,
-  paymentDocument: documentSchema.nullable(), 
+
+  paymentDocument: documentSchema.nullable(),
 
   comment: z.string(),
-  
-  
+
+
   createdAt: z.date(),
 });
 

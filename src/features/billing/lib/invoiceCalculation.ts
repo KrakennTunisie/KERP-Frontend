@@ -12,7 +12,7 @@ export function recalculate(
 ): BaseItem {
 
   const totalExclTax = round2(item.quantity * item.unityPriceEXclTax);
-  const taxAmount    = round2(totalExclTax * (item.vatRate / 100));
+  const taxAmount    = round2(totalExclTax * (item.vatRate! / 100));
   const totalInclTax = round2(totalExclTax + taxAmount);
 
   return {
@@ -54,12 +54,12 @@ export function calculateInvoiceTotals(items: BaseItem[] = []) {
   );
 
   const totalTVA = items.reduce(
-    (acc, item) => acc + ((item.quantity * item.unityPriceEXclTax)*(item.vatRate/100)),
+    (acc, item) => acc + ((item.quantity * item.unityPriceEXclTax)*(item.vatRate!/100)),
     0
   );
 
   const totalTTC = items.reduce(
-    (acc, item) => acc + ((item.quantity * item.unityPriceEXclTax)*(1 + item.vatRate/100)),
+    (acc, item) => acc + ((item.quantity * item.unityPriceEXclTax)*(1 + item.vatRate!/100)),
     0
   );
 
@@ -77,12 +77,12 @@ export function calculateInvoiceTotalsFromPurchaseOrder(items: PurchaseOrderItem
   );
 
   const totalTVA = items.reduce(
-    (acc, item) => acc + (((item.quantity - item.invoicedQuantity)  * item.unityPriceEXclTax)*(item.vatRate/100)),
+    (acc, item) => acc + (((item.quantity - item.invoicedQuantity)  * item.unityPriceEXclTax)*(item.vatRate!/100)),
     0
   );
 
   const totalTTC = items.reduce(
-    (acc, item) => acc + (((item.quantity - item.invoicedQuantity) * item.unityPriceEXclTax)*(1 + item.vatRate/100)),
+    (acc, item) => acc + (((item.quantity - item.invoicedQuantity) * item.unityPriceEXclTax)*(1 + item.vatRate!/100)),
     0
   );
 

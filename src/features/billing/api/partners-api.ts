@@ -19,6 +19,7 @@ import { PartnerDocumentType } from "../types/documentType";
 import { TVARate, TVARatePageItem } from "../models/TVArate";
 import { PaymentCondition, PaymentConditionPageItem } from "../models/paymentCondition";
 import { OperationCategory, OperationCategoryPageItem } from "../models/operationCategory";
+import { PaymentType } from "../types/paymentStatus";
 
 export const partnersApi = {
 
@@ -43,6 +44,10 @@ export const partnersApi = {
   existsByCompanyName : (companyName:String)=> apiClient.get<boolean>(BILLING_ENDPOINTS.existByCompanyName(companyName)),
 
   getSupplierByCompanyName : (companyName: string) => apiClient.get<PartnerSummary>(BILLING_ENDPOINTS.getSupplierByCompanyName(companyName)),
+
+  clientExistsByCompanyName : (companyName:String)=> apiClient.get<boolean>(BILLING_ENDPOINTS.clientExistByCompanyName(companyName)),
+
+  getClientByCompanyName : (companyName: string) => apiClient.get<PartnerSummary>(BILLING_ENDPOINTS.getClientByCompanyName(companyName)),
 
   createClient: (payload: FormData) =>
     apiClient.post<CreatePartner>(BILLING_ENDPOINTS.clients, payload),
@@ -199,7 +204,7 @@ export const PurchaseOrderAPI = {
     apiClient.get<PurchaseOrderDetails>(PURCHASE_ORDER_ENDPOINTS.supplierPurchaseOrderById(id)),
 
   createClientPurchaseOrder: (payload: FormData) =>
-    apiClient.post<PurchaseOrderCreate>(PURCHASE_ORDER_ENDPOINTS.purchaseOrders, payload),
+    apiClient.post<PurchaseOrderCreate>(PURCHASE_ORDER_ENDPOINTS.clientPurchaseOrders, payload),
 
   createSupplierPurchaseOrder: (payload: FormData) =>
     apiClient.post<PurchaseOrderCreate>(PURCHASE_ORDER_ENDPOINTS.supplierPurchaseOrders, payload),
@@ -238,6 +243,8 @@ export const paymentsAPI = {
     apiClient.post<Payment>(PAYMENT_ENDPIONTS.payment, data),
 
   updatePayment: (id: string, payload: FormData) => apiClient.patch<Payment>(PAYMENT_ENDPIONTS.paymentById(id), payload),
+
+  updatePaymentStatus: (id:string , status : PaymentType) => apiClient.patch<void>(PAYMENT_ENDPIONTS.updatePaymentStatus(id,status)),
 
   deletePayment: (id: string)=> 
     apiClient.delete<void>(PAYMENT_ENDPIONTS.paymentById(id)),
@@ -334,6 +341,8 @@ export const TvaRateAPI = {
   getTvaRateByCode: (code: string) => apiClient.get<TVARate>(TVA_RATE_ENDPOINTS.getTvaRateByCode(code)),
 
   getTvaRateByLabel: (label: string) => apiClient.get<TVARate>(TVA_RATE_ENDPOINTS.getTvaRateByLabel(label)),
+
+  existTvaRateByLabel: (label: string) => apiClient.get<boolean>(TVA_RATE_ENDPOINTS.existTvaRateByLabel(label)),
 
   createTvaRate: (payload: FormData) => apiClient.post<TVARate>(TVA_RATE_ENDPOINTS.createTvaRate, payload),
 

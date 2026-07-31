@@ -2,6 +2,7 @@
 
 import { useSupplierPurchaseOrderList } from "../../hooks/useSupplierPurchaseOrderList";
 import { getClientPurchaseOrderAllowedNextStatuses, purchaseOrderStatusLabels, purchaseOrderStatusSchema } from "../../types/purchaseOrderStatus";
+import { ArchiveInvoiceModal } from "../widgets/archiveModal";
 import { StatusFilterBar } from "../widgets/billingFilterBar";
 import { BillingPageHeader } from "../widgets/billingHeader";
 import { DeleteInvoiceModal } from "../widgets/deleteInvoiceModal";
@@ -15,7 +16,8 @@ export default function SuppliersPurchaseOrderList() {
     const { router, search, setSearch, deleteOpen, setDeleteOpen, purchaseOrders, selectedPurchaseOrder, idPurchaseOrder, setUpdateOpen, updateLoading, updateOpen, setIdPurchaseOrder
         , updateStatus, nextStatus, setNextStatus, setSelectedPurchaseOrder, deletePurchaseOrder,
         filtre, setFiltre, invoiceRef, setInvoiceRef, open, setOpen,
-        setCurrentPage, openSendMail, setOpenSendMail,
+        setCurrentPage, openSendMail, setOpenSendMail, archiveOpen, setArchiveOpen,
+        loadingArchive,archivePurchaseOrder,
         currentPage,
         totalElements,
         totalPages,
@@ -36,6 +38,13 @@ export default function SuppliersPurchaseOrderList() {
                 createHref="/billing/purchaseOrder/suppliers/create"
                 createLabel="Nouvelle Commande"
             />
+            <ArchiveInvoiceModal
+                documentType="purchase-order"
+                open={archiveOpen}
+                onClose={() => setArchiveOpen(false)}
+                documentRef={invoiceRef}
+                onConfirm={async () => { await archivePurchaseOrder() }}
+                loading={loadingArchive} />
 
             <DeleteInvoiceModal
                 documentType="purchase-order"
@@ -47,11 +56,11 @@ export default function SuppliersPurchaseOrderList() {
                     setDeleteOpen(false);
                 }} />
             <SendDocumentModal
-                    document={selectedPurchaseOrder}
-                    variant="purchaseOrder"
-                    isOpen={openSendMail}
-                    onClose={() => setOpenSendMail(false)}
-                />
+                document={selectedPurchaseOrder}
+                variant="purchaseOrder"
+                isOpen={openSendMail}
+                onClose={() => setOpenSendMail(false)}
+            />
             <SupplierPurchaseOrderModal
                 open={open}
                 title={`Bon de commande ${invoiceRef}`}
@@ -88,9 +97,9 @@ export default function SuppliersPurchaseOrderList() {
                 defaultStatus={purchaseOrderStatusSchema.enum.ALL}
                 statuses={purchaseOrderStatus}
                 searchPlaceholder="Référence ou client..."
-                onDownloadAll={()=>console.log("DownloadALL")}
-                onDownloadCurrentYear={()=>console.log("onDownloadCurrentYear")}
-                onDownloadFitered={()=>console.log("onDownloadFitered")}
+                onDownloadAll={() => console.log("DownloadALL")}
+                onDownloadCurrentYear={() => console.log("onDownloadCurrentYear")}
+                onDownloadFitered={() => console.log("onDownloadFitered")}
             />
             <PurchaseOrderTable
                 type="SUPPLIER"
@@ -122,6 +131,14 @@ export default function SuppliersPurchaseOrderList() {
                     setDeleteOpen(true);
                     setInvoiceRef(purchaseOrder.purchaseOrderNumber);
                     setIdPurchaseOrder(purchaseOrder.idPurchaseOrder);
+                }}
+                onArchive={(purchaseOrder) => {
+                  
+                    if (purchaseOrder.purchaseOrderStatus == purchaseOrderStatusSchema.enum.FULLY_INVOICED || purchaseOrder.purchaseOrderStatus == purchaseOrderStatusSchema.enum.CANCELLED) {
+                        setSelectedPurchaseOrder(purchaseOrder);
+                        setIdPurchaseOrder(purchaseOrder.idPurchaseOrder);
+                        setArchiveOpen(true);
+                    }
                 }}
             />
         </div>

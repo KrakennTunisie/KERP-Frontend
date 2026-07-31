@@ -342,7 +342,7 @@ export default function UseCreatePartner({ type, mode, partnerId }: pageProps) {
 
     const setValueAny = setValue as (field: string, value: unknown, options?: object) => void;
     return {
-        copyBillingToShipping, documentFields, fields, isClient, router, getValues,
+        copyBillingToShipping, documentFields, fields, isClient, router, getValues,reset,
         onSubmit, getError, register, handleSubmit, setValue, watch, setValueAny, isSubmitting
     }
 }

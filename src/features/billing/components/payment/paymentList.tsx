@@ -3,10 +3,11 @@
 import { BillingPageHeader } from "../widgets/billingHeader";
 import { StatusFilterBar } from "../widgets/billingFilterBar";
 import { BillingTable } from "../widgets/billingTable";
-import {  PaymentListItem } from "../../models/payment";
+import { PaymentListItem } from "../../models/payment";
 import { usePaymentList } from "../../hooks/usePaymentList";
-import { paymentMethodLabels,  paymentMethodWithAllLabels, paymentMethodWithAllSchema } from "../../types/paymentMethod";
+import { paymentMethodLabels, paymentMethodWithAllLabels, paymentMethodWithAllSchema } from "../../types/paymentMethod";
 import { DeleteInvoiceModal } from "../widgets/deleteInvoiceModal";
+import { SendDocumentModal } from "../widgets/sendInvoiceModal";
 
 
 export default function PaymentsList() {
@@ -20,6 +21,7 @@ export default function PaymentsList() {
     setMethodFilter,
 
     payments,
+    fetchClientsPayment,
 
     currentPage,
     setCurrentPage,
@@ -27,7 +29,7 @@ export default function PaymentsList() {
     totalPages,
 
     loading,
-
+    openSendMail, setOpenMail,
     deletePayment,
     deleteLoading,
     deleteOpen,
@@ -36,11 +38,11 @@ export default function PaymentsList() {
     setSelectedPayment,
   } = usePaymentList();
 
-        const paymentMethods = paymentMethodWithAllSchema.options
-        .map((status) => ({
-            value: status,
-            label: paymentMethodWithAllLabels[status],
-        }));
+  const paymentMethods = paymentMethodWithAllSchema.options
+    .map((status) => ({
+      value: status,
+      label: paymentMethodWithAllLabels[status],
+    }));
   return (
     <div className="min-h-screen bg-gray-50 p-8 font-sans">
       {/* Header */}
@@ -60,9 +62,17 @@ export default function PaymentsList() {
         defaultStatus="ALL"
         statuses={paymentMethods}
         searchPlaceholder="Référence paiement ou facture..."
-        onDownloadAll={()=>console.log("DownloadALL")}
-        onDownloadCurrentYear={()=>console.log("onDownloadCurrentYear")}
-        onDownloadFitered={()=>console.log("onDownloadFitered")}
+        onDownloadAll={() => console.log("DownloadALL")}
+        onDownloadCurrentYear={() => console.log("onDownloadCurrentYear")}
+        onDownloadFitered={() => console.log("onDownloadFitered")}
+      />
+      <SendDocumentModal
+        document={selectedPayment}
+        variant="payment"
+        isOpen={openSendMail}
+        onClose={async () => {  
+          await fetchClientsPayment()
+          setOpenMail(false)}}
       />
 
       {/* Table */}
@@ -81,25 +91,32 @@ export default function PaymentsList() {
         onEdit={(payment) => {
           router.push(`/billing/payments/update/${payment.idPayment}`);
         }}
+        onSend={(payment) => {
+          setSelectedPayment(payment);
+          setOpenMail(true);
+        }}
         onDelete={(payment) => {
           setSelectedPayment(payment);
           setDeleteOpen(true);
         }}
         getNumber={(payment) => payment.reference}
+        getPartnerEmail={(payment) => payment.invoice.partner.email}
+        getPaymentStatus={(payment) => payment.paymentStatus}
+        getCurrency={(payment) => payment.invoice.invoiceCurrency}
         getRelatedInvoiceNumber={(payment) => payment.invoice.invoiceNumber}
-        getPaymentMethod={(payment) => paymentMethodLabels[ payment.method]}
-        getAmountEUR={(payment) =>payment.currency=="EUR" ? payment.amount : null}
-        getAmountTND={(payment) =>payment.currency=="TND" ? payment.amount : null}
+        getPaymentMethod={(payment) => paymentMethodLabels[payment.method]}
+        getAmountEUR={(payment) => payment.currency == "EUR" ? payment.amount : null}
+        getAmountTND={(payment) => payment.currency == "TND" ? payment.amount : null}
         getDate={(payment) => new Date(payment.paymentDate)}
         emptyMessage="Aucun paiement trouvé."
       />
       <DeleteInvoiceModal
-      documentType="payment"
-      documentRef={selectedPayment?.reference} 
-      open={deleteOpen} 
-      onClose={()=> setDeleteOpen(false)} 
-      onConfirm={deletePayment}
-      loading={deleteLoading}      
+        documentType="payment"
+        documentRef={selectedPayment?.reference}
+        open={deleteOpen}
+        onClose={() => setDeleteOpen(false)}
+        onConfirm={deletePayment}
+        loading={deleteLoading}
       />
     </div>
   );

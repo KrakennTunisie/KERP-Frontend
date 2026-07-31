@@ -20,27 +20,33 @@ import { discountTypeOptions, discountTypeSchema } from "../../types/discountTyp
 import { Input } from "@/shared/components/ui/input";
 import { Textarea } from "@/shared/components/ui/textArea";
 import AddSettingModal from "../parameters/addSettingItem";
-import { Plus } from "lucide-react";
+import { Plus, TriangleAlert } from "lucide-react";
 import { SettingTypeSchema } from "../../types/settingType";
-import { formatShowLabel } from "../../lib/settingItemHelpers";
+import { extractTvaRate, formatShowLabel } from "../../lib/settingItemHelpers";
 import { useRouter } from "next/navigation";
 import UseSetting from "../../hooks/useSettings";
+import { useFetchSettings } from "../../hooks/useFetchSetting";
+import { Label } from "recharts";
+import { Button } from "@/shared/components/ui/button";
+import * as Popover from "@radix-ui/react-popover";
+import * as HoverCard from "@radix-ui/react-hover-card";
+import { useEffect } from "react";
 
 
 export default function CreateSupplierInvoice() {
   const {
     form, errors, linkedToPO, selectedPO, suppliers, supplierSearch, setSupplierSearch, showDropdown, setShowDropdown, previewData, purchaseOrders, getMaxQuantity, getError,
-    invoiceSupplier, handleSave, selectSupplier, clearSupplier, loadingSave, addItem, removeItem, updateItem, register, showAddPCModal, supplierExist, handleSupplierAdded,
-    setShowAddPCModal, showAddTVAModal, setShowAddTVAModal, showAddOPCModal, setShowAddOPCModal, handleAddOption, getItemError, setLinkedToPO, newSupplier
-    , invoiceSupplierType, loadingDraft, showAddSupplierModal, setShowAddSupplierModal, supplierSummary, setNewSupplierName } = useCreateSupplierInvoice();
+    invoiceSupplier, handleSave, selectSupplier, clearSupplier, loadingSave, addItem, removeItem, updateItem, register, supplierExist, handleSupplierAdded,
+    TVAExist, getItemError, setLinkedToPO, newSupplier, newTvaExist, setNewTvaExist, setTVAExist
+    , invoiceSupplierType, loadingDraft, showAddSupplierModal, setShowAddSupplierModal, setNewSupplierName } = useCreateSupplierInvoice();
   const router = useRouter();
-
-  const {
-    typeAdd, openAddModal, setOpenAddModal, loadingAddModal,
-
-    onAction, handleCreate, getTitleAddModal
-
-  } = UseSetting()
+  const { fetchCategories, fetchPaymentConditions, fetchTvaRates, operationCategories, paymentConditions, vatRates } = useFetchSettings();
+  useEffect(() => {
+    fetchTvaRates();
+    fetchCategories();
+    fetchPaymentConditions();
+  }, []);
+  const { typeAdd, openAddModal, setOpenAddModal, loadingAddModal, onAction, handleCreate, getTitleAddModal } = UseSetting()
 
   if (loadingDraft || !invoiceSupplier) {
     return (
@@ -104,34 +110,21 @@ export default function CreateSupplierInvoice() {
         onClose={() => setShowAddSupplierModal(false)}
         onSuccess={handleSupplierAdded}
       />
-      {/*       <AddSettingModal
-        title="Condition de paiement"
-        open={showAddPCModal}
-        loading={true}
-        onClose={() => setShowAddPCModal(false)}
-        onSubmit={() => handleAddOption}
-      />
-      <AddSettingModal
-        title="TVA"
-        open={showAddTVAModal}
-        loading={true}
-        onClose={() => setShowAddTVAModal(false)}
-        onSubmit={() => handleAddOption}
-      />
-      <AddSettingModal
-        title="Catégorie"
-        open={showAddOPCModal}
-        loading={true}
-        onClose={() => setShowAddOPCModal(false)}
-        onSubmit={() => handleAddOption}
-      /> */}
 
       {typeAdd && <AddSettingModal
         open={openAddModal}
         title={getTitleAddModal()}
         loading={loadingAddModal}
+        newLabel={newTvaExist}
         onClose={() => setOpenAddModal(false)}
         onSubmit={handleCreate}
+        onSuccess={async () => {
+          await fetchTvaRates()
+          await fetchCategories()
+          await fetchPaymentConditions()
+          setNewTvaExist("")
+          setTVAExist(true)
+        }}
         settingType={typeAdd}
       />}
 
@@ -250,36 +243,49 @@ export default function CreateSupplierInvoice() {
                       <label className="block text-xs font-medium text-slate-500 mb-1">
                         Sélectionner le bon de commande
                       </label>
-                      <select
-                        onChange={(e) => {
-                          const po = purchaseOrders.find((p) => p.idPurchaseOrder === e.target.value);
 
-                        }}
-                        className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
-                      >
-                        <option value="">-- Choisir une commande --</option>
-                        {purchaseOrders.map((po) => (
-                          <option key={po.idPurchaseOrder} value={po.idPurchaseOrder}>
-                            {po.purchaseOrderNumber} — {purchaseOrderStatusLabels[po.purchaseOrderStatus]}
-                          </option>
-                        ))}
-                      </select>
-
-                      {selectedPO && (
-                        <div className="mt-3 bg-blue-50/50 border border-blue-100 rounded-xl p-3 flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-xl bg-blue-100 flex items-center justify-center shrink-0">
-                            <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-blue-700 truncate">{selectedPO.purchaseOrderNumber}</p>
-                            <p className="text-xs text-blue-500 mt-0.5 truncate">{selectedPO.partner?.partnerName}</p>
-                          </div>
-                          <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wide bg-blue-100 px-2.5 py-1 rounded-full">
-                            {selectedPO.purchaseCurrency}
-                          </span>
+                      {purchaseOrders.length === 0 ? (
+                        <div className="flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+                          <svg className="w-5 h-5 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m0 3.75h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <p className="text-xs text-amber-800">
+                            Aucun bon de commande disponible .
+                          </p>
                         </div>
+                      ) : (
+                        <>
+                          <select
+                            onChange={(e) => {
+                              const po = purchaseOrders.find((p) => p.idPurchaseOrder === e.target.value);
+                            }}
+                            className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
+                          >
+                            <option value="">-- Choisir une commande --</option>
+                            {purchaseOrders.map((po) => (
+                              <option key={po.idPurchaseOrder} value={po.idPurchaseOrder}>
+                                {po.purchaseOrderNumber} — {purchaseOrderStatusLabels[po.purchaseOrderStatus]}
+                              </option>
+                            ))}
+                          </select>
+
+                          {selectedPO && (
+                            <div className="mt-3 bg-blue-50/50 border border-blue-100 rounded-xl p-3 flex items-center gap-3">
+                              <div className="w-9 h-9 rounded-xl bg-blue-100 flex items-center justify-center shrink-0">
+                                <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-semibold text-blue-700 truncate">{selectedPO.purchaseOrderNumber}</p>
+                                <p className="text-xs text-blue-500 mt-0.5 truncate">{selectedPO.partner?.partnerName}</p>
+                              </div>
+                              <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wide bg-blue-100 px-2.5 py-1 rounded-full">
+                                {selectedPO.purchaseCurrency}
+                              </span>
+                            </div>
+                          )}
+                        </>
                       )}
                     </div>
                   )}
@@ -292,10 +298,46 @@ export default function CreateSupplierInvoice() {
               <SectionTitle number="02" invoiceType={invoiceTypeSchema.enum.PURCHASE} label="Fournisseur" />
               <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 flex flex-col gap-3 mt-3">
                 <div>
-                  <label className="block text-xs font-medium text-slate-500 mb-1">
+                  <label className="flex items-center gap-1.5 text-xs font-medium text-slate-500 mb-1">
                     Sélectionner un fournisseur
+
+                    {!supplierExist && (
+                      <HoverCard.Root openDelay={150} closeDelay={200}>
+                        <HoverCard.Trigger asChild>
+                          <button type="button">
+                            <TriangleAlert className="h-4 w-4 text-amber-500" />
+                          </button>
+                        </HoverCard.Trigger>
+
+                        <HoverCard.Portal>
+                          <HoverCard.Content
+                            side="right"
+                            align="start"
+                            className="w-64 rounded-lg border border-amber-200 bg-amber-50 p-3 shadow-lg"
+                          >
+                            <div className="flex items-start gap-2">
+                              <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+
+                              <div>
+                                <p className="text-sm text-amber-900">
+                                  Aucun fournisseur correspondant à <strong>"{supplierSearch}"</strong>.
+                                </p>
+
+                                <button
+                                  type="button"
+                                  onClick={() => setShowAddSupplierModal(true)}
+                                  className="mt-2 text-sm font-medium text-amber-700 hover:text-amber-800 hover:underline"
+                                >
+                                  Ajouter ce fournisseur
+                                </button>
+                              </div>
+                            </div>
+                          </HoverCard.Content>
+                        </HoverCard.Portal>
+                      </HoverCard.Root>
+                    )}
                   </label>
-                  <div className="relative">
+                  <div className="relative mt-3.5">
                     <input
                       type="text"
                       placeholder="Rechercher un fournisseur..."
@@ -343,100 +385,15 @@ export default function CreateSupplierInvoice() {
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                           </svg>
-                          <span className="text-sm font-medium">Ajouter "{supplierSearch}" comme nouveau fournisseur</span>
+                          <span className="text-sm font-medium">Ajouter un  nouveau fournisseur</span>
                         </button>
                       </div>
-
-
                     )}
                   </div>
                   <FieldError error={getError("partner")} />
                 </div>
                 {/* supplier sélectionné */}
-                {previewData.partner && supplierExist && (
-                  <div className="border-2 border-blue-100 bg-blue-50/40 rounded-xl p-4">
-                    <div className="flex items-start justify-between mb-1">
-                      <p className="text-sm font-semibold text-slate-700">{previewData.partner.companyName}</p>
-                      <button
-                        type="button"
-                        onClick={clearSupplier}
-                        className="text-slate-300 hover:text-red-400 transition"
-                      >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    </div>
-                    <p className="text-xs text-blue-500 mb-2">{previewData.partner?.billingAddress?.street1 ?? "-"}</p>
 
-                    {/* Email + Téléphone sur une ligne */}
-                    <div className="grid grid-cols-2 gap-4">
-                      <span className="flex items-center gap-1.5 text-xs text-blue-500">
-                        <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
-                        {previewData.partner.email ?? "-"}
-                      </span>
-                      {previewData.partner.professionnalPhoneNumber && <span className="flex items-center gap-1.5 text-xs text-blue-500">
-                        <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                        </svg>
-                        {previewData.partner.professionnalPhoneNumber != null ? previewData.partner.professionnalPhoneNumber : "-"}
-                      </span>}
-                    </div>
-                  </div>
-                )}
-
-                {!supplierExist && (
-
-                  <div className="flex items-center justify-between gap-4 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-100">
-                        <svg
-                          className="h-5 w-5 text-blue-600"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth={2}
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M12 9v3.75m0 3.75h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                          />
-                        </svg>
-                      </div>
-
-                      <div>
-                        <p className="text-sm font-medium text-slate-800">
-                          Fournisseur introuvable
-                        </p>
-                        <p className="text-xs text-slate-500">
-                          Créez <span className="font-medium">"{supplierSearch}"</span> pour continuer.
-                        </p>
-                      </div>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => setShowAddSupplierModal(true)}
-                      className="
-                        flex h-7 w-7 items-center justify-center
-                        rounded-full
-                        bg-blue-600
-                        text-white
-                        shadow-sm
-                        transition-all
-                        hover:bg-blue-800
-                        hover:scale-105
-                        active:scale-95
-                        "
-                      title="Ajouter un fournisseur"
-                    >
-                      <Plus className="h-5 w-5" />
-                    </button>
-                  </div>
-                )}
               </div>
             </section>
 
@@ -470,29 +427,23 @@ export default function CreateSupplierInvoice() {
                     <label className="block text-xs font-medium text-slate-500 mb-1">Condition de paiement</label>
                     <Select
                       {...register("paymentCondition")}
-                      onValueChange={(value) => {
-                        if (value === "__add_pc__") {
-                          onAction(SettingTypeSchema.enum.PAYMENT_CONDITION)
-                          return;
-                        }
-                      }}
                       defaultValue={PaymentConditionSchema.enum.NET_15}
                     >
-                      <SelectTrigger className="bg-white">
-                        <SelectValue placeholder="Sélectionner une condition" />
+                      <SelectTrigger className="bg-slate-50"
+                        onAdd={() => onAction(SettingTypeSchema.enum.PAYMENT_CONDITION)}
+                      >
+                        <SelectValue placeholder="Méthode de paiement" />
                       </SelectTrigger>
                       <SelectContent>
-                        {PaymentConditionSchema.options.map((condition) => (
-                          <SelectItem key={condition} value={condition}>
-                            {formatShowLabel(condition)}
+                        {paymentConditions.length === 0 ? (
+                              <div className="px-3 py-2 text-sm text-slate-400">
+                                Aucune condition de pour le moment
+                              </div>) :(
+                        paymentConditions.map((condition) => (
+                          <SelectItem key={condition.label} value={condition.label}>
+                            {formatShowLabel(condition.label)}
                           </SelectItem>
-                        ))}
-                        <SelectItem
-                          value="__add_pc__"
-                          className="mt-1 cursor-pointer border-t border-slate-100 text-sm font-medium text-blue-600 hover:bg-blue-50 focus:bg-blue-50"
-                        >
-                          + Ajouter une condition de paiement
-                        </SelectItem>
+                        )))}
                       </SelectContent>
                     </Select>
 
@@ -556,7 +507,7 @@ export default function CreateSupplierInvoice() {
                       <div className="mb-3">
                         <label className="block text-xs font-medium text-slate-500 mb-1">Catégorie</label>
                         <Select
-                          value={item.operationCategory!}
+                          value={item.operationCategory || undefined}
                           onValueChange={(value) => {
                             if (value === "__add_category__") {
                               onAction(SettingTypeSchema.enum.OPERATION_CATEGORY);
@@ -565,26 +516,30 @@ export default function CreateSupplierInvoice() {
                             updateItem(item.idInvoiceItem!, "operationCategory", value);
                           }}
                         >
-                          <SelectTrigger className="bg-white">
+                          <SelectTrigger
+                            onAdd={() => onAction(SettingTypeSchema.enum.OPERATION_CATEGORY)}
+                          >
                             <SelectValue placeholder="Sélectionner une catégorie" />
                           </SelectTrigger>
+
                           <SelectContent>
-                            {operationCategorySchema.options.map((value) => (
-                              <SelectItem key={value} value={value}>
-                                {OperationCategoryLabels[value]}
-                              </SelectItem>
-                            ))}
-                            <SelectItem
-                              value="__add_category__"
-                              className="mt-1 cursor-pointer border-t border-slate-100 text-sm font-medium text-blue-600 hover:bg-blue-50 focus:bg-blue-50"
-                            >
-                              + Ajouter une catégorie
-                            </SelectItem>
+                            {operationCategories.length === 0 ? (
+                              <div className="px-3 py-2 text-sm text-slate-400">
+                                Aucune catégorie pour le moment
+                              </div>
+                            ) : (
+                              operationCategories.map((category) => (
+                                <SelectItem
+                                  key={category.code}
+                                  value={category.label}
+                                >
+                                  {formatShowLabel(category.label)}
+                                </SelectItem>
+                              ))
+                            )}
                           </SelectContent>
                         </Select>
-                        <FieldError
-                          error={getItemError(index, "operationCategory")}
-                        />
+                        <FieldError error={getItemError(index, "operationCategory")} />
                       </div>
 
                       <div className="grid grid-cols-3 gap-3">
@@ -607,29 +562,81 @@ export default function CreateSupplierInvoice() {
                           error={getItemError(index, "unityPriceEXclTax")}
                         />
 
-                        <div>
-                          <label className="block text-xs font-medium text-slate-500 mb-1">TVA</label>
+                        <div className="space-y-3">
+                          <div className="mb-3 flex items-center gap-2">
+                            <label className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                              TVA
+                            </label>
+
+                            {!TVAExist && (
+                              <div className="group relative flex items-center">
+
+                                <HoverCard.Root openDelay={150} closeDelay={200}>
+                                  <HoverCard.Trigger asChild>
+                                    <button type="button">
+                                      <TriangleAlert className="h-4 w-4 text-amber-500" />
+                                    </button>
+                                  </HoverCard.Trigger>
+
+                                  <HoverCard.Portal>
+                                    <HoverCard.Content
+                                      side="right"
+                                      align="start"
+                                      className="w-64 rounded-lg border border-amber-200 bg-amber-50 p-3 shadow-lg"
+                                    >
+                                      <div className="flex items-start gap-2">
+                                        <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+
+                                        <div>
+                                          <p className="text-sm text-amber-900">
+                                            Aucun taux de TVA correspondant à <strong>{item.vatRate}%</strong>.
+                                          </p>
+
+                                          <button
+                                            type="button"
+                                            onClick={() => onAction(SettingTypeSchema.enum.TVA_RATE)}
+                                            className="mt-2 text-sm font-medium text-amber-700 hover:text-amber-800 hover:underline"
+                                          >
+                                            Ajouter ce taux
+                                          </button>
+                                        </div>
+                                      </div>
+                                    </HoverCard.Content>
+                                  </HoverCard.Portal>
+                                </HoverCard.Root>
+                              </div>
+                            )}
+                          </div>
+
                           <Select
-                            value={String(item.vatRate)}
+                            value={item.vatRate != null ? String(item.vatRate) : undefined}
                             onValueChange={(value) => {
-                              if (value === "__add_tva__") {
-                                onAction(SettingTypeSchema.enum.TVA_RATE);
-                                return;
-                              }
                               updateItem(item.idInvoiceItem!, "vatRate", Number(value))
-                            }}
+                            }
+                            }
                           >
-                            <SelectTrigger>
-                              <SelectValue />
+
+                            <SelectTrigger
+                              id="vatRate"
+                              onAdd={() => onAction(SettingTypeSchema.enum.TVA_RATE)}
+                            >
+                              <SelectValue placeholder="Choisir la TVA" />
                             </SelectTrigger>
+
                             <SelectContent>
-                              {tvaRateSchema.options.map((rate) => (
-                                <SelectItem key={rate.value} value={String(rate.value)}>
-                                  {rate.value}%
-                                </SelectItem>
-                              ))}
+                              {vatRates.length === 0 ? (
+                                <div className="px-3 py-2 text-sm text-slate-400">
+                                  Aucune valeur TVA pour le moment
+                                </div>) : (
+                                vatRates.map((rate) => (
+                                  <SelectItem key={rate.code} value={String(extractTvaRate(rate.label))}>
+                                    {formatShowLabel(rate.label)}
+                                  </SelectItem>
+                                ))
+                              )}
                             </SelectContent>
                           </Select>
+
                           <FieldError error={errors.invoiceItems?.[index]?.vatRate?.message} />
                         </div>
                         <div>
@@ -644,7 +651,7 @@ export default function CreateSupplierInvoice() {
                         </div>
 
                         <div className="col-span-2">
-                          <label className="block text-xs font-medium text-slate-500 mb-1">Discount</label>
+                          <label className="mb-3 block text-xs font-medium uppercase tracking-wide text-slate-500">(%)</label>
                           <div className="flex gap-2">
                             <input
                               type="number"
