@@ -1,21 +1,17 @@
 "use client";
 
-import { useEffect } from "react";
 import { SectionTitle } from "../widgets/sectionTitle";
 import { OperationCategoryLabels, operationCategorySchema } from "../../types/operationCategory";
 import { tvaRateSchema } from "../../types/tvaRate";
 import ErrorForm from "../widgets/errorForm";
 import { invoiceTypeSchema } from "../../types/invoiceType";
 import { paymentMethodLabels, paymentMethodSchema } from "../../types/paymentMethod";
-import { PaymentCondition, PaymentConditionLabels, PaymentConditionSchema } from "../../types/paymentCondition";
+import { PaymentConditionSchema } from "../../types/paymentCondition";
 import { currencyTypeSchema } from "../../types/currency";
 import { purchaseOrderStatusLabels } from "../../types/purchaseOrderStatus";
 import { Controller } from "react-hook-form";
-import { Modal } from "@/shared/components/ui/modal";
-import useCreateSupplierInvoice, { InvoiceFormModalProps } from "../../hooks/useCreateSupplierInvoice";
+import useCreateSupplierInvoice from "../../hooks/useCreateSupplierInvoice";
 import { DocumentViewer } from "@/shared/components/ui/DocumentViewer";
-import { useParams, useRouter } from "next/navigation";
-import AddSupplierModal from "../widgets/addPartnerModal";
 import AddPartnerModal from "../widgets/addPartnerModal";
 import { partnerTypeSchema } from "../../types/partnerType";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select";
@@ -25,6 +21,10 @@ import { Input } from "@/shared/components/ui/input";
 import { Textarea } from "@/shared/components/ui/textArea";
 import AddSettingModal from "../parameters/addSettingItem";
 import { Plus } from "lucide-react";
+import { SettingTypeSchema } from "../../types/settingType";
+import { formatShowLabel } from "../../lib/settingItemHelpers";
+import { useRouter } from "next/navigation";
+import UseSetting from "../../hooks/useSettings";
 
 
 export default function CreateSupplierInvoice() {
@@ -34,6 +34,13 @@ export default function CreateSupplierInvoice() {
     setShowAddPCModal, showAddTVAModal, setShowAddTVAModal, showAddOPCModal, setShowAddOPCModal, handleAddOption, getItemError, setLinkedToPO, newSupplier
     , invoiceSupplierType, loadingDraft, showAddSupplierModal, setShowAddSupplierModal, supplierSummary, setNewSupplierName } = useCreateSupplierInvoice();
   const router = useRouter();
+
+  const {
+    typeAdd, openAddModal, setOpenAddModal, loadingAddModal,
+
+    onAction, handleCreate, getTitleAddModal
+
+  } = UseSetting()
 
   if (loadingDraft || !invoiceSupplier) {
     return (
@@ -97,7 +104,7 @@ export default function CreateSupplierInvoice() {
         onClose={() => setShowAddSupplierModal(false)}
         onSuccess={handleSupplierAdded}
       />
-      <AddSettingModal
+      {/*       <AddSettingModal
         title="Condition de paiement"
         open={showAddPCModal}
         loading={true}
@@ -117,7 +124,16 @@ export default function CreateSupplierInvoice() {
         loading={true}
         onClose={() => setShowAddOPCModal(false)}
         onSubmit={() => handleAddOption}
-      />
+      /> */}
+
+      {typeAdd && <AddSettingModal
+        open={openAddModal}
+        title={getTitleAddModal()}
+        loading={loadingAddModal}
+        onClose={() => setOpenAddModal(false)}
+        onSubmit={handleCreate}
+        settingType={typeAdd}
+      />}
 
       {/* ── Body : 2 colonnes ── */}
       <div className="flex h-[calc(100vh-80px)]">
@@ -351,7 +367,7 @@ export default function CreateSupplierInvoice() {
                         </svg>
                       </button>
                     </div>
-                    <p className="text-xs text-blue-500 mb-2">{previewData.partner?.billingAddress?.street1?? "-"}</p>
+                    <p className="text-xs text-blue-500 mb-2">{previewData.partner?.billingAddress?.street1 ?? "-"}</p>
 
                     {/* Email + Téléphone sur une ligne */}
                     <div className="grid grid-cols-2 gap-4">
@@ -456,7 +472,7 @@ export default function CreateSupplierInvoice() {
                       {...register("paymentCondition")}
                       onValueChange={(value) => {
                         if (value === "__add_pc__") {
-                          setShowAddOPCModal(true);
+                          onAction(SettingTypeSchema.enum.PAYMENT_CONDITION)
                           return;
                         }
                       }}
@@ -468,7 +484,7 @@ export default function CreateSupplierInvoice() {
                       <SelectContent>
                         {PaymentConditionSchema.options.map((condition) => (
                           <SelectItem key={condition} value={condition}>
-                            {PaymentConditionLabels[condition]}
+                            {formatShowLabel(condition)}
                           </SelectItem>
                         ))}
                         <SelectItem
@@ -479,6 +495,7 @@ export default function CreateSupplierInvoice() {
                         </SelectItem>
                       </SelectContent>
                     </Select>
+
                   </div>
 
                   <div>
@@ -542,7 +559,7 @@ export default function CreateSupplierInvoice() {
                           value={item.operationCategory!}
                           onValueChange={(value) => {
                             if (value === "__add_category__") {
-                              setShowAddOPCModal(true);
+                              onAction(SettingTypeSchema.enum.OPERATION_CATEGORY);
                               return;
                             }
                             updateItem(item.idInvoiceItem!, "operationCategory", value);
@@ -596,7 +613,7 @@ export default function CreateSupplierInvoice() {
                             value={String(item.vatRate)}
                             onValueChange={(value) => {
                               if (value === "__add_tva__") {
-                                setShowAddTVAModal(true);
+                                onAction(SettingTypeSchema.enum.TVA_RATE);
                                 return;
                               }
                               updateItem(item.idInvoiceItem!, "vatRate", Number(value))
@@ -611,12 +628,6 @@ export default function CreateSupplierInvoice() {
                                   {rate.value}%
                                 </SelectItem>
                               ))}
-                              <SelectItem
-                                value="__add_tva__"
-                                className="mt-1 cursor-pointer border-t border-slate-100 text-sm font-medium text-blue-600 hover:bg-blue-50 focus:bg-blue-50"
-                              >
-                                + Ajouter un taux TVA %
-                              </SelectItem>
                             </SelectContent>
                           </Select>
                           <FieldError error={errors.invoiceItems?.[index]?.vatRate?.message} />

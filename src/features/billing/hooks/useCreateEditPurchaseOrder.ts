@@ -16,10 +16,10 @@ import { CurrencyType, currencyTypeSchema } from "../types/currency";
 import { PaymentConditionSchema } from "../types/paymentCondition";
 import { paymentMethodSchema } from "../types/paymentMethod";
 import { exchangeRateSourceSchema } from "../types/exchangeRateSource";
-import { PurchaseOrder, basePurchaseOrderSchema, PurchaseOrderDetails } from "../models/purchaseOrder";
+import { PurchaseOrder, basePurchaseOrderSchema, PurchaseOrderDetails, PurchaseOrderCreate, purchaseOrderCreateDTO } from "../models/purchaseOrder";
 import { purchaseOrderStatusSchema } from "../types/purchaseOrderStatus";
 import { nextNumber } from "../types/nextNumber";
-import { ExchangeRateAPI, partnersApi, PurchaseOrderAPI } from "../api/partners-api";
+import { ExchangeRateAPI,  partnersApi,  PurchaseOrderAPI } from "../api/partners-api";
 import { appToast } from "@/shared/lib/toast";
 import { useDebounce } from "@/shared/hooks/useDebounce";
 import { getApiErrorMessage } from "@/shared/api/handle-api-error";
@@ -27,6 +27,7 @@ import { purchaseOrderTypeSchema } from "../types/PurchaseOrderType";
 import { ExchangeRate } from "../types/exchangeRate";
 import { generatePdfFile } from "@/shared/pdf/pdfGenerator";
 import { purchaseOrderToPdfData } from "@/shared/pdf/documentAdapter";
+
 
 export type PropsPurchaseOrder = {
   params: {
@@ -65,13 +66,14 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
       totalExclTax: 0,
       totalInclTax: 0,
       vatAmount: 0,
-      paymentCondition: PaymentConditionSchema.enum.NET_15,
+      paymentCondition: "NET_15",
       paymentMethod: paymentMethodSchema.enum.BANK_TRANSFER,
       partner: null,
       currency: currencyTypeSchema.enum.TND,
       appliedExchangeRate: 4,
       exchangeRateReferenceDate: new Date(),
       exchangeRateSource: exchangeRateSourceSchema.enum.EXTERNAL_API,
+      purchaseOrderDocument: null,
     },
     mode: "onChange",
   });
@@ -82,6 +84,19 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
     control,
     name: "purchaseOrderItems",
   });
+
+    const getItemError = (
+        index: number,
+        field: keyof PurchaseOrderItem
+      ) => {
+        return errors.purchaseOrderItems?.[index]?.[field]?.message as
+          | string
+          | undefined;
+      };
+
+    const getError = (field: keyof PurchaseOrderCreate) => {
+            return errors[field]?.message as string | undefined;
+        };
 
   const fetchSupplierPurchaseOrder = async () => {
     try {
@@ -236,8 +251,8 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
 
   // Validation des données obligatoire
 
-  const canCreatePurchaseOrder =
-    isDirty &&
+  const canCreatePurchaseOrder = true
+/*     isDirty &&
     isValid &&
     !!previewData.partner &&
     !!previewData.purchaseOrderItems?.length &&
@@ -251,7 +266,7 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
         item.quantity! > 0 &&
         item.unityPriceEXclTax! >= 0 &&
         item.vatRate! >= 0
-    );
+    ); */
 
 
 
@@ -371,7 +386,6 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
     setValue("partner", null, { shouldValidate: true, shouldDirty: true, });
     setSupplierSearch("");
   };
-
 
 
 
@@ -582,7 +596,11 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
 
     loadingEdit,
     loadingForm,
-    loadingSuppliers
+    loadingSuppliers,
+
+    getItemError,
+
+    getError
 
   };
 

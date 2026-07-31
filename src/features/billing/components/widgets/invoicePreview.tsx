@@ -5,12 +5,11 @@ import { invoiceCreditNoteSchema } from "../../models/creditNote";
 import { InvoiceCreate, invoiceSchema } from "../../models/invoice";
 import { creditNoteTypeLabels } from "../../types/creditNoteType";
 import { invoiceTypeLabels } from "../../types/invoiceType";
-import { OperationCategoryLabels } from "../../types/operationCategory";
-import { PaymentConditionLabels } from "../../types/paymentCondition";
 import { paymentMethodLabels } from "../../types/paymentMethod";
 import { getDiscountLabel, getDiscountValue } from "../../lib/invoiceItemHelpers";
 import { BaseItem } from "../../models/invoiceItem";
 import { currencyTypeSchema } from "../../types/currency";
+import { formatShowLabel } from "../../lib/settingItemHelpers";
 
 
 export type InvoiceData = DeepPartial<z.infer<typeof invoiceSchema>>;
@@ -160,9 +159,9 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
                             ? [{ label: "Échéance", value: data.dueDate ? new Date(data.dueDate).toLocaleDateString("fr-FR") : "-" }]
                             : []),
                         ...(isCredit ? [
-                            { label: "Paiement", value: data?.originalInvoice?.paymentCondition ? PaymentConditionLabels[data.originalInvoice.paymentCondition] : "—", },
+                            { label: "Paiement", value: data?.originalInvoice?.paymentCondition ? formatShowLabel(data.originalInvoice.paymentCondition) : "—", },
                             { label: "Mode", value: data?.originalInvoice?.paymentMethod ? paymentMethodLabels[data.originalInvoice.paymentMethod] : "—" }] :
-                            [{ label: "Paiement", value: PaymentConditionLabels[data!.paymentCondition!] ?? "—" },
+                            [{ label: "Paiement", value: formatShowLabel(data!.paymentCondition!) ?? "—" },
                             { label: "Mode", value: paymentMethodLabels[data!.paymentMethod!] ?? "—" },])
 
                     ].map(({ label, value }) => (
@@ -237,7 +236,7 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
                                     <p className="text-xs text-slate-400 mt-0.5">
                                     Catégorie :{" "}
                                     {item?.operationCategory
-                                        ? OperationCategoryLabels[item.operationCategory]
+                                        ? item.operationCategory
                                         : "_"}
                                     </p>
                                 </td>

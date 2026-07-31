@@ -6,7 +6,7 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
-import { ExchangeRateAPI, InvoicesAPI, partnersApi, PurchaseOrderAPI } from "../api/partners-api";
+import { ExchangeRateAPI, InvoicesAPI, OperationCategoryAPI, partnersApi, PaymentConditionAPI, PurchaseOrderAPI, TvaRateAPI } from "../api/partners-api";
 import { Invoice, InvoiceCreate, invoiceCreateSchema } from "../models/invoice";
 import { BaseItem, defaultInvoiceItem, InvoiceItem } from "../models/invoiceItem";
 import { PartnerSummary } from "../models/partner";
@@ -30,6 +30,10 @@ import { generatePdfFile } from "@/shared/pdf/pdfGenerator";
 import { invoiceToPdfData } from "@/shared/pdf/documentAdapter";
 import { invoiceTypeSchema } from "../types/invoiceType";
 import { discountTypeSchema } from "../types/discountType";
+import { OperationCategoryPageItem } from "../models/operationCategory";
+import { PaymentConditionPageItem } from "../models/paymentCondition";
+import { TVARatePageItem } from "../models/TVArate";
+import { extractPaymentConditionDays } from "../lib/settingItemHelpers";
 
 export type InvoiceFormClientProps = {
     mode: "create" | "edit" | "clone";
@@ -111,7 +115,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
       totalExclTax: 0,
       totalInclTax: 0,
       vatRate: 0,
-      paymentCondition: PaymentConditionSchema.enum.NET_15,
+      paymentCondition: "NET_15",
       paymentMethod: paymentMethodSchema.enum.BANK_TRANSFER,
       partner: null,
       purchaseOrder: null,
@@ -141,7 +145,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
         | undefined;
     };
 
-  const { control, setValue, getValues, handleSubmit, reset, formState: { isDirty, isValid, errors } } = form;
+  const { control, setValue, getValues, handleSubmit, watch, reset, formState: { isDirty, isValid, errors } } = form;
   const { append, remove, replace } = useFieldArray({
     control,
     name: "invoiceItems",
@@ -307,6 +311,12 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
   const [clients, setClients] = useState<PartnerSummary[] | []>([])
   const [loadingClients, setLoadingClients] = useState(false)
   const [showDropdown, setShowDropdown] = useState(false);
+/*   
+  const [operationCategories, setOperationCategories]=useState<OperationCategoryPageItem[]|[]>([])
+  const [paymentConditions, setPaymentConditions]=useState<PaymentConditionPageItem[]|[]>([])
+  const [vatRates, setVatRates]=useState<TVARatePageItem[]|[]>([])
+ */
+  
   const previousCurrencyRef = useRef<CurrencyType>("TND");
   // const previewData = useWatch({ control });
   const previewData = getValues();
@@ -317,7 +327,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
 
   //Filtrage de la liste des clients lors de la recherche 
   const debouncedSearchQuery = useDebounce(clientSearch, 2000);
-
+ 
   const getClients = async () => {
     try {
       setLoadingClients(true);
@@ -337,6 +347,40 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
       setLoadingClients(false);
     }
   };
+/*
+    const fetchPaymentConditions = async ()=>{
+        try {
+            const response = await PaymentConditionAPI.getAllActivePaymentConditions()
+            setPaymentConditions(response)
+        } catch (error) {
+            appToast.error("erreur de fetch", getApiErrorMessage(error))
+        }
+    }
+
+    const fetchCategories = async ()=>{
+            try {
+                const response = await OperationCategoryAPI.getAllActiveOperationCategories()
+                setOperationCategories(response)
+            } catch (error) {
+                appToast.error("erreur de fetch", getApiErrorMessage(error))
+            }
+        }
+
+    const fetchTvaRates = async ()=>{
+                try {
+                    const response = await TvaRateAPI.getAllActiveTvaRates()
+                    setVatRates(response)
+                } catch (error) {
+                    appToast.error("erreur de fetch", getApiErrorMessage(error))
+                }
+        }
+  
+
+  useEffect(() => {
+    fetchCategories();
+    fetchPaymentConditions();
+    fetchTvaRates();
+  }, []);  */   
 
   useEffect(() => {
     getClients();
@@ -536,13 +580,12 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
   const calculateDueDate = (): Date => {
     const date = new Date(getValues("issueDate"));
     console.log(date)
-    switch (getValues("paymentCondition")) {
-      case PaymentConditionSchema.enum.NET_15: date.setDate(date.getDate() + 15); break;
-      case PaymentConditionSchema.enum.NET_30: date.setDate(date.getDate() + 30); break;
-      case PaymentConditionSchema.enum.NET_45: date.setDate(date.getDate() + 45); break;
-      case "IMMEDIATE": break;
-    }
+
+
+    date.setDate(date.getDate()+ Number(extractPaymentConditionDays(getValues('paymentCondition'))))
+
     setValue("dueDate", date, { shouldValidate: true });
+    
     return date;
   };
 
@@ -890,7 +933,13 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
     invoice,
     getError,
     getItemError,
-    sendOpen, setSendOpen
+    setValue,
+    watch,
+    sendOpen, setSendOpen,
+/* 
+    vatRates, paymentConditions, operationCategories,
+
+    fetchPaymentConditions, fetchCategories, fetchTvaRates */
 
   };
 

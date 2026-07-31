@@ -1,8 +1,7 @@
 import { paymentMethodLabels } from "../../types/paymentMethod";
-import { OperationCategoryLabels } from "../../types/operationCategory";
-import { PaymentConditionLabels } from "../../types/paymentCondition";
 import { forwardRef } from "react";
 import { PurchaseOrder } from "../../models/purchaseOrder";
+import { formatShowLabel } from "../../lib/settingItemHelpers";
 
 type PurchaseOrderPreviewProps = {
     data: PurchaseOrder;
@@ -97,7 +96,7 @@ const PurchaseOrderPreview = forwardRef<HTMLDivElement, PurchaseOrderPreviewProp
 
                         { label: "Date de livraison", value: data.issueDate ? new Date(data.issueDate).toLocaleDateString("fr-FR") : "-" },
 
-                        { label: "Paiement", value: PaymentConditionLabels[data.paymentCondition] ?? "—" },
+                        { label: "Paiement", value: formatShowLabel(data.paymentCondition) ?? "—" },
                         { label: "Mode", value: paymentMethodLabels[data!.paymentMethod!] ?? "—" },
 
                     ].map(({ label, value }) => (
@@ -136,7 +135,7 @@ const PurchaseOrderPreview = forwardRef<HTMLDivElement, PurchaseOrderPreviewProp
                                                 {item!.description || "—"}
                                             </p>
                                             <p className="text-xs text-slate-400 mt-0.5">TVA appliquée : {item!.vatRate}%</p>
-                                            <p className="text-xs text-slate-400 mt-0.5">Catégorie : {OperationCategoryLabels[item!.operationCategory!]}</p>
+                                            <p className="text-xs text-slate-400 mt-0.5">Catégorie : {item!.operationCategory!}</p>
                                         </td>
                                         <td className="text-right text-sm text-slate-600 py-4">{item!.quantity}</td>
                                         <td className="text-right text-sm text-slate-600 py-4">{item!.unityPriceEXclTax!.toFixed(2)}</td>

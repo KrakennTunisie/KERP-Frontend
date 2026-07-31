@@ -29,7 +29,7 @@ export type PdfLineItem = {
     itemTotalExclTax: number ,
     itemTaxAmount: number ,
     itemTotalInclTax: number ,
-    operationCategory: OperationCategory,
+    operationCategory: string,
     discountType?:DiscountType | null,
     discountValue?:number,
     discountTotal?:number ,

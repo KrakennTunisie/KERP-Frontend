@@ -92,7 +92,7 @@ export default function DeleteSettingModal({
             {itemType.toLowerCase()}
           </span>{" "}
           <span className="font-semibold text-slate-900">
-            "{itemName}"
+            {itemName}
           </span>{" "}
           ?
         </p>

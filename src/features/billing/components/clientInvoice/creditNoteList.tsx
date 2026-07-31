@@ -18,7 +18,7 @@ export default function CreditNoteList({ invoiceId, type }: InvoiceDetailsProps)
         filtre, setFiltre, deleteCreditNote, creditNotes, totalElements, totalPages, idInvoice, setIdInvoice, deleteId, setDeleteId, deleteClientInvoice,  currentPage,
      setCurrentPage, loading, selectedCreditNote, setSelectedCreditNote} = useCreditNoteList({ invoiceId, type });
     return (
-        <div className="min-h-screen bg-gray-50 p font-sans">
+        <div className="min-h-screen  font-sans">
             {/* TOP BAR */}
             {/* TOP BAR */}
             <div className="bg-white border-b border-gray-200 px-6 py-3.5 flex items-start justify-between mb-8 sticky top-0 z-50 shadow-sm">

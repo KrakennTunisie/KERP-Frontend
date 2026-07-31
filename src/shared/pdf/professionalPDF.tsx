@@ -7,8 +7,7 @@ import {
   Image,
 } from "@react-pdf/renderer";
 import { PdfDocumentData, PdfParty } from "./types";
-import { calculateLineHT, calculatePdfTotals, formatMoney, formatNumber, formatPdfDate, formatPdfDateTime, getAccentColor, getBuyerLabel, getDocumentNumberPrefix, getDocumentSoftColor, getDocumentTitle, getMainTotalLabel, getPaymentLabel } from "./utils";
-import { OperationCategoryLabels } from "@/features/billing/types/operationCategory";
+import {  calculatePdfTotals, formatMoney, formatNumber, formatPdfDate, formatPdfDateTime, getAccentColor, getBuyerLabel, getDocumentNumberPrefix, getDocumentSoftColor, getDocumentTitle, getMainTotalLabel, getPaymentLabel } from "./utils";
 import { getDiscountLabel } from "@/features/billing/lib/invoiceItemHelpers";
 import { CurrencyType } from "@/features/billing/types/currency";
 
@@ -722,7 +721,7 @@ function ItemsTable({ data }: { data: PdfDocumentData }) {
             <View style={styles.tdDescription}>
               <Text style={styles.itemTitle}>{item.description || "—"}</Text>
               <Text style={styles.itemMeta}>TVA appliquée : {item.vatRate || 0}%</Text>
-              <Text style={styles.itemMeta}>Catégorie : {OperationCategoryLabels[item.operationCategory] || "Prestation de Service"}</Text>
+              <Text style={styles.itemMeta}>Catégorie : {item.operationCategory || "Prestation de Service"}</Text>
 
             </View>
             <Text style={styles.tdQty}>{item.quantity}</Text>

@@ -141,7 +141,9 @@ export const  AUDITLOGS_ENDPOINTS = {
 }  
 
 export const OPERATION_CATEGORY_ENDPOINTS = {
-  getAllOperationCategories: () => "/operation-categories",
+  getAllOperationCategories: "/operation-categories",
+
+  getAllActiveOperationCategories: "/operation-categories/active",
 
   getOperationCategory: (id: string) => `/operation-categories/${id}`,
 
@@ -151,7 +153,7 @@ export const OPERATION_CATEGORY_ENDPOINTS = {
   getOperationCategoryByLabel: (label: string) =>
     `/operation-categories/label/${label}`,
 
-  createOperationCategory: () => "/operation-categories",
+  createOperationCategory:  "/operation-categories",
 
   updateOperationCategory: (id: string) =>
     `/operation-categories/${id}`,
@@ -161,4 +163,54 @@ export const OPERATION_CATEGORY_ENDPOINTS = {
 
   deactivateOperationCategory: (id: string) =>
     `/operation-categories/${id}/deactivate`
+}
+
+export const PAYMENT_CONDITION_ENDPOINTS = {
+  getAllPaymentConditions: "/payment-conditions",
+
+  getAllActivePaymentConditions: "/payment-conditions/active",
+
+  getPaymentCondition: (id: string) => `/payment-conditions/${id}`,
+
+  getPaymentConditionByCode: (code: string) =>
+    `/payment-conditions/code/${code}`,
+
+  getPaymentConditionByLabel: (label: string) =>
+    `/payment-conditions/label/${label}`,
+
+  createPaymentCondition: "/payment-conditions",
+
+  updatePaymentCondition: (id: string) =>
+    `/payment-conditions/${id}`,
+
+  activatePaymentCondition: (id: string) =>
+    `/payment-conditions/${id}/activate`,
+
+  deactivatePaymentCondition: (id: string) =>
+    `/payment-conditions/${id}/deactivate`
+}
+
+export const TVA_RATE_ENDPOINTS = {
+  getAllTvaRates: "/tva-rates",
+
+  getAllActiveTvaRates: "/tva-rates/active",
+
+  getTvaRate: (id: string) => `/tva-rates/${id}`,
+
+  getTvaRateByCode: (code: string) =>
+    `/tva-rates/code/${code}`,
+
+  getTvaRateByLabel: (label: string) =>
+    `/tva-rates/label/${label}`,
+
+  createTvaRate: "/tva-rates",
+
+  updateTvaRate: (id: string) =>
+    `/tva-rates/${id}`,
+
+  activateTvaRate: (id: string) =>
+    `/tva-rates/${id}/activate`,
+
+  deactivateTvaRate: (id: string) =>
+    `/tva-rates/${id}/deactivate`
 }

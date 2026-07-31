@@ -20,7 +20,7 @@ export function CreateCreditNote({invoiceId}: InvoiceDetailsProps) {
         sent, sendToTTN, router, errors, getMaxQuantity, getError } = useCreateCreditNote({invoiceId});
     const { register } = form
     return (
-        <div className="flex-1 flex flex-col min-h-0 bg-white">
+        <div className="flex-1 flex flex-col min-h-0">
             {/* Header */}
             <header className="bg-white border-b border-gray-100 px-8 py-6 sticky top-0 z-10">
                 <div className="flex items-center justify-between w-full">
