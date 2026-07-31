@@ -58,7 +58,7 @@ export default function UseSetting() {
 
         setToggleLoading(true);
 
-        let idSettingItem = getSettingItemId(selectedItem)
+        const idSettingItem = getSettingItemId(selectedItem)
 
         try {
             // Mock API

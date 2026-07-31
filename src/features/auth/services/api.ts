@@ -1,7 +1,7 @@
 import { apiClient } from "@/shared/api/api-client";
 import { LoginRequest } from "../types/loginRequest";
 import { AUTH_ENDPOINTS } from "./endpoints";
-import { User } from "@/features/admin/mocks/mock-users";
+import { User } from "@/features/admin/models/user";
 
 
 

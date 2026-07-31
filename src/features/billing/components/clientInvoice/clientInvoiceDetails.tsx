@@ -75,8 +75,8 @@ export default function ClientInvoiceDetails({ invoiceId, type }: InvoiceDetails
             label: "Envoyer",
             icon: Send,
             onClick: () => setSendOpen(true),
-            disabled: invoice?.invoiceStatus != "DRAFT",
-            visible: invoice?.partner!.email!="" && invoice?.invoiceType === invoiceTypeSchema.enum.SALE && invoice?.invoiceStatus == "DRAFT",
+            disabled: invoice?.invoiceStatus == "PAID" || invoice?.invoiceStatus == "ARCHIVED" || invoice?.invoiceStatus == "CANCELLED",
+            visible: invoice?.partner!.email!="" && invoice?.invoiceType === invoiceTypeSchema.enum.SALE && invoice?.invoiceStatus != "PAID" && invoice?.invoiceStatus != "CANCELLED" && invoice?.invoiceStatus != "ARCHIVED",
         },
         {
             label: "Modifier",

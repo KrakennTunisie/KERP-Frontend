@@ -7,7 +7,7 @@ import { creditNoteTypeLabels } from "../../types/creditNoteType";
 import { invoiceTypeLabels } from "../../types/invoiceType";
 import { paymentMethodLabels } from "../../types/paymentMethod";
 import { getDiscountLabel, getDiscountValue } from "../../lib/invoiceItemHelpers";
-import { BaseItem } from "../../models/invoiceItem";
+import { BaseItem, InvoiceItem } from "../../models/invoiceItem";
 import { currencyTypeSchema } from "../../types/currency";
 import { formatShowLabel } from "../../lib/settingItemHelpers";
 
@@ -210,7 +210,7 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
 
                                     const subtotal = quantity * unitPrice;
 
-                                    const discount = getDiscountValue(item as BaseItem, subtotal)
+                                    const discount = getDiscountValue(item as InvoiceItem, subtotal)
 
                                     const netHT = Math.max(0, subtotal - discount);
 
@@ -258,7 +258,7 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
 
                                             {/* DISCOUNT */}
                                             <td className="text-right text-sm text-slate-600 py-4">
-                                                {currency ? getDiscountLabel(item as BaseItem, currency) : currencyTypeSchema.enum.TND}
+                                                {currency ? getDiscountLabel(item as InvoiceItem, currency) : currencyTypeSchema.enum.TND}
                                             </td>
 
                                             {/* NET HT */}
@@ -318,7 +318,7 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
                             const totalDiscount = items.reduce((sum, item) => {
                                 const subtotal = (item?.quantity ?? 0) * (item?.unityPriceEXclTax ?? 0);
 
-                                const discount = getDiscountValue(item as BaseItem, subtotal)
+                                const discount = getDiscountValue(item as InvoiceItem, subtotal)
 
                                 return sum + discount;
                             }, 0);
@@ -328,7 +328,7 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
                             const totalTVA = items.reduce((sum, item) => {
                                 const subtotal = (item?.quantity ?? 0) * (item?.unityPriceEXclTax ?? 0);
 
-                                const discount = getDiscountValue(item as BaseItem, subtotal)
+                                const discount = getDiscountValue(item as InvoiceItem, subtotal)
 
                                 const net = subtotal - discount;
 

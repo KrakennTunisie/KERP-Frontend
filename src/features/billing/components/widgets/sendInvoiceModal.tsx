@@ -6,7 +6,7 @@ import { X, Send, Mail, Paperclip } from "lucide-react";
 import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 import { appToast } from "@/shared/lib/toast";
 
-import { InvoicesAPI, InvoicesCreditNoteAPI, MailingAPI, paymentsAPI } from "../../api/partners-api";
+import { InvoicesAPI, InvoicesCreditNoteAPI, MailingAPI, paymentsAPI, PurchaseOrderAPI } from "../../api/partners-api";
 
 import { Invoice, InvoicePageItem } from "../../models/invoice";
 import { PurchaseOrderPageItem } from "../../models/purchaseOrder";
@@ -14,6 +14,7 @@ import { InvoiceCreditNotePageItem } from "../../models/creditNote";
 import { PaymentDetails } from "../../models/payment";
 import { paymentStatusTypeSchema } from "../../types/paymentStatus";
 import { invoiceStatusSchema } from "../../types/invoiceStatus";
+import { purchaseOrderStatusSchema } from "../../types/purchaseOrderStatus";
 
 type SendDocumentVariant =
   | "invoice"
@@ -327,21 +328,23 @@ export function SendDocumentModal({
       switch (variant) {
         case "invoice":
           await MailingAPI.sendEmailWithInvoice(documentId, payload);
-          const status = new FormData();
-          console.log("ho")
+          /*const status = new FormData();
           status.append("status",invoiceStatusSchema.enum.TO_COLLECT)
-          await InvoicesAPI.updateClientInvoiceStatus(idEntity,status);
+          await InvoicesAPI.updateClientInvoiceStatus(idEntity,status);*/
           break;
 
         case "purchaseOrder":
           await MailingAPI.sendEmailWithPurchaseOrder(documentId, payload);
+          /*const purchaseOrderStatus = new FormData();
+          purchaseOrderStatus.append("status",purchaseOrderStatusSchema.enum.IN_DELIVERY)
+          await PurchaseOrderAPI.updateSupplierPurchaseOrderStatus(idEntity,purchaseOrderStatus);*/
           break;
 
         case "invoiceCreditNote":
           await MailingAPI.sendEmailWithCreditNote(documentId, payload);
-          const formData = new FormData();
+          /*const formData = new FormData();
           formData.append("status",invoiceStatusSchema.enum.IN_PROGRESS)
-          await InvoicesCreditNoteAPI.updateInvoiceCreditNoteStatus(documentNumber, formData);
+          await InvoicesCreditNoteAPI.updateInvoiceCreditNoteStatus(documentNumber, formData);*/
           break;
 
         case "payment":

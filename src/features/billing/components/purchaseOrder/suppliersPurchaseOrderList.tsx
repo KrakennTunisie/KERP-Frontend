@@ -17,8 +17,8 @@ export default function SuppliersPurchaseOrderList() {
         , updateStatus, nextStatus, setNextStatus, setSelectedPurchaseOrder, deletePurchaseOrder,
         filtre, setFiltre, invoiceRef, setInvoiceRef, open, setOpen,
         setCurrentPage, openSendMail, setOpenSendMail, archiveOpen, setArchiveOpen,
-        loadingArchive,archivePurchaseOrder,
-        currentPage,
+        loadingArchive, archivePurchaseOrder,
+        currentPage, fetchSuppliersPurchaseOrders,
         totalElements,
         totalPages,
         loading } = useSupplierPurchaseOrderList();
@@ -59,7 +59,10 @@ export default function SuppliersPurchaseOrderList() {
                 document={selectedPurchaseOrder}
                 variant="purchaseOrder"
                 isOpen={openSendMail}
-                onClose={() => setOpenSendMail(false)}
+                onClose={async () => {
+                    setOpenSendMail(false);
+                    await fetchSuppliersPurchaseOrders();
+                }}
             />
             <SupplierPurchaseOrderModal
                 open={open}
@@ -133,7 +136,7 @@ export default function SuppliersPurchaseOrderList() {
                     setIdPurchaseOrder(purchaseOrder.idPurchaseOrder);
                 }}
                 onArchive={(purchaseOrder) => {
-                  
+
                     if (purchaseOrder.purchaseOrderStatus == purchaseOrderStatusSchema.enum.FULLY_INVOICED || purchaseOrder.purchaseOrderStatus == purchaseOrderStatusSchema.enum.CANCELLED) {
                         setSelectedPurchaseOrder(purchaseOrder);
                         setIdPurchaseOrder(purchaseOrder.idPurchaseOrder);

@@ -6,7 +6,7 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
-import { ExchangeRateAPI, InvoicesAPI, OperationCategoryAPI, partnersApi, PaymentConditionAPI, PurchaseOrderAPI, TvaRateAPI } from "../api/partners-api";
+import { ExchangeRateAPI, InvoicesAPI,  partnersApi,  PurchaseOrderAPI } from "../api/partners-api";
 import { Invoice, InvoiceCreate, invoiceCreateSchema } from "../models/invoice";
 import { BaseItem, defaultInvoiceItem, InvoiceItem } from "../models/invoiceItem";
 import { PartnerSummary } from "../models/partner";
@@ -30,9 +30,6 @@ import { generatePdfFile } from "@/shared/pdf/pdfGenerator";
 import { invoiceToPdfData } from "@/shared/pdf/documentAdapter";
 import { invoiceTypeSchema } from "../types/invoiceType";
 import { discountTypeSchema } from "../types/discountType";
-import { OperationCategoryPageItem } from "../models/operationCategory";
-import { PaymentConditionPageItem } from "../models/paymentCondition";
-import { TVARatePageItem } from "../models/TVArate";
 import { extractPaymentConditionDays } from "../lib/settingItemHelpers";
 
 export type InvoiceFormClientProps = {

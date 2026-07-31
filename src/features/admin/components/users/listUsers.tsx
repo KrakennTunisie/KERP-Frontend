@@ -8,30 +8,39 @@ import { UserFilterBar } from "@/shared/components/widgets/barFilter";
 
 import {
   mockUsers,
-  User,
-  USER_ROLE_OPTIONS,
-  USER_STATUS_OPTIONS,
 } from "../../mocks/mock-users";
 import { getUserRoleColor, getUserRoleLabel, getUserStatusColor, getUserStatusLabel } from "../../helpers/userHelpers";
-import { useRouter } from "next/navigation";
+import { useUsersList } from "../../hooks/useUsersList";
+import { User, USER_ROLE_OPTIONS, USER_STATUS_OPTIONS } from "../../models/user";
 
 export default function ListUsers() {
-  const [search, setSearch] = useState("");
   const [role, setRole] = useState("ALL");
   const [status, setStatus] = useState("ALL");
-  const router = useRouter()
 
-  const totalUsers = mockUsers.length;
+  const {
+     router,
+     search,
+     setSearch,
+     filtre,
+     setFiltre,
+     users,
+     currentPage,
+     setCurrentPage,
+     totalElements,
+     totalPages,
+     loading,
+  }=useUsersList()
 
-  const activeUsers = useMemo(
-    () => mockUsers.filter((u) => u.status === "ACTIVE").length,
-    []
-  );
 
-  const blockedUsers = useMemo(
-    () => mockUsers.filter((u) => u.status === "BLOCKED").length,
-    []
-  );
+const activeUsers = useMemo(
+  () => users.filter((u) => u.enabled === true).length,
+  [users]
+);
+
+const blockedUsers = useMemo(
+  () => users.filter((u) => u.enabled === false).length,
+  [users]
+);
 
   return (
 <div className="min-h-screen">
@@ -69,7 +78,7 @@ export default function ListUsers() {
 
         <p className="text-xs text-slate-500">Total utilisateurs</p>
         <h2 className="mt-1 text-2xl font-semibold text-slate-900">
-          {totalUsers}
+          {totalElements}
         </h2>
       </div>
 
@@ -114,7 +123,7 @@ export default function ListUsers() {
 
     {/* TABLE */}
       <UserTable<User>
-        items={mockUsers}
+        items={users}
         variant="user"
         currentPage={1}
         totalPages={1}

@@ -92,7 +92,7 @@ export function InvoiceTableRow<T>({
   const paymentStatus = getPaymentStatus?.(item);
   const statusUpdateDisabled = !onUpdateStatus || (canUpdateStatus ? !canUpdateStatus(item) : false);
 
-  console.log(paymentStatus)
+
 
 
 
@@ -122,8 +122,7 @@ export function InvoiceTableRow<T>({
       },
       ] : []),
 
-    ...(status && getPartnerEmail?.(item) != "" &&
-      status == invoiceStatusSchema.enum.DRAFT &&
+    ...(status && status != "PAID" && status != "CANCELLED" && status != "ARCHIVED" && getPartnerEmail?.(item) != "" &&
       onSend
       ? [
         {
@@ -196,6 +195,7 @@ export function InvoiceTableRow<T>({
       ]
       : []),
   ];
+  console.log(actions)
   return (
     <tr className="transition-colors hover:bg-slate-50/60">
 
@@ -259,6 +259,7 @@ export function InvoiceTableRow<T>({
 
 
       {/* ACTIONS */}
+     
       <td className="px-2 py-1 whitespace-nowrap">
         <div className="flex items-center justify-center">
           {variant === "payment" &&
@@ -278,6 +279,7 @@ export function InvoiceTableRow<T>({
               <CircleSlash className="h-5 w-5" />
             </span>
           ) : (
+            
             <ActionMenu
               orientation="horizontal"
               title={variant === "payment" ? "Actions paiement" : "Actions facture"}

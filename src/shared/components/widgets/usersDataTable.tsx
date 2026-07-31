@@ -116,7 +116,7 @@ export function UserTable<T>({
             </td>
           </tr>
 
-        ) : items.length === 0 ? (
+        ) :  items && items.length === 0 ? (
 
           /* EMPTY STATE */
           <tr>
@@ -133,7 +133,7 @@ export function UserTable<T>({
           </tr>
 
         ) : (
-          items.map((item) => (
+         items?.map((item) => (
             <UserTableRow<T>
               key={getId(item)}
               item={item}

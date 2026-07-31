@@ -1,10 +1,12 @@
 import { Modal } from "@/shared/components/ui/modal";
-import { Role } from "../mocks/mock-roles";
-import { Permission } from "../mocks/mock-permission";
+
 import { ShieldMinus } from "lucide-react";
+import { Permission } from "../models/permission";
+import { Role } from "../models/role";
 
 
 type Revoke_Permission_Props = {
+  loading: boolean;
   revokeModalOpen: boolean;
   selectedPermission: Permission;
   selectedRole: Role;
@@ -13,6 +15,7 @@ type Revoke_Permission_Props = {
 };
 
 export default function RevokePermissionModal({
+    loading,
   revokeModalOpen,
   selectedPermission,
   selectedRole,
@@ -28,6 +31,7 @@ export default function RevokePermissionModal({
             footer={
             <>
                 <button
+                disabled={loading}
                 onClick={onClose}
                 className="
                     inline-flex h-10 cursor-pointer items-center justify-center
@@ -36,12 +40,15 @@ export default function RevokePermissionModal({
                     transition-all
                     hover:bg-slate-50 hover:border-slate-300
                     active:scale-[0.98]
+                    disabled:cursor-not-allowed
+                    disabled:opacity-50
                 "
                 >
                 Annuler
                 </button>
 
                 <button
+                disabled={loading}
                 onClick={onSubmit}
                 className="
                     inline-flex h-10 cursor-pointer items-center gap-2
@@ -51,10 +58,12 @@ export default function RevokePermissionModal({
                     shadow-sm transition-all
                     hover:bg-rose-700 hover:shadow-md
                     active:scale-[0.98]
+                    disabled:cursor-not-allowed
+                    disabled:opacity-50
                 "
                 >
                 <ShieldMinus className="h-4 w-4" />
-                Révoquer la permission
+                            {loading ? "Chargement...": "Révoquer la permission"}
                 </button>
             </>
             }
@@ -63,7 +72,7 @@ export default function RevokePermissionModal({
                 Voulez-vous vraiment révoquer la permission
                 <span className="font-semibold">
                 {" "}
-                {selectedPermission?.label}
+                {selectedPermission?.name}
                 </span>
                 {" "}du rôle 
                 <span className="font-semibold">

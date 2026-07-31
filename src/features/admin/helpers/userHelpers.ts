@@ -1,4 +1,4 @@
-import { UserRole, UserStatus } from "../mocks/mock-users";
+import { UserRole, UserStatus } from "../models/user";
 
 export const ROLE_COLOR_MAP: Record<string, string> = {
   violet: "bg-violet-50 text-violet-700 border-violet-200",

@@ -38,14 +38,14 @@ export function useSupplierPurchaseOrderList() {
       await PurchaseOrderAPI.deleteSupplierPurchaseOrder(idPurchaseOrder);
       appToast.success('Bon de commande supprimée avec succès.')
       setDeleteOpen(false)
-      await fetchClientsPurchaseOrders()
+      await fetchSuppliersPurchaseOrders()
     } catch (error) {
       appToast.error("Erreur de suppresion: ", getApiErrorMessage(error))
     } finally {
       setDeleteLoading(false);
     }
   }
-  const fetchClientsPurchaseOrders = async () => {
+  const fetchSuppliersPurchaseOrders = async () => {
     try {
       setLoading(true);
       const keyword =
@@ -76,7 +76,7 @@ export function useSupplierPurchaseOrderList() {
 
   useEffect(() => {
 
-    fetchClientsPurchaseOrders();
+    fetchSuppliersPurchaseOrders();
   }, [invoiceRef, debouncedSearchQuery, currentPage, filtre]);
 
   const archivePurchaseOrder = async () => {
@@ -87,7 +87,7 @@ export function useSupplierPurchaseOrderList() {
       await PurchaseOrderAPI.updateSupplierPurchaseOrderStatus(idPurchaseOrder, formData);
       appToast.success('Bon de commande archivée avec succés.')
       setArchiveOpen(false)
-      await fetchClientsPurchaseOrders()
+      await fetchSuppliersPurchaseOrders()
     } catch (error) {
       appToast.error("Erreur de mise à jour: ", getApiErrorMessage(error))
     } finally {
@@ -103,7 +103,7 @@ export function useSupplierPurchaseOrderList() {
       await PurchaseOrderAPI.updateSupplierPurchaseOrderStatus(idPurchaseOrder, formData);
       appToast.success('Statut mise à jour avec succès avec succès.')
       setUpdateOpen(false)
-      await fetchClientsPurchaseOrders()
+      await fetchSuppliersPurchaseOrders()
     } catch (error) {
       appToast.error("Erreur Fetch du client:", getApiErrorMessage(error));
     }
@@ -137,6 +137,7 @@ export function useSupplierPurchaseOrderList() {
     idPurchaseOrder,
     open,
     setOpen,
+    fetchSuppliersPurchaseOrders,
     updateOpen,
     archiveOpen, setArchiveOpen,
     loadingArchive, setLoadingArchive,

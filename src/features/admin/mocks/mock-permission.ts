@@ -1,4 +1,5 @@
 import { z } from "zod";
+import {  PermissionDTO } from "../models/permission";
 
 export const permissionCategorySchema = z.enum([
   "USER",
@@ -17,93 +18,74 @@ export const PERMISSION_CATEGORY_OPTIONS = Object.values(
   label: value,
 }));
 
-export type Permission = {
-  key: string;
-  label: string;
-  description: string;
-  category: PermissionCategory;
-};
-
-export const mockPermissions: Permission[] = [
+export const mockPermissions: PermissionDTO[] = [
   // USER
   {
-    key: "USER_VIEW",
-    label: "Voir utilisateurs",
+    name: "Voir utilisateurs",
     description: "Accéder à la liste et aux détails des utilisateurs",
-    category: permissionCategorySchema.enum.USER,
+    clientId: ""
   },
   {
-    key: "USER_CREATE",
-    label: "Créer utilisateurs",
+    name: "Créer utilisateurs",
     description: "Créer de nouveaux comptes utilisateurs",
-    category: permissionCategorySchema.enum.USER,
+    clientId: ""
   },
   {
-    key: "USER_EDIT",
-    label: "Modifier utilisateurs",
+    name: "USER_EDIT",
     description: "Modifier les informations des utilisateurs",
-    category: permissionCategorySchema.enum.USER,
+    clientId: ""
   },
   {
-    key: "USER_DELETE",
-    label: "Supprimer utilisateurs",
+    name: "USER_DELETE",
     description: "Supprimer des comptes utilisateurs",
-    category: permissionCategorySchema.enum.USER,
+    clientId: ""
   },
 
   // ROLES
   {
-    key: "ROLE_VIEW",
-    label: "Voir rôles",
+    name: "ROLE_VIEW",
     description: "Consulter la liste des rôles",
-    category: permissionCategorySchema.enum.USER,
+    clientId: ""
   },
   {
-    key: "ROLE_MANAGE",
-    label: "Gérer rôles",
+    name: "ROLE_MANAGE",
     description: "Créer et modifier les rôles et permissions",
-    category: permissionCategorySchema.enum.USER,
+    clientId: ""
   },
 
   // BILLING
   {
-    key: "INVOICE_VIEW",
-    label: "Voir factures",
+    name: "INVOICE_VIEW",
     description: "Accéder aux factures clients et fournisseurs",
-    category: permissionCategorySchema.enum.BILLING,
+    clientId: ""
   },
   {
-    key: "INVOICE_EXPORT",
-    label: "Exporter factures",
+    name: "INVOICE_EXPORT",
     description: "Télécharger les factures au format Excel ou PDF",
-    category: permissionCategorySchema.enum.BILLING,
+    clientId: ""
   },
   {
-    key: "PAYMENT_VIEW",
-    label: "Voir paiements",
+    name: "PAYMENT_VIEW",
     description: "Consulter l’historique des paiements",
-    category: permissionCategorySchema.enum.BILLING,
+    clientId: ""
   },
 
   // REPORTING
   {
-    key: "REPORT_VIEW",
-    label: "Voir rapports",
+    name: "REPORT_VIEW",
     description: "Accéder aux tableaux de bord et rapports",
-    category: permissionCategorySchema.enum.REPORTING,
+    clientId: ""
   },
 
   // SYSTEM
   {
-    key: "SYSTEM_CONFIG",
-    label: "Configuration système",
+    name: "SYSTEM_CONFIG",
     description: "Modifier les paramètres globaux du système",
-    category: permissionCategorySchema.enum.SYSTEM,
+    clientId: ""
   },
   {
-    key: "AUDIT_LOGS",
-    label: "Logs d’audit",
+    name: "AUDIT_LOGS",
     description: "Consulter les journaux d’activité du système",
-    category: permissionCategorySchema.enum.SYSTEM,
+    clientId: ""
   },
 ];

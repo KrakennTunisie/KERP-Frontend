@@ -41,12 +41,23 @@ export function useFetchSettings(){
                     }
             }
       
+            useEffect(() => {
+                const loadSettings = async () => {
+                    await Promise.all([
+                    fetchCategories(),
+                    fetchPaymentConditions(),
+                    fetchTvaRates(),
+                    ]);
+                };
+
+                loadSettings();
+            }, []);
     
-      useEffect(() => {
+/*       useEffect(() => {
         fetchCategories();
         fetchPaymentConditions();
         fetchTvaRates();
-      }, []);   
+      }, []);    */
 
       return{
         vatRates,

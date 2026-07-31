@@ -1,43 +1,9 @@
-import { FilterOption } from "@/shared/components/widgets/barFilter";
 
-export type UserStatus = "ACTIVE" | "INACTIVE" | "BLOCKED";
+/* ============================
+ * Mock Data
+ * ============================ */
 
-export type UserRole =
-  | "ADMIN"
-  | "MANAGER"
-  | "ACCOUNTANT"
-  | "CLIENT"
-  | "SUPPLIER"
-  | "USER";
-
-
-export const USER_ROLE_OPTIONS: FilterOption<UserRole>[] = [
-  { value: "ADMIN", label: "Administrateur" },
-  { value: "MANAGER", label: "Manager" },
-  { value: "ACCOUNTANT", label: "Comptable" },
-  { value: "CLIENT", label: "Client" },
-  { value: "SUPPLIER", label: "Fournisseur" },
-  { value: "USER", label: "Utilisateur" },
-];
-
-export const USER_STATUS_OPTIONS: FilterOption<UserStatus>[] = [
-  { value: "ACTIVE", label: "Actif" },
-  { value: "INACTIVE", label: "Inactif" },
-  { value: "BLOCKED", label: "Bloqué" },
-];
-
-export interface User {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone:string;
-
-  role: UserRole;
-  status: UserStatus;
-
-  createdAt: Date;
-}
+import { User } from "../models/user";
 
 export const mockUsers: User[] = [
   {
@@ -45,86 +11,95 @@ export const mockUsers: User[] = [
     firstName: "Ahmed",
     lastName: "Ben Ali",
     email: "ahmed.benali@example.com",
+    phone: "12345689",
     role: "ADMIN",
     status: "ACTIVE",
     createdAt: new Date("2026-01-15"),
-    phone: "12345689"
+    enabled: false,
+    username: ""
   },
-
   {
     id: "USR-002",
     firstName: "Sarra",
     lastName: "Trabelsi",
     email: "sarra.trabelsi@example.com",
+    phone: "",
     role: "MANAGER",
     status: "ACTIVE",
     createdAt: new Date("2026-02-10"),
-    phone: ""
+    enabled: false,
+    username: ""
   },
-
   {
     id: "USR-003",
     firstName: "Mohamed",
     lastName: "Jaziri",
     email: "m.jaziri@example.com",
+    phone: "",
     role: "ACCOUNTANT",
     status: "INACTIVE",
     createdAt: new Date("2025-12-01"),
-    phone: ""
+    enabled: false,
+    username: ""
   },
-
   {
     id: "USR-004",
     firstName: "Leila",
     lastName: "Hamdi",
     email: "leila.hamdi@example.com",
+    phone: "",
     role: "USER",
     status: "ACTIVE",
     createdAt: new Date("2026-03-21"),
-    phone: ""
+    enabled: false,
+    username: ""
   },
-
   {
     id: "USR-005",
     firstName: "Youssef",
     lastName: "Mansouri",
     email: "youssef.mansouri@example.com",
+    phone: "",
     role: "USER",
     status: "BLOCKED",
     createdAt: new Date("2025-11-18"),
-    phone: ""
+    enabled: false,
+    username: ""
   },
-
   {
     id: "USR-006",
     firstName: "Nour",
     lastName: "Chaabane",
     email: "nour.chaabane@example.com",
+    phone: "",
     role: "MANAGER",
     status: "ACTIVE",
     createdAt: new Date("2026-04-02"),
-    phone: ""
+    enabled: false,
+    username: ""
   },
-
   {
     id: "USR-007",
     firstName: "Walid",
     lastName: "Kefi",
     email: "walid.kefi@example.com",
+    phone: "",
     role: "ACCOUNTANT",
     status: "ACTIVE",
     createdAt: new Date("2026-02-28"),
-    phone: ""
+    enabled: false,
+    username: ""
   },
-
   {
     id: "USR-008",
     firstName: "Amira",
     lastName: "Ben Salem",
     email: "amira.bensalem@example.com",
+    phone: "",
     role: "USER",
     status: "INACTIVE",
     createdAt: new Date("2025-10-14"),
-    phone: ""
+    enabled: false,
+    username: ""
   },
 ];

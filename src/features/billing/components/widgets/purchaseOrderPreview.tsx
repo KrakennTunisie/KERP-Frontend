@@ -2,7 +2,7 @@ import { paymentMethodLabels } from "../../types/paymentMethod";
 import { forwardRef } from "react";
 import { PurchaseOrder } from "../../models/purchaseOrder";
 import { formatShowLabel } from "../../lib/settingItemHelpers";
-import { BaseItem } from "../../models/invoiceItem";
+import { BaseItem, InvoiceItem, PurchaseOrderItem } from "../../models/invoiceItem";
 import { getDiscountValue } from "../../lib/invoiceItemHelpers";
 
 type PurchaseOrderPreviewProps = {
@@ -19,7 +19,7 @@ const PurchaseOrderPreview = forwardRef<HTMLDivElement, PurchaseOrderPreviewProp
     const totalDiscount = items!.reduce((sum, item) => {
         const subtotal = (item?.quantity ?? 0) * (item?.unityPriceEXclTax ?? 0);
 
-        const discount = getDiscountValue(item as BaseItem, subtotal)
+        const discount = getDiscountValue(item as PurchaseOrderItem, subtotal)
 
         return sum + discount;
     }, 0);
@@ -29,7 +29,7 @@ const PurchaseOrderPreview = forwardRef<HTMLDivElement, PurchaseOrderPreviewProp
     const totalTVA = items!.reduce((sum, item) => {
         const subtotal = (item?.quantity ?? 0) * (item?.unityPriceEXclTax ?? 0);
 
-        const discount = getDiscountValue(item as BaseItem, subtotal)
+        const discount = getDiscountValue(item as  PurchaseOrderItem, subtotal)
 
         const net = subtotal - discount;
 

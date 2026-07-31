@@ -1,4 +1,4 @@
-import { User } from "@/features/admin/mocks/mock-users";
+import { User } from "@/features/admin/models/user";
 import { create } from "zustand";
 
 type AuthState = {
