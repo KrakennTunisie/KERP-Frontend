@@ -55,36 +55,36 @@ export default function CategoryCard({category, permissions, setSelectedPermissi
         </div>
 
           {/* PERMISSIONS */}
-          <div className="flex flex-wrap gap-2">
+          <div className="max-h-48 overflow-y-auto pr-2">
+            <div className="flex flex-wrap gap-2">
+              {permissions.map((permission) => (
+                <div
+                  key={permission.name}
+                  onClick={() => {
+                    setSelectedPermission(permission);
+                    setOpen(true);
+                  }}
+                  className="
+                    cursor-pointer
+                    rounded-lg
+                    border border-slate-200
+                    bg-slate-50
+                    px-2.5 py-1.5
+                    transition
+                    hover:border-blue-200
+                    hover:bg-blue-50
+                  "
+                >
+                  <p className="text-[11px] font-semibold text-slate-800">
+                    {permission.name}
+                  </p>
 
-            {permissions.map((permission) => (
-              <div
-                key={permission.name}
-                onClick={() => {
-                  setSelectedPermission(permission);
-                  setOpen(true);
-                }}
-                className="
-                  cursor-pointer
-                  rounded-lg
-                  border border-slate-200
-                  bg-slate-50
-                  px-2.5 py-1.5
-                  transition
-                  hover:border-blue-200
-                  hover:bg-blue-50
-                "
-              >
-                <p className="text-[11px] font-semibold text-slate-800">
-                  {permission.name}
-                </p>
-
-                <p className="text-[10px] text-slate-400">
-                  {permission.description}
-                </p>
-              </div>
-            ))}
-
+                  <p className="text-[10px] text-slate-400">
+                    {permission.description}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
 
         </div>

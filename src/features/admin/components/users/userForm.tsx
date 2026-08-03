@@ -13,12 +13,18 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select";
 import { Button } from "@/shared/components/ui/button"
 import { useCreateEditUser } from "../../hooks/useCreateEditUser"
-import { CreateUser, USER_ROLE_OPTIONS, USER_STATUS_OPTIONS } from "../../models/user";
+import { CreateUser,  USER_STATUS_OPTIONS } from "../../models/user";
+
 export type PropsForm = {
   userId?: string,
   mode: "create" |"edit"
 }
 
+export interface userProps {
+    params: {
+        idUser: string
+    }
+}
 
 export default function UserForm ({userId, mode}:PropsForm) {
  
@@ -30,9 +36,11 @@ const {
       setValue,
       watch,
       errors, isSubmitting,
-      router
+      router,
+      roles
     } = useCreateEditUser({userId, mode});
 
+    const isEditMode = mode==="edit"
   return (
     <div className="bg-gray-50">
 
@@ -96,6 +104,7 @@ const {
 
                 <Input
                     label="Prénom"
+                    required
                     placeholder="John"
                     {...register("firstName")}
                     error={errors.firstName?.message}
@@ -103,6 +112,7 @@ const {
 
                 <Input
                     label="Nom"
+                    required
                     placeholder="Doe"
                     {...register("lastName")}
                     error={errors.lastName?.message}
@@ -121,11 +131,10 @@ const {
                 <Input
                     label="Téléphone"
                     placeholder="+216XXXXXXXX"
-                    required
                     type="text"
                     className="md:col-span-2"
-                    {...register("phone")}
-                    error={errors.phone?.message}
+                    {...register("phoneNumber")}
+                    error={errors.phoneNumber?.message}
                 />
 
                 </div>
@@ -138,108 +147,115 @@ const {
             {/* ROLE & STATUS */}
 
             <Card className="border-slate-200 bg-white shadow-sm">
+                <CardHeader className="border-b border-slate-100">
+                    <CardTitle className="text-lg">
+                    Permissions
+                    </CardTitle>
 
-            <CardHeader className="border-b border-slate-100">
+                    <CardDescription>
+                    Définissez le rôle et le statut du compte.
+                    </CardDescription>
+                </CardHeader>
 
-                <CardTitle className="text-lg">
-                Permissions
-                </CardTitle>
+                <CardContent className="p-5 sm:p-6">
+                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
 
-                <CardDescription>
-                Définissez le rôle et le statut du compte.
-                </CardDescription>
-
-            </CardHeader>
-
-
-            <CardContent className="p-5 sm:p-6">
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-
-                <div className="space-y-2">
-
-                    <Label required>
-                    Rôle
-                    </Label>
-
-                    <Select
-                      value={watch("role")}
-                      onValueChange={(value) =>
-                          setValue("role", value as CreateUser["role"], {
-                              shouldValidate: true,
-                          })
-                      }
-                  >
-                      <SelectTrigger className="bg-slate-50">
-                          <SelectValue />
-                      </SelectTrigger>
-
-                      <SelectContent>
-                          {USER_ROLE_OPTIONS.map((role) => (
-                              <SelectItem
-                                  key={role.value}
-                                  value={role.value}
-                              >
-                                  {role.label}
-                              </SelectItem>
-                          ))}
-                      </SelectContent>
-                  </Select>
-
-                  {errors.role && (
-                      <p className="text-sm text-red-500">
-                          {errors.role.message}
-                      </p>
-                  )}
-
-                </div>
-
-
-                
-
+                    {/* ROLE */}
                     <div className="space-y-2">
+                        <Label required>
+                        Rôle
+                        </Label>
 
-                    <Label>
+                        <Select
+                        value={watch("roles")}
+                        onValueChange={(value) =>
+                            setValue(
+                            "roles",
+                            value as CreateUser["roles"],
+                            {
+                                shouldValidate: true,
+                            }
+                            )
+                        }
+                        disabled={isEditMode}
+                        >
+                        <SelectTrigger
+                            className={`
+                            bg-slate-50
+                            ${isEditMode ? "cursor-not-allowed opacity-60" : ""}
+                            `}
+                        >
+                            <SelectValue />
+                        </SelectTrigger>
+
+                        <SelectContent>
+                            {roles.map((role) => (
+                            <SelectItem
+                                key={role.id}
+                                value={role.name}
+                            >
+                                {role.name}
+                            </SelectItem>
+                            ))}
+                        </SelectContent>
+                        </Select>
+
+                        {errors.roles && (
+                        <p className="text-sm text-red-500">
+                            {errors.roles.message}
+                        </p>
+                        )}
+                    </div>
+
+                    {/* STATUS */}
+                    <div className="space-y-2">
+                        <Label>
                         Statut
-                    </Label>
+                        </Label>
 
-                    <Select
+                        <Select
                         value={watch("status")}
                         onValueChange={(value) =>
-                            setValue("status", value as CreateUser["status"], {
+                            setValue(
+                            "status",
+                            value as CreateUser["status"],
+                            {
                                 shouldValidate: true,
-                            })
+                            }
+                            )
                         }
-                    >
-                        <SelectTrigger className="bg-slate-50">
+                        disabled={isEditMode}
+                        >
+                        <SelectTrigger
+                            className={`
+                            bg-slate-50
+                            ${isEditMode ? "cursor-not-allowed opacity-60" : ""}
+                            `}
+                        >
                             <SelectValue />
                         </SelectTrigger>
 
                         <SelectContent>
                             {USER_STATUS_OPTIONS.map((status) => (
-                                <SelectItem
-                                    key={status.value}
-                                    value={status.value}
-                                >
-                                    {status.label}
-                                </SelectItem>
+                            <SelectItem
+                                key={status.value}
+                                value={status.value}
+                            >
+                                {status.label}
+                            </SelectItem>
                             ))}
                         </SelectContent>
-                    </Select>
+                        </Select>
 
-                    {errors.status && (
+                        {errors.status && (
                         <p className="text-sm text-red-500">
                             {errors.status.message}
                         </p>
-                    )}
-
+                        )}
                     </div>
 
-
-                </div>
-
-            </CardContent>
-
+                    </div>
+                </CardContent>
             </Card>
         </form>
         <Card className="sticky bottom-0 z-10 border-slate-200 bg-white/90 backdrop-blur shadow-lg">

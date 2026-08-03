@@ -1,7 +1,6 @@
 "use client";
 
 import Card from "../widgets/card";
-import { OperationCategoryLabels } from "../../types/operationCategory";
 import { Invoice } from "../../models/invoice";
 import { InvoiceItem } from "../../models/invoiceItem";
 import { getDiscountLabel, getDiscountValue } from "../../lib/invoiceItemHelpers";

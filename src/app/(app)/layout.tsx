@@ -11,7 +11,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
  
   return (
     <AuthProvider>
-    { /*   <AuthGuard>  */}
+      {/*  <AuthGuard> */}  
     {/* <RoleGuard allowedRoles={['ADMIN']}> */}
     <div
       className="flex h-screen min-h-0 flex-col overflow-hidden bg-gray-50/50"
@@ -34,7 +34,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </div>
     </div>
     {/* </RoleGuard> */}
-    {/*</AuthGuard>*/}
+   {/*  </AuthGuard> */}
     </AuthProvider>
   );
 }

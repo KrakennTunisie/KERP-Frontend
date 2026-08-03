@@ -8,7 +8,7 @@ import { ClientPermissions, Permission } from "../models/permission";
 export function usePermissionsList(){
 
     const [permissions, setPermissions]= useState<ClientPermissions[]|[]>([])
-    const [loading, setLoading]=useState(false)
+    const [loading, setLoading]=useState(true)
     const [totalPages, setTotalPages] = useState(1);
     const [totalElements, setTotalElements] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
@@ -20,8 +20,6 @@ export function usePermissionsList(){
     
     const fetchPermissions = async () => {
         try {
-            setLoading(true);
-
             const response = await permissionsAPI.getAllPermissions({
                 page: currentPage - 1,
             });

@@ -11,11 +11,32 @@ import {
 import { Avatar, AvatarFallback } from '@/shared/components/ui/avatar';
 import { Badge } from '@/shared/components/ui/badge';
 import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/store/authStore';
 
 export function Navbar() {
   const notificationCount = 3;
   const router = useRouter()
 
+  const {user, logout}=useAuthStore()
+
+  
+
+  const initials =
+    [user?.firstName, user?.lastName]
+      .filter(Boolean)
+      .map((name) => name![0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2) ||
+    user?.username
+      .slice(0, 2)
+      .toUpperCase();
+
+  const handleLogut = async ()=>{
+    await logout();
+
+    router.replace("/auth/login");
+  }
   return (
     <header className="h-20 bg-white border-b border-gray-100 flex items-center justify-between px-8">
       {/* Logo */}
@@ -49,13 +70,13 @@ export function Navbar() {
             <button className="flex items-center gap-3 p-2 pr-4 hover:bg-gray-50 rounded-[20px] transition-all duration-200 group">
               <Avatar className="h-10 w-10 border-2 border-gray-100">
                 <AvatarFallback className="bg-gray-900 text-white text-sm font-black">
-                  JD
+                  {initials}
                 </AvatarFallback>
               </Avatar>
 
               <div className="text-left">
                 <p className="text-sm font-black text-gray-900 leading-tight">
-                  Jean Dupont
+                  {user?.firstName +" "+ user?.lastName}
                 </p>
                 <p className="text-xs text-gray-500 font-semibold leading-tight">
                   Dir. Financier
@@ -72,9 +93,9 @@ export function Navbar() {
             >
               <DropdownMenuLabel className="px-4 py-3">
                 <div className="flex flex-col">
-                  <p className="text-sm font-black text-gray-900">Jean Dupont</p>
+                  <p className="text-sm font-black text-gray-900">{user?.firstName +" "+ user?.lastName}</p>
                   <p className="text-xs text-gray-500 font-semibold mt-0.5">
-                    jean.dupont@company.com
+                    {user?.email}
                   </p>
                 </div>
               </DropdownMenuLabel>
@@ -91,7 +112,7 @@ export function Navbar() {
                 <span className="font-bold text-sm text-gray-700">Parmètres</span>
               </DropdownMenuItem>
 
-              <DropdownMenuItem onClick={()=>router.push('/auth/login')} className="px-4 py-3 rounded-[16px] cursor-pointer focus:bg-red-50 text-red-600">
+              <DropdownMenuItem onClick={handleLogut} className="px-4 py-3 rounded-[16px] cursor-pointer focus:bg-red-50 text-red-600">
                 <LogOut className="mr-3 h-4 w-4" />
                 <span className="font-bold text-sm">Déconnexion</span>
               </DropdownMenuItem>

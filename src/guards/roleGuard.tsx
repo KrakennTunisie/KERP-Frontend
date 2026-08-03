@@ -15,9 +15,9 @@ export default function RoleGuard({
   const router = useRouter();
 
   const user = useAuthStore((state) => state.user);
-  const loading = useAuthStore((state) => state.loading);
+  const loading = useAuthStore((state) => state.isLoading);
 
-  const hasRole = !!user && allowedRoles.includes(user.role);
+  const hasRole = !!user && allowedRoles.includes(user.roles[0]);
 
   useEffect(() => {
     if (loading) return;

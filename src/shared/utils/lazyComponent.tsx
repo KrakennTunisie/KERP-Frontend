@@ -1,11 +1,14 @@
 import dynamic from "next/dynamic";
+import type { ComponentType } from "react";
 import PageLoader from "../components/ui/pageLoader";
 
-export default function lazyComponent<T>(
-  importer: () => Promise<T>,
+export default function lazyComponent<P>(
+  importer: () => Promise<{
+    default: ComponentType<P>;
+  }>,
   label = "Chargement..."
 ) {
-  return dynamic(importer as any, {
-    loading: () => <PageLoader label={label}/>
+  return dynamic<P>(importer, {
+    loading: () => <PageLoader label={label} />,
   });
 }

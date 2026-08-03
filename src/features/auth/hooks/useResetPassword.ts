@@ -4,6 +4,9 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react'
 import { Step } from '../widget/stepper';
 import { passwordStrength } from '../helpers/passwordStrength';
+import { ResetPasswordAPI } from '../services/api';
+import { appToast } from '@/shared/lib/toast';
+import { getApiErrorMessage } from '@/shared/api/handle-api-error';
 
 export default function useResetPassword() {
      const router = useRouter()
@@ -23,6 +26,8 @@ export default function useResetPassword() {
   const [resendCooldown, setResendCooldown] = useState(0);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const resendRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const [resetToken, setResetToken]= useState<string>("")
 
   // Step 3
   const [newPassword, setNewPassword] = useState("");
@@ -75,11 +80,12 @@ export default function useResetPassword() {
     setEmailLoading(true);
     try {
       // TODO: await api.post("/auth/forgot-password", { email });
-      await new Promise((r) => setTimeout(r, 1200));
+      await ResetPasswordAPI.sendResetEmail({email})
       setStep("code");
       startCountdown();
       startResendCooldown();
-    } catch {
+    } catch(error) {
+      appToast.error("Erreur envoi de mail", getApiErrorMessage(error))
       setEmailError("Aucun compte associé à cette adresse.");
     } finally {
       setEmailLoading(false);
@@ -96,9 +102,12 @@ export default function useResetPassword() {
     setOtpLoading(true);
     try {
       // TODO: await api.post("/auth/verify-code", { email, code });
-      await new Promise((r) => setTimeout(r, 1200));
+      //await new Promise((r) => setTimeout(r, 1200));
+      const response = await ResetPasswordAPI.verifyCode({email, otp: code})
+      setResetToken(response.resetToken)
       setStep("newPassword");
-    } catch {
+    } catch (error){
+      appToast.error("Erreur de verification du code", getApiErrorMessage(error))
       setOtpError("Code incorrect ou expiré. Vérifiez et réessayez.");
     } finally {
       setOtpLoading(false);
@@ -107,9 +116,15 @@ export default function useResetPassword() {
 
   const handleResend = async () => {
     // TODO: await api.post("/auth/forgot-password", { email });
-    setOtp(Array(6).fill(""));
-    startCountdown();
-    startResendCooldown();
+    try {
+      
+      await ResetPasswordAPI.sendResetEmail({email})
+      setOtp(Array(6).fill(""));
+      startCountdown();
+      startResendCooldown();
+    } catch (error) {
+      appToast.error("Erreur de renvoi de mail", getApiErrorMessage(error))
+    }
   };
 
   const handleResetPassword = async () => {
@@ -125,10 +140,12 @@ export default function useResetPassword() {
     setPasswordLoading(true);
     try {
       // TODO: await api.post("/auth/reset-password", { email, password: newPassword });
-      await new Promise((r) => setTimeout(r, 1200));
+      //await new Promise((r) => setTimeout(r, 1200));
+      await ResetPasswordAPI.resetPassword({resetToken, newPassword, confirmPassword})
       if (countdownRef.current) clearInterval(countdownRef.current);
       setStep("success");
-    } catch {
+    } catch(error) {
+      appToast.error("Erreur du reset ", getApiErrorMessage(error))
       setPasswordError("Une erreur est survenue. Veuillez réessayer.");
     } finally {
       setPasswordLoading(false);

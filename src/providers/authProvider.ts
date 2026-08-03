@@ -1,62 +1,36 @@
 "use client";
 
-import { authAPI } from "@/features/auth/services/api";
 import { useAuthStore } from "@/store/authStore";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 
+interface AuthProviderProps {
+children: React.ReactNode;
+}
 
 export function AuthProvider({
+children,
+}: AuthProviderProps) {
 
- children
+const loadUser = useAuthStore(
+(state) => state.loadUser
+);
 
-}:{
+const initialized = useRef(false);
 
- children:React.ReactNode
+useEffect(() => {
 
-}){
+// Prevent multiple initialization
+// in React Strict Mode
+if (initialized.current) {
+  return;
+}
 
- const {
+initialized.current = true;
 
-   setUser,
+loadUser();
 
-   setLoading
+}, [loadUser]);
 
- } = useAuthStore();
-
-
- useEffect(()=>{
-
-   const init = async ()=>{
-
-      try{
-
-        const user =
-        await authAPI.me();
-
-        setUser(user);
-
-      }
-
-      catch{
-
-        setUser(null);
-
-      }
-
-      finally{
-
-        setLoading(false);
-
-      }
-
-   }
-
-   init();
-
- },[]);
-
-
- return children;
-
+return children;
 }

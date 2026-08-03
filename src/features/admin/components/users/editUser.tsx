@@ -1,9 +1,10 @@
 
 
-import UserForm from './userForm'
+import UserForm, { userProps } from './userForm'
 
-export default function editUser() {
+export default function EditUser({params}:userProps) {
+  const {idUser}= params
   return (
-    <UserForm userId={''} mode={'edit'}/>
+    <UserForm userId={idUser} mode={'edit'}/>
   )
 }

@@ -9,7 +9,7 @@ export const ROLE_COLOR_MAP: Record<string, string> = {
 };
 
 export const getUserRoleLabel = (
-  role: UserRole
+  role: string
 ): string => {
   switch (role) {
     case "ADMIN":
@@ -36,7 +36,7 @@ export const getUserRoleLabel = (
 };
 
 export const getUserRoleColor = (
-  role: UserRole
+  role: string
 ): string => {
   switch (role) {
     case "ADMIN":

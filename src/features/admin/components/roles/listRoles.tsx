@@ -1,7 +1,7 @@
 'use client'
 
 
-import { Plus, ShieldCheck, Key, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, ShieldCheck, Key, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 
 import { RoleCard } from "../../widgets/roleCard";
 import { AddPermissionModal } from "../../widgets/affectPermissionModal";
@@ -16,6 +16,7 @@ import { useCreateRole } from "../../hooks/useCreateRole";
 export default function RolesPage() {
 
     const {
+      loading,
         roles,
         currentPage,
         setCurrentPage,
@@ -94,23 +95,41 @@ export default function RolesPage() {
 
               <p className="text-xs text-slate-500">Permissions totales</p>
               <h2 className="text-2xl font-bold text-slate-900">
-                {totalElements}
+                {permissions.length}
               </h2>
             </div>
           </div>
 
           {/* GRID ROLES */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {roles.map((role) => (
-              <RoleCard
-                key={role.id}
-                role={role}
-                setModalOpen={setModalOpen}
-                setSelectedRole={setSelectedRole}
-                setSelectedPermission={setSelectedPermission}
-                seRevokePermissionModalOpen={setRevokeModalOpen}
-              />
-            ))}
+          <div className="grid  gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {loading ? (
+              <div className="col-span-full flex min-h-[300px] flex-col items-center justify-center gap-2 text-slate-400">
+                <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+                <p className="text-xs font-medium">
+                  Chargement...
+                </p>
+              </div>
+            ) : roles && roles.length === 0 ? (
+              /* EMPTY STATE */
+              <div className="col-span-full flex min-h-[300px] items-center justify-center">
+                <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50/60 p-5 text-center">
+                  <p className="text-xs font-medium text-slate-500">
+                    Aucun rôle à afficher
+                  </p>
+                </div>
+              </div>
+            ) : (
+              roles.map((role) => (
+                <RoleCard
+                  key={role.id}
+                  role={role}
+                  setModalOpen={setModalOpen}
+                  setSelectedRole={setSelectedRole}
+                  setSelectedPermission={setSelectedPermission}
+                  seRevokePermissionModalOpen={setRevokeModalOpen}
+                />
+              ))
+            )}
           </div>
 
           {/* PAGINATION */}

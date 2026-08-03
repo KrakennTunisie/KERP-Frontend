@@ -12,6 +12,13 @@ export type GetListParams = {
   page?: number;
 };
 
+export type GetExtendedListParams = {
+  keyword?: string;
+  statusFilter?: string;
+  roleFilter?:string;
+  page?: number;
+};
+
 
 export type ExchangeRateParams = {
   fromCurrency: string,

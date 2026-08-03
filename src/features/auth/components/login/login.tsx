@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { LoginRequest, loginRequestSchema } from "../../types/loginRequest";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Lock, Mail } from "lucide-react";
+import { useAuthStore } from "@/store/authStore";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -15,34 +16,15 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-/*   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-
-    const result = await signIn("credentials", {
-      username,
-      password,
-      redirect: false,
-    });
-
-    setLoading(false);
-
-    if (result?.error) {
-      setError("Identifiants incorrects. Veuillez réessayer.");
-    } else {
-      router.push("/dashboard");
-    }
-  }; */
-
-/*   const handleKeycloakLogin = () => {
-    signIn("keycloak", { callbackUrl: "/dashboard" });
-  }; */
+  const login = useAuthStore(
+  (state) => state.login
+  );
 
 
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<LoginRequest>({
     resolver: zodResolver(loginRequestSchema),
@@ -52,39 +34,57 @@ export default function LoginPage() {
     },
   });
 
-  const onSubmit = async (data: LoginRequest) => {
-  try {
-    setLoading(true);
-    setError("");
+  const onSubmit = async (
+      data: LoginRequest
+  ) => {
+      try {
+      setLoading(true);
+      setError("");
 
-    console.log(data);
+        /*
+        * The Zustand store calls:
+        *
+        * POST /api/auth/login
+        *
+        * The Next.js backend then:
+        * 1. Authenticates against Keycloak
+        * 2. Retrieves the authenticated user
+        * 3. Stores access_token in HttpOnly cookie
+        * 4. Stores refresh_token in HttpOnly cookie
+        *
+        * Tokens are never exposed to this component.
+        */
+        await login({
+          email: data.email,
+          password: data.password,
+        });
+        reset({
+          email:"",
+          password:""
+        })
+        // Authentication succeeded
+        router.replace("/dashboard");
 
-    /*
-    const result = await signIn("credentials", {
-      username: data.username,
-      password: data.password,
-      redirect: false,
-    });
+      } catch (error) {
+        console.error(
+          "Login failed:",
+          error
+        );
 
-    if (result?.error) {
-      setError("Identifiants incorrects.");
-      return;
-    }
-    */
+        setError(
+          "Identifiants incorrects ou une erreur est survenue."
+        );
+      } finally {
+        setLoading(false);
+      }
 
-    router.push("/dashboard");
-  } catch {
-    setError("Une erreur est survenue.");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
-  const handleLogin = ()=>{
+/*   const handleLogin = ()=>{
     console.log("Logged in suucessfully.")
     router.push('/dashboard')
   }
-
+ */
   return (
     <div className="min-h-screen flex items-center justify-center bg-white">
       <div className="flex w-full max-w-4xl min-h-[580px] rounded-2xl overflow-hidden shadow-lg border border-gray-100">
