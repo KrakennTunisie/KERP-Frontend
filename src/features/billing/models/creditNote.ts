@@ -31,7 +31,7 @@ const detailsInvoiceCreditNoteItemSchema = z.object({
   totalExclTaxEUR: z.number(),
   totalInclTaxEUR: z.number(),
   totalExclTaxTND: z.number(),
-  totalInclTaxTND: z.number(),  
+  totalInclTaxTND: z.number(),
   totalExclTaxUSD: z.number(),
   totalInclTaxUSD: z.number(),
 })
@@ -89,8 +89,17 @@ export const invoiceCreditNoteCreateSchema = z.object({
   invoiceCreditNoteDocument: fileSchema.nullable(),
   creditNoteItems: z.array(creditNoteItemSchema).nullable(),
   issueDate: z.date(),
-});
-
+}).refine(
+  (data) => {
+    if (!data.originalInvoice?.issueDate) return true;
+    console.log("1");
+    return new Date(data.issueDate) > new Date(data.originalInvoice.issueDate);
+  },
+  {
+    message: "La date d'émission doit être postérieure ou égale à celle de la facture d'origine",
+    path: ["issueDate"],
+  }
+);
 /**
  * InvoiceCreditNotePageItem
  * idInvoiceCreditNote, invoiceCreditNoteNumber, issueDate,

@@ -27,23 +27,28 @@ import { TvaRateString } from "../../types/tvaRate";
 import { CurrencyType } from "../../types/currency";
 import UseCreatePartner, { pageProps } from "../../hooks/useCreatePartner";
 import { partnerTypeSchema } from "../../types/partnerType";
+import { PartnerSummary } from "../../models/partner";
+import { Form } from "react-hook-form";
 
 interface AddPartnerModalProps {
   isOpen: boolean;
-  initialCompanyName?: string;
-  partnerType? : string
+  partner?: PartnerSummary;
+  partnerType?: string
   onClose: () => void;
+  onSuccess: ()=> void;
 }
 
 export default function AddPartnerModal({
   isOpen,
-  initialCompanyName = "",
+  partner,
   partnerType,
   onClose,
+  onSuccess
 }: AddPartnerModalProps) {
   const {
     register,
     watch,
+    reset,
     setValue,
     getError,
     documentFields,
@@ -57,25 +62,47 @@ export default function AddPartnerModal({
 
   // Pré-remplit le nom d'entreprise avec celui extrait de la facture
   useEffect(() => {
-    if (isOpen && initialCompanyName) {
-      setValue("companyName", initialCompanyName, {
+    if (isOpen && partner?.companyName) {
+      setValue("companyName", partner.companyName ?? "", {
         shouldValidate: true,
         shouldDirty: true,
       });
+      setValue("email", partner.email ?? "", {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+      const phoneValue = partner.professionnalPhoneNumber && !isNaN(Number(partner.professionnalPhoneNumber))
+        ? Number(partner.professionnalPhoneNumber)
+        : null;
+      setValue("workPhone", phoneValue, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+      setValue("taxId", partner.taxRegistrationNumber ?? "", {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+      setValue("billingAddress", partner.billingAddress, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+
     }
-  }, [isOpen, initialCompanyName, setValue]);
+  }, [isOpen, partner?.companyName, setValue]);
 
   if (!isOpen) return null;
 
   const submitAndClose = handleSubmit(
-  async (data) => {
-    await onSubmit(data);
-    onClose();
-  },
-  (errors) => {
-    console.log("Validation échouée:", errors);
-  }
-);
+    async (data) => {
+      await onSubmit(data, false);
+      onSuccess();
+      reset()
+      onClose();
+    },
+    (errors) => {
+      console.log("Validation échouée:", errors);
+    }
+  );
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4">
@@ -85,7 +112,7 @@ export default function AddPartnerModal({
           <div>
             <h2 className="text-lg font-bold text-slate-900">{partnerType == partnerTypeSchema.enum.SUPPLIER ? "Nouveau  fournisseur" : "Nouveau  client"}</h2>
             <p className="text-sm text-slate-500">
-              Complétez les informations du {partnerType == partnerTypeSchema.enum.SUPPLIER ?  "fournisseur" :"client"} détecté dans la facture
+              Complétez les informations du {partnerType == partnerTypeSchema.enum.SUPPLIER ? "fournisseur" : "client"} détecté dans la facture
             </p>
           </div>
           <button
@@ -489,7 +516,7 @@ export default function AddPartnerModal({
                     <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <div>
                         <h3 className="font-semibold text-slate-900">Adresse de livraison</h3>
-                       
+
                       </div>
                       <Button
                         type="button"
@@ -500,9 +527,9 @@ export default function AddPartnerModal({
                       >
                         Copier depuis facturation
                       </Button>
-                      
+
                     </div>
-                   
+
 
                     <div className="space-y-4">
                       <div className="space-y-2">
@@ -610,7 +637,7 @@ export default function AddPartnerModal({
             disabled={isSubmitting}
             className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 disabled:opacity-60"
           >
-            Ajouter le {partnerType == partnerTypeSchema.enum.SUPPLIER ?  "fournisseur" :"client"}
+            Ajouter le {partnerType == partnerTypeSchema.enum.SUPPLIER ? "fournisseur" : "client"}
           </LoadingButton>
         </div>
       </div>

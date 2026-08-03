@@ -80,7 +80,7 @@ export default function usePaymentDetails({
     deleteOpen,
     setDeleteOpen,
     deletePayment,
-    refetch: fetchPaymentDetails,
+    fetchPaymentDetails,
     telecharger,
     previewDocument, setPreviewDocument
   };

@@ -12,21 +12,22 @@ import { paymentMethodSchema } from "../types/paymentMethod";
 import { CurrencyType, currencyTypeSchema } from "../types/currency";
 import { v4 as uuidv4 } from "uuid";
 import { nextNumber } from "../types/nextNumber";
-import { BaseItem, defaultInvoiceItem, InvoiceItem } from "../models/invoiceItem";
+import { BaseItem, defaultInvoiceItem, defaultPurchaseOrderItem, InvoiceItem, PurchaseOrderItem } from "../models/invoiceItem";
 import { exchangeRateSourceSchema } from "../types/exchangeRateSource";
 import { invoiceComplianceStatusSchema } from "../types/invoiceComplianceStatus";
 import { useRouter } from "next/navigation";
-import { PurchaseOrderDetails, PurchaseOrderSummary } from "../models/purchaseOrder";
+import { basePurchaseOrderSchema, ExtractedPurchaseOrder, PurchaseOrder, PurchaseOrderDetails, PurchaseOrderSummary } from "../models/purchaseOrder";
 import { AddPartnerFormData, PartnerSummary } from "../models/partner";
 import { useDebounce } from "@/shared/hooks/useDebounce";
 import { calculateInvoiceTotals, calculateInvoiceTotalsFromPurchaseOrder, calculUnityPrice, recalculate } from "../lib/invoiceCalculation";
-import { useInvoiceStore } from "./useSupplierInvoiceList";
-import { discountTypeOptions, discountTypeSchema } from "../types/discountType";
+import { discountTypeSchema } from "../types/discountType";
 
 import { normalizeVatRatePercentage } from "../lib/normalizeTVA";
-import { formatOperationCategoryLabel } from "../lib/normalizeOperationCategory";
-import { normalizePaymentConditionToDbFormat } from "../lib/normalizePaymentCondition";
+import { usePurchaseOrderStore } from "./usePurchaseOrderList";
 import { resolvePaymentMethod } from "../lib/normalizePaymentMethod";
+import { normalizePaymentConditionToDbFormat } from "../lib/normalizePaymentCondition";
+import { purchaseOrderTypeSchema } from "../types/PurchaseOrderType";
+import { formatOperationCategoryLabel } from "../lib/normalizeOperationCategory";
 export type InvoiceFormClientProps = {
     mode: "create" | "edit" | "clone";
     invoiceId?: string
@@ -51,13 +52,13 @@ export type InvoiceFormModalProps = {
 };
 
 
-export default function useCreateSupplierInvoice() {
+export default function useCreateClientPurchaseOrder() {
     const [nextNumber, setNextNumber] = useState<nextNumber>()
     const [exchangeRate, setExchangeRate] = useState<ExchangeRate>()
     const [invoice, setInvoice] = useState<Invoice>()
-    const invoiceSupplier = useInvoiceStore(state => state.fileUrl);
-    const invoiceSupplierType = useInvoiceStore(state => state.file);
-    const [extractedData, setExtractedData] = useState<Partial<ExtractedInvoice> | null>(null);
+    const clientPurchaseOrder = usePurchaseOrderStore(state => state.fileUrl);
+    const clientPurchaseOrderType = usePurchaseOrderStore(state => state.file);
+    const [extractedData, setExtractedData] = useState<Partial<ExtractedPurchaseOrder> | null>(null);
     const [newSupplier, setNewSupplier] = useState<PartnerSummary>();
     const [newSupplierName, setNewSupplierName] = useState<string>("");
     const [supplierSummary, setSupplierSummary] = useState<PartnerSummary>();
@@ -79,9 +80,7 @@ export default function useCreateSupplierInvoice() {
         }
     }
     useEffect(() => {
-        fetchNextNumber()
-        fetchPurchaseOrderSummary()
-
+        fetchNextNumber();
     }, [])
 
     // récupération des données extraites depuis n8n à partir de local storage
@@ -94,34 +93,25 @@ export default function useCreateSupplierInvoice() {
     }, []);
 
     /***** Initialisation .... */
-    const form = useForm<InvoiceCreate>({
-        resolver: zodResolver(invoiceCreateSchema),
+    const form = useForm<PurchaseOrder>({
+        resolver: zodResolver(basePurchaseOrderSchema),
         defaultValues: {
-            invoiceType: "PURCHASE",
-            invoiceNumber: nextNumber?.value,
-            idInvoice: uuidv4(),
-            invoiceStatus: invoiceStatusSchema.enum["DRAFT"],
+            purchaseOrderNumber: nextNumber?.value,
+            idPurchaseOrder: uuidv4(),
+            purchaseOrderStatus: invoiceStatusSchema.enum["DRAFT"],
+            purchaseOrderType: purchaseOrderTypeSchema.enum.SALE,
             issueDate: undefined,
-            creationDate: new Date(),
-            sentToclientDate: null,
-            sentToTTNDate: null,
-            dueDate: new Date(new Date().setDate(new Date().getDate() + 15)),
-            invoiceItems: [defaultInvoiceItem()],
+            purchaseOrderItems: [defaultInvoiceItem()],
             totalExclTax: 0,
             totalInclTax: 0,
-            vatRate: 0,
-            paymentCondition: PaymentConditionSchema.enum.IMMEDIATE,
+            paymentCondition: "",
             paymentMethod: paymentMethodSchema.enum.CASH,
             partner: null,
-            purchaseOrder: null,
-            invoiceCurrency: currencyTypeSchema.enum.TND,
+            currency: currencyTypeSchema.enum.TND,
             appliedExchangeRate: 3,
             exchangeRateReferenceDate: new Date(),
             exchangeRateSource: exchangeRateSourceSchema.enum.EXTERNAL_API,
-            complianceQRcode: "",
-            invoiceComplianceStatus: invoiceComplianceStatusSchema.enum.RECEIVED,
-            invoiceDocument: null,
-            comment: "",
+            purchaseOrderDocument: null,
             vatAmount: 0,
         },
         mode: "onChange",
@@ -129,12 +119,12 @@ export default function useCreateSupplierInvoice() {
     const { control, setValue, getValues, handleSubmit, register, reset, formState: { isDirty, isValid, errors } } = form;
     const { append, remove, replace } = useFieldArray({
         control,
-        name: "invoiceItems",
+        name: "purchaseOrderItems",
     });
 
     useEffect(() => {
         nextNumber?.value &&
-            form.setValue("invoiceNumber", nextNumber.value, {
+            form.setValue("purchaseOrderNumber", nextNumber.value, {
                 shouldValidate: true,
                 shouldDirty: false,
             });
@@ -149,7 +139,8 @@ export default function useCreateSupplierInvoice() {
                     shouldValidate: true,
                     shouldDirty: false,
                 });
-
+                   return;
+            }
 
                 const response = await ExchangeRateAPI.getExchangeRate({
                     fromCurrency: "TND",
@@ -157,13 +148,13 @@ export default function useCreateSupplierInvoice() {
                 });
                 console.log("response: exchangeRate", response)
                 setExchangeRate(response);
-            }
+            
         }
         catch (error: any) {
             appToast.error("Erreur de fetch de taux de change: ", getApiErrorMessage(error))
         }
     }
-    const selectedCurrency = form.watch("invoiceCurrency");
+    const selectedCurrency = form.watch("currency");
 
     useEffect(() => {
         fetchExchangeRate(selectedCurrency);
@@ -188,15 +179,18 @@ export default function useCreateSupplierInvoice() {
     // affectation des données extraites depuis n8n  dans le formulaire 
     useEffect(() => {
         if (extractedData) {
-            console.log(normalizeVatRatePercentage(extractedData?.vatRate))
+            
+            console.log(extractedData.paymentMethod!)
+           
+            console.log(resolvePaymentMethod(extractedData.paymentMethod!))
+       
+            
             reset({
                 ...getValues(), // garde les valeurs déjà saisies/par défaut
                 issueDate: extractedData.issueDate ? new Date(extractedData.issueDate) : undefined,
-                dueDate: extractedData.dueDate ? new Date(extractedData.dueDate) : undefined,
-                invoiceItems: extractedData.invoiceItems
-                    ? extractedData.invoiceItems.map((item) => ({
-                        idInvoiceItem: crypto.randomUUID(),
-                        invoice: "",
+                purchaseOrderItems: extractedData.purchaseOrderItems
+                    ? extractedData.purchaseOrderItems.map((item) => ({
+                        idPurchaseOrderItem: crypto.randomUUID(),
                         description: item.description ?? "",
                         quantity: item.quantity ?? 1,
                         unityPriceEXclTax: item.unityPriceExclTax ?? 0,
@@ -206,9 +200,9 @@ export default function useCreateSupplierInvoice() {
                         itemTotalInclTax: item.itemTotalInclTax ?? 0,
                         discountType: discountTypeSchema.enum.AMOUNT,
                         discountValue: item.discountValue ?? 0,
-                        operationCategory: formatOperationCategoryLabel(item.operationCategory),
-                        purchaseOrderItem: null,
-                        creditedQuantity: 0,
+                        operationCategory: formatOperationCategoryLabel(item.operationCategory) ,
+                        invoicedQuantity: 0,
+                        purchaseOrder:null
                     }))
                     : [defaultInvoiceItem()],
                 paymentCondition: normalizePaymentConditionToDbFormat(extractedData.paymentCondition),
@@ -224,14 +218,14 @@ export default function useCreateSupplierInvoice() {
                         street1: extractedData.companyAddress ?? undefined,
                     },
                 },
-                invoiceCurrency: extractedData?.invoiceCurrency === "TND"
+                currency: extractedData?.purchaseCurrency === "TND"
                     ? currencyTypeSchema.enum.TND
-                    : extractedData?.invoiceCurrency === "EUR"
+                    : extractedData?.purchaseCurrency === "EUR"
                         ? currencyTypeSchema.enum.EUR
-                        : extractedData?.invoiceCurrency === "USD"
+                        : extractedData?.purchaseCurrency === "USD"
                             ? currencyTypeSchema.enum.USD
                             : currencyTypeSchema.enum.TND,
-                comment: extractedData.comments ?? "",
+
             });
             setNewSupplier(
                 {
@@ -239,11 +233,11 @@ export default function useCreateSupplierInvoice() {
                     email: extractedData.issuerEmail ?? null,
                     professionnalPhoneNumber: Number(extractedData.issuerPhone) ?? null,
                     taxRegistrationNumber: extractedData.issuerTaxId ?? null,
-                    currency: extractedData?.invoiceCurrency === "TND"
+                    currency: extractedData?.purchaseCurrency === "TND"
                         ? currencyTypeSchema.enum.TND
-                        : extractedData?.invoiceCurrency === "EUR"
+                        : extractedData?.purchaseCurrency === "EUR"
                             ? currencyTypeSchema.enum.EUR
-                            : extractedData?.invoiceCurrency === "USD"
+                            : extractedData?.purchaseCurrency === "USD"
                                 ? currencyTypeSchema.enum.USD
                                 : currencyTypeSchema.enum.TND,
                     taxRate: "",
@@ -289,23 +283,23 @@ export default function useCreateSupplierInvoice() {
     const checkSupplierExists = useCallback(async (companyName: string) => {
         if (!companyName) return;
         try {
-            console.log("debug1")
-            const exists = await partnersApi.existsByCompanyName(companyName);
+
+            const exists = await partnersApi.clientExistsByCompanyName(companyName);
             setSupplierExist(exists);
 
             if (exists) {
-                console.log("exisiting supplier");
+
                 try {
-                    const getExistedSupplier = await partnersApi.getSupplierByCompanyName(companyName);
+                    const getExistedSupplier = await partnersApi.getClientByCompanyName(companyName);
                     selectSupplier(getExistedSupplier);
                 } catch (error) {
-                    console.error("Erreur lors de la récupération du fournisseur:", error);
+                    console.error("Erreur lors de la récupération du client:", error);
                 }
             } else {
                 selectSupplier(newSupplier!);
             }
         } catch (error) {
-            console.error("Erreur lors de la vérification du fournisseur:", error);
+            console.error("Erreur lors de la vérification du client:", error);
         }
     }, [newSupplier]);
 
@@ -380,12 +374,12 @@ export default function useCreateSupplierInvoice() {
     const [showDropdown, setShowDropdown] = useState(false);
     const previewData = getValues();
 
-    const getError = (field: keyof InvoiceCreate) => {
+    const getError = (field: keyof PurchaseOrder) => {
         return errors[field]?.message as string | undefined;
     };
 
-    const getItemError = (index: number, field: keyof InvoiceItem) => {
-        return errors.invoiceItems?.[index]?.[field]?.message as
+    const getItemError = (index: number, field: keyof PurchaseOrderItem) => {
+        return errors.purchaseOrderItems?.[index]?.[field]?.message as
             | string
             | undefined;
     }
@@ -402,7 +396,7 @@ export default function useCreateSupplierInvoice() {
                     ? debouncedSearchQuery.trim()
                     : undefined;
 
-            const response = await partnersApi.getSummarySuppliers({
+            const response = await partnersApi.getSummaryClients({
                 keyword: keyword,
             });
 
@@ -421,17 +415,18 @@ export default function useCreateSupplierInvoice() {
     //Synchronisation des items lors d'un nouveau item
     const syncItems = (newItems: BaseItem[]) => {
 
-        const mappedItems: InvoiceItem[] = newItems.map((item: any) => ({
+        const mappedItems: PurchaseOrderItem[] = newItems.map((item: any) => ({
             ...item,
-            idInvoiceItem: (item as InvoiceItem).idInvoiceItem ?? uuidv4(),
-            invoice: (item as InvoiceItem).invoice ?? null,
-            purchaseOrderItem: null,
-            creditedQuantity: 0,
+            idPurchaseOrderItem: (item as PurchaseOrderItem).idPurchaseOrderItem ?? uuidv4(),
+            purchaseOrder: (item as PurchaseOrderItem).purchaseOrder ?? null,
+            invoicedQuantity: (item as PurchaseOrderItem).invoicedQuantity ?? 0,
+            discountValue: (item as PurchaseOrderItem).discountValue ?? 0,
+            discountType: (item as PurchaseOrderItem).discountType ?? null,
 
         }));
 
         replace(mappedItems);
-        setValue("invoiceItems", mappedItems, {
+        setValue("purchaseOrderItems", mappedItems, {
             shouldValidate: true,
             shouldDirty: true,
         });
@@ -441,7 +436,7 @@ export default function useCreateSupplierInvoice() {
 
     // Ajout d'un card qui permet l'ajout les données d'unt item (P.U ,QT , TVA)
     const addItem = () => {
-        append(defaultInvoiceItem(), {
+        append(defaultPurchaseOrderItem(), {
             shouldFocus: false,
         });
     };
@@ -449,16 +444,16 @@ export default function useCreateSupplierInvoice() {
 
     // Suppression d'item et la mis à jour des totaux TTC / HT /TVA  
     const removeItem = (id: string) => {
-        const currentItems = getValues("invoiceItems") ?? [];
+        const currentItems = getValues("purchaseOrderItems") ?? [];
         console.log(currentItems)
         console.log(id);
-        const index = currentItems.findIndex((item) => item.idInvoiceItem === id);
+        const index = currentItems.findIndex((item) => item.idPurchaseOrderItem === id);
         if (index !== -1) {
             remove(index);
         }
 
         // Recalculer les totaux sans l'élément supprimé
-        const remainingItems = currentItems.filter((item) => item.idInvoiceItem !== id);
+        const remainingItems = currentItems.filter((item) => item.idPurchaseOrderItem !== id);
         const totals = calculateInvoiceTotals(remainingItems);
 
         setValue("totalExclTax", totals.totalHT, { shouldValidate: true, shouldDirty: true });
@@ -467,53 +462,30 @@ export default function useCreateSupplierInvoice() {
     };
 
 
-    // Mis à jour les données d'item (QT, P.U, TVA ) et calcul de nouveau les totaux 
-    const updateItem = (id: string, field: UpdateableField, value: string | number | null) => {
-        const currentItems = getValues("invoiceItems") ?? [];
+    // Mis à jour les données d'item (QT, P.U, TVA ) et calcul de nouveau les totaux
+    const updateItem = (id: string, field: UpdateableField, value: string | number) => {
+        const currentItems = getValues("purchaseOrderItems") ?? [];
 
         const updatedItems = currentItems.map((item) => {
-            if (item.idInvoiceItem !== id) return item;
+            if (item.idPurchaseOrderItem !== id) return item;
             const updatedItem = { ...item, [field]: value };
             if (field === "unityPriceEXclTax") {
                 const itemWithConvertedPrice = calculUnityPrice(
                     updatedItem,
-                    getValues("invoiceCurrency"),
+                    getValues("currency"),
                     getValues("appliedExchangeRate")
                 );
                 return recalculate(itemWithConvertedPrice);
             }
-            return recalculate(updatedItem,);
+            return recalculate(updatedItem);
         });
         const totals = calculateInvoiceTotals(updatedItems);
         setValue("totalExclTax", totals.totalHT, { shouldValidate: true, shouldDirty: true });
         setValue("vatAmount", totals.totalTVA, { shouldValidate: true, shouldDirty: true });
         setValue("totalInclTax", totals.totalTTC, { shouldValidate: true, shouldDirty: true });
         syncItems(updatedItems);
-
     };
 
-    // récupération de la quantité initiale d'un item lors de la modification => pour faire la référence
-    const getInitialQuantity = (idInvoiceItem: string) => {
-        const originalItem = invoice?.invoiceItems!.find(
-            (invoiceItem) => invoiceItem.idInvoiceItem === idInvoiceItem
-        );
-        return originalItem?.quantity ?? 0;
-    };
-    const getMaxQuantity = (item: InvoiceItem) => {
-        if (item.purchaseOrderItem) {
-            const remaining = (item.purchaseOrderItem?.quantity ?? 0) -
-                (item.purchaseOrderItem?.invoicedQuantity ?? 0);
-            const initialQty = getInitialQuantity(item.idInvoiceItem!);
-            console.log(initialQty)
-            return remaining + initialQty;
-        }
-        if (selectedPO && linkedToPO) {
-            return (item.purchaseOrderItem!.quantity ?? 0) -
-                (item.purchaseOrderItem!.invoicedQuantity ?? 0);
-        }
-
-        return undefined;
-    };
     // Sélection d'un fournisseur
     const selectSupplier = (client: PartnerSummary) => {
         setValue("partner", client, { shouldValidate: true, shouldDirty: true, });
@@ -528,36 +500,6 @@ export default function useCreateSupplierInvoice() {
         setSupplierSearch("");
     };
 
-    // récupération de la liste des bon de commande
-    const fetchPurchaseOrderSummary = async () => {
-        try {
-
-            setLoadingPurchaseOrders(true)
-            const purchaseorders = await PurchaseOrderAPI.getSupplierPurchaseOrderSummary();
-            setPurchaseOrders(purchaseorders);
-
-
-        } catch (error) {
-            appToast.error("Erreur Fetch du fournisseur:", getApiErrorMessage(error));
-        }
-        finally {
-            setLoadingPurchaseOrders(false)
-        }
-    }
-
-    // calcule de la date d'échance lors la saisie de condition de paiement 
-    const calculateDueDate = (): Date => {
-        const date = new Date(getValues("issueDate"));
-        console.log(date)
-        switch (getValues("paymentCondition")) {
-            case PaymentConditionSchema.enum.NET_15: date.setDate(date.getDate() + 15); break;
-            case PaymentConditionSchema.enum.NET_30: date.setDate(date.getDate() + 30); break;
-            case PaymentConditionSchema.enum.NET_45: date.setDate(date.getDate() + 45); break;
-            case "IMMEDIATE": break;
-        }
-        setValue("dueDate", date, { shouldValidate: true });
-        return date;
-    };
 
     // vérification des données et lancement de création de facture fournisseur
     const handleSave = form.handleSubmit(async (data) => {
@@ -585,7 +527,7 @@ export default function useCreateSupplierInvoice() {
             setLoadingForm(true)
             const values = getValues();
 
-            if (!invoiceSupplierType) {
+            if (!clientPurchaseOrderType) {
                 appToast.error("Erreur de création", "Le document PDF est vide.");
                 return;
             }
@@ -596,40 +538,32 @@ export default function useCreateSupplierInvoice() {
             }
             const formData = new FormData();
 
-            formData.append("invoiceNumber", values.invoiceNumber);
+            formData.append("purchaseOrderNumber", values.purchaseOrderNumber);
             formData.append("issueDate", values.issueDate.toISOString());
-            formData.append("dueDate", values.dueDate.toISOString());
-            if (selectedPO) {
-                formData.append("purchaseOrder", selectedPO?.idPurchaseOrder)
-            }
-            formData.append("invoiceType", values.invoiceType);
-            formData.append("invoiceCurrency", values.invoiceCurrency);
-            formData.append("vatRate", String(values.vatRate));
+            formData.append("purchaseOrderStatus", values.purchaseOrderStatus);
+            formData.append("purchaseOrderType", values.purchaseOrderType)
+            formData.append("purchaseCurrency", values.currency);
+            formData.append("vatRate", String(0));
             formData.append("paymentMethod", values.paymentMethod);
             formData.append("paymentCondition", values.paymentCondition);
             formData.append("exchangeRateReferenceDate", values.exchangeRateReferenceDate.toISOString());
             formData.append("appliedExchangeRate", String(values.appliedExchangeRate));
             formData.append("exchangeRateSource", values.exchangeRateSource);
             formData.append("partner", values.partner.idPartner);
-            formData.append("invoiceDocument", invoiceSupplierType);
-            if (values.invoiceItems?.length) {
-                const invoiceItemsToSend = values.invoiceItems.map(({ purchaseOrderItem, ...rest }: any) => ({
-                    ...rest,
-                    idPurchaseOrderItem: purchaseOrderItem?.idPurchaseOrderItem ?? null,
-                }));
-
-                formData.append("invoiceItemsList", JSON.stringify(invoiceItemsToSend));
+            formData.append("purchaseOrderDocument", clientPurchaseOrderType);
+            if (values.purchaseOrderItems?.length) {
+                formData.append("purchaseOrderItemsList", JSON.stringify(values.purchaseOrderItems));
             }
             for (const pair of formData.entries()) {
                 console.log(pair[0], pair[1]);
             }
 
-            const createdInvoice = await InvoicesAPI.createSupplierInvoice(formData);
+            const createdPurchaseOrder = await PurchaseOrderAPI.createClientPurchaseOrder(formData);
 
-            if (createdInvoice) {
-                appToast.success("Facture créée avec succès");
+            if (createdPurchaseOrder) {
+                appToast.success("Bon de commande créée avec succès");
                 setIsModalOpen(false);
-                setSuccessMessage("La facture a été créée avec succès.");
+                setSuccessMessage("Le bon de commande a été créée avec succès.");
                 setTtnModalOpen(true);
             }
         } catch (e: unknown) {
@@ -659,7 +593,7 @@ export default function useCreateSupplierInvoice() {
         addItem,
         removeItem,
         updateItem,
-        getMaxQuantity,
+
 
         // Client UI
         supplierSearch,
@@ -687,8 +621,8 @@ export default function useCreateSupplierInvoice() {
         loadingPurchaseOrders,
 
 
-        invoiceSupplier,
-        invoiceSupplierType,
+        clientPurchaseOrder,
+        clientPurchaseOrderType,
 
         linkedToPO,
         setLinkedToPO,
@@ -709,8 +643,7 @@ export default function useCreateSupplierInvoice() {
         newTvaExist,
         setNewTvaExist,
 
-        //dueDate
-        calculateDueDate,
+
 
         //createInvoice
         createInvoice,

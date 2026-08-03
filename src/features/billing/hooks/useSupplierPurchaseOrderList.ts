@@ -15,8 +15,10 @@ export function useSupplierPurchaseOrderList() {
   const [search, setSearch] = useState("");
   const [filtre, setFiltre] = useState<purchaseOrderStatus>("ALL");
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [archiveOpen, setArchiveOpen] = useState(false);
+  const [loadingArchive, setLoadingArchive] = useState(false);
   const [loading, setLoading] = useState(false)
-  const [updateLoading, setUpdateLoading]= useState(false)
+  const [updateLoading, setUpdateLoading] = useState(false)
   const [invoiceRef, setInvoiceRef] = useState("");
   const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrderPageItem[] | []>([])
   const [open, setOpen] = useState(false);
@@ -27,8 +29,8 @@ export function useSupplierPurchaseOrderList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [updateOpen, setUpdateOpen] = useState(false);
   const [openSendMail, setOpenSendMail] = useState(false);
-  const [nextStatus, setNextStatus]=useState("")
-  const [selectedPurchaseOrder, setSelectedPurchaseOrder]= useState<PurchaseOrderPageItem|null>(null)
+  const [nextStatus, setNextStatus] = useState("")
+  const [selectedPurchaseOrder, setSelectedPurchaseOrder] = useState<PurchaseOrderPageItem | null>(null)
   const debouncedSearchQuery = useDebounce(search, 2000);
   async function deletePurchaseOrder(idPurchaseOrder: string) {
     try {
@@ -36,14 +38,14 @@ export function useSupplierPurchaseOrderList() {
       await PurchaseOrderAPI.deleteSupplierPurchaseOrder(idPurchaseOrder);
       appToast.success('Bon de commande supprimée avec succès.')
       setDeleteOpen(false)
-      await fetchClientsPurchaseOrders()
+      await fetchSuppliersPurchaseOrders()
     } catch (error) {
       appToast.error("Erreur de suppresion: ", getApiErrorMessage(error))
     } finally {
       setDeleteLoading(false);
     }
   }
-  const fetchClientsPurchaseOrders = async () => {
+  const fetchSuppliersPurchaseOrders = async () => {
     try {
       setLoading(true);
       const keyword =
@@ -74,27 +76,43 @@ export function useSupplierPurchaseOrderList() {
 
   useEffect(() => {
 
-    fetchClientsPurchaseOrders();
+    fetchSuppliersPurchaseOrders();
   }, [invoiceRef, debouncedSearchQuery, currentPage, filtre]);
 
-  const updateStatus = async ()=>{
-            try {
-            setLoading(true)
-            const formData = new FormData();
-            formData.append("status",  nextStatus);
-            console.log(idPurchaseOrder)
-            await PurchaseOrderAPI.updateSupplierPurchaseOrderStatus(idPurchaseOrder, formData);
-            appToast.success('Statut mise à jour avec succès avec succès.')
-            setUpdateOpen(false)
-            await fetchClientsPurchaseOrders()
-          } catch (error) {
-            appToast.error("Erreur Fetch du client:",getApiErrorMessage(error));
-          }
-          finally{
-            setLoading(false)
-            setIdPurchaseOrder("")
-          }
+  const archivePurchaseOrder = async () => {
+    try {
+      setLoadingArchive(true);
+      const formData = new FormData();
+      formData.append("status", "ARCHIVED");
+      await PurchaseOrderAPI.updateSupplierPurchaseOrderStatus(idPurchaseOrder, formData);
+      appToast.success('Bon de commande archivée avec succés.')
+      setArchiveOpen(false)
+      await fetchSuppliersPurchaseOrders()
+    } catch (error) {
+      appToast.error("Erreur de mise à jour: ", getApiErrorMessage(error))
+    } finally {
+      setLoadingArchive(false);
+    }
   }
+  const updateStatus = async () => {
+    try {
+      setLoading(true)
+      const formData = new FormData();
+      formData.append("status", nextStatus);
+      console.log(idPurchaseOrder)
+      await PurchaseOrderAPI.updateSupplierPurchaseOrderStatus(idPurchaseOrder, formData);
+      appToast.success('Statut mise à jour avec succès avec succès.')
+      setUpdateOpen(false)
+      await fetchSuppliersPurchaseOrders()
+    } catch (error) {
+      appToast.error("Erreur Fetch du client:", getApiErrorMessage(error));
+    }
+    finally {
+      setLoading(false)
+      setIdPurchaseOrder("")
+    }
+  }
+
 
 
   const router = useRouter()
@@ -119,7 +137,11 @@ export function useSupplierPurchaseOrderList() {
     idPurchaseOrder,
     open,
     setOpen,
+    fetchSuppliersPurchaseOrders,
     updateOpen,
+    archiveOpen, setArchiveOpen,
+    loadingArchive, setLoadingArchive,
+    archivePurchaseOrder,
     setUpdateOpen,
     selectedPurchaseOrder,
     setSelectedPurchaseOrder,

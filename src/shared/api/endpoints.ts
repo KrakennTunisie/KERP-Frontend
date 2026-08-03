@@ -4,6 +4,7 @@ import {  ExchangeRateParams, GetListParams } from "./types";
 import { withPrefix } from "../utils/prefixHelper";
 
 const BILLING_PREFIX = '/billing'
+import { PaymentType } from "@/features/billing/types/paymentStatus";
 
 export const BILLING_ENDPOINTS = withPrefix(BILLING_PREFIX,{
   clients: "/partners/clients",
@@ -21,6 +22,10 @@ export const BILLING_ENDPOINTS = withPrefix(BILLING_PREFIX,{
   supplierInvoiceById: (id: string) => `/invoices/suppliers/${id}`,
   getClientsInvoices: (idClient:string) => `/invoices/last/client-invoices/${idClient}`,
   getSuppliersInvoices: (idSupplier:string) => `/invoices/last/supplier-invoices/${idSupplier}`,
+  existByCompanyName: (companyName:String)=> `/partners/suppliers/existByCompanyName/${companyName}`,
+  getSupplierByCompanyName :(companyName:String) => `/partners/suppliers/companyName/${companyName}`,
+  clientExistByCompanyName: (companyName:String)=> `/partners/clients/existByCompanyName/${companyName}`,
+  getClientByCompanyName :(companyName:String) => `/partners/clients/companyName/${companyName}`,
 
 
   updatestatus: (id: string, statusClient: boolean) => `/partners/clients/updateStatus/${id}?statusClient=${statusClient}`,
@@ -85,11 +90,15 @@ export const PURCHASE_ORDER_ENDPOINTS = withPrefix(BILLING_PREFIX,{
   purchaseOrders: "/purchase-orders/",
   nextNumber: "/purchase-orders/next-number",
   summary:"/purchase-orders/summary",
-  updateSupplierPurchaseOrder : "/purchase-orders/supplier",
+ 
   getPurchaseOrders: (query? : GetListParams)=> `/purchase-orders/${buildQueryString(query)}`,
   purchaseOrderById: (id?: string) => `/purchase-orders/${id}`, 
   updateStatusPurchaseOrder: (id: string)=> `/purchase-orders/${id}/status`,
+  
 
+  clientPurchaseOrders: "/purchase-orders/client",
+  
+  updateSupplierPurchaseOrder : "/purchase-orders/supplier",
   supplierPurchaseOrders: "/purchase-orders/supplier",
   supplierSummary:"/purchase-orders/supplier/summary",
   getSupplierPurchaseOrders: (query? : GetListParams)=> `/purchase-orders/supplier${buildQueryString(query)}`,
@@ -113,7 +122,8 @@ export const PAYMENT_ENDPIONTS= withPrefix(BILLING_PREFIX,{
   getPayments: (query?: GetListParams)=>`/payments${buildQueryString(query)}`,
   getPaymentsByIdInvoice: (id: string, query?: GetListParams)=>`/payments/invoice/${id}${buildQueryString(query)}`,
   getPaymentsByIdParner: (id: string, query?: GetListParams)=>`/payments/partner/${id}${buildQueryString(query)}`,
-  paymentById: (id: string)=>`/payments/${id}`
+  paymentById: (id: string)=>`/payments/${id}`,
+ updatePaymentStatus: (id: string, paymentStatus: PaymentType) =>`/payments/updateStatus/${id}?paymentStatus=${paymentStatus}`,
 })
 
 export const DASHBOARD_ENDPOINTS= withPrefix(BILLING_PREFIX,{
@@ -203,7 +213,10 @@ export const TVA_RATE_ENDPOINTS = withPrefix(BILLING_PREFIX,{
     `/tva-rates/code/${code}`,
 
   getTvaRateByLabel: (label: string) =>
-    `/tva-rates/label/${label}`,
+  `/tva-rates/label?label=${encodeURIComponent(label)}`,
+
+  existTvaRateByLabel: (label: string) =>
+  `/tva-rates/existByLabel?label=${encodeURIComponent(label)}`,
 
   createTvaRate: "/tva-rates",
 

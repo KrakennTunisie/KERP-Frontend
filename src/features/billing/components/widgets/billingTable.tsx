@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 
 import { InvoiceStatus } from "../../types/invoiceStatus";
 import { InvoiceTableRow } from "./invoiceTableRow";
+import { PaymentType } from "../../types/paymentStatus";
 
 type BillingTableVariant = "invoice" | "payment" | "invoiceCreditNotes";
 
@@ -22,16 +23,20 @@ type BillingTableProps<T> = {
   onView: (item: T) => void;
   onEdit?: (item: T) => void;
   onDelete?: (item: T) => void;
+  onArchive?: (item: T) => void;
   onSend?: (item: T) => void;
 
   onUpdateStatus?: (item: T) => void;
   canUpdateStatus?: (item: T) => boolean;
 
   getNumber: (item: T) => string;
+  getCurrency: (item: T) => string;
   getDate: (item: T) =>  Date| undefined;
 
   getPartnerName?: (item: T) => string | null | undefined;
+  getPartnerEmail?: (item: T) => string | null | undefined;
   getStatus?: (item: T) => InvoiceStatus | null | undefined;
+  getPaymentStatus?: (item: T) => PaymentType | null | undefined;
 
   getAmountEUR?: (item: T) => number | null | undefined;
   getAmountTND?: (item: T) => number | null | undefined;
@@ -57,13 +62,17 @@ export function BillingTable<T>({
   onView,
   onEdit,
   onDelete,
+  onArchive,
   onSend,
   onUpdateStatus,
   canUpdateStatus,
   getNumber,
+  getCurrency,
   getDate,
   getPartnerName,
+  getPartnerEmail,
   getStatus,
+  getPaymentStatus,
   getAmountEUR,
   getAmountTND,
   getPaymentMethod,
@@ -83,18 +92,18 @@ export function BillingTable<T>({
         "Référence",
         secondColumnLabel,
         "Méthode",
-        "Montant EUR",
-        "Montant TND",
+        "Montant",
+       
         "Date",
-        "Conforme",
+      
         "Actions",
       ]
     : [
         "Référence",
         secondColumnLabel,
         "Statut",
-        isInvoiceCreditNote ? "Montant avoir EUR" : "Montant TTC EUR",
-        isInvoiceCreditNote ? "Montant avoir TND" : "Montant TTC TND",
+        isInvoiceCreditNote ? "Montant avoir EUR" : "Montant TTC",
+       
         "Date",
         "Conforme",
         "Actions",
@@ -171,12 +180,16 @@ export function BillingTable<T>({
               onView={onView}
               onEdit={onEdit}
               onDelete={onDelete}
+              onArchive={onArchive}
               onSend={onSend}
               onUpdateStatus={onUpdateStatus}
               canUpdateStatus={canUpdateStatus}
               getNumber={getNumber}
+              getCurrency={getCurrency}
               getPartnerName={getPartnerName}
+              getPartnerEmail={getPartnerEmail}
               getStatus={getStatus}
+              getPaymentStatus={getPaymentStatus}
               getAmountEUR={getAmountEUR}
               getAmountTND={getAmountTND}
               getDate={getDate}

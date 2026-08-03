@@ -61,15 +61,21 @@ export function FiltersBar({
             <select
               value={cityValue}
               onChange={(e) => onCityChange(e.target.value)}
-              className="h-10 w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 px-3 pr-9 text-xs font-medium text-slate-900 outline-none transition hover:bg-white focus:border-blue-300 focus:bg-white focus:ring-2 focus:ring-blue-100 cursor-pointer"
+              disabled={cityOptions.length === 0}
+              className="h-10 w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 px-3 pr-9 text-xs font-medium text-slate-900 outline-none transition hover:bg-white focus:border-blue-300 focus:bg-white focus:ring-2 focus:ring-blue-100 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
             >
-              <option value="all">Toutes les pays</option>
-
-              {cityOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
+              {cityOptions.length === 0 ? (
+                <option value="">Aucun pays disponible</option>
+              ) : (
+                <>
+                  <option value="all">Toutes les pays</option>
+                  {cityOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </>
+              )}
             </select>
 
             <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />

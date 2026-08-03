@@ -11,7 +11,7 @@ import { Controller } from "react-hook-form"
 import PurchaseOrderPreview from "../widgets/purchaseOrderPreview"
 import { PurchaseOrder } from "../../models/purchaseOrder"
 import PageLoader from "@/shared/components/ui/pageLoader"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Eye, EyeOff } from "lucide-react"
 import { extractTvaRate, formatShowLabel } from "../../lib/settingItemHelpers"
 import { useFetchSettings } from "../../hooks/useFetchSetting"
@@ -23,6 +23,9 @@ import AddSettingModal from "../parameters/addSettingItem"
 import { FieldError } from "@/shared/components/ui/fieldError"
 import { Input } from "@/shared/components/ui/input"
 import { Label } from "@/shared/components/ui/label"
+import AddPartnerModal from "../widgets/addPartnerModal"
+import { partnerTypeSchema } from "../../types/partnerType"
+import { discountTypeOptions, discountTypeSchema } from "../../types/discountType"
 
 export default function CreatePurchaseOrder({
     mode,
@@ -34,27 +37,31 @@ export default function CreatePurchaseOrder({
         errors, selectSupplier, clearSupplier, suppliers,
         previewData, form, onSubmit, router, isModalOpen, createPurchaseOrder, pdfUrl,
         onCloseDocumentModal, purchaseOrderRef, updatePurchaseOrder,
-        loadingEdit,
+        loadingEdit, showAddSupplierModal,
+        setShowAddSupplierModal,
+        handleSupplierAdded,
+        newSupplier,
+        setNewSupplier,
+        setNewSupplierName,
         loadingForm,
         getItemError,
         getError
     } = useCreatePurchaseOrder({ mode, purchaseOrderId })
 
-    
-    const {
-        vatRates,
-        operationCategories,
-        paymentConditions,
-        fetchPaymentConditions, fetchCategories, fetchTvaRates
-        } = useFetchSettings()
 
-          
-    const {      
-            typeAdd,  openAddModal, onCloseAddModal, loadingAddModal, 
-    
-            onAction, handleCreate, getTitleAddModal
-    
-        } = UseSetting()
+    const { fetchCategories, fetchPaymentConditions, fetchTvaRates, operationCategories, paymentConditions, vatRates } = useFetchSettings();
+    useEffect(() => {
+        fetchTvaRates();
+        fetchCategories();
+        fetchPaymentConditions();
+    }, []);
+
+    const {
+        typeAdd, openAddModal, onCloseAddModal, loadingAddModal,
+
+        onAction, handleCreate, getTitleAddModal
+
+    } = UseSetting()
 
     const [showPreview, setShowPreview] = useState(true)
     const { register, watch, setValue } = form
@@ -128,6 +135,13 @@ export default function CreatePurchaseOrder({
                     </button>
                 </div>
             </header>
+            <AddPartnerModal
+                isOpen={showAddSupplierModal}
+                partner={newSupplier}
+                partnerType={partnerTypeSchema.enum.SUPPLIER}
+                onClose={() => setShowAddSupplierModal(false)}
+                onSuccess={handleSupplierAdded}
+            />
             {/* Modal pour la facture générée  */}
             <DocumentPreviewModal
                 open={isModalOpen}
@@ -138,13 +152,19 @@ export default function CreatePurchaseOrder({
                 type="Bon Commande" />
 
             {typeAdd && <AddSettingModal
-                            open={openAddModal}
-                            title={getTitleAddModal()}
-                            loading={loadingAddModal}
-                            onClose={onCloseAddModal}
-                            onSubmit={handleCreate} 
-                            settingType={typeAdd}       
-                    />}
+                open={openAddModal}
+                title={getTitleAddModal()}
+                loading={loadingAddModal}
+                onClose={onCloseAddModal}
+                onSubmit={handleCreate}
+                settingType={typeAdd}
+                onSuccess={async () => {
+                    await fetchTvaRates()
+                    await fetchCategories()
+                    await fetchPaymentConditions()
+
+                }}
+            />}
             {/* ── Body ── */}
             <div className="flex h-[calc(110vh-80px)]">
 
@@ -233,7 +253,7 @@ export default function CreatePurchaseOrder({
                                                         onMouseDown={(e) => {
                                                             e.preventDefault();
                                                             selectSupplier(supplier);
-                                                            setSupplierSearch(supplier.companyName); 
+                                                            setSupplierSearch(supplier.companyName);
                                                         }}
                                                         className="w-full text-left px-4 py-3 hover:bg-blue-50 transition border-b border-slate-50 last:border-0"
                                                     >
@@ -241,46 +261,27 @@ export default function CreatePurchaseOrder({
                                                         <p className="text-xs text-slate-400 mt-0.5">{supplier.billingAddress!.city}</p>
                                                     </button>
                                                 ))}
+                                                {/* Lien pour ajouter un fournisseur inexistant */}
+                                                <button
+                                                    type="button"
+                                                    onMouseDown={(e) => {
+                                                        e.preventDefault();
+                                                        setNewSupplierName(supplierSearch);
+                                                        setShowAddSupplierModal(true);
+                                                        setShowDropdown(false);
+                                                    }}
+                                                    className="w-full text-left px-4 py-3 flex items-center gap-2 text-blue-600 hover:bg-blue-50 transition"
+                                                >
+                                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                                                    </svg>
+                                                    <span className="text-sm font-medium">Ajouter un  nouveau fournisseur</span>
+                                                </button>
                                             </div>
                                         )}
                                     </div>
                                     <FieldError error={getError("partner")} />
                                 </div>
-
-                                {/* Client sélectionné */}
-                                {previewData.partner && previewData.partner.email != "" && previewData.partner.professionnalPhoneNumber?.toString() != "" && (
-                                    <div className="border-2 border-blue-100 bg-blue-50/40 rounded-xl p-4">
-                                        <div className="flex items-start justify-between mb-1">
-                                            <p className="text-sm font-semibold text-slate-700">{previewData.partner.companyName}</p>
-                                            <button
-                                                type="button"
-                                                onClick={clearSupplier}
-                                                className="text-slate-300 hover:text-red-400 transition"
-                                            >
-                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                                </svg>
-                                            </button>
-                                        </div>
-                                        <p className="text-xs text-blue-500 mb-2">{previewData?.partner?.billingAddress?.region}</p>
-
-                                        {/* Email + Téléphone sur une ligne */}
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <span className="flex items-center gap-1.5 text-xs text-blue-500">
-                                                <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                                </svg>
-                                                {previewData.partner.email}
-                                            </span>
-                                            <span className="flex items-center gap-1.5 text-xs text-blue-500">
-                                                <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                                                </svg>
-                                                {previewData.partner.professionnalPhoneNumber}
-                                            </span>
-                                        </div>
-                                    </div>
-                                )}
                             </div>
                         </section>
 
@@ -295,14 +296,14 @@ export default function CreatePurchaseOrder({
                                             Devise
                                         </Label>
                                         <Select value={watch("currency") ?? ""}
-                                                disabled={mode==="edit"}
-                                                onValueChange={(value) =>
-                                                    {setValue("currency", value as CurrencyType, {
-                                                        shouldValidate: true,
-                                                        shouldDirty: true,
-                                                    });
-                                                
-                                                }
+                                            disabled={mode === "edit"}
+                                            onValueChange={(value) => {
+                                                setValue("currency", value as CurrencyType, {
+                                                    shouldValidate: true,
+                                                    shouldDirty: true,
+                                                });
+
+                                            }
                                             }>
                                             <SelectTrigger className="bg-slate-50" >
                                                 <SelectValue placeholder="Devise" />
@@ -311,7 +312,7 @@ export default function CreatePurchaseOrder({
                                                 {currencyTypeSchema.options.map((currency) => (
                                                     <SelectItem key={currency} value={currency}>
                                                         {currency}
-                                                    </SelectItem>                                                
+                                                    </SelectItem>
                                                 ))}
                                             </SelectContent>
                                         </Select>
@@ -338,23 +339,23 @@ export default function CreatePurchaseOrder({
                                         </Label>
 
                                         <Select value={watch("paymentCondition") ?? ""}
-                                                onValueChange={(value) =>
-                                                    {setValue("paymentCondition", value as PaymentCondition, {
-                                                        shouldValidate: true,
-                                                        shouldDirty: true,
-                                                    });                                                
-                                                }
+                                            onValueChange={(value) => {
+                                                setValue("paymentCondition", value as PaymentCondition, {
+                                                    shouldValidate: true,
+                                                    shouldDirty: true,
+                                                });
+                                            }
                                             }>
-                                            <SelectTrigger className="bg-slate-50" 
-                                                onAdd={()=>onAction(SettingTypeSchema.enum.PAYMENT_CONDITION)}
-                                                onRefresh={fetchPaymentConditions}>
+                                            <SelectTrigger className="bg-slate-50"
+                                                onAdd={() => onAction(SettingTypeSchema.enum.PAYMENT_CONDITION)}
+                                            >
                                                 <SelectValue placeholder="Méthode de paiement" />
                                             </SelectTrigger>
                                             <SelectContent>
                                                 {paymentConditions.map((condition) => (
                                                     <SelectItem key={condition.code} value={condition.label}>
                                                         {formatShowLabel(condition.label)}
-                                                    </SelectItem>                                                
+                                                    </SelectItem>
                                                 ))}
                                             </SelectContent>
                                         </Select>
@@ -366,21 +367,21 @@ export default function CreatePurchaseOrder({
                                             Méthode de paiement
                                         </Label>
                                         <Select value={watch("paymentMethod") ?? ""}
-                                                onValueChange={(value) =>
-                                                    setValue("paymentMethod", value as paymentMethod, {
-                                                        shouldValidate: true,
-                                                        shouldDirty: true,
-                                                    })
+                                            onValueChange={(value) =>
+                                                setValue("paymentMethod", value as paymentMethod, {
+                                                    shouldValidate: true,
+                                                    shouldDirty: true,
+                                                })
                                             }>
                                             <SelectTrigger className="bg-slate-50">
                                                 <SelectValue placeholder="Méthode de paiement" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                    {paymentMethodSchema.options.map((method) => (
+                                                {paymentMethodSchema.options.map((method) => (
                                                     <SelectItem key={method} value={method}>
                                                         {paymentMethodLabels[method]}
                                                     </SelectItem>
-                                                    ))}
+                                                ))}
                                             </SelectContent>
                                         </Select>
                                     </div>
@@ -403,10 +404,13 @@ export default function CreatePurchaseOrder({
                             </div>
 
                             <div className="flex flex-col gap-3 mt-3">
-                                {(previewData.purchaseOrderItems ?? []).map((item, index) => (
-                                    <div key={item.idPurchaseOrderItem ?? index} className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+                                {(previewData.purchaseOrderItems ?? []).map((item, index) => {
+                                    const lineTotal = (item.quantity ?? 0) * (item.unityPriceEXclTax ?? 0);
 
-                                        {/* Désignation + bouton supprimer */}
+                                    return ( // ✅ ajouté
+                                        <div key={item.idPurchaseOrderItem ?? index} className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+
+                                            {/* Désignation + bouton supprimer */}
                                             <div className="flex items-center justify-between mb-1">
                                                 <div className="text-xs font-medium text-slate-500">
                                                 </div>
@@ -420,8 +424,8 @@ export default function CreatePurchaseOrder({
                                                 </button>
                                             </div>
 
-                                        {/* Input désignation */}
-                                        <Input
+                                            {/* Input désignation */}
+                                            <Input
                                                 label="Désignation"
                                                 value={item.description}
                                                 onChange={(e) =>
@@ -430,115 +434,176 @@ export default function CreatePurchaseOrder({
                                                 error={getItemError(index, "description")}
                                             />
 
-                                        {/* Catégorie */}
-                                        <div className="mt-3 mb-4">
-                                            <Label>
-                                                Catégorie
-                                            </Label>
-                                            
-                                            <Select
-                                                value={item.operationCategory}
-                                                onValueChange={(value) =>
-                                                    updateItem(
-                                                        item.idPurchaseOrderItem!,
-                                                        "operationCategory",
-                                                        value
-                                                    )
-                                                }
-                                            >
-                                                <SelectTrigger 
-                                                        onAdd={()=>onAction(SettingTypeSchema.enum.OPERATION_CATEGORY)}
-                                                        onRefresh={fetchCategories}>
-                                                    <SelectValue placeholder="Sélectionner une catégorie" />
-                                                </SelectTrigger>
-
-                                                <SelectContent>
-                                                    {operationCategories.map((category) => (
-                                                        <SelectItem
-                                                            key={category.code}
-                                                            value={category.label}
-                                                        >
-                                                            {formatShowLabel(category.label)}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                            <FieldError
-                                                error={getItemError(index, "operationCategory")}
-                                            />
-                                        </div>
-
-                                        {/* QTÉ / P.U HT / TVA */}
-                                        <div className="grid grid-cols-3 gap-2">
-                                            <div>
-                                                <Label >
-                                                    QTÉ
-                                                </Label>
-                                                <Input
-                                                    type="number"
-                                                    min={1}
-                                                    value={item.quantity}
-                                                    onChange={(e) =>
-                                                        updateItem(
-                                                            item.idPurchaseOrderItem!,
-                                                            "quantity",
-                                                            Number(e.target.value)
-                                                        )
-                                                    }
-                                                    error={getItemError(index, "quantity")}
-                                                />
-                                            </div>
-                                            <div>
+                                            {/* Catégorie */}
+                                            <div className="mt-3 mb-4">
                                                 <Label>
-                                                    P.U HT
+                                                    Catégorie
                                                 </Label>
-                                                <Input
-                                                    type="number"
-                                                    min={0}
-                                                    defaultValue={item.unityPriceEXclTax}
-                                                    onBlur={(e) =>
-                                                        updateItem(
-                                                            item.idPurchaseOrderItem!,
-                                                            "unityPriceEXclTax",
-                                                            Number(e.target.value)
-                                                        )
-                                                    }
-                                                    error={getItemError(index, "unityPriceEXclTax")}
-                                                />
-                                            </div>
-                                            <div>
-                                                <Label>
-                                                    TVA %
-                                                </Label>
+
                                                 <Select
-                                                    value={String(item.vatRate)}
+                                                    value={item.operationCategory ?? ""}
                                                     onValueChange={(value) =>
-                                                        updateItem(item.idPurchaseOrderItem!, "vatRate", Number(value))
+                                                        updateItem(
+                                                            item.idPurchaseOrderItem!,
+                                                            "operationCategory",
+                                                            value
+                                                        )
                                                     }
                                                 >
-                                                    <SelectTrigger 
-                                                            onAdd={()=>onAction(SettingTypeSchema.enum.TVA_RATE)}
-                                                            onRefresh={fetchTvaRates}>
-                                                        <SelectValue />
+                                                    <SelectTrigger
+                                                        onAdd={() => onAction(SettingTypeSchema.enum.OPERATION_CATEGORY)}
+                                                    >
+                                                        <SelectValue placeholder="Sélectionner une catégorie" />
                                                     </SelectTrigger>
 
                                                     <SelectContent>
-                                                        {vatRates.map((rate) => (
+                                                        {operationCategories.map((category) => (
                                                             <SelectItem
-                                                                key={rate.code}
-                                                                value={String(extractTvaRate(rate.label))}
+                                                                key={category.code}
+                                                                value={category.label}
                                                             >
-                                                                {formatShowLabel(rate.label)}
+                                                                {formatShowLabel(category.label)}
                                                             </SelectItem>
                                                         ))}
                                                     </SelectContent>
                                                 </Select>
+                                                <FieldError
+                                                    error={getItemError(index, "operationCategory")}
+                                                />
+                                            </div>
 
-                                                <FieldError error={errors.purchaseOrderItems?.[index]?.vatRate?.message} />
+                                            {/* QTÉ / P.U HT / TVA */}
+                                            <div className="grid grid-cols-3 gap-2">
+                                                <div>
+                                                    <Label>
+                                                        QTÉ
+                                                    </Label>
+                                                    <Input
+                                                        type="number"
+                                                        min={1}
+                                                        value={item.quantity}
+                                                        onChange={(e) =>
+                                                            updateItem(
+                                                                item.idPurchaseOrderItem!,
+                                                                "quantity",
+                                                                Number(e.target.value)
+                                                            )
+                                                        }
+                                                        error={getItemError(index, "quantity")}
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <Label>
+                                                        P.U HT
+                                                    </Label>
+                                                    <Input
+                                                        type="number"
+                                                        min={0}
+                                                        defaultValue={item.unityPriceEXclTax}
+                                                        onBlur={(e) =>
+                                                            updateItem(
+                                                                item.idPurchaseOrderItem!,
+                                                                "unityPriceEXclTax",
+                                                                Number(e.target.value)
+                                                            )
+                                                        }
+                                                        error={getItemError(index, "unityPriceEXclTax")}
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <Label>
+                                                        TVA %
+                                                    </Label>
+                                                    <Select
+                                                        value={String(item.vatRate)}
+                                                        onValueChange={(value) =>
+                                                            updateItem(item.idPurchaseOrderItem!, "vatRate", Number(value))
+                                                        }
+                                                    >
+                                                        <SelectTrigger
+                                                            onAdd={() => onAction(SettingTypeSchema.enum.TVA_RATE)}
+                                                        >
+                                                            <SelectValue />
+                                                        </SelectTrigger>
+
+                                                        <SelectContent>
+                                                            {vatRates.map((rate) => (
+                                                                <SelectItem
+                                                                    key={rate.code}
+                                                                    value={String(extractTvaRate(rate.label))}
+                                                                >
+                                                                    {formatShowLabel(rate.label)}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+
+                                                    <FieldError error={errors.purchaseOrderItems?.[index]?.vatRate?.message} />
+                                                </div>
+
+                                                {/* Discount */}
+                                                <div className="col-span-2">
+                                                    <Label>
+                                                        Discount
+                                                    </Label>
+
+                                                    <div className="flex gap-2">
+                                                        <Input
+                                                            type="number"
+                                                            min={0}
+                                                            value={item.discountValue ?? 0}
+                                                            onChange={(e) =>
+                                                                updateItem(
+                                                                    item.idPurchaseOrderItem!,
+                                                                    "discountValue",
+                                                                    Number(e.target.value)
+                                                                )
+                                                            }
+                                                            className="flex-1"
+                                                        />
+
+                                                        <Select
+                                                            value={item.discountType ?? "PERCENTAGE"}
+                                                            onValueChange={(value) =>
+                                                                updateItem(
+                                                                    item.idPurchaseOrderItem!,
+                                                                    "discountType",
+                                                                    value
+                                                                )
+                                                            }
+                                                        >
+                                                            <SelectTrigger className="w-28">
+                                                                <SelectValue />
+                                                            </SelectTrigger>
+
+                                                            <SelectContent>
+                                                                {discountTypeOptions.map((discountType) => (
+                                                                    <SelectItem key={discountType.value} value={discountType.value}>
+                                                                        {discountType.value === discountTypeSchema.enum.AMOUNT
+                                                                            ? form.getValues("currency")
+                                                                            : discountType.label}
+                                                                    </SelectItem>
+                                                                ))}
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </div>
+
+                                                    <FieldError error={errors.purchaseOrderItems?.[index]?.discountValue?.message} />
+                                                </div>
+
+                                                <div>
+                                                    <Label>Total HT</Label>
+                                                    <input
+                                                        type="text"
+                                                        readOnly
+                                                        value={lineTotal.toFixed(2)}
+                                                        className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-100 text-sm font-semibold text-slate-700 text-center focus:outline-none transition"
+                                                    />
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                             {errors.purchaseOrderItems?.message && (
                                 <ErrorForm error={errors.purchaseOrderItems?.message} />

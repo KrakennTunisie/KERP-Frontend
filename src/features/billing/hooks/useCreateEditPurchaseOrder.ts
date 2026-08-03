@@ -43,13 +43,17 @@ type UpdateableField =
   | "quantity"
   | "unityPriceEXclTax"
   | "vatRate"
-  | "operationCategory";
+  | "operationCategory"
+  | "discountType"
+  | "discountValue";
 
 
 export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderFormClientProps) {
   const [nextNumber, setNextNumber] = useState<nextNumber>()
   const [exchangeRate, setExchangeRate] = useState<ExchangeRate>()
   const [purchaseOrder, setPurchaseOrder] = useState<PurchaseOrderDetails>()
+  const [newSupplier, setNewSupplier] = useState<PartnerSummary>();
+  const [newSupplierName, setNewSupplierName] = useState<string>("");
   const [loadingEdit, setLoadingEdit] = useState(false);
   const [loadingForm, setLoadingForm] = useState(false);
 
@@ -199,6 +203,7 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
   useEffect(() => {
     if (mode === "edit" && purchaseOrder) {
       console.log("Status reçu:", purchaseOrder?.purchaseOrderStatus);
+      setSupplierSearch(purchaseOrder.partner?.companyName!)
       reset({
         idPurchaseOrder: purchaseOrder.idPurchaseOrder,
         purchaseOrderNumber: purchaseOrder.purchaseOrderNumber,
@@ -236,9 +241,39 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
       console.log(purchaseOrder)
     }
   }, [mode, purchaseOrder, reset]);
+  // rafraîchissement des données aprés l'ajout de nouveau fournisseur
+      const handleSupplierAdded = async () => {
+          try {
+              await getSuppliers();
+              setNewSupplier({
+                  companyName: "",
+                  email: null,
+                  professionnalPhoneNumber: null,
+                  taxRegistrationNumber: null,
+                  currency: currencyTypeSchema.enum.TND,
+                  taxRate: "",
+                  billingAddress: {
+                      street1: null,
+                      street2: null,
+                      city: null,
+                      state: null,
+                      zipCode: null,
+                      addressType: "Billing Address",
+                  },
+                  maritalStatus: "",
+                  partnerName: "",
+                  partnerType: "SUPPLIER",
+                  idPartner: crypto.randomUUID(),
+              });
+  
+          } catch (error) {
+              console.error("Erreur lors du rafraîchissement après ajout:", error);
+          }
+      };
 
   // UI state only
   const [supplierSearch, setSupplierSearch] = useState("");
+  const [showAddSupplierModal, setShowAddSupplierModal] = useState(false);
   const [suppliers, setSuppliers] = useState<PartnerSummary[] | []>([])
   const [loadingSuppliers, setLoadingSuppliers] = useState(false)
   const [showDropdown, setShowDropdown] = useState(false);
@@ -312,6 +347,8 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
       idPurchaseOrderItem: (item as PurchaseOrderItem).idPurchaseOrderItem ?? uuidv4(),
       purchaseOrder: (item as PurchaseOrderItem).purchaseOrder ?? null,
       invoicedQuantity: (item as PurchaseOrderItem).invoicedQuantity ?? 0,
+      discountValue :(item as PurchaseOrderItem).discountValue ?? 0,
+      discountType : (item as PurchaseOrderItem).discountType ?? null,
     }));
 
     replace(mappedItems);
@@ -571,6 +608,12 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
     setShowDropdown,
     selectSupplier,
     clearSupplier,
+    showAddSupplierModal, 
+    setShowAddSupplierModal,
+    handleSupplierAdded,
+    newSupplier,
+    setNewSupplier,
+    setNewSupplierName,
 
     //data validation
 

@@ -14,7 +14,7 @@ export const CreateTVARateSchema = CreateSettingSchema.extend({
     label: z
     .string()
     .min(1, "Le libellé est obligatoire")
-    .regex(/^\d+$/, "Le libellé doit être un nombre")
+    .regex(/^\d+(\.\d{1,2})?$/, "Le libellé doit être un nombre valide")
     .refine((value) => {
         const number = Number(value);
         return number >= 0 && number <= 100;

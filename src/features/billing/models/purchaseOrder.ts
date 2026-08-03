@@ -153,6 +153,40 @@ export const CategoryAmountSchema = z.object({
   montant: z.number(),
 });
 
+
+/*** Schema pour un item de facture extrait ***/
+const extractedPurchaseOrderItemSchema = z.object({
+    description: z.string(),
+    quantity: z.number(),
+    unityPriceExclTax: z.number(),
+    itemTotalInclTax: z.number(),
+    operationCategory: z.string(),
+    vatRate: z.number(),
+    itemTotalExclTax: z.number(),
+    discountValue: z.number(),
+});
+
+/*** Schema pour les données de facture extraites via IA/OCR ***/
+const extractedPurchaseOrderSchema = z.object({
+    purchaseOrderNumber: z.string(),
+    issueDate: z.string(), 
+    deliveryDate: z.string(),
+    purchaseCurrency: z.string(), 
+    vatRate: z.number(),
+    totalExclTax: z.number(),
+    totalInclTax: z.number(),
+    companyName: z.string(),
+    issuerTaxId: z.string(),
+    companyAddress: z.string(),
+    issuerEmail: z.string(),
+    issuerPhone: z.string(),
+    paymentCondition: z.string(),
+    paymentMethod: z.string(),
+    purchaseOrderItems: z.array(extractedPurchaseOrderItemSchema).default([]),
+});
+
+export type ExtractedPurchaseOrder = z.infer<typeof extractedPurchaseOrderSchema>;
+
 export type CategoryAmount = z.infer<typeof CategoryAmountSchema>;
 
 export type SupplierExpenseStats = z.infer<typeof SupplierExpenseStatsSchema>;

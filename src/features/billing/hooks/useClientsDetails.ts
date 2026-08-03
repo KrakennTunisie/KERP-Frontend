@@ -66,8 +66,8 @@ export default function UseClientsDetails({ partner, onRefresh }: PartnerDetails
   const [activeTab, setActiveTab] = useState('overview');
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     invoices: true,
-    payments: false,
-    purchaseOrders: false,
+    payments: true,
+    purchaseOrders: true,
   });
   const [deleteLoading, setDeleteLoading] = useState(false)
   const [deletePartnerOpen, setDeletePartnerOpen] = useState(false)

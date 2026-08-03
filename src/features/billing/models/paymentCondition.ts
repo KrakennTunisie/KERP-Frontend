@@ -11,7 +11,7 @@ export const PaymentConditionSchema = SettingBaseSchema.extend({
 export type PaymentCondition = z.infer<typeof PaymentConditionSchema>;
 
 export const CreatePaymentConditionSchema = CreateSettingSchema.extend({
-    label: z.string().min(1, "Label est obligatoire").regex(/^[1-9]\d*$/, "Le libellé doit être un nombre entier positif"),
+    label: z.string().min(0, "Label est obligatoire").regex(/^[0-9]\d*$/, "Le libellé doit être un nombre entier positif"),
     settingType: z.literal("PAYMENT_CONDITION"),
 });
 

@@ -43,10 +43,12 @@ export default function useSupplierInvoiceList() {
   const [filtre, setFiltre] = useState<InvoiceStatus>("ALL");
   const [loading, setLoading] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(false)
+  const [archiveLoading, setArchiveLoading] = useState(false)
   const [updateLoading, setUpdateLoading] = useState(false)
   const [invoiceId, setInvoiceId] = useState("")
   const [open, setOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [archiveOpen, setArchiveOpen] = useState(false);
   const [updateOpen, setUpdateOpen] = useState(false);
   const [invoiceRef, setInvoiceRef] = useState("");
   const [suppliersInvoices, setSuppliersInvoices] = useState<InvoicePageItem[] | []>([])
@@ -111,6 +113,7 @@ export default function useSupplierInvoiceList() {
       setDeleteLoading(false);
     }
   }
+  
 
   const fetchSuppliersInvoices = async () => {
     try {
@@ -165,6 +168,22 @@ export default function useSupplierInvoiceList() {
     }
   }
 
+  const archiveInvoice = async()=>{
+         try {
+            setArchiveLoading(true);
+            const formData = new FormData();
+            formData.append("status",  "ARCHIVED");
+            await InvoicesAPI.updateSupplierInvoiceStatus(invoiceId, formData);
+            appToast.success('Facture archivée avec succés.')
+            setArchiveOpen(false)
+            await fetchSuppliersInvoices()
+          } catch (error) {
+            appToast.error("Erreur d'archivage: ",getApiErrorMessage(error))
+          } finally {
+            setArchiveLoading(false);
+          }
+      }
+
   const setFile = useInvoiceStore(state => state.setFile);
   const setFileUrl = useInvoiceStore(state => state.setFileUrl);
 
@@ -178,13 +197,11 @@ export default function useSupplierInvoiceList() {
 
     const extractedData = await extractInvoice(file);
 
-    // Stash the result so the create page can read it after navigation
-    sessionStorage.setItem('extractedInvoiceData', JSON.stringify(extractedData));
+    localStorage.setItem('extractedInvoiceData', JSON.stringify(extractedData));
 
     router.push(`/billing/invoices/suppliers/create`);
   } catch (error) {
     console.error('Extraction failed:', error);
-    // Still navigate so the user can fill the form manually
     router.push(`/billing/invoices/suppliers/create`);
   } finally {
     setLoading(false);
@@ -195,7 +212,7 @@ async function extractInvoice(file: File) {
   const formData = new FormData();
   formData.append('data', file); // 'data' is the binary property name n8n expects
 
-  const res = await fetch('http://localhost:5678/webhook-test/2cc77c51-b677-4f7a-bfca-c30d5b4e43bb', {
+  const res = await fetch('http://localhost:5678/webhook/b770d73d-b268-4c5b-a25d-7bc47fe8516e', {
     method: 'POST',
     body: formData,
   });
@@ -239,6 +256,10 @@ async function extractInvoice(file: File) {
     suppliersInvoiceStats,
     isUploadInvoiceOpen, setIsUploadInvoiceOpen,
     handleUpload,
+    archiveLoading,
+    archiveOpen,
+    setArchiveOpen,
+    archiveInvoice
 
 
   }

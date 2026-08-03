@@ -115,7 +115,7 @@ export function InvoiceDetailsTab({
             <ReceiptText className="h-3.5 w-3.5" />
             Avoirs
           </button>
-        ) : (
+        ) : type =="CLIENT" &&(
           <button
             onClick={() =>
               router.push(`/billing/invoices/clients/${invoiceId}/credit-note/create`)
