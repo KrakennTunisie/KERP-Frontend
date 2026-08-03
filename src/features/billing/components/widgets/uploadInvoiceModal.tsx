@@ -54,6 +54,7 @@ export default function UploadInvoiceModal({
     <Modal
       open={open}
       onClose={handleClose}
+      loading={loading}
       title="Nouvelle facture fournisseur"
       footer={
         <>
@@ -79,11 +80,11 @@ export default function UploadInvoiceModal({
             disabled={!file || loading}
             onClick={handleUpload}
             className="
-    px-4 py-2 rounded-lg
-    bg-blue-600 text-white
-    text-sm font-semibold
-    hover:bg-blue-700
-    disabled:opacity-50
+             px-4 py-2 rounded-lg
+           bg-blue-600 text-white
+           text-sm font-semibold
+           hover:bg-blue-700
+             disabled:opacity-50
     disabled:cursor-not-allowed
     cursor-pointer
     inline-flex items-center justify-center gap-2
@@ -174,6 +175,7 @@ export default function UploadInvoiceModal({
               <button
                 type="button"
                 onClick={reset}
+                disabled={loading}
                 className="
                   w-8 h-8
                   rounded-lg

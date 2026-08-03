@@ -9,32 +9,13 @@ import { appToast } from "@/shared/lib/toast";
 import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 import { InvoiceData } from "../components/widgets/invoicePreview";
 import { create } from "zustand";
+import { useInvoiceStore } from "../lib/globalStateFile";
 export type PropsSupplier = {
   params: {
     invoiceId: string
   }
 }
-type InvoiceStore = {
-  selectedFile: File | null;
-  setSelectedFile: (file: File | null) => void;
-  clearSelectedFile: () => void;
-};
 
-type Store = {
-  file: File | null;
-  fileUrl: string | null;
-
-  setFile: (file: File | null) => void;
-  setFileUrl: (url: string | null) => void;
-};
-
-export const useInvoiceStore = create<Store>((set) => ({
-  file: null,
-  fileUrl: null,
-
-  setFile: (file) => set({ file }),
-  setFileUrl: (url) => set({ fileUrl: url }),
-}));
 export default function useSupplierInvoiceList() {
   const searchParams = useSearchParams();
 
@@ -113,7 +94,7 @@ export default function useSupplierInvoiceList() {
       setDeleteLoading(false);
     }
   }
-  
+
 
   const fetchSuppliersInvoices = async () => {
     try {
@@ -168,61 +149,62 @@ export default function useSupplierInvoiceList() {
     }
   }
 
-  const archiveInvoice = async()=>{
-         try {
-            setArchiveLoading(true);
-            const formData = new FormData();
-            formData.append("status",  "ARCHIVED");
-            await InvoicesAPI.updateSupplierInvoiceStatus(invoiceId, formData);
-            appToast.success('Facture archivée avec succés.')
-            setArchiveOpen(false)
-            await fetchSuppliersInvoices()
-          } catch (error) {
-            appToast.error("Erreur d'archivage: ",getApiErrorMessage(error))
-          } finally {
-            setArchiveLoading(false);
-          }
-      }
+  const archiveInvoice = async () => {
+    try {
+      setArchiveLoading(true);
+      const formData = new FormData();
+      formData.append("status", "ARCHIVED");
+      await InvoicesAPI.updateSupplierInvoiceStatus(invoiceId, formData);
+      appToast.success('Facture archivée avec succés.')
+      setArchiveOpen(false)
+      await fetchSuppliersInvoices()
+    } catch (error) {
+      appToast.error("Erreur d'archivage: ", getApiErrorMessage(error))
+    } finally {
+      setArchiveLoading(false);
+    }
+  }
 
   const setFile = useInvoiceStore(state => state.setFile);
   const setFileUrl = useInvoiceStore(state => state.setFileUrl);
 
   const handleUpload = async (file: File) => {
-  setLoading(true);
-  try {
-    setIsUploadOpen(false);
-    setFile(file);
-    const url = URL.createObjectURL(file);
-    setFileUrl(url);
+    setLoading(true);
+    try {
+      setIsUploadOpen(false);
+      setFile(file);
+      const url = URL.createObjectURL(file);
+      setFileUrl(url);
 
-    const extractedData = await extractInvoice(file);
+      const extractedData = await extractInvoice(file);
 
-    localStorage.setItem('extractedInvoiceData', JSON.stringify(extractedData));
+      localStorage.setItem('extractedInvoiceData', JSON.stringify(extractedData));
+     
 
-    router.push(`/billing/invoices/suppliers/create`);
-  } catch (error) {
-    console.error('Extraction failed:', error);
-    router.push(`/billing/invoices/suppliers/create`);
-  } finally {
-    setLoading(false);
+      router.push(`/billing/invoices/suppliers/create`);
+    } catch (error) {
+      console.error('Extraction failed:', error);
+      router.push(`/billing/invoices/suppliers/create`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  async function extractInvoice(file: File) {
+    const formData = new FormData();
+    formData.append('data', file); // 'data' is the binary property name n8n expects
+
+    const res = await fetch('http://localhost:5678/webhook/b770d73d-b268-4c5b-a25d-7bc47fe8516e', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!res.ok) {
+      throw new Error(`Extraction request failed with status ${res.status}`);
+    }
+
+    return res.json();
   }
-};
-
-async function extractInvoice(file: File) {
-  const formData = new FormData();
-  formData.append('data', file); // 'data' is the binary property name n8n expects
-
-  const res = await fetch('http://localhost:5678/webhook/b770d73d-b268-4c5b-a25d-7bc47fe8516e', {
-    method: 'POST',
-    body: formData,
-  });
-
-  if (!res.ok) {
-    throw new Error(`Extraction request failed with status ${res.status}`);
-  }
-
-  return res.json();
-}
 
 
   return {

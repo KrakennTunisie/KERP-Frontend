@@ -12,7 +12,7 @@ import {
   Calendar,
   ShieldCheck,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
   BarChart,
@@ -31,6 +31,7 @@ import { appToast } from "@/shared/lib/toast";
 import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 import RevenueExpenseBarChart from "../widgets/RevnueExpensesBarChart";
 import PageLoader from "@/shared/components/ui/pageLoader";
+import SlidingPanel, { AISummaryData, SummaryStatus } from "../widgets/silidingPanel";
 
 export function BillingDashboard() {
   const currentYear = new Date().getFullYear();
@@ -38,13 +39,24 @@ export function BillingDashboard() {
     month: "long",
   });
 
-  const [loadingClientsStats, setLoadingClientsStats]=useState(false)
-  const [loadingSuppliersStats, setLoadingSuppliersStats]=useState(false)
+  const [loadingClientsStats, setLoadingClientsStats] = useState(false)
+  const [loadingSuppliersStats, setLoadingSuppliersStats] = useState(false)
+
+  const [openSlidingPanel, setOpenSilidingPanel] = useState(false)
+  const [summary, setSummary] = useState<AISummaryData | null>();
+  const [silidingPanelStatus, setSilidingStatusPanel] = useState<SummaryStatus>();
+  const summaryTriggeredRef = useRef(false);
+  const [clientsLoaded, setClientsLoaded] = useState(false);
+  const [suppliersLoaded, setSuppliersLoaded] = useState(false);
+  useEffect(() => {
+
+    setOpenSilidingPanel(true)
+  }, [])
 
   const currentNumericMonth = new Date().getMonth(); // 0-based
 
 
-  const [clientInvoices, setclientInvoices]=useState<ClientInvoiceDashboardStats[]|[]>([])
+  const [clientInvoices, setclientInvoices] = useState<ClientInvoiceDashboardStats[] | []>([])
 
   const fetchClientsInvoices = async () => {
     try {
@@ -54,13 +66,14 @@ export function BillingDashboard() {
 
       setclientInvoices(response);
     } catch (error) {
-      appToast.error("Erreur de fetch clients: ",getApiErrorMessage(error))
+      appToast.error("Erreur de fetch clients: ", getApiErrorMessage(error))
     } finally {
       setLoadingClientsStats(false);
+      setClientsLoaded(true)
     }
   };
 
-    const [supplierInvoices, setSupplierInvoices]=useState<ClientInvoiceDashboardStats[]|[]>([])
+  const [supplierInvoices, setSupplierInvoices] = useState<ClientInvoiceDashboardStats[] | []>([])
 
   const fetchSupplierssInvoices = async () => {
     try {
@@ -70,16 +83,18 @@ export function BillingDashboard() {
 
       setSupplierInvoices(response);
     } catch (error) {
-      appToast.error("Erreur de fetch clients: ",getApiErrorMessage(error))
+      appToast.error("Erreur de fetch clients: ", getApiErrorMessage(error))
     } finally {
       setLoadingSuppliersStats(false);
+      setSuppliersLoaded(true)
+
     }
   };
 
-  useEffect(()=>{
+  useEffect(() => {
     fetchClientsInvoices()
     fetchSupplierssInvoices()
-  },[])
+  }, [])
 
 
   const totalClientsYearEUR = clientInvoices.reduce((sum, inv) => sum + inv.amountEUR, 0);
@@ -92,23 +107,23 @@ export function BillingDashboard() {
   const tauxValidation = ((totalConformes / clientInvoices.length) * 100).toFixed(1);
 
 
-const months = Array.from({ length: 6 }, (_, index) => {
-  const monthIndex = currentNumericMonth - 3 + index;
+  const months = Array.from({ length: 6 }, (_, index) => {
+    const monthIndex = currentNumericMonth - 3 + index;
 
-  const date = new Date(currentYear, monthIndex);
+    const date = new Date(currentYear, monthIndex);
 
-  return {
-    label: date.toLocaleString("fr-FR", { month: "short" }),
-    value: date.getMonth() + 1,
-  };
-});
+    return {
+      label: date.toLocaleString("fr-FR", { month: "short" }),
+      value: date.getMonth() + 1,
+    };
+  });
 
-const clientsByMonth = months.map((month) => ({
-  month: month.label,
-  montant: clientInvoices
-    .filter((inv) => inv.month === month.value)
-    .reduce((sum, inv) => sum + inv.amountEUR, 0).toFixed(2),
-}));
+  const clientsByMonth = months.map((month) => ({
+    month: month.label,
+    montant: clientInvoices
+      .filter((inv) => inv.month === month.value)
+      .reduce((sum, inv) => sum + inv.amountEUR, 0).toFixed(2),
+  }));
 
   const suppliersByMonth = months.map((month) => ({
     month: month.label,
@@ -117,7 +132,7 @@ const clientsByMonth = months.map((month) => ({
       .reduce((sum, inv) => sum + inv.amountEUR, 0).toFixed(2),
   }));
 
-console.log("suppliersByMonth: ",suppliersByMonth)
+
   const clientsGrouped = clientInvoices.reduce<{ client: string; montant: number }[]>(
     (acc, inv) => {
       const existing = acc.find((item) => item.client === inv.client);
@@ -131,10 +146,10 @@ console.log("suppliersByMonth: ",suppliersByMonth)
       return acc;
     },
     []
-  )  .sort((a, b) => b.montant - a.montant) 
-     .slice(0, 3);
+  ).sort((a, b) => b.montant - a.montant)
+    .slice(0, 3);
 
-    const suppliersGrouped = supplierInvoices.reduce<{ client: string; montant: number }[]>(
+  const suppliersGrouped = supplierInvoices.reduce<{ client: string; montant: number }[]>(
     (acc, inv) => {
       const existing = acc.find((item) => item.client === inv.client);
 
@@ -147,10 +162,10 @@ console.log("suppliersByMonth: ",suppliersByMonth)
       return acc;
     },
     []
-  ) .sort((a, b) => b.montant - a.montant) 
-     .slice(0, 3);
+  ).sort((a, b) => b.montant - a.montant)
+    .slice(0, 3);
 
-    // Mock chart data
+  // Mock chart data
   const chartData = [
     { month: 'Jan 2025', revenus: 12500, depenses: 8200 },
     { month: 'Fév 2025', revenus: 8750, depenses: 6100 },
@@ -161,98 +176,184 @@ console.log("suppliersByMonth: ",suppliersByMonth)
   ];
 
   const [selectedPeriod, setSelectedPeriod] = useState(6);
-  
-  // Calculate statistics
-    const totalRevenueLastSixMonths = chartData.reduce((sum, item) => sum + item.revenus, 0);
-    const totalExpensesLastSixMonths = chartData.reduce((sum, item) => sum + item.depenses, 0);
-  const monthlyData = chartData.map(item => ({
-          period: item.month,
-          monthLabel: item.month,
-          revenueHT: item.revenus,
-          revenueTVA: 0,
-          revenueTTC: item.revenus,
-          overdueHT: item.depenses,
-          overdueTVA: item.depenses,
-          overdueTTC: item.depenses,
-          nombreFactures: 0,
-      }));
 
-      if(loadingClientsStats  || loadingSuppliersStats){
-        return(
-          <PageLoader label="Chargement des données..."/>
-        )
-      }
+  // Calculate statistics
+  const totalRevenueLastSixMonths = chartData.reduce((sum, item) => sum + item.revenus, 0);
+  const totalExpensesLastSixMonths = chartData.reduce((sum, item) => sum + item.depenses, 0);
+  const monthlyData = chartData.map(item => ({
+    period: item.month,
+    monthLabel: item.month,
+    revenueHT: item.revenus,
+    revenueTVA: 0,
+    revenueTTC: item.revenus,
+    overdueHT: item.depenses,
+    overdueTVA: item.depenses,
+    overdueTTC: item.depenses,
+    nombreFactures: 0,
+  }));
+
+  // Envoie des données au workflow n8n pour me fournir une résumée des statistiques
+
+  const sendToN8n = useCallback(async () => {
+    const stats = {
+      clients: {
+        totalEUR: totalClientsYearEUR,
+        totalTND: totalClientsYearTND,
+        nombreFactures: clientInvoices.length,
+      },
+      fournisseurs: {
+        totalEUR: totalSuppliersYearEUR,
+        totalTND: totalSuppliersYearTND,
+        nombreFactures: supplierInvoices.length,
+      },
+      validationEFacture: {
+        tauxValidation: Number(tauxValidation) || 0,
+        conformes: totalConformes,
+        total: clientInvoices.length,
+      },
+      evolutionMensuelleClients: clientsByMonth,
+      evolutionMensuelleFournisseurs: suppliersByMonth,
+      topClients: clientsGrouped,
+      topFournisseurs: suppliersGrouped,
+      revenusDepenses6mois: monthlyData,
+    };
+
+    try {
+      setSilidingStatusPanel("loading");
+
+      const res = await fetch(
+        "http://localhost:5678/webhook/81492a9c-8e6f-4066-98a5-f566c34ae778",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(stats),
+        }
+      );
+
+      if (!res.ok) throw new Error("Échec de l'appel n8n");
+      const data = await res.json();
+      const parsedSummary =
+        typeof data.summary === "string" ? JSON.parse(data.summary) : data.summary;
+
+      setSummary(parsedSummary);
+      setSilidingStatusPanel("done");
+    } catch (err) {
+      setSilidingStatusPanel("error");
+    }
+  }, [
+    totalClientsYearEUR,
+    totalClientsYearTND,
+    clientInvoices.length,
+    totalSuppliersYearEUR,
+    totalSuppliersYearTND,
+    supplierInvoices.length,
+    tauxValidation,
+    totalConformes,
+    clientsByMonth,
+    suppliersByMonth,
+    clientsGrouped,
+    suppliersGrouped,
+    monthlyData,
+  ]);
+
+  useEffect(() => {
+    if (!clientsLoaded || !suppliersLoaded) return;
+    if (summaryTriggeredRef.current) return;
+    summaryTriggeredRef.current = true;
+
+    sendToN8n();
+  }, [clientsLoaded, suppliersLoaded, sendToN8n]);
+
+  if (loadingClientsStats || loadingSuppliersStats) {
+    return (
+      <PageLoader label="Chargement des données..." />
+    )
+  }
+
 
   return (
     <div className="flex min-h-screen bg-white flex-col bg-gray-50/30">
-    <header className="border-b border-slate-200 bg-white px-5 py-4">
-  <div className="mx-auto">
 
-    {/* Header */}
-    <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <SlidingPanel
+        open={openSlidingPanel}
+        onClose={() => setOpenSilidingPanel(false)}
+        onOpen={()=> setOpenSilidingPanel(true)}
+        status={silidingPanelStatus!}
+        data={summary!}
+        onRetry={() => {
+          summaryTriggeredRef.current = false;
+          sendToN8n()
 
-      <div>
-        <h1 className="text-xl font-semibold tracking-tight text-slate-900">
-          Tableau de bord
-        </h1>
-
-        <p className="mt-0.5 text-xs text-slate-500">
-          {"Vue d'ensemble de l'activité financière"}
-        </p>
-      </div>
-
-      <div className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5">
-        <Calendar className="h-3.5 w-3.5 text-slate-500" />
-
-        <span className="text-xs font-medium text-slate-700">
-          {currentMonth} {currentYear}
-        </span>
-      </div>
-
-    </div>
-
-    {/* KPIs */}
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-
-      <KpiCard
-        color="blue"
-        icon={<TrendingUp />}
-        title={`Clients ${currentYear}`}
-        value={`${totalClientsYearEUR.toLocaleString()} EUR`}
-        secondValue={`${totalClientsYearTND.toLocaleString()} TND`}
-        footer={`${clientInvoices.length} factures`}
+        }}
       />
+      <header className="border-b border-slate-200 bg-white px-5 py-4">
+        <div className="mx-auto">
 
-      <KpiCard
-        color="emerald"
-        icon={<TrendingDown />}
-        title={`Fournisseurs ${currentYear}`}
-        value={`${totalSuppliersYearEUR.toLocaleString()} EUR`}
-        secondValue={`${totalSuppliersYearTND.toLocaleString()} TND`}
-        footer={`${supplierInvoices.length} factures`}
-      />
+          {/* Header */}
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 
-      <KpiCard
-        color="purple"
-        icon={<ShieldCheck />}
-        title="Validation E-Facture"
-        value={`${tauxValidation}%`}
-        footer={`${totalConformes}/${clientInvoices.length} conformes`}
-      />
+            <div>
+              <h1 className="text-xl font-semibold tracking-tight text-slate-900">
+                Tableau de bord
+              </h1>
 
-      <KpiCard
-        color="amber"
-        icon={<Calendar />}
-        title="Période"
-        value={currentMonth}
-        secondValue={currentYear.toString()}
-        footer="Exercice en cours"
-      />
+              <p className="mt-0.5 text-xs text-slate-500">
+                {"Vue d'ensemble de l'activité financière"}
+              </p>
+            </div>
 
-    </div>
+            <div className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5">
+              <Calendar className="h-3.5 w-3.5 text-slate-500" />
 
-  </div>
-</header>
+              <span className="text-xs font-medium text-slate-700">
+                {currentMonth} {currentYear}
+              </span>
+            </div>
+
+          </div>
+
+          {/* KPIs */}
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+
+            <KpiCard
+              color="blue"
+              icon={<TrendingUp />}
+              title={`Clients ${currentYear}`}
+              value={`${totalClientsYearEUR.toLocaleString()} EUR`}
+              secondValue={`${totalClientsYearTND.toLocaleString()} TND`}
+              footer={`${clientInvoices.length} factures`}
+            />
+
+            <KpiCard
+              color="emerald"
+              icon={<TrendingDown />}
+              title={`Fournisseurs ${currentYear}`}
+              value={`${totalSuppliersYearEUR.toLocaleString()} EUR`}
+              secondValue={`${totalSuppliersYearTND.toLocaleString()} TND`}
+              footer={`${supplierInvoices.length} factures`}
+            />
+
+            <KpiCard
+              color="purple"
+              icon={<ShieldCheck />}
+              title="Validation E-Facture"
+              value={`${tauxValidation}%`}
+              footer={`${totalConformes}/${clientInvoices.length} conformes`}
+            />
+
+            <KpiCard
+              color="amber"
+              icon={<Calendar />}
+              title="Période"
+              value={currentMonth}
+              secondValue={currentYear.toString()}
+              footer="Exercice en cours"
+            />
+
+          </div>
+
+        </div>
+      </header>
 
       <main className="flex-1 p-8">
         <div className="mx-auto space-y-8">
@@ -265,203 +366,203 @@ console.log("suppliersByMonth: ",suppliersByMonth)
             totalLabel={`Total net (${selectedPeriod} derniers mois)`}
             totalValue={totalRevenueLastSixMonths - totalExpensesLastSixMonths}
           />
-            <Section
-              icon={<Users />}
-              iconBg="bg-blue-600 text-white"
-              title="Factures clients"
-              subtitle="Analyse des ventes"
-            >
-              <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-                <ChartCard title="Évolution mensuelle" subtitle="Total facturé en EUR">
-                  <ResponsiveContainer width="100%" height={260}>
-                    <LineChart
-                      data={clientsByMonth}
-                      margin={{ top: 10, right: 16, left: 0, bottom: 8 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+          <Section
+            icon={<Users />}
+            iconBg="bg-blue-600 text-white"
+            title="Factures clients"
+            subtitle="Analyse des ventes"
+          >
+            <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+              <ChartCard title="Évolution mensuelle" subtitle="Total facturé en EUR">
+                <ResponsiveContainer width="100%" height={260}>
+                  <LineChart
+                    data={clientsByMonth}
+                    margin={{ top: 10, right: 16, left: 0, bottom: 8 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
 
-                      <XAxis
-                        dataKey="month"
-                        tick={{ fontSize: 12, fill: "#64748b" }}
-                        axisLine={false}
-                        tickLine={false}
-                      />
+                    <XAxis
+                      dataKey="month"
+                      tick={{ fontSize: 12, fill: "#64748b" }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
 
-                      <YAxis
-                        tick={{ fontSize: 12, fill: "#64748b" }}
-                        axisLine={false}
-                        tickLine={false}
-                      />
+                    <YAxis
+                      tick={{ fontSize: 12, fill: "#64748b" }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
 
-                      <Tooltip
-                        cursor={{ stroke: "#cbd5e1", strokeWidth: 1 }}
-                        contentStyle={{
-                          borderRadius: "12px",
-                          border: "1px solid #e2e8f0",
-                          boxShadow: "0 10px 25px rgba(15, 23, 42, 0.08)",
-                          fontSize: "12px",
-                        }}
-                      />
+                    <Tooltip
+                      cursor={{ stroke: "#cbd5e1", strokeWidth: 1 }}
+                      contentStyle={{
+                        borderRadius: "12px",
+                        border: "1px solid #e2e8f0",
+                        boxShadow: "0 10px 25px rgba(15, 23, 42, 0.08)",
+                        fontSize: "12px",
+                      }}
+                    />
 
-                      <Line
-                        type="monotone"
-                        dataKey="montant"
-                        stroke="#2563eb"
-                        strokeWidth={2.5}
-                        dot={{ r: 3 }}
-                        activeDot={{ r: 5 }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </ChartCard>
+                    <Line
+                      type="monotone"
+                      dataKey="montant"
+                      stroke="#2563eb"
+                      strokeWidth={2.5}
+                      dot={{ r: 3 }}
+                      activeDot={{ r: 5 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </ChartCard>
 
-                <ChartCard
-                  title="Top clients"
-                  subtitle={`Total par client ${currentYear} en EUR`}
-                >
-                  <ResponsiveContainer width="100%" height={260}>
-                    <BarChart
-                      data={clientsGrouped}
-                      margin={{ top: 10, right: 16, left: 0, bottom: 24 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+              <ChartCard
+                title="Top clients"
+                subtitle={`Total par client ${currentYear} en EUR`}
+              >
+                <ResponsiveContainer width="100%" height={260}>
+                  <BarChart
+                    data={clientsGrouped}
+                    margin={{ top: 10, right: 16, left: 0, bottom: 24 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
 
-                      <XAxis
-                        dataKey="client"
-                        angle={-12}
-                        textAnchor="end"
-                        height={60}
-                        tick={{ fontSize: 11, fill: "#64748b" }}
-                        axisLine={false}
-                        tickLine={false}
-                      />
+                    <XAxis
+                      dataKey="client"
+                      angle={-12}
+                      textAnchor="end"
+                      height={60}
+                      tick={{ fontSize: 11, fill: "#64748b" }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
 
-                      <YAxis
-                        tick={{ fontSize: 12, fill: "#64748b" }}
-                        axisLine={false}
-                        tickLine={false}
-                      />
+                    <YAxis
+                      tick={{ fontSize: 12, fill: "#64748b" }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
 
-                      <Tooltip
-                        cursor={{ fill: "#f8fafc" }}
-                        contentStyle={{
-                          borderRadius: "12px",
-                          border: "1px solid #e2e8f0",
-                          boxShadow: "0 10px 25px rgba(15, 23, 42, 0.08)",
-                          fontSize: "12px",
-                        }}
-                      />
+                    <Tooltip
+                      cursor={{ fill: "#f8fafc" }}
+                      contentStyle={{
+                        borderRadius: "12px",
+                        border: "1px solid #e2e8f0",
+                        boxShadow: "0 10px 25px rgba(15, 23, 42, 0.08)",
+                        fontSize: "12px",
+                      }}
+                    />
 
-                      <Bar
-                        dataKey="montant"
-                        fill="#2563eb"
-                        radius={[8, 8, 0, 0]}
-                        maxBarSize={42}
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </ChartCard>
-              </div>
-            </Section>
+                    <Bar
+                      dataKey="montant"
+                      fill="#2563eb"
+                      radius={[8, 8, 0, 0]}
+                      maxBarSize={42}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </ChartCard>
+            </div>
+          </Section>
 
-            <Section
-              icon={<Truck />}
-              iconBg="bg-emerald-600 text-white"
-              title="Factures fournisseurs"
-              subtitle="Analyse des achats"
-            >
-              <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-                <ChartCard title="Évolution mensuelle" subtitle="Total facturé en EUR">
-                  <ResponsiveContainer width="100%" height={260}>
-                    <LineChart
-                      data={suppliersByMonth}
-                      margin={{ top: 10, right: 16, left: 0, bottom: 8 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+          <Section
+            icon={<Truck />}
+            iconBg="bg-emerald-600 text-white"
+            title="Factures fournisseurs"
+            subtitle="Analyse des achats"
+          >
+            <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+              <ChartCard title="Évolution mensuelle" subtitle="Total facturé en EUR">
+                <ResponsiveContainer width="100%" height={260}>
+                  <LineChart
+                    data={suppliersByMonth}
+                    margin={{ top: 10, right: 16, left: 0, bottom: 8 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
 
-                      <XAxis
-                        dataKey="month"
-                        tick={{ fontSize: 12, fill: "#64748b" }}
-                        axisLine={false}
-                        tickLine={false}
-                      />
+                    <XAxis
+                      dataKey="month"
+                      tick={{ fontSize: 12, fill: "#64748b" }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
 
-                      <YAxis
-                        tick={{ fontSize: 12, fill: "#64748b" }}
-                        axisLine={false}
-                        tickLine={false}
-                      />
+                    <YAxis
+                      tick={{ fontSize: 12, fill: "#64748b" }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
 
-                      <Tooltip
-                        cursor={{ stroke: "#cbd5e1", strokeWidth: 1 }}
-                        contentStyle={{
-                          borderRadius: "12px",
-                          border: "1px solid #e2e8f0",
-                          boxShadow: "0 10px 25px rgba(15, 23, 42, 0.08)",
-                          fontSize: "12px",
-                        }}
-                      />
+                    <Tooltip
+                      cursor={{ stroke: "#cbd5e1", strokeWidth: 1 }}
+                      contentStyle={{
+                        borderRadius: "12px",
+                        border: "1px solid #e2e8f0",
+                        boxShadow: "0 10px 25px rgba(15, 23, 42, 0.08)",
+                        fontSize: "12px",
+                      }}
+                    />
 
-                      <Line
-                        type="monotone"
-                        dataKey="montant"
-                        stroke="#059669"
-                        strokeWidth={2.5}
-                        dot={{ r: 3 }}
-                        activeDot={{ r: 5 }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </ChartCard>
+                    <Line
+                      type="monotone"
+                      dataKey="montant"
+                      stroke="#059669"
+                      strokeWidth={2.5}
+                      dot={{ r: 3 }}
+                      activeDot={{ r: 5 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </ChartCard>
 
-                <ChartCard
-                  title="Top fournisseurs"
-                  subtitle={`Total par fournisseur ${currentYear} en EUR`}
-                >
-                  <ResponsiveContainer width="100%" height={260}>
-                    <BarChart
-                      data={suppliersGrouped}
-                      margin={{ top: 10, right: 16, left: 0, bottom: 24 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+              <ChartCard
+                title="Top fournisseurs"
+                subtitle={`Total par fournisseur ${currentYear} en EUR`}
+              >
+                <ResponsiveContainer width="100%" height={260}>
+                  <BarChart
+                    data={suppliersGrouped}
+                    margin={{ top: 10, right: 16, left: 0, bottom: 24 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
 
-                      <XAxis
-                        dataKey="client"
-                        angle={-12}
-                        textAnchor="end"
-                        height={60}
-                        tick={{ fontSize: 11, fill: "#64748b" }}
-                        axisLine={false}
-                        tickLine={false}
-                      />
+                    <XAxis
+                      dataKey="client"
+                      angle={-12}
+                      textAnchor="end"
+                      height={60}
+                      tick={{ fontSize: 11, fill: "#64748b" }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
 
-                      <YAxis
-                        tick={{ fontSize: 12, fill: "#64748b" }}
-                        axisLine={false}
-                        tickLine={false}
-                      />
+                    <YAxis
+                      tick={{ fontSize: 12, fill: "#64748b" }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
 
-                      <Tooltip
-                        cursor={{ fill: "#f8fafc" }}
-                        contentStyle={{
-                          borderRadius: "12px",
-                          border: "1px solid #e2e8f0",
-                          boxShadow: "0 10px 25px rgba(15, 23, 42, 0.08)",
-                          fontSize: "12px",
-                        }}
-                      />
+                    <Tooltip
+                      cursor={{ fill: "#f8fafc" }}
+                      contentStyle={{
+                        borderRadius: "12px",
+                        border: "1px solid #e2e8f0",
+                        boxShadow: "0 10px 25px rgba(15, 23, 42, 0.08)",
+                        fontSize: "12px",
+                      }}
+                    />
 
-                      <Bar
-                        dataKey="montant"
-                        fill="#059669"
-                        radius={[8, 8, 0, 0]}
-                        maxBarSize={42}
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </ChartCard>
-              </div>
-            </Section>
+                    <Bar
+                      dataKey="montant"
+                      fill="#059669"
+                      radius={[8, 8, 0, 0]}
+                      maxBarSize={42}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </ChartCard>
+            </div>
+          </Section>
 
         </div>
       </main>

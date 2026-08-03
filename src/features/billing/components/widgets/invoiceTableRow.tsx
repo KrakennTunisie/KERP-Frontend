@@ -122,7 +122,7 @@ export function InvoiceTableRow<T>({
       },
       ] : []),
 
-    ...(status && status != "PAID" && status != "CANCELLED" && status != "ARCHIVED" && getPartnerEmail?.(item) != "" &&
+    ...(status && status != "PAID" && status != "REFUNDED" && status != "CANCELLED" && status != "ARCHIVED" && getPartnerEmail?.(item) != "" &&
       onSend
       ? [
         {

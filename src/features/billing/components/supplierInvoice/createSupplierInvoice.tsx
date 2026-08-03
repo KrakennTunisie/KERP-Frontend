@@ -26,9 +26,6 @@ import { extractTvaRate, formatShowLabel } from "../../lib/settingItemHelpers";
 import { useRouter } from "next/navigation";
 import UseSetting from "../../hooks/useSettings";
 import { useFetchSettings } from "../../hooks/useFetchSetting";
-import { Label } from "recharts";
-import { Button } from "@/shared/components/ui/button";
-import * as Popover from "@radix-ui/react-popover";
 import * as HoverCard from "@radix-ui/react-hover-card";
 import { useEffect } from "react";
 
@@ -48,7 +45,7 @@ export default function CreateSupplierInvoice() {
   }, []);
   const { typeAdd, openAddModal, setOpenAddModal, loadingAddModal, onAction, handleCreate, getTitleAddModal } = UseSetting()
 
-  if (loadingDraft || !invoiceSupplier) {
+  if ( !invoiceSupplier) {
     return (
       <div className="flex items-center justify-center bg-white  h-[calc(100vh-80px)]">
         <p className="text-sm text-slate-400">Chargement de la facture extraite...</p>

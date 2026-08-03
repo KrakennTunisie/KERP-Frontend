@@ -23,11 +23,12 @@ import { calculateInvoiceTotals, calculateInvoiceTotalsFromPurchaseOrder, calcul
 import { discountTypeSchema } from "../types/discountType";
 
 import { normalizeVatRatePercentage } from "../lib/normalizeTVA";
-import { usePurchaseOrderStore } from "./usePurchaseOrderList";
+
 import { resolvePaymentMethod } from "../lib/normalizePaymentMethod";
 import { normalizePaymentConditionToDbFormat } from "../lib/normalizePaymentCondition";
 import { purchaseOrderTypeSchema } from "../types/PurchaseOrderType";
 import { formatOperationCategoryLabel } from "../lib/normalizeOperationCategory";
+import { useInvoiceStore } from "../lib/globalStateFile";
 export type InvoiceFormClientProps = {
     mode: "create" | "edit" | "clone";
     invoiceId?: string
@@ -56,8 +57,8 @@ export default function useCreateClientPurchaseOrder() {
     const [nextNumber, setNextNumber] = useState<nextNumber>()
     const [exchangeRate, setExchangeRate] = useState<ExchangeRate>()
     const [invoice, setInvoice] = useState<Invoice>()
-    const clientPurchaseOrder = usePurchaseOrderStore(state => state.fileUrl);
-    const clientPurchaseOrderType = usePurchaseOrderStore(state => state.file);
+    const clientPurchaseOrder = useInvoiceStore(state => state.fileUrl);
+    const clientPurchaseOrderType = useInvoiceStore(state => state.file);
     const [extractedData, setExtractedData] = useState<Partial<ExtractedPurchaseOrder> | null>(null);
     const [newSupplier, setNewSupplier] = useState<PartnerSummary>();
     const [newSupplierName, setNewSupplierName] = useState<string>("");
@@ -88,7 +89,6 @@ export default function useCreateClientPurchaseOrder() {
         const stored = localStorage.getItem('extractedInvoiceData');
         if (stored) {
             setExtractedData(JSON.parse(stored));
-            localStorage.removeItem('extractedInvoiceData');
         }
     }, []);
 
@@ -562,6 +562,7 @@ export default function useCreateClientPurchaseOrder() {
 
             if (createdPurchaseOrder) {
                 appToast.success("Bon de commande créée avec succès");
+                localStorage.removeItem('extractedInvoiceData');
                 setIsModalOpen(false);
                 setSuccessMessage("Le bon de commande a été créée avec succès.");
                 setTtnModalOpen(true);

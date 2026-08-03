@@ -9,10 +9,10 @@ type SendToTTNModalProps = {
     onConfirm: () => void | Promise<void>;
     invoiceRef?: string;
     loading?: boolean;
-    emailExist? :boolean;
+    emailExist?: boolean;
     invoiceSent?: boolean
     successMessage?: string,
-    onSendToClient?: ()=>void,
+    onSendToClient?: () => void,
 };
 
 export function SendToTTNModal({
@@ -27,54 +27,56 @@ export function SendToTTNModal({
     onSendToClient
 }: SendToTTNModalProps) {
     const router = useRouter();
-const footer = (
-  <>
-    {/* Cancel */}
-    <button
-      onClick={onClose}
-      disabled={loading || invoiceSent}
-      className="px-5 py-2.5 rounded-xl border border-gray-300 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-    >
-      Annuler
-    </button>
-
-    {/* Send to Client */}
-    {onSendToClient && 
-    <button
-      onClick={onSendToClient}
-      disabled={loading || invoiceSent || emailExist}
-      className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-blue-200 bg-blue-50 text-blue-700 text-sm font-semibold hover:bg-blue-100 transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
-    >
-      <Mail className="h-4 w-4" />
-      Envoyer au client
-    </button>}
-
-    {/* Send to TTN */}
-    <button
-      onClick={onConfirm}
-      disabled={loading || invoiceSent}
-      className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
-    >
-      {loading ? (
+    const footer = (
         <>
-          <Loader2 className="h-4 w-4 animate-spin" />
-          Envoi en cours…
+            {/* Cancel */}
+            <button
+                onClick={() => {
+                    onClose();
+                }}
+                disabled={loading || invoiceSent}
+                className="px-5 py-2.5 rounded-xl border border-gray-300 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            >
+                Annuler
+            </button>
+
+            {/* Send to Client */}
+            {onSendToClient &&
+                <button
+                    onClick={onSendToClient}
+                    disabled={loading || invoiceSent || emailExist}
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-blue-200 bg-blue-50 text-blue-700 text-sm font-semibold hover:bg-blue-100 transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+                >
+                    <Mail className="h-4 w-4" />
+                    Envoyer au client
+                </button>}
+
+            {/* Send to TTN */}
+            <button
+                onClick={onConfirm}
+                disabled={loading || invoiceSent}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+            >
+                {loading ? (
+                    <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Envoi en cours…
+                    </>
+                ) : (
+                    <>
+                        <Send className="h-4 w-4" />
+                        Envoyer au TTN
+                    </>
+                )}
+            </button>
         </>
-      ) : (
-        <>
-          <Send className="h-4 w-4" />
-          Envoyer au TTN
-        </>
-      )}
-    </button>
-  </>
-);
+    );
 
     return (
         <Modal
             open={open}
             title="Envoyer la facture aux autorités fiscales (TTN)"
-            onClose={()=> {onClose() ;router.back() ;}}
+            onClose={() => { onClose(); router.back(); }}
             footer={footer}
         >
             {/* Warning banner */}

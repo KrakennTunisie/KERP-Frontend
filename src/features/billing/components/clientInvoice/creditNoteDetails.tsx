@@ -73,7 +73,7 @@ export default function CreditNoteDetails({ params }: PropsCreditNote) {
                         label: "Envoyer",
                         icon: Send,
                         onClick: () => setSendOpen(true),
-                        visible: invoice?.invoiceCreditNoteStatus === "DRAFT"
+                        visible: true
                     },
                     {
                         label: "Supprimer",
