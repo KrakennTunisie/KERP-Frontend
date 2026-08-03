@@ -5,61 +5,72 @@ import { useAuthStore } from "@/store/authStore";
 import { useRouter }
 from "next/navigation";
 
-import { useEffect }
-from "react";
+import {
+useEffect,
+useRef,
+} from "react";
 
+
+interface AuthGuardProps {
+children: React.ReactNode;
+}
 
 export default function AuthGuard({
+children,
+}: AuthGuardProps) {
 
- children
+const router = useRouter();
 
-}:{
+const {
+isLoading,
+isAuthenticated,
+loadUser,
+} = useAuthStore();
 
- children:React.ReactNode
+const initialized = useRef(false);
 
-}){
+useEffect(() => {
 
+// Prevent multiple initialization
+if (initialized.current) {
+  return;
+}
 
- const router = useRouter();
+initialized.current = true;
 
- const {
+loadUser();
 
-   loading,
+}, [loadUser]);
 
-   isAuthenticated
+useEffect(() => {
 
- } = useAuthStore();
-
-
- useEffect(()=>{
-
-    if(
-
-      !loading &&
-
-      !isAuthenticated
-
-    ){
-
-       router.replace("/auth");
-
-    }
-
- },[loading,isAuthenticated]);
+if (
+  !isLoading &&
+  !isAuthenticated
+) {
+  router.replace("/auth/login");
+}
 
 
- if(loading){
+}, [
+isLoading,
+isAuthenticated,
+router,
+]);
 
-    return (<PageLoader label="Chargement..."/>)
+// While checking the HttpOnly cookie
+if (isLoading) {
+return ( <PageLoader
+     label="Chargement..."
+   />
+);
+}
 
- }
+// Authentication failed
+if (!isAuthenticated) {
+return null;
+}
 
- if(!isAuthenticated){
-
-    return null;
-
- }
-
- return children;
-
+// Authentication succeeded
+return children;
 }

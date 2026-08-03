@@ -9,7 +9,7 @@ import { Role } from "../models/role";
 export function useRolesList(){
 
     const [roles, setRoles]= useState<Role[]|[]>([])
-    const [loading, setLoading]=useState(false)
+    const [loading, setLoading]=useState(true)
     const [totalPages, setTotalPages] = useState(1);
     const [totalElements, setTotalElements] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);

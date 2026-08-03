@@ -1,6 +1,6 @@
 'use client'
 
-import { Key, FolderKanban, ChevronLeft, ChevronRight } from "lucide-react";
+import { Key, FolderKanban, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 
 import { PermissionDetailsModal } from "../../widgets/permissionDetailsModal";
 import CategoryCard from "../../widgets/categoryCard";
@@ -9,6 +9,7 @@ import { usePermissionsList } from "../../hooks/usePermissionsList";
 export default function ListPermissions() {
 
   const {
+        loading,
         permissions,
         currentPage,
         setCurrentPage,
@@ -67,7 +68,23 @@ export default function ListPermissions() {
           {/* GRID CATEGORIES */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
 
-            {permissions.map((permission) => (
+            {loading ? (
+              <div className="col-span-full flex min-h-[300px] flex-col items-center justify-center gap-2 text-slate-400">
+                <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+                <p className="text-xs font-medium">
+                  Chargement...
+                </p>
+              </div>
+            ) : permissions && permissions.length === 0 ? (
+              /* EMPTY STATE */
+              <div className="col-span-full flex min-h-[300px] items-center justify-center">
+                <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50/60 p-5 text-center">
+                  <p className="text-xs font-medium text-slate-500">
+                    Aucun rôle à afficher
+                  </p>
+                </div>
+              </div>
+            ) : (permissions.map((permission) => (
               <CategoryCard 
                 key={permission.clientId}
                 category={permission} 
@@ -75,7 +92,7 @@ export default function ListPermissions() {
                 setSelectedPermission={setSelectedPermission} 
                 setOpen={setDetailsOpen }   
               />
-            ))}
+            )))}
 
           </div>
 
