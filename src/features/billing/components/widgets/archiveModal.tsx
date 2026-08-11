@@ -128,7 +128,7 @@ const config = documentConfig[documentType];
                     </div>
                 )}
                 <div className="flex items-center justify-between">
-                    <span className="text-gray-500">Date d'archivage </span>
+                    <span className="text-gray-500">{"Date d'archivage"} </span>
                     <span className="font-semibold text-gray-900">
                     
                         {formatDateLongWithTime(new Date())}

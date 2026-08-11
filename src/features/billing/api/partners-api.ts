@@ -41,11 +41,11 @@ export const partnersApi = {
   getSupplierById: (id: string) =>
     apiClient.get<PartnerAllDetails>(BILLING_ENDPOINTS.supplierById(id)),
 
-  existsByCompanyName : (companyName:String)=> apiClient.get<boolean>(BILLING_ENDPOINTS.existByCompanyName(companyName)),
+  existsByCompanyName : (companyName:string)=> apiClient.get<boolean>(BILLING_ENDPOINTS.existByCompanyName(companyName)),
 
   getSupplierByCompanyName : (companyName: string) => apiClient.get<PartnerSummary>(BILLING_ENDPOINTS.getSupplierByCompanyName(companyName)),
 
-  clientExistsByCompanyName : (companyName:String)=> apiClient.get<boolean>(BILLING_ENDPOINTS.clientExistByCompanyName(companyName)),
+  clientExistsByCompanyName : (companyName:string)=> apiClient.get<boolean>(BILLING_ENDPOINTS.clientExistByCompanyName(companyName)),
 
   getClientByCompanyName : (companyName: string) => apiClient.get<PartnerSummary>(BILLING_ENDPOINTS.getClientByCompanyName(companyName)),
 

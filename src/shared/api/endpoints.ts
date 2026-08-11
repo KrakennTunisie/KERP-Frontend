@@ -22,10 +22,10 @@ export const BILLING_ENDPOINTS = withPrefix(BILLING_PREFIX,{
   supplierInvoiceById: (id: string) => `/invoices/suppliers/${id}`,
   getClientsInvoices: (idClient:string) => `/invoices/last/client-invoices/${idClient}`,
   getSuppliersInvoices: (idSupplier:string) => `/invoices/last/supplier-invoices/${idSupplier}`,
-  existByCompanyName: (companyName:String)=> `/partners/suppliers/existByCompanyName/${companyName}`,
-  getSupplierByCompanyName :(companyName:String) => `/partners/suppliers/companyName/${companyName}`,
-  clientExistByCompanyName: (companyName:String)=> `/partners/clients/existByCompanyName/${companyName}`,
-  getClientByCompanyName :(companyName:String) => `/partners/clients/companyName/${companyName}`,
+  existByCompanyName: (companyName:string)=> `/partners/suppliers/existByCompanyName/${companyName}`,
+  getSupplierByCompanyName :(companyName:string) => `/partners/suppliers/companyName/${companyName}`,
+  clientExistByCompanyName: (companyName:string)=> `/partners/clients/existByCompanyName/${companyName}`,
+  getClientByCompanyName :(companyName:string) => `/partners/clients/companyName/${companyName}`,
 
 
   updatestatus: (id: string, statusClient: boolean) => `/partners/clients/updateStatus/${id}?statusClient=${statusClient}`,
