@@ -203,7 +203,7 @@ export function useCreatePurchaseOrder({ mode, purchaseOrderId }: PurchaseOrderF
   useEffect(() => {
     if (mode === "edit" && purchaseOrder) {
       console.log("Status reçu:", purchaseOrder?.purchaseOrderStatus);
-      setSupplierSearch(purchaseOrder.partner?.companyName!)
+      setSupplierSearch(purchaseOrder.partner?.companyName ?? "")
       reset({
         idPurchaseOrder: purchaseOrder.idPurchaseOrder,
         purchaseOrderNumber: purchaseOrder.purchaseOrderNumber,
