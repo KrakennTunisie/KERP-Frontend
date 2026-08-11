@@ -29,6 +29,8 @@ export function usePaymentListTab({
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const [openSendMail,setSendOpenMail]=useState(false)
+
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteId, setDeleteId] = useState("");
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -138,6 +140,10 @@ export function usePaymentListTab({
     payments,
     selectedPayment,
     setSelectedPayment,
+
+    fetchPayments,
+
+    openSendMail,setSendOpenMail,
 
     currentPage,
     setCurrentPage,

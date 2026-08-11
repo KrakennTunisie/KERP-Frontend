@@ -5,6 +5,7 @@ import {
   Mail,
   UserX,
   UserCog,
+  UserCheck,
 } from "lucide-react";
 
 import { ActionMenu } from "@/shared/components/ui/actionMenuItem";
@@ -51,6 +52,9 @@ export function UserTableRow<T>({
   getCreatedAt,
 }: UserTableRowProps<T>) {
 
+  const status = getStatus?.(item) 
+  const isActive = status === "Actif";
+
   const actions = [
 
     ...(onEdit
@@ -60,7 +64,7 @@ export function UserTableRow<T>({
           color: "text-amber-600",
           hover: "hover:bg-amber-50",
           onClick: () => onEdit(item),
-          visible: true
+          visible: true,
         }]
       : []),
 
@@ -71,7 +75,7 @@ export function UserTableRow<T>({
           color: "text-violet-600",
           hover: "hover:bg-violet-50",
           onClick: () => onManageRoles(item),
-          visible: true
+          visible: true,
         }]
       : []),
 
@@ -82,18 +86,22 @@ export function UserTableRow<T>({
           color: "text-emerald-600",
           hover: "hover:bg-emerald-50",
           onClick: () => onSendInvite(item),
-          visible: true
+          visible: true,
         }]
       : []),
 
     ...(onDelete
       ? [{
-          label: "Bloquer",
-          icon: UserX,
-          color: "text-rose-600",
-          hover: "hover:bg-rose-50",
+          label: isActive ? "Bloquer" : "Activer",
+          icon: isActive ? UserX : UserCheck,
+          color: isActive
+            ? "text-rose-600"
+            : "text-emerald-600",
+          hover: isActive
+            ? "hover:bg-rose-50"
+            : "hover:bg-emerald-50",
           onClick: () => onDelete(item),
-          visible: true
+          visible: true,
         }]
       : []),
   ];

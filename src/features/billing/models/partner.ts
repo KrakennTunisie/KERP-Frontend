@@ -14,10 +14,10 @@ export const partnerSchema = z.object({
   active: z.boolean(),
   enablePortal: z.boolean,
   maritalStatus: z.string().nullable().or(z.literal("")),
-  partnerName: z.string().min(3, "Le nom doit contenir au moins 3 caractères").nullable().or(z.literal("").transform(() => null)),
+  partnerName: z.string().min(3, "Le nom doit contenir au moins 3 caractères").nullable().or(z.literal("")),
   companyName: z.string().min(3, "Le nom doit contenir au moins 3 caractères"),
-  displayName: z.string().min(3, "Le nom doit contenir au moins 3 caractères").nullable(),
-  email: z.string()
+  displayName: z.string().min(3, "Le nom doit contenir au moins 3 caractères").or(z.literal("")).nullable(),
+  email: z.string().or(z.literal(""))
     .nullable(),
   professionnalPhoneNumber: z
     .union([z.number(), z.nan(), z.string()])
@@ -26,13 +26,13 @@ export const partnerSchema = z.object({
     .union([z.number(), z.nan(), z.string()])
     .nullable(),
   taxRegistrationNumber: z.string().min(1).nullable().or(z.literal("")),
-  currency: currencyTypeSchema.nullable(),
-  taxRate: tvaRateStringSchema.nullable(),
-  paymentCondition: PaymentConditionSchema.nullable(),
+  currency: currencyTypeSchema.or(z.literal("")).nullable(),
+  taxRate: z.string().or(z.literal("")).nullable(),
+  paymentCondition: z.string().or(z.literal("")).nullable(),
   billingAddress: addAddressSchema.nullable(),
   shippingAddress: addAddressSchema.nullable(),
-  language: z.string().nullable(),
-  iban: z.string().nullable(),
+  language: z.string().or(z.literal("")).nullable(),
+  iban: z.string().or(z.literal("")).nullable(),
   rne: z.array(documentSchema).default([]).nullable(),
   contract: z.array(documentSchema).default([]).nullable(),
   patente: fileSchema.nullable() || z.array(documentSchema).default([]).nullable(),
@@ -53,8 +53,8 @@ export const createPartnerSchema = z.object({
   personnelPhoneNumber: z.number(),
   taxRegistrationNumber: z.string(),
   currency: currencyTypeSchema,
-  taxRate: tvaRateStringSchema,
-  paymentCondition: PaymentConditionSchema,
+  taxRate: z.string(),
+  paymentCondition: z.string(),
   billingAddress: addAddressSchema,
   shippingAddress: addAddressSchema,
   language: z.string().min(1, "Language est obligatoire"),
@@ -78,8 +78,8 @@ export const partnerDetailsSchema = z.object({
   personnelPhoneNumber: z.number(),
   taxRegistrationNumber: z.string(),
   currency: currencyTypeSchema,
-  taxRate: tvaRateStringSchema,
-  paymentCondition: PaymentConditionSchema,
+  taxRate: z.string(),
+  paymentCondition: z.string(),
   billingAddress: addAddressSchema,
   shippingAddress: addAddressSchema,
   language: z.string().min(1, "Language est obligatoire"),
@@ -166,8 +166,8 @@ export const addPartnerSchema = z.object({
 
   taxId: z.string().min(1).nullable().or(z.literal("")),
   iban: z.string().nullable().or(z.literal("").transform(() => null)),
-  taxRate: tvaRateStringSchema.nullable(),
-  paymentTerms: PaymentConditionSchema.nullable().or(z.literal("").transform(() => null)),
+  taxRate: z.string().nullable(),
+  paymentTerms: z.string().nullable().or(z.literal("").transform(() => null)),
   enablePortal: z.boolean(),
   billingAddress: addAddressSchema.nullable().optional(),
   shippingAddress: addAddressSchema.nullable().optional(),
@@ -228,9 +228,9 @@ export const upadtePartnerSchema = addPartnerSchema.pick({
   enablePortal: true,
   billingAddress: true,
   shippingAddress: true,
-  rne:true,
-  contract:true,
-  patente:true
+  rne: true,
+  contract: true,
+  patente: true
 });
 
 export type UpdatePartner = z.infer<typeof upadtePartnerSchema>;

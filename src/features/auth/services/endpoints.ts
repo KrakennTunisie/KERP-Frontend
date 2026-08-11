@@ -1,11 +1,10 @@
+import { withPrefix } from "@/shared/utils/prefixHelper";
 
 
-
-export const AUTH_ENDPOINTS = {
-    login: "/auth/login",
-    logout: "/auth/logout",
-    me: "/auth/me",
-    sendResteEmail: "/auth/forgot-password",
-    verifyResetCode: "/auth/verify-code",
-    resetPassword: "/auth/reset-password"
-};
+const IAM_PREFIX = '/iam'
+export const RESET_PASSWORD_ENDPOINTS = withPrefix(IAM_PREFIX,{
+    forget_password: '/forgot-password',
+    forget_password_request: `/forgot-password/request`,
+    forget_password_verify:`/forgot-password/verify`,
+    forget_password_reset: `/forgot-password/reset`,
+});

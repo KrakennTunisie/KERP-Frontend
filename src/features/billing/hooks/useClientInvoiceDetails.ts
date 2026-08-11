@@ -50,8 +50,10 @@ export default function useClientInvoiceDetails ({invoiceId, type}:InvoiceDetail
     const [hasCreditInvoice, setHasCreditInvoice] = useState(true);
     
     const [deleteLoading, setDeleteLoading]= useState(false)
+    const [archiveLoading, setArchiveLoading]= useState(false)
     const [updateLoading, setUpdateLoading]= useState(false)
     const [deleteOpen, setDeleteOpen] = useState(false);
+    const [archiveOpen, setArchiveOpen] = useState(false);
     const [sendOpen, setSendOpen] = useState(false);
     const [updateOpen, setUpdateOpen] = useState(false);
     const [nextStatus, setNextStatus]=useState<InvoiceStatus | string>("")
@@ -157,6 +159,21 @@ function sendToTTN ()
           setDeleteLoading(false);
         }
     }
+    const archiveInvoice = async()=>{
+           try {
+              setArchiveLoading(true);
+              const formData = new FormData();
+              formData.append("status",  "ARCHIVED");
+              await InvoicesAPI.updateClientInvoiceStatus(invoiceId, formData);
+              appToast.success('Facture archivée avec succés.')
+              setArchiveOpen(false)
+             router.back()
+            } catch (error) {
+              appToast.error("Erreur de suppresion: ",getApiErrorMessage(error))
+            } finally {
+              setArchiveLoading(false);
+            }
+        }
 
       const telecharger = async ()=>{
         if(invoice && invoice.invoiceDocument)
@@ -185,8 +202,12 @@ function sendToTTN ()
         setDeleteOpen,
         deleteLoading,
         setDeleteLoading,
+        setArchiveOpen,
+        archiveOpen,
         updateLoading,
         setUpdateLoading,
+        archiveLoading, setArchiveLoading,
+        archiveInvoice,
         updateOpen,
         setUpdateOpen,
         setNextStatus,

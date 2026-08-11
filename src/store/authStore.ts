@@ -1,60 +1,144 @@
-import { User } from "@/features/admin/mocks/mock-users";
+// src/stores/auth.store.ts
+
+import { AuthUser } from "@/features/auth/types/authUser";
+import { LoginRequest } from "@/features/auth/types/loginRequest";
 import { create } from "zustand";
 
-type AuthState = {
 
- user: User | null;
+interface AuthState {
+  user: AuthUser | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
 
- isAuthenticated: boolean;
+  login: (
+    credentials: LoginRequest
+  ) => Promise<void>;
 
- loading: boolean;
+  logout: () => Promise<void>;
 
- setUser: (user: User | null) => void;
-
- setLoading:(loading:boolean)=>void;
-
- logout: ()=>void;
-
+  loadUser: () => Promise<void>;
 }
 
+export const useAuthStore =
+  create<AuthState>((set) => ({
 
-export const useAuthStore = create<AuthState>(
-(set)=>({
+    user: null,
 
- user:null,
+    isAuthenticated: false,
 
- isAuthenticated:false,
+    isLoading: true,
 
- loading:true,
+    login: async (credentials) => {
 
- setUser:(user)=>{
+      set({
+        isLoading: true,
+      });
 
-   set({
+      try {
 
-      user,
+        const response =
+          await fetch("/api/auth/login", {
+            method: "POST",
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+            body: JSON.stringify(
+              credentials
+            ),
+          });
 
-      isAuthenticated:!!user
+        if (!response.ok) {
+          const errorBody = await response.text();
+         console.error("Keycloak error:", response.status, errorBody);
+          throw new Error(
+            "Authentication failed"
+          );
+        }
 
-   });
+        const data =
+          await response.json();
 
- },
+        set({
+          user: data.user,
+          isAuthenticated: true,
+        });
 
- setLoading:(loading)=>{
+      } finally {
 
-   set({loading});
+        set({
+          isLoading: false,
+        });
 
- },
+      }
+    },
 
- logout:()=>{
+    logout: async () => {
+      try {
+        await fetch(
+          "/api/auth/logout",
+          {
+            method: "POST",
+          }
+        );
+      }
+      finally{
 
-   set({
+      set({
+        user: null,
+        isAuthenticated: false,
+      });
+      }
 
-      user:null,
 
-      isAuthenticated:false
+    },
 
-   });
+    loadUser: async () => {
 
- }
+      try {
 
-}));
+        set({
+          isLoading: true,
+        });
+
+        const response =
+          await fetch(
+            "/api/auth/me",
+            {
+              cache: "no-store",
+            }
+          );
+
+        if (!response.ok) {
+          set({
+            user: null,
+            isAuthenticated: false,
+          });
+
+          return;
+        }
+
+        const data =
+          await response.json();
+
+        set({
+          user: data.user,
+          isAuthenticated: true,
+        });
+
+      } catch {
+
+        set({
+          user: null,
+          isAuthenticated: false,
+        });
+
+      } finally {
+
+        set({
+          isLoading: false,
+        });
+
+      }
+    },
+  }));

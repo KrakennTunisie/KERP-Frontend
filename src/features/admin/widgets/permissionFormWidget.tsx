@@ -1,19 +1,18 @@
-import { getCategoryLabel } from "../helpers/categoryHelper";
-import { Permission } from "../mocks/mock-permission";
+import { Permission, PermissionDTO } from "../models/permission";
 
 export type PermissionFormWidgetProps = {
-    selected: Permission[]|[],
+    selected: PermissionDTO[]|[],
     permission: Permission,
     togglePermission : (permission: Permission)=> void;
 
 }
 
 export default function PermissionFormWidget({selected, permission, togglePermission}:PermissionFormWidgetProps) {
-  const isSelected = selected.some((p) => p.key === permission.key);
+  const isSelected = selected.some((p) => p.name === permission.name);
   
     return (
     <button
-        key={permission.key}
+        key={permission.name}
         type="button"
         onClick={() => togglePermission(permission)}
         className={`
@@ -58,26 +57,12 @@ export default function PermissionFormWidget({selected, permission, togglePermis
                 ${isSelected ? "text-blue-700" : "text-slate-800"}
                 `}
             >
-                {permission.label}
+                {permission.name}
             </p>
 
             </div>
 
         </div>
-
-        {/* CATEGORY BADGE */}
-        <span
-            className={`
-            shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold border
-            ${
-                isSelected
-                ? "bg-blue-100 text-blue-700 border-blue-200"
-                : "bg-slate-50 text-slate-500 border-slate-200"
-            }
-            `}
-        >
-            {getCategoryLabel(permission.category)}
-        </span>
         </div>
 
     </button>

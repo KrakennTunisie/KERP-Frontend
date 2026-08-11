@@ -1,9 +1,6 @@
 "use client";
 
-import { mockPermissions } from "../../mocks/mock-permission";
-import { AuditLog, mockAuditLogs } from "@/features/billing/models/AuditLogs";
 import { formatDateLong } from "@/shared/utils/formatDate";
-import { mockUsers, User } from "../../mocks/mock-users";
 import {
   Phone,
   Calendar,
@@ -13,13 +10,20 @@ import {
   Send,
   UserCog,
   UserCheck,
-  UserMinus,
 } from "lucide-react";
 import { ActionMenu, ActionMenuItem } from "@/shared/components/ui/actionMenuItem";
-import ActivityHeatmap, { HeatmapItem, mockHeatmap } from "../../widgets/activityHeatMap";
+import ActivityHeatmap from "../../widgets/activityHeatMap";
 import PermissionsMatrix from "../../widgets/permissionsMatrix";
 import AuditLogs from "../../widgets/auditLogs";
 import PageLoader from "@/shared/components/ui/pageLoader";
+import { userProps } from "./userForm";
+import useUserDetails from "../../hooks/useUserDetails";
+import { NotFound } from "@/shared/components/widgets/notFound";
+import {  UserResponse, UserStatusSchema } from "../../models/user";
+import { getUserStatusColor, getUserStatusLabel } from "../../helpers/userHelpers";
+import { ChangeUserRoleModal } from "./updateUserRole";
+import { UserStatusModal } from "./userStatusModal";
+import { SendEmailModal } from "@/shared/components/widgets/sendEmailModal";
 
 /* ================= SKELETON ================= */
 
@@ -41,25 +45,39 @@ function UserSkeleton() {
 
 /* ================= PAGE ================= */
 
-export default function UserDetailsPage({
-  user = mockUsers[0],
-  logs = mockAuditLogs,
-  heatmap = mockHeatmap,
-  loading,
-}: {
-  user: User;
-  logs: AuditLog[];
-  heatmap: HeatmapItem[];
-  loading?: boolean;
-}) {
-  if (loading) 
+
+
+export default  function UserDetailsPage({params}:userProps) {
+
+  const {idUser} =  params
+
+  const { 
+      user, 
+      heatmap,
+      logs,
+      totalActions,
+      activeDays,
+      loading,
+      router,
+    
+      updateStatusOpen, setUpdateStatusOpen,
+      activeOpen, setActiveOpen,
+      sendOpen, setSendOpen, getUserById
+    } = useUserDetails({idUser})
+
+   if (loading) 
     return (
         <PageLoader label="Chargement..." />
   
-      )
+      ) 
+   if(!user){
+    return(
+      <NotFound resource="Utilisateur" message="Utilisateur introuvable"/>
+    )
+   }
 
-  const totalActions = heatmap.reduce((s, d) => s + d.count, 0);
-  const activeDays = heatmap.filter((d) => d.count > 0).length;
+    const isActive = user.status === UserStatusSchema.enum.ACTIVE;
+
 
     const actions: ActionMenuItem[] = [
             {
@@ -67,14 +85,14 @@ export default function UserDetailsPage({
               icon: Pencil,
               color: "text-amber-600",
               hover: "hover:bg-amber-50",
-              onClick: ()=> console.log('onUpdate'),
+              onClick: () =>router.push(`/admin/users/${user.keycloakUserId}/edit`),
               visible: true
             },{
               label: "Envoyer email",
               icon: Send,
               color: "text-blue-600",
               hover: "hover:bg-blue-50",
-              onClick: ()=> console.log('onSendEmail'),
+              onClick: ()=> setSendOpen(true),
               visible: true
             },
             {
@@ -82,34 +100,21 @@ export default function UserDetailsPage({
               icon: UserCog,
               color: "text-violet-600",
               hover: "hover:bg-violet-50",
-              onClick: ()=> console.log('onUpdateRole'),
+              onClick: ()=> setUpdateStatusOpen(true),
               visible: true
             },
             {
-                  label: "Désactiver",
-                  icon: UserX,
-                  color: "text-rose-600",
-                  hover: "hover:bg-rose-50",
-                  onClick: ()=> console.log('onUpdateStatus'),
-                  visible: true
-              },
-              {
-                label: "Activer",
-                icon: UserCheck,
-                color: "text-emerald-600",
-                hover: "hover:bg-emerald-50",
-                onClick: ()=> console.log('onUpdateStatus'),
-                visible: true
-              },
-            {
-              label: "Supprimer",
-              icon: UserMinus,
-              color: "text-red-600",
-              hover: "hover:bg-red-50",
-              onClick: ()=> console.log('onDeelete'),
-              visible: true
-            },
-          ]
+              label: isActive ? "Désactiver" : "Activer",
+              icon: isActive ? UserX : UserCheck,
+              color: isActive
+                ? "text-rose-600"
+                : "text-emerald-600",
+              hover: isActive
+                ? "hover:bg-rose-50"
+                : "hover:bg-emerald-50",
+              onClick: () => setActiveOpen(true),
+              visible: true,
+        }]
 
   return (
     <div className="min-h-screen p-4 md:p-6">
@@ -129,23 +134,23 @@ export default function UserDetailsPage({
           <div className="flex items-center gap-1.5">
             <span
               className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium ${
-                user.status === "ACTIVE"
-                  ? "bg-green-50 text-green-700"
-                  : user.status === "INACTIVE"
-                  ? "bg-slate-100 text-slate-600"
-                  : "bg-red-50 text-red-600"
+                getUserStatusColor(user.status)
               }`}
             >
               <span className={`h-1.5 w-1.5 rounded-full ${
-                user.status === "ACTIVE" ? "bg-green-500" : "bg-slate-400"
+                getUserStatusColor(user.status)
               }`} />
-              {user.status === "ACTIVE" ? "Actif" : user.status}
+              {getUserStatusLabel(user.status) /* user.status === "ACTIVE" ? "Actif" : user.status */}
             </span>
 
-            <span className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium bg-blue-50 text-blue-700">
-              <ShieldCheck className="h-3 w-3" />
-              {user.role}
-            </span>
+            {user.roles.map((role)=>(
+              <span
+                  key={role.id} 
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium bg-blue-50 text-blue-700">
+                <ShieldCheck className="h-3 w-3" />
+                {role.name}
+              </span>
+            ))}
             <div className="flex gap-1.5">
             <ActionMenu
                     orientation="horizontal"
@@ -183,7 +188,7 @@ export default function UserDetailsPage({
             <div className="pt-4 space-y-2.5">
               <div className="flex items-center gap-2 text-[12px] text-slate-500">
                 <Phone className="h-3.5 w-3.5 text-slate-400 flex-shrink-0" />
-                {user.phone}
+                {user.phoneNumber}
               </div>
               <div className="flex items-center gap-2 text-[12px] text-slate-500">
                 <Calendar className="h-3.5 w-3.5 text-slate-400 flex-shrink-0" />
@@ -208,7 +213,7 @@ export default function UserDetailsPage({
           </div>
 
           <ActivityHeatmap data={heatmap} />
-          <PermissionsMatrix permissions={mockPermissions} />
+          <PermissionsMatrix permissions={user.roles[0].permissions} />
         </div>
 
         {/* RIGHT */}
@@ -217,6 +222,38 @@ export default function UserDetailsPage({
         </div>
 
       </div>
+
+      {user && (
+        <ChangeUserRoleModal
+          open={updateStatusOpen}
+          user={user as unknown as UserResponse}
+          currentRole={user.roles[0].name}
+          onClose={()=>setUpdateStatusOpen(false)}
+          onSuccess={() => {
+            getUserById();
+          }}
+        />
+      )}
+      
+      {user && (
+        <UserStatusModal
+          open={activeOpen}
+          user={user as unknown as UserResponse}
+          onClose={()=>setActiveOpen(false)}
+          onSuccess={() => {
+            getUserById();
+          }}
+        />
+      )}
+
+      {user && (
+        <SendEmailModal
+        isOpen={sendOpen}
+        onClose={() => setSendOpen(false)}
+        defaultTo={user.email}
+        recipientName={user.firstName+" "+user.lastName}
+        />
+      )}
     </div>
   );
 }

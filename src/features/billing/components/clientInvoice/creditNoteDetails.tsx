@@ -3,7 +3,7 @@ import { DocumentPreviewModal } from "@/shared/components/ui/documentPreviewModa
 import PageLoader from "@/shared/components/ui/pageLoader";
 import { NotFound } from "@/shared/components/widgets/notFound";
 import { formatDateLong, formatDateLongWithTime } from "@/shared/utils/formatDate";
-import { Copy, Send, ShieldIcon, Trash2 } from "lucide-react";
+import { Copy, Download, Send, ShieldIcon, Trash2 } from "lucide-react";
 import useCreditNoteDetails, { PropsCreditNote } from "../../hooks/useCreditNoteDetails";
 import { creditNoteTypeLabels } from "../../types/creditNoteType";
 import { invoiceComplianceStatusSchema } from "../../types/invoiceComplianceStatus";
@@ -19,29 +19,29 @@ import { SendToTTNModal } from "../widgets/ttnConfirmationModal";
 import { invoiceTypeSchema } from "../../types/invoiceType";
 
 export default function CreditNoteDetails({ params }: PropsCreditNote) {
-    const { updateStatus, previewDocument, setPreviewDocument, setStatusPaiement, invoice, 
+    const { updateStatus, previewDocument, setPreviewDocument, setStatusPaiement, invoice,
         sendToTTN, TtnModalOpen, setTtnModalOpen, loading, sent, successMessage, router,
-            sendOpen,
+        sendOpen,
         setSendOpen,
         deleteLoading,
         setDeleteLoading,
-        deleteOpen,deleteCreditNote,
+        deleteOpen, deleteCreditNote,
         setDeleteOpen } = useCreditNoteDetails({ params });
-    
-    
-            if(loading){
-                return(
-                    <PageLoader label="Chargement de facture d'avoir ..."/>
-                )
-            }
-            if(invoice==null){
-                <NotFound
-                    resource="Facture d'avoir"
-                    message="Cette facture n'existe pas ou vous n'avez pas les droits pour y accéder."
-                />
-            }
+
+
+    if (loading) {
+        return (
+            <PageLoader label="Chargement de facture d'avoir ..." />
+        )
+    }
+    if (invoice == null) {
+        <NotFound
+            resource="Facture d'avoir"
+            message="Cette facture n'existe pas ou vous n'avez pas les droits pour y accéder."
+        />
+    }
     return (
-        <div className="min-h-screen bg-gray-50 font-sans">
+        <div className="min-h-screen font-sans">
 
             {/* TOP BAR */}
             <DocumentTopBar
@@ -49,37 +49,41 @@ export default function CreditNoteDetails({ params }: PropsCreditNote) {
                 documentNumber={invoice?.invoiceCreditNoteNumber}
                 statusLabel={
                     invoice?.invoiceCreditNoteStatus
-                    ? invoiceStatusLabels[invoice.invoiceCreditNoteStatus]
-                    : "-"
+                        ? invoiceStatusLabels[invoice.invoiceCreditNoteStatus]
+                        : "-"
                 }
                 statusVariant="danger"
                 issueDateLabel="Émise le"
                 issueDate={formatDateLong(invoice?.issueDate)}
                 onBack={() => router.back()}
                 actionItems={[
-                        {
-                            label: "Cloner",
-                            icon: Copy,
-                            onClick: () => console.log("Cloner", invoice?.idInvoiceCreditNote),
-                            visible: invoice?.invoice.invoiceType == invoiceTypeSchema.enum.SALE
-                        },
-                        {
-                            label: "Envoyer",
-                            icon: Send,
-                            onClick: () => setSendOpen(true),
-                            disabled: invoice?.invoiceCreditNoteStatus === "CANCELLED",
-                            visible: true
-                        },
-                        {
-                            label: "Supprimer",
-                            icon: Trash2,
-                            color: "text-rose-600",
-                            hover: "hover:bg-rose-50",
-                            onClick: () => setDeleteOpen(true),
-                            disabled: invoice?.invoiceCreditNoteStatus !== "DRAFT",
-                            visible: true
-                        },
-                    ]}
+                    {
+                        label: "Cloner",
+                        icon: Copy,
+                        onClick: () => console.log("Cloner", invoice?.idInvoiceCreditNote),
+                        visible: invoice?.invoice.invoiceType == invoiceTypeSchema.enum.SALE
+                    },
+                    {
+                        label: "Télécharger",
+                        icon: Download,
+                        onClick: () => setPreviewDocument(invoice?.invoiceCreditNoteDocument),
+                        visible: true
+                    },
+                    {
+                        label: "Envoyer",
+                        icon: Send,
+                        onClick: () => setSendOpen(true),
+                        visible: true
+                    },
+                    {
+                        label: "Supprimer",
+                        icon: Trash2,
+                        color: "text-rose-600",
+                        hover: "hover:bg-rose-50",
+                        onClick: () => setDeleteOpen(true),
+                        visible: invoice?.invoiceCreditNoteStatus == "DRAFT"
+                    },
+                ]}
             />
 
             {/* MAIN */}
@@ -110,27 +114,27 @@ export default function CreditNoteDetails({ params }: PropsCreditNote) {
                                 )}
                             </div>
                             {/* Bouton envoi TTN — visible seulement si pas encore envoyée */}
-                                <button
-                                    disabled={invoice?.invoiceCreditNoteStatus==invoiceStatusSchema.enum.DRAFT 
-                                        || invoice?.invoiceCreditNoteComplianceStatus==invoiceComplianceStatusSchema.enum.TTN_ACCEPTED
-                                    }
-                                    onClick={() => { setTtnModalOpen(true) }}
-                                    className="shrink-0 px-4 py-2 rounded-xl bg-red-600 text-white text-sm font-semibold hover:bg-blue transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2" >
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        className="h-4 w-4"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="2"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                    >
-                                        <line x1="22" y1="2" x2="11" y2="13" />
-                                        <polygon points="22 2 15 22 11 13 2 9 22 2" />
-                                    </svg>
-                                    {"Envoyer au TTN"}
-                                </button>
+                            <button
+                                disabled={invoice?.invoiceCreditNoteStatus == invoiceStatusSchema.enum.DRAFT
+                                    || invoice?.invoiceCreditNoteComplianceStatus == invoiceComplianceStatusSchema.enum.TTN_ACCEPTED
+                                }
+                                onClick={() => { setTtnModalOpen(true) }}
+                                className="shrink-0 px-4 py-2 rounded-xl bg-red-600 text-white text-sm font-semibold hover:bg-blue transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2" >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-4 w-4"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                >
+                                    <line x1="22" y1="2" x2="11" y2="13" />
+                                    <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                                </svg>
+                                {"Envoyer au TTN"}
+                            </button>
                         </div>
                     </Card>
                     {/* Modal pour demander au user s'il veut envoyer la Facture au TTN */}
@@ -144,7 +148,7 @@ export default function CreditNoteDetails({ params }: PropsCreditNote) {
                         successMessage={successMessage} />
 
                     {/* Actions */}
-                    <div style={{ display: "flex", flexDirection: "column", gap: "16px", padding: "1rem 0" }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "16px", padding: "1rem 0", color: "white" }}>
                         <div className="bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700 rounded-xl p-5 flex flex-col gap-4">
                             <p className="text-[11px] font-medium tracking-widest uppercase text-gray-400 m-0">
                                 Détails administratifs
@@ -251,11 +255,11 @@ export default function CreditNoteDetails({ params }: PropsCreditNote) {
                                     <div>
                                         <p className="text-sm font-semibold text-gray-900">{item.invoiceItem.description}</p>
                                         <p className="text-xs text-gray-400 mt-0.5">{item.invoiceItem.vatRate + " %"}</p>
-                                        <p className="text-xs text-gray-400 mt-0.5">{OperationCategoryLabels[item.invoiceItem.operationCategory]}</p>
+                                        <p className="text-xs text-gray-400 mt-0.5">{item.invoiceItem.operationCategory}</p>
                                     </div>
                                     <p className="text-sm text-gray-700 text-right">{item.quantity}</p>
                                     <p className="text-sm text-gray-700 text-right">{item.invoiceItem.unityPriceEXclTax}</p>
-                                    <p className="text-sm font-bold text-gray-900 text-right">{item.quantity *item.invoiceItem.unityPriceEXclTax}</p>
+                                    <p className="text-sm font-bold text-gray-900 text-right">{item.quantity * item.invoiceItem.unityPriceEXclTax}</p>
                                 </div>
                             ))}
                         </div>
@@ -430,11 +434,11 @@ export default function CreditNoteDetails({ params }: PropsCreditNote) {
 
             <DeleteInvoiceModal
                 documentType="credit-note"
-                documentRef={invoice?.invoiceCreditNoteNumber} 
-                open={deleteOpen} 
-                onClose={()=> setDeleteOpen(false)} 
+                documentRef={invoice?.invoiceCreditNoteNumber}
+                open={deleteOpen}
+                onClose={() => setDeleteOpen(false)}
                 onConfirm={deleteCreditNote}
-                loading={deleteLoading}      
+                loading={deleteLoading}
             />
         </div>
     );

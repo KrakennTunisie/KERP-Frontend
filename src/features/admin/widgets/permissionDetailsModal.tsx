@@ -1,9 +1,9 @@
 "use client";
 
 import { Modal } from "@/shared/components/ui/modal";
-import { Permission } from "../mocks/mock-permission";
 import { Shield, Tag, KeyRound } from "lucide-react";
 import { getCategoryLabel } from "../helpers/categoryHelper";
+import { Permission } from "../models/permission";
 
 type PermissionDetailsModalProps = {
   open: boolean;
@@ -41,7 +41,7 @@ export function PermissionDetailsModal({
         <div className="flex items-start justify-between">
           <div>
             <p className="text-lg font-bold text-slate-900">
-              {permission.label}
+              {permission.name}
             </p>
 
             <p className="mt-1 text-sm text-slate-500">
@@ -66,7 +66,7 @@ export function PermissionDetailsModal({
           </div>
 
           <p className="mt-2 font-mono text-sm font-semibold text-slate-800">
-            {permission.key}
+            {permission.name}
           </p>
         </div>
 
@@ -78,7 +78,7 @@ export function PermissionDetailsModal({
           </div>
 
           <p className="mt-2 text-sm font-semibold text-slate-800">
-            {getCategoryLabel(permission.category)}
+            {permission.name}
           </p>
         </div>
 

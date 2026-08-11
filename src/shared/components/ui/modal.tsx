@@ -1,16 +1,18 @@
 "use client";
 
+import Loading from "@/app/(app)/billing/purchaseOrder/suppliers/create/page";
 import React from "react";
 
 type ModalProps = {
   open: boolean;
   title?: string;
+  loading?:boolean;
   onClose: () => void;
   children: React.ReactNode;
   footer?: React.ReactNode;
 };
 
-export function Modal({ open, title, onClose, children, footer }: ModalProps) {
+export function Modal({ open, title,loading, onClose, children, footer }: ModalProps) {
   if (!open) return null;
 
   return (
@@ -30,6 +32,7 @@ export function Modal({ open, title, onClose, children, footer }: ModalProps) {
 
           <button
             onClick={onClose}
+            disabled={loading}
             className="flex items-center justify-center w-9 h-9 rounded-lg text-gray-500 hover:bg-gray-100 transition cursor-pointer"
             aria-label="Fermer"
           >

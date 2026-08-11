@@ -1,12 +1,9 @@
 "use client"
 
 import { DocumentPreviewModal } from "@/shared/components/ui/documentPreviewModal"
-import { currencyTypeSchema } from "../../types/currency"
+import { CurrencyType, currencyTypeSchema } from "../../types/currency"
 import { invoiceTypeSchema } from "../../types/invoiceType"
-import { OperationCategoryLabels, operationCategorySchema } from "../../types/operationCategory"
-import { PaymentConditionLabels, PaymentConditionSchema } from "../../types/paymentCondition"
-import { paymentMethodLabels, paymentMethodSchema } from "../../types/paymentMethod"
-import { tvaRateSchema } from "../../types/tvaRate"
+import { paymentMethod, paymentMethodLabels, paymentMethodSchema } from "../../types/paymentMethod"
 import ErrorForm from "../widgets/errorForm"
 import { SectionTitle } from "../widgets/sectionTitle"
 import { PurchaseOrderFormClientProps, useCreatePurchaseOrder } from "../../hooks/useCreateEditPurchaseOrder"
@@ -14,35 +11,72 @@ import { Controller } from "react-hook-form"
 import PurchaseOrderPreview from "../widgets/purchaseOrderPreview"
 import { PurchaseOrder } from "../../models/purchaseOrder"
 import PageLoader from "@/shared/components/ui/pageLoader"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Eye, EyeOff } from "lucide-react"
+import { extractTvaRate, formatShowLabel } from "../../lib/settingItemHelpers"
+import { useFetchSettings } from "../../hooks/useFetchSetting"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select"
+import { SettingTypeSchema } from "../../types/settingType"
+import { PaymentCondition } from "../../types/paymentCondition"
+import UseSetting from "../../hooks/useSettings"
+import AddSettingModal from "../parameters/addSettingItem"
+import { FieldError } from "@/shared/components/ui/fieldError"
+import { Input } from "@/shared/components/ui/input"
+import { Label } from "@/shared/components/ui/label"
+import AddPartnerModal from "../widgets/addPartnerModal"
+import { partnerTypeSchema } from "../../types/partnerType"
+import { discountTypeOptions, discountTypeSchema } from "../../types/discountType"
 
 export default function CreatePurchaseOrder({
-  mode,
-  purchaseOrderId,
+    mode,
+    purchaseOrderId,
 }: PurchaseOrderFormClientProps) {
-  const {
-    addItem,
-    removeItem, updateItem, supplierSearch, setSupplierSearch, showDropdown, setShowDropdown, canCreatePurchaseOrder, 
-    errors, selectSupplier, clearSupplier, clients,
-      previewData, form, onSubmit, router, isModalOpen, createPurchaseOrder, pdfUrl, 
-    onCloseDocumentModal, purchaseOrderRef,updatePurchaseOrder,
-    loadingEdit,
-    loadingForm,
-  } = useCreatePurchaseOrder({ mode, purchaseOrderId })
-  const [showPreview, setShowPreview] = useState(true)
-  const { register } = form
+    const {
+        addItem,
+        removeItem, updateItem, supplierSearch, setSupplierSearch, showDropdown, setShowDropdown, canCreatePurchaseOrder,
+        errors, selectSupplier, clearSupplier, suppliers,
+        previewData, form, onSubmit, router, isModalOpen, createPurchaseOrder, pdfUrl,
+        onCloseDocumentModal, purchaseOrderRef, updatePurchaseOrder,
+        loadingEdit, showAddSupplierModal,
+        setShowAddSupplierModal,
+        handleSupplierAdded,
+        newSupplier,
+        setNewSupplier,
+        setNewSupplierName,
+        loadingForm,
+        getItemError,
+        getError
+    } = useCreatePurchaseOrder({ mode, purchaseOrderId })
 
-  if(loadingEdit){
-    return(
-      <PageLoader label="Chargement de bon de commande..."/>
-    )
-  }
 
-  return (
-    <div className={`flex flex-col {${showPreview ? "overflow-y-auto" : "overflow-hidden"}`}>
-      {/* ── Header ── */}
-      <header className="sticky top-0 z-30 bg-white border-b border-slate-100 px-6 py-4 flex items-center justify-between shadow-sm">
+    const { fetchCategories, fetchPaymentConditions, fetchTvaRates, operationCategories, paymentConditions, vatRates } = useFetchSettings();
+    useEffect(() => {
+        fetchTvaRates();
+        fetchCategories();
+        fetchPaymentConditions();
+    }, []);
+
+    const {
+        typeAdd, openAddModal, onCloseAddModal, loadingAddModal,
+
+        onAction, handleCreate, getTitleAddModal
+
+    } = UseSetting()
+
+    const [showPreview, setShowPreview] = useState(true)
+    const { register, watch, setValue } = form
+
+    if (loadingEdit) {
+        return (
+            <PageLoader label="Chargement de bon de commande..." />
+        )
+    }
+
+
+    return (
+        <div className={`flex flex-col bg-white min-h-screen {${showPreview ? "overflow-y-auto" : "overflow-hidden"}`}>
+            {/* ── Header ── */}
+            <header className="sticky top-0 z-30 bg-white border-b border-slate-100 px-6 py-4 flex items-center justify-between shadow-sm">
                 <div className="flex items-center gap-4">
                     <button
                         onClick={() => router.back()}
@@ -53,9 +87,9 @@ export default function CreatePurchaseOrder({
                     </button>
                     <div>
                         <h1 className="text-xl font-bold text-slate-900 tracking-tight">
-                            {mode === "create" ? "Création bon de commande" 
-                                                :
-                                                 "Modification bon de commande"}
+                            {mode === "create" ? "Création bon de commande"
+                                :
+                                "Modification bon de commande"}
                         </h1>
                         <p className="text-xs text-slate-400 mt-0.5">
                             {mode === "create"
@@ -72,7 +106,6 @@ export default function CreatePurchaseOrder({
                     </button>
                     <button
                         onClick={onSubmit}
-                        disabled={!canCreatePurchaseOrder}
                         className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold shadow-md transition ${!canCreatePurchaseOrder
                             ? "bg-gray-300 cursor-not-allowed text-gray-500 shadow-none"
                             : "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-200 cursor-pointer"
@@ -102,337 +135,488 @@ export default function CreatePurchaseOrder({
                     </button>
                 </div>
             </header>
-      {/* Modal pour la facture générée  */}
-      <DocumentPreviewModal
-        open={isModalOpen}
-        onClose={onCloseDocumentModal}
-        onCreateInvoice={mode === "create" ? createPurchaseOrder : updatePurchaseOrder}
-        document={pdfUrl}
-        loading={loadingForm}
-        type="Bon Commande" />
-      {/* ── Body ── */}
-      <div className="flex h-[calc(110vh-80px)]">
+            <AddPartnerModal
+                isOpen={showAddSupplierModal}
+                partner={newSupplier}
+                partnerType={partnerTypeSchema.enum.SUPPLIER}
+                onClose={() => setShowAddSupplierModal(false)}
+                onSuccess={handleSupplierAdded}
+            />
+            {/* Modal pour la facture générée  */}
+            <DocumentPreviewModal
+                open={isModalOpen}
+                onClose={onCloseDocumentModal}
+                onCreateInvoice={mode === "create" ? createPurchaseOrder : updatePurchaseOrder}
+                document={pdfUrl}
+                loading={loadingForm}
+                type="Bon Commande" />
 
-        {/* ── Left Panel ── */}
-        <div className={`${showPreview ? "w-6/10 overflow-y-auto" : "w-full"} transition-all duration-300`}>
-           <div className="max-w-7xl mx-auto p-6 flex flex-col gap-5 ">
+            {typeAdd && <AddSettingModal
+                open={openAddModal}
+                title={getTitleAddModal()}
+                loading={loadingAddModal}
+                onClose={onCloseAddModal}
+                onSubmit={handleCreate}
+                settingType={typeAdd}
+                onSuccess={async () => {
+                    await fetchTvaRates()
+                    await fetchCategories()
+                    await fetchPaymentConditions()
 
-              {/* Section 01 — Référence */}
-              <section>
-                  <SectionTitle number="01" label="Référence" invoiceType={invoiceTypeSchema.enum.SALE} />
-                  <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 flex flex-col gap-4 mt-3">
+                }}
+            />}
+            {/* ── Body ── */}
+            <div className="flex h-[calc(110vh-80px)]">
 
-                      {/* N° Facture + Date émission sur une ligne */}
-                      <div className="grid grid-cols-2 gap-4">
-                          <div>
-                              <label className="block text-xs font-medium text-slate-500 mb-1">
-                                  N° Facture
-                              </label>
-                              <input
-                                  readOnly
-                                  type="text"
-                                  {...register("purchaseOrderNumber")}
-                                  className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
-                              />
-                          </div>
-                          
-                          <div className="grid grid-cols gap-3">
-                            <div>
-                              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
-                                Date de livraison
-                              </label>
-                              <Controller
-                                control={form.control}
-                                name="issueDate"
-                                render={({ field }) => (
-                                  <input
-                                    type="date"
-                                    value={field.value ? new Date(field.value).toISOString().split("T")[0] : ""}
-                                    onChange={(e) => {
-                                      field.onChange(new Date(e.target.value)); // ← Date object
-                                    }}
-                                    min={new Date().toISOString().split("T")[0]}
-                                    className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
-                                  />
-                                )}
-                              />
+                {/* ── Left Panel ── */}
+                <div className={`${showPreview ? "w-6/10 overflow-y-auto" : "w-full"} transition-all duration-300`}>
+                    <div className="max-w-7xl mx-auto p-6 flex flex-col gap-5 ">
+
+                        {/* Section 01 — Référence */}
+                        <section>
+                            <SectionTitle number="01" label="Référence" invoiceType={invoiceTypeSchema.enum.SALE} />
+                            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 flex flex-col gap-4 mt-3">
+
+                                {/* N° Facture + Date émission sur une ligne */}
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <Label>
+                                            N° Facture
+                                        </Label>
+                                        <input
+                                            readOnly
+                                            type="text"
+                                            {...register("purchaseOrderNumber")}
+                                            className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
+                                        />
+                                    </div>
+
+                                    <div className="grid grid-cols gap-3">
+                                        <div>
+                                            <Label >
+                                                Date de livraison
+                                            </Label>
+                                            <Controller
+                                                control={form.control}
+                                                name="issueDate"
+                                                render={({ field }) => (
+                                                    <input
+                                                        type="date"
+                                                        value={field.value ? new Date(field.value).toISOString().split("T")[0] : ""}
+                                                        onChange={(e) => {
+                                                            field.onChange(new Date(e.target.value)); // ← Date object
+                                                        }}
+                                                        min={new Date().toISOString().split("T")[0]}
+                                                        className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
+                                                    />
+                                                )}
+                                            />
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                            </div>
+                        </section>
+
+                        {/* Section 02 — fournisseur */}
+                        <section>
+                            <SectionTitle number="02" label="Fournisseur" invoiceType={invoiceTypeSchema.enum.SALE} />
+                            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 flex flex-col gap-3 mt-3">
+                                <div>
+                                    <Label>
+                                        Sélectionner un fournisseur
+                                    </Label>
+                                    <div className="relative">
+                                        <input
+                                            type="text"
+                                            placeholder="Rechercher un fournisseur..."
+                                            value={supplierSearch}
+                                            onChange={(e) => { setSupplierSearch(e.target.value); setShowDropdown(true) }}
+                                            onFocus={() => setShowDropdown(true)}
+                                            onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
+                                            className="w-full px-3 py-2.5 pr-9 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
+                                        />
+                                        <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+                                            <svg
+                                                className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${showDropdown ? "rotate-180" : ""}`}
+                                                fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </div>
+                                        {showDropdown && suppliers.length > 0 && (
+                                            <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-20 max-h-48 overflow-y-auto">
+                                                {suppliers.map((supplier) => (
+                                                    <button
+                                                        key={supplier.idPartner}
+                                                        type="button"
+                                                        onMouseDown={(e) => {
+                                                            e.preventDefault();
+                                                            selectSupplier(supplier);
+                                                            setSupplierSearch(supplier.companyName);
+                                                        }}
+                                                        className="w-full text-left px-4 py-3 hover:bg-blue-50 transition border-b border-slate-50 last:border-0"
+                                                    >
+                                                        <p className="text-sm font-bold text-slate-800">{supplier.companyName}</p>
+                                                        <p className="text-xs text-slate-400 mt-0.5">{supplier.billingAddress!.city}</p>
+                                                    </button>
+                                                ))}
+                                                {/* Lien pour ajouter un fournisseur inexistant */}
+                                                <button
+                                                    type="button"
+                                                    onMouseDown={(e) => {
+                                                        e.preventDefault();
+                                                        setNewSupplierName(supplierSearch);
+                                                        setShowAddSupplierModal(true);
+                                                        setShowDropdown(false);
+                                                    }}
+                                                    className="w-full text-left px-4 py-3 flex items-center gap-2 text-blue-600 hover:bg-blue-50 transition"
+                                                >
+                                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                                                    </svg>
+                                                    <span className="text-sm font-medium">Ajouter un  nouveau fournisseur</span>
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <FieldError error={getError("partner")} />
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* Section 03 — Devise + Paiement (fusionnés) */}
+                        <section>
+                            <SectionTitle number="03" label="Devise & Paiement" invoiceType={invoiceTypeSchema.enum.SALE} />
+                            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 mt-3">
+                                <div className="grid grid-cols-2 gap-4">
+                                    {/* Devise */}
+                                    <div>
+                                        <Label>
+                                            Devise
+                                        </Label>
+                                        <Select value={watch("currency") ?? ""}
+                                            disabled={mode === "edit"}
+                                            onValueChange={(value) => {
+                                                setValue("currency", value as CurrencyType, {
+                                                    shouldValidate: true,
+                                                    shouldDirty: true,
+                                                });
+
+                                            }
+                                            }>
+                                            <SelectTrigger className="bg-slate-50" >
+                                                <SelectValue placeholder="Devise" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {currencyTypeSchema.options.map((currency) => (
+                                                    <SelectItem key={currency} value={currency}>
+                                                        {currency}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+
+                                    {/* Taux de change */}
+                                    <div>
+                                        <Label>
+                                            Taux de change
+                                        </Label>
+                                        <input
+                                            type="text"
+                                            readOnly
+                                            disabled
+                                            {...register("appliedExchangeRate", { valueAsNumber: true })}
+                                            className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition disabled:opacity-50"
+                                        />
+                                    </div>
+
+                                    {/* Conditions de paiement */}
+                                    <div>
+                                        <Label>
+                                            Condition de paiement
+                                        </Label>
+
+                                        <Select value={watch("paymentCondition") ?? ""}
+                                            onValueChange={(value) => {
+                                                setValue("paymentCondition", value as PaymentCondition, {
+                                                    shouldValidate: true,
+                                                    shouldDirty: true,
+                                                });
+                                            }
+                                            }>
+                                            <SelectTrigger className="bg-slate-50"
+                                                onAdd={() => onAction(SettingTypeSchema.enum.PAYMENT_CONDITION)}
+                                            >
+                                                <SelectValue placeholder="Méthode de paiement" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {paymentConditions.map((condition) => (
+                                                    <SelectItem key={condition.code} value={condition.label}>
+                                                        {formatShowLabel(condition.label)}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+
+                                    {/* Méthode de paiement */}
+                                    <div>
+                                        <Label>
+                                            Méthode de paiement
+                                        </Label>
+                                        <Select value={watch("paymentMethod") ?? ""}
+                                            onValueChange={(value) =>
+                                                setValue("paymentMethod", value as paymentMethod, {
+                                                    shouldValidate: true,
+                                                    shouldDirty: true,
+                                                })
+                                            }>
+                                            <SelectTrigger className="bg-slate-50">
+                                                <SelectValue placeholder="Méthode de paiement" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {paymentMethodSchema.options.map((method) => (
+                                                    <SelectItem key={method} value={method}>
+                                                        {paymentMethodLabels[method]}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* Section 04 — Services */}
+                        <section>
+                            <div className="flex items-center justify-between">
+                                <SectionTitle number="04" label="Services" invoiceType={invoiceTypeSchema.enum.SALE} />
+                                <button
+                                    onClick={addItem}
+                                    className="w-8 h-8 rounded-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center shadow-md shadow-blue-200 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                                >
+                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                                    </svg>
+                                </button>
                             </div>
 
-                          </div>
-                      </div>
+                            <div className="flex flex-col gap-3 mt-3">
+                                {(previewData.purchaseOrderItems ?? []).map((item, index) => {
+                                    const lineTotal = (item.quantity ?? 0) * (item.unityPriceEXclTax ?? 0);
 
-                  </div>
-              </section>
+                                    return ( // ✅ ajouté
+                                        <div key={item.idPurchaseOrderItem ?? index} className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
 
-              {/* Section 02 — Client */}
-              <section>
-                  <SectionTitle number="02" label="Client" invoiceType={invoiceTypeSchema.enum.SALE} />
-                  <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 flex flex-col gap-3 mt-3">
-                      <div>
-                          <label className="block text-xs font-medium text-slate-500 mb-1">
-                              Sélectionner un client
-                          </label>
-                          <div className="relative">
-                              <input
-                                  type="text"
-                                  placeholder="Rechercher un client..."
-                                  value={supplierSearch}
-                                  onChange={(e) => { setSupplierSearch(e.target.value); setShowDropdown(true) }}
-                                  onFocus={() => setShowDropdown(true)}
-                                  onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
-                                  className="w-full px-3 py-2.5 pr-9 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
-                              />
-                              <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
-                                  <svg
-                                      className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${showDropdown ? "rotate-180" : ""}`}
-                                      fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                                  </svg>
-                              </div>
-                              {showDropdown && clients.length > 0 && (
-                                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-20 max-h-48 overflow-y-auto">
-                                      {clients.map((client) => (
-                                          <button
-                                              key={client.idPartner}
-                                              type="button"
-                                              onMouseDown={(e) => {
-                                                  e.preventDefault();
-                                                  selectSupplier(client);
-                                              }}
-                                              className="w-full text-left px-4 py-3 hover:bg-blue-50 transition border-b border-slate-50 last:border-0"
-                                          >
-                                              <p className="text-sm font-bold text-slate-800">{client.companyName}</p>
-                                              <p className="text-xs text-slate-400 mt-0.5">{client.billingAddress!.city}</p>
-                                          </button>
-                                      ))}
-                                  </div>
-                              )}
-                          </div>
-                      </div>
+                                            {/* Désignation + bouton supprimer */}
+                                            <div className="flex items-center justify-between mb-1">
+                                                <div className="text-xs font-medium text-slate-500">
+                                                </div>
+                                                <button
+                                                    onClick={() => removeItem(item.idPurchaseOrderItem!)}
+                                                    className="text-slate-300 hover:text-red-400 transition"
+                                                >
+                                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                    </svg>
+                                                </button>
+                                            </div>
 
-                      {/* Client sélectionné */}
-                      {previewData.partner && (
-                          <div className="border-2 border-blue-100 bg-blue-50/40 rounded-xl p-4">
-                              <div className="flex items-start justify-between mb-1">
-                                  <p className="text-sm font-semibold text-slate-700">{previewData.partner.companyName}</p>
-                                  <button
-                                      type="button"
-                                      onClick={clearSupplier}
-                                      className="text-slate-300 hover:text-red-400 transition"
-                                  >
-                                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                      </svg>
-                                  </button>
-                              </div>
-                              <p className="text-xs text-blue-500 mb-2">{previewData?.partner?.billingAddress?.region}</p>
+                                            {/* Input désignation */}
+                                            <Input
+                                                label="Désignation"
+                                                value={item.description}
+                                                onChange={(e) =>
+                                                    updateItem(item.idPurchaseOrderItem!, "description", e.target.value)
+                                                }
+                                                error={getItemError(index, "description")}
+                                            />
 
-                              {/* Email + Téléphone sur une ligne */}
-                              <div className="grid grid-cols-2 gap-4">
-                                  <span className="flex items-center gap-1.5 text-xs text-blue-500">
-                                      <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                          <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                      </svg>
-                                      {previewData.partner.email}
-                                  </span>
-                                  <span className="flex items-center gap-1.5 text-xs text-blue-500">
-                                      <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                          <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                                      </svg>
-                                      {previewData.partner.professionnalPhoneNumber}
-                                  </span>
-                              </div>
-                          </div>
-                      )}
-                  </div>
-              </section>
+                                            {/* Catégorie */}
+                                            <div className="mt-3 mb-4">
+                                                <Label>
+                                                    Catégorie
+                                                </Label>
 
-              {/* Section 03 — Devise + Paiement (fusionnés) */}
-              <section>
-                  <SectionTitle number="03" label="Devise & Paiement" invoiceType={invoiceTypeSchema.enum.SALE} />
-                  <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 mt-3">
-                      <div className="grid grid-cols-2 gap-4">
-                          {/* Devise */}
-                          <div>
-                              <label className="block text-xs font-medium text-slate-500 mb-1">
-                                  Devise
-                              </label>
-                              <select
-                                  {...register("currency")}
-                                  disabled={ mode == "edit"}
-                                  className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition disabled:opacity-50"
-                              >
-                                  {currencyTypeSchema.options.map((currency) => (
-                                      <option key={currency} value={currency}>{currency}</option>
-                                  ))}
-                              </select>
-                          </div>
+                                                <Select
+                                                    value={item.operationCategory ?? ""}
+                                                    onValueChange={(value) =>
+                                                        updateItem(
+                                                            item.idPurchaseOrderItem!,
+                                                            "operationCategory",
+                                                            value
+                                                        )
+                                                    }
+                                                >
+                                                    <SelectTrigger
+                                                        onAdd={() => onAction(SettingTypeSchema.enum.OPERATION_CATEGORY)}
+                                                    >
+                                                        <SelectValue placeholder="Sélectionner une catégorie" />
+                                                    </SelectTrigger>
 
-                          {/* Taux de change */}
-                          <div>
-                              <label className="block text-xs font-medium text-slate-500 mb-1">
-                                  Taux de change
-                              </label>
-                              <input
-                                  type="text"
-                                  readOnly
-                                  {...register("appliedExchangeRate", { valueAsNumber: true })}
-                                  className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition disabled:opacity-50"
-                              />
-                          </div>
+                                                    <SelectContent>
+                                                        {operationCategories.map((category) => (
+                                                            <SelectItem
+                                                                key={category.code}
+                                                                value={category.label}
+                                                            >
+                                                                {formatShowLabel(category.label)}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                                <FieldError
+                                                    error={getItemError(index, "operationCategory")}
+                                                />
+                                            </div>
 
-                          {/* Conditions de paiement */}
-                          <div>
-                              <label className="block text-xs font-medium text-slate-500 mb-1">
-                                  Condition de paiement
-                              </label>
-                              <select
-                                  {...register("paymentCondition", {
-                                      onChange: (e) => { /*calculateDueDate();*/ }
-                                  })}
-                                  className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
-                              >
-                                  {PaymentConditionSchema.options.map((condition) => (
-                                      <option key={condition} value={condition}>{PaymentConditionLabels[condition]}</option>
-                                  ))}
-                              </select>
-                          </div>
+                                            {/* QTÉ / P.U HT / TVA */}
+                                            <div className="grid grid-cols-3 gap-2">
+                                                <div>
+                                                    <Label>
+                                                        QTÉ
+                                                    </Label>
+                                                    <Input
+                                                        type="number"
+                                                        min={1}
+                                                        value={item.quantity}
+                                                        onChange={(e) =>
+                                                            updateItem(
+                                                                item.idPurchaseOrderItem!,
+                                                                "quantity",
+                                                                Number(e.target.value)
+                                                            )
+                                                        }
+                                                        error={getItemError(index, "quantity")}
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <Label>
+                                                        P.U HT
+                                                    </Label>
+                                                    <Input
+                                                        type="number"
+                                                        min={0}
+                                                        defaultValue={item.unityPriceEXclTax}
+                                                        onBlur={(e) =>
+                                                            updateItem(
+                                                                item.idPurchaseOrderItem!,
+                                                                "unityPriceEXclTax",
+                                                                Number(e.target.value)
+                                                            )
+                                                        }
+                                                        error={getItemError(index, "unityPriceEXclTax")}
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <Label>
+                                                        TVA %
+                                                    </Label>
+                                                    <Select
+                                                        value={String(item.vatRate)}
+                                                        onValueChange={(value) =>
+                                                            updateItem(item.idPurchaseOrderItem!, "vatRate", Number(value))
+                                                        }
+                                                    >
+                                                        <SelectTrigger
+                                                            onAdd={() => onAction(SettingTypeSchema.enum.TVA_RATE)}
+                                                        >
+                                                            <SelectValue />
+                                                        </SelectTrigger>
 
-                          {/* Méthode de paiement */}
-                          <div>
-                              <label className="block text-xs font-medium text-slate-500 mb-1">
-                                  Méthode de paiement
-                              </label>
-                              <select
-                                  {...register("paymentMethod")}
-                                  className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
-                              >
-                                  {paymentMethodSchema.options.map((method) => (
-                                      <option key={method} value={method}>
-                                          {paymentMethodLabels[method]}
-                                      </option>
-                                  ))}
-                              </select>
-                          </div>
-                      </div>
-                  </div>
-              </section>
+                                                        <SelectContent>
+                                                            {vatRates.map((rate) => (
+                                                                <SelectItem
+                                                                    key={rate.code}
+                                                                    value={String(extractTvaRate(rate.label))}
+                                                                >
+                                                                    {formatShowLabel(rate.label)}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
 
-              {/* Section 04 — Services */}
-              <section>
-                  <div className="flex items-center justify-between">
-                      <SectionTitle number="04" label="Services" invoiceType={invoiceTypeSchema.enum.SALE} />
-                      <button
-                          onClick={addItem}
-                          className="w-8 h-8 rounded-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center shadow-md shadow-blue-200 transition disabled:opacity-40 disabled:cursor-not-allowed"
-                      >
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                          </svg>
-                      </button>
-                  </div>
+                                                    <FieldError error={errors.purchaseOrderItems?.[index]?.vatRate?.message} />
+                                                </div>
 
-                  <div className="flex flex-col gap-3 mt-3">
-                    {(previewData.purchaseOrderItems ?? []).map((item, index) => (
-                      <div key={item.idPurchaseOrderItem ?? index} className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+                                                {/* Discount */}
+                                                <div className="col-span-2">
+                                                    <Label>
+                                                        Discount
+                                                    </Label>
 
-                        {/* Header : Désignation + bouton supprimer */}
-                        <div className="flex items-start justify-between mb-1">
-                          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                            Désignation
-                          </label>
-                          <button
-                            onClick={() => removeItem(item.idPurchaseOrderItem!)}
-                            className="text-slate-300 hover:text-red-400 transition"
-                          >
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                          </button>
-                        </div>
+                                                    <div className="flex gap-2">
+                                                        <Input
+                                                            type="number"
+                                                            min={0}
+                                                            value={item.discountValue ?? 0}
+                                                            onChange={(e) =>
+                                                                updateItem(
+                                                                    item.idPurchaseOrderItem!,
+                                                                    "discountValue",
+                                                                    Number(e.target.value)
+                                                                )
+                                                            }
+                                                            className="flex-1"
+                                                        />
 
-                        {/* Input désignation */}
-                        <input
-                          type="text"
+                                                        <Select
+                                                            value={item.discountType ?? "PERCENTAGE"}
+                                                            onValueChange={(value) =>
+                                                                updateItem(
+                                                                    item.idPurchaseOrderItem!,
+                                                                    "discountType",
+                                                                    value
+                                                                )
+                                                            }
+                                                        >
+                                                            <SelectTrigger className="w-28">
+                                                                <SelectValue />
+                                                            </SelectTrigger>
 
-                          value={item.description}
-                          onChange={(e) => updateItem(item.idPurchaseOrderItem!, "description", e.target.value)}
-                          className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition mb-4"
-                        />
+                                                            <SelectContent>
+                                                                {discountTypeOptions.map((discountType) => (
+                                                                    <SelectItem key={discountType.value} value={discountType.value}>
+                                                                        {discountType.value === discountTypeSchema.enum.AMOUNT
+                                                                            ? form.getValues("currency")
+                                                                            : discountType.label}
+                                                                    </SelectItem>
+                                                                ))}
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </div>
 
-                        {/* Catégorie */}
-                        <div className="mb-4">
-                          <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
-                            Catégorie
-                          </label>
-                          <select
-                            value={item.operationCategory}
+                                                    <FieldError error={errors.purchaseOrderItems?.[index]?.discountValue?.message} />
+                                                </div>
 
-                            onChange={(e) => updateItem(item.idPurchaseOrderItem!, "operationCategory", e.target.value)}
-                            className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
-                          >
-                            {operationCategorySchema.options.map((value) => (
-                              <option key={value} value={value}>{OperationCategoryLabels[value]}</option>
-                            ))}
-                          </select>
-                        </div>
-
-                        {/* QTÉ / P.U HT / TVA */}
-                        <div className="grid grid-cols-3 gap-2">
-                          <div>
-                            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
-                              QTÉ
-                            </label>
-                            <input
-                              type="number"
-
-                              min={1}
-                              value={item.quantity}
-                              onChange={(e) => updateItem(item.idPurchaseOrderItem!, "quantity", parseFloat(e.target.value) || 0)}
-                              className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 text-center focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
-                              P.U HT
-                            </label>
-                            <input
-                              type="text"
-                              defaultValue={item.unityPriceEXclTax}
-                              onBlur={(e) => updateItem(item.idPurchaseOrderItem!, "unityPriceEXclTax", parseFloat(e.target.value))}
-                              className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 text-center focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">
-                              TVA %
-                            </label>
-                            <select
-                              value={item.vatRate}
-                              onChange={(e) => updateItem(item.idPurchaseOrderItem!, "vatRate", Number(e.target.value))}
-                              className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 text-center focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
-                            >
-                              {tvaRateSchema.options.map((rate) => (
-                                <option key={rate.value} value={rate.value}>{rate.value}%</option>
-                              ))}
-                            </select>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  {errors.purchaseOrderItems?.message && (
-                      <ErrorForm error={errors.purchaseOrderItems?.message} />
-                  )}
-              </section>
-          </div>
-        </div>
-        {showPreview && (
-                <div className="flex-1">
-                    <PurchaseOrderPreview ref={purchaseOrderRef} data={previewData as PurchaseOrder} />
+                                                <div>
+                                                    <Label>Total HT</Label>
+                                                    <input
+                                                        type="text"
+                                                        readOnly
+                                                        value={lineTotal.toFixed(2)}
+                                                        className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-100 text-sm font-semibold text-slate-700 text-center focus:outline-none transition"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                            {errors.purchaseOrderItems?.message && (
+                                <ErrorForm error={errors.purchaseOrderItems?.message} />
+                            )}
+                        </section>
+                    </div>
                 </div>
-        )}
-      </div>
-    </div>
-  )
+                {showPreview && (
+                    <div className="flex-1">
+                        <PurchaseOrderPreview ref={purchaseOrderRef} data={previewData as PurchaseOrder} />
+                    </div>
+                )}
+            </div>
+        </div>
+    )
 }

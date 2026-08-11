@@ -10,6 +10,7 @@ import { StatusFilterBar } from "../widgets/billingFilterBar";
 import { BillingTable } from "../widgets/billingTable";
 import { InvoicePageItem } from "../../models/invoice";
 import { Status, UpdateDocumentStatusModal } from "../widgets/updateStatusModal";
+import { ArchiveInvoiceModal } from "../widgets/archiveModal";
 
 export default function ClientsInvoiceList() {
 
@@ -28,7 +29,11 @@ export default function ClientsInvoiceList() {
         setInvoiceId,
         deleteClientInvoice,
         setUpdateOpen,
-
+        fetchClientsInvoices,
+        archiveLoading,
+        archiveOpen,
+        setArchiveOpen,
+        archiveInvoice,
         selectedInvoice, setSelectedInvoice,
 
         loading, clientInvoiceStats } = useClientInvoiceList();
@@ -46,12 +51,12 @@ export default function ClientsInvoiceList() {
             label: invoiceStatusLabels[status],
         }));
     return (
-        <div className="min-h-screen bg-gray-50 p-8 font-sans">
+        <div className="min-h-screen p-8 font-sans">
             <SendDocumentModal
                 document={selectedInvoice}
                 variant="invoice"
                 isOpen={open}
-                onClose={() => setOpen(false)}
+                onClose={async() =>{ setOpen(false) ; await fetchClientsInvoices()}}
             />
             {/* Header */}
             <BillingPageHeader
@@ -60,6 +65,24 @@ export default function ClientsInvoiceList() {
                 createHref="/billing/invoices/clients/create"
                 createLabel="Nouvelle facture client"
             />
+
+            <ArchiveInvoiceModal
+                documentType="invoice"
+                open={archiveOpen}
+                onClose={() => setArchiveOpen(false)}
+                documentRef={invoiceRef}
+                onConfirm={archiveInvoice}
+                loading={archiveLoading} />
+
+            <DeleteInvoiceModal
+                documentType="invoice"
+                open={deleteOpen}
+                onClose={() => setDeleteOpen(false)}
+                documentRef={selectedInvoice?.invoiceNumber}
+                onConfirm={deleteClientInvoice}
+                loading={deleteLoading} />
+
+
             {/* Stats */}
             <div className="flex gap-4 mb-8">
                 <StatClientInvoiceCard
@@ -100,13 +123,6 @@ export default function ClientsInvoiceList() {
                     sub={`${clientInvoiceStats.pendingInvoices} factures`}
                     variant="emerald"
                 />
-                <DeleteInvoiceModal
-                    documentType="invoice"
-                    open={deleteOpen}
-                    onClose={() => setDeleteOpen(false)}
-                    documentRef={selectedInvoice?.invoiceNumber}
-                    onConfirm={deleteClientInvoice}
-                    loading={deleteLoading} />
 
             </div>
             <UpdateDocumentStatusModal
@@ -135,57 +151,68 @@ export default function ClientsInvoiceList() {
                 defaultStatus={invoiceStatusSchema.enum.ALL}
                 statuses={invoiceStatuses}
                 searchPlaceholder="Référence ou client..."
-                onDownloadAll={()=>console.log("DownloadALL")}
-                onDownloadCurrentYear={()=>console.log("onDownloadCurrentYear")}
-                onDownloadFitered={()=>console.log("onDownloadFitered")}
+                onDownloadAll={() => console.log("DownloadALL")}
+                onDownloadCurrentYear={() => console.log("onDownloadCurrentYear")}
+                onDownloadFitered={() => console.log("onDownloadFitered")}
             />
             {/* Table */}
 
-                <BillingTable<InvoicePageItem>
-                    items={clientsInvoices}
-                    variant="invoice"
-                    secondColumnLabel="Client"
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    totalElements={totalElements}
-                    loading={loading}
-                    onPageChange={setCurrentPage}
-                    onView={(invoice) => {
-                        router.push(`/billing/invoices/clients/${invoice.idInvoice}/details/`);
-                    }}
-                    onUpdateStatus={(invoice) => {
-                        setSelectedInvoice(invoice);
-                        setInvoiceId(invoice.idInvoice);
-                        setUpdateOpen(true);
-                    }}
-                    canUpdateStatus={(invoice) =>
-                        getClientInvoiceAllowedNextStatuses(invoice.invoiceStatus).length > 0
-                    }
-                    onEdit={(invoice) => {
-                        router.push(`/billing/invoices/clients/${invoice.idInvoice}/edit`);
-                    }}
-                    onSend={(invoice) => {
-                        
-                        setSelectedInvoice(invoice);
-                        setInvoiceId(invoice.idInvoice);
-                        setOpen(true);
-                    }}
-                    onDelete={(invoice) => {
+            <BillingTable<InvoicePageItem>
+                items={clientsInvoices}
+                variant="invoice"
+                secondColumnLabel="Client"
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalElements={totalElements}
+                loading={loading}
+                onPageChange={setCurrentPage}
+                onView={(invoice) => {
+                    router.push(`/billing/invoices/clients/${invoice.idInvoice}/details/`);
+                }}
+                onUpdateStatus={(invoice) => {
+                    setSelectedInvoice(invoice);
+                    setInvoiceId(invoice.idInvoice);
+                    setUpdateOpen(true);
+                }}
+                canUpdateStatus={(invoice) =>
+                    getClientInvoiceAllowedNextStatuses(invoice.invoiceStatus).length > 0
+                }
+                onEdit={(invoice) => {
+                    router.push(`/billing/invoices/clients/${invoice.idInvoice}/edit`);
+                }}
+                onSend={(invoice) => {
+
+                    setSelectedInvoice(invoice);
+                    setInvoiceId(invoice.idInvoice);
+                    setOpen(true);
+                }}
+                onDelete={(invoice) => {
+                    if (invoice.invoiceStatus == invoiceStatusSchema.enum.DRAFT || invoiceStatusSchema.enum.CANCELLED) {
                         setSelectedInvoice(invoice);
                         setInvoiceId(invoice.idInvoice);
                         setDeleteOpen(true);
-                    }}
-                    getNumber={(invoice) => invoice.invoiceNumber}
-                    getPartnerName={(invoice) => invoice.partner?.companyName}
-                    getStatus={(invoice) => invoice.invoiceStatus}
-                    getAmountEUR={(invoice) => invoice.totalInclTaxEUR}
-                    getAmountTND={(invoice) => invoice.totalInclTaxTND}
-                    getDate={(invoice) => invoice.dueDate ?? invoice.issueDate}
-                    getStatusLabel={(status) => invoiceStatusLabels[status]}
-                    getStatusColor={(status) =>
-                        status !== "ALL" ? invoiceStatusColors[status] : ""
                     }
-                />
+                }}
+                onArchive={(invoice) => {
+                    if (invoice.invoiceStatus == invoiceStatusSchema.enum.PAID || invoiceStatusSchema.enum.ARCHIVED) {
+                        setSelectedInvoice(invoice);
+                        setInvoiceId(invoice.idInvoice);
+                        setArchiveOpen(true);
+                    }
+                }}
+                getNumber={(invoice) => invoice.invoiceNumber}
+                getPartnerName={(invoice) => invoice.partner?.companyName}
+                getPartnerEmail={(invoice) => invoice.partner?.email}
+                getStatus={(invoice) => invoice.invoiceStatus}
+                getAmountEUR={(invoice) => invoice.totalInclTaxEUR}
+                getAmountTND={(invoice) => invoice.totalInclTaxTND}
+                getCurrency={(invoice)=> invoice.invoiceCurrency}
+                getDate={(invoice) => invoice.dueDate ?? invoice.issueDate}
+                getStatusLabel={(status) => invoiceStatusLabels[status]}
+                getStatusColor={(status) =>
+                    status !== "ALL" ? invoiceStatusColors[status] : ""
+                }
+            />
         </div>
 
 

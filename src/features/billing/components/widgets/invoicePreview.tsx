@@ -5,12 +5,11 @@ import { invoiceCreditNoteSchema } from "../../models/creditNote";
 import { InvoiceCreate, invoiceSchema } from "../../models/invoice";
 import { creditNoteTypeLabels } from "../../types/creditNoteType";
 import { invoiceTypeLabels } from "../../types/invoiceType";
-import { OperationCategoryLabels } from "../../types/operationCategory";
-import { PaymentConditionLabels } from "../../types/paymentCondition";
 import { paymentMethodLabels } from "../../types/paymentMethod";
 import { getDiscountLabel, getDiscountValue } from "../../lib/invoiceItemHelpers";
-import { BaseItem } from "../../models/invoiceItem";
+import { BaseItem, InvoiceItem } from "../../models/invoiceItem";
 import { currencyTypeSchema } from "../../types/currency";
+import { formatShowLabel } from "../../lib/settingItemHelpers";
 
 
 export type InvoiceData = DeepPartial<z.infer<typeof invoiceSchema>>;
@@ -80,16 +79,16 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
                                     </span>
                                 </div>
                                 {(("purchaseOrder" in data && data.purchaseOrder) &&
-                                    
-                                        <div className="inline-flex items-center px-4 py-1.5 rounded-lg bg-blue-50 border border-blue-200">
-                                            <span className="text-sm font-bold text-blue-700">
-                                                {"purchaseOrder" in data && data.purchaseOrder
-                                                    ? `N° ${data.purchaseOrder.purchaseOrderNumber}`
-                                                   : ""
-                                                }
-                                            </span>
-                                        </div>
-                                    )}
+
+                                    <div className="inline-flex items-center px-4 py-1.5 rounded-lg bg-blue-50 border border-blue-200">
+                                        <span className="text-sm font-bold text-blue-700">
+                                            {"purchaseOrder" in data && data.purchaseOrder
+                                                ? `N° ${data.purchaseOrder.purchaseOrderNumber}`
+                                                : ""
+                                            }
+                                        </span>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -128,19 +127,19 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
                                     <p className="text-sm text-slate-500 mt-0.5">{partner.billingAddress?.region}</p>
                                     <p className="text-sm font-bold text-black mt-2">{"MF: "}{partner.taxRegistrationNumber}</p>
                                     <div className="flex items-center gap-4 mt-3">
-                                <span className="flex items-center gap-1.5 text-xs text-slate-400">
-                                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                    </svg>
-                                    {partner.email}
-                                </span>
-                                <span className="flex items-center gap-1.5 text-xs text-slate-400">
-                                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                                    </svg>
-                                   {partner.professionnalPhoneNumber}
-                                </span>
-                            </div>
+                                        <span className="flex items-center gap-1.5 text-xs text-slate-400">
+                                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                            </svg>
+                                            {partner.email}
+                                        </span>
+                                        <span className="flex items-center gap-1.5 text-xs text-slate-400">
+                                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                            </svg>
+                                            {partner.professionnalPhoneNumber}
+                                        </span>
+                                    </div>
                                 </>
                             ) : (
                                 <p className="text-sm text-slate-400 italic">Aucun client sélectionné</p>
@@ -160,9 +159,9 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
                             ? [{ label: "Échéance", value: data.dueDate ? new Date(data.dueDate).toLocaleDateString("fr-FR") : "-" }]
                             : []),
                         ...(isCredit ? [
-                            { label: "Paiement", value: data?.originalInvoice?.paymentCondition ? PaymentConditionLabels[data.originalInvoice.paymentCondition] : "—", },
+                            { label: "Paiement", value: data?.originalInvoice?.paymentCondition ? formatShowLabel(data.originalInvoice.paymentCondition) : "—", },
                             { label: "Mode", value: data?.originalInvoice?.paymentMethod ? paymentMethodLabels[data.originalInvoice.paymentMethod] : "—" }] :
-                            [{ label: "Paiement", value: PaymentConditionLabels[data!.paymentCondition!] ?? "—" },
+                            [{ label: "Paiement", value: formatShowLabel(data!.paymentCondition!) ?? "—" },
                             { label: "Mode", value: paymentMethodLabels[data!.paymentMethod!] ?? "—" },])
 
                     ].map(({ label, value }) => (
@@ -186,90 +185,90 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
                                 <th className="text-right text-[10px] font-bold text-slate-500 uppercase tracking-widest pb-3">Total HT</th>
                                 <th className="text-right text-[10px] font-bold text-slate-500 uppercase tracking-widest pb-3">Remise</th>
                                 <th className="text-right text-[10px] font-bold text-slate-500 uppercase tracking-widest pb-3">Net HT</th>
-                                
+
                             </tr>
                         </thead>
                         <tbody>
-                        {(() => {
-                            const items = isCredit
-                            ? (data as CreditNoteData).creditNoteItems
-                            : (data as InvoiceCreate).invoiceItems;
+                            {(() => {
+                                const items = isCredit
+                                    ? (data as CreditNoteData).creditNoteItems
+                                    : (data as InvoiceCreate).invoiceItems;
 
-                            if (!items || items.length === 0) {
-                            return (
-                                <tr>
-                                <td colSpan={5} className="text-center text-slate-400 italic py-8">
-                                    Aucun service ajouté
-                                </td>
-                                </tr>
-                            );
-                            }
+                                if (!items || items.length === 0) {
+                                    return (
+                                        <tr>
+                                            <td colSpan={5} className="text-center text-slate-400 italic py-8">
+                                                Aucun service ajouté
+                                            </td>
+                                        </tr>
+                                    );
+                                }
 
-                            return items.map((item) => {
-                            const quantity = Number(item?.quantity ?? 0);
-                            const unitPrice = Number(item?.unityPriceEXclTax ?? 0);
+                                return items.map((item) => {
+                                    const quantity = Number(item?.quantity ?? 0);
+                                    const unitPrice = Number(item?.unityPriceEXclTax ?? 0);
 
-                            const subtotal = quantity * unitPrice;
+                                    const subtotal = quantity * unitPrice;
 
-                            const discount = getDiscountValue(item as BaseItem, subtotal)
+                                    const discount = getDiscountValue(item as InvoiceItem, subtotal)
 
-                            const netHT = Math.max(0, subtotal - discount);
+                                    const netHT = Math.max(0, subtotal - discount);
 
-                            return (
-                                <tr key={getItemId(item)} className="border-b border-slate-50">
-                                {/* DESCRIPTION */}
-                                <td className="py-4">
-                                    <p className="text-sm font-bold text-slate-800">
-                                    {item?.description || "—"}
-                                    </p>
+                                    return (
+                                        <tr key={getItemId(item)} className="border-b border-slate-50">
+                                            {/* DESCRIPTION */}
+                                            <td className="py-4">
+                                                <p className="text-sm font-bold text-slate-800">
+                                                    {item?.description || "—"}
+                                                </p>
 
-                                    {isCredit && (
-                                    <p className="text-xs text-slate-400 mt-0.5">
-                                        {"Motif de l'avoir : "}
-                                        {creditNoteTypeLabels[(data as CreditNoteData).motif!] ?? "—"}
-                                    </p>
-                                    )}
+                                                {isCredit && (
+                                                    <p className="text-xs text-slate-400 mt-0.5">
+                                                        {"Motif de l'avoir : "}
+                                                        {creditNoteTypeLabels[(data as CreditNoteData).motif!] ?? "—"}
+                                                    </p>
+                                                )}
 
-                                    <p className="text-xs text-slate-400 mt-0.5">
-                                    TVA appliquée : {item?.vatRate ?? 0}%
-                                    </p>
+                                                <p className="text-xs text-slate-400 mt-0.5">
+                                                    TVA appliquée : {item?.vatRate ?? 0}%
+                                                </p>
 
-                                    <p className="text-xs text-slate-400 mt-0.5">
-                                    Catégorie :{" "}
-                                    {item?.operationCategory
-                                        ? OperationCategoryLabels[item.operationCategory]
-                                        : "_"}
-                                    </p>
-                                </td>
+                                                <p className="text-xs text-slate-400 mt-0.5">
+                                                    Catégorie :{" "}
+                                                    {item?.operationCategory
+                                                        ? item.operationCategory
+                                                        : "_"}
+                                                </p>
+                                            </td>
 
-                                {/* QUANTITY */}
-                                <td className="text-right text-sm text-slate-600 py-4">
-                                    {quantity}
-                                </td>
+                                            {/* QUANTITY */}
+                                            <td className="text-right text-sm text-slate-600 py-4">
+                                                {quantity}
+                                            </td>
 
-                                {/* UNIT PRICE */}
-                                <td className="text-right text-sm text-slate-600 py-4">
-                                    {unitPrice.toFixed(2)}
-                                </td>
+                                            {/* UNIT PRICE */}
+                                            <td className="text-right text-sm text-slate-600 py-4">
+                                                {unitPrice.toFixed(2)}
+                                            </td>
 
-                                {/* TOTAL HT (BRUT) */}
-                                <td className="text-right text-sm text-slate-700 py-4">
-                                    {subtotal.toFixed(2)}
-                                </td>
+                                            {/* TOTAL HT (BRUT) */}
+                                            <td className="text-right text-sm text-slate-700 py-4">
+                                                {subtotal.toFixed(2)}
+                                            </td>
 
-                                {/* DISCOUNT */}
-                                <td className="text-right text-sm text-slate-600 py-4">
-                                    {currency ?  getDiscountLabel(item as BaseItem, currency) : currencyTypeSchema.enum.TND}
-                                </td>
+                                            {/* DISCOUNT */}
+                                            <td className="text-right text-sm text-slate-600 py-4">
+                                                {currency ? getDiscountLabel(item as InvoiceItem, currency) : currencyTypeSchema.enum.TND}
+                                            </td>
 
-                                {/* NET HT */}
-                                <td className="text-right text-sm font-bold text-slate-800 py-4">
-                                    {netHT.toFixed(2)}
-                                </td>
-                                </tr>
-                            );
-                            });
-                        })()}
+                                            {/* NET HT */}
+                                            <td className="text-right text-sm font-bold text-slate-800 py-4">
+                                                {netHT.toFixed(2)}
+                                            </td>
+                                        </tr>
+                                    );
+                                });
+                            })()}
                         </tbody>
                     </table>
                 </div>
@@ -289,102 +288,102 @@ const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(({ data }
                             </div>
                         </div>
                         <p className="mt-2 text-xs leading-6 text-slate-500 whitespace-pre-wrap break-words">
-                                    {data.comment}
+                            {data.comment}
 
-                                    {data.comment && (
-                                        <>
-                                            <br />
-                                        </>
-                                    )}
+                            {data.comment && (
+                                <>
+                                    <br />
+                                </>
+                            )}
 
-                                    Généré le {new Date().toLocaleDateString("fr-FR")} à{" "}
-                                    {new Date().toLocaleTimeString("fr-FR")}
-                                </p>
+                            Généré le {new Date().toLocaleDateString("fr-FR")} à{" "}
+                            {new Date().toLocaleTimeString("fr-FR")}
+                        </p>
                     </div>
 
-                 {/* Totals */}
+                    {/* Totals */}
                     <div className="w-64 flex flex-col gap-2">
 
-                    {(() => {
-                        const items = (
-                            isCredit
-                                ? (data as CreditNoteData).creditNoteItems
-                                : (data as InvoiceCreate).invoiceItems
+                        {(() => {
+                            const items = (
+                                isCredit
+                                    ? (data as CreditNoteData).creditNoteItems
+                                    : (data as InvoiceCreate).invoiceItems
                             ) ?? [];
 
-                        const subtotalHT = items.reduce((sum, item) => {
-                            return sum + (item?.quantity ?? 0) * (item?.unityPriceEXclTax ?? 0);
+                            const subtotalHT = items.reduce((sum, item) => {
+                                return sum + (item?.quantity ?? 0) * (item?.unityPriceEXclTax ?? 0);
                             }, 0);
 
                             const totalDiscount = items.reduce((sum, item) => {
-                            const subtotal = (item?.quantity ?? 0) * (item?.unityPriceEXclTax ?? 0);
+                                const subtotal = (item?.quantity ?? 0) * (item?.unityPriceEXclTax ?? 0);
 
-                            const discount = getDiscountValue(item as BaseItem, subtotal)
+                                const discount = getDiscountValue(item as InvoiceItem, subtotal)
 
-                            return sum + discount;
+                                return sum + discount;
                             }, 0);
 
-                        const netHT = subtotalHT - totalDiscount;
+                            const netHT = subtotalHT - totalDiscount;
 
-                        const totalTVA = items.reduce((sum, item) => {
-                            const subtotal = (item?.quantity ?? 0) * (item?.unityPriceEXclTax ?? 0);
+                            const totalTVA = items.reduce((sum, item) => {
+                                const subtotal = (item?.quantity ?? 0) * (item?.unityPriceEXclTax ?? 0);
 
-                            const discount = getDiscountValue(item as BaseItem, subtotal)
+                                const discount = getDiscountValue(item as InvoiceItem, subtotal)
 
-                            const net = subtotal - discount;
+                                const net = subtotal - discount;
 
-                            return sum + net * ((item?.vatRate ?? 0) / 100);
-                        }, 0);
+                                return sum + net * ((item?.vatRate ?? 0) / 100);
+                            }, 0);
 
-                        const totalTTC = netHT + totalTVA;
+                            const totalTTC = netHT + totalTVA;
 
-                        return (
-                        <>
-                            {/* Total HT */}
-                            <div className="flex justify-between text-sm">
-                            <span className="text-slate-500 font-medium">Total HT</span>
-                            <span className="font-bold text-slate-800">
-                                {subtotalHT.toFixed(2)} {currency}
-                            </span>
-                            </div>
+                            return (
+                                <>
+                                    {/* Total HT */}
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-slate-500 font-medium">Total HT</span>
+                                        <span className="font-bold text-slate-800">
+                                            {subtotalHT.toFixed(2)} {currency}
+                                        </span>
+                                    </div>
 
-                            {/* Remise */}
-                            <div className="flex justify-between text-sm">
-                            <span className="text-slate-500 font-medium">Remise totale</span>
-                            <span className="font-bold text-slate-800">
-                                -{totalDiscount.toFixed(2)} {currency}
-                            </span>
-                            </div>
+                                    {/* Remise */}
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-slate-500 font-medium">Remise totale</span>
+                                        <span className="font-bold text-slate-800">
+                                            -{totalDiscount.toFixed(2)} {currency}
+                                        </span>
+                                    </div>
 
-                            {/* Net HT */}
-                            <div className="flex justify-between text-sm">
-                            <span className="text-slate-500 font-medium">Net HT</span>
-                            <span className="font-bold text-slate-800">
-                                {netHT.toFixed(2)} {currency}
-                            </span>
-                            </div>
+                                    {/* Net HT */}
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-slate-500 font-medium">Net HT</span>
+                                        <span className="font-bold text-slate-800">
+                                            {netHT.toFixed(2)} {currency}
+                                        </span>
+                                    </div>
 
-                            {/* TVA */}
-                            <div className="flex justify-between text-sm">
-                            <span className="text-slate-500 font-medium">Total TVA</span>
-                            <span className="font-bold text-slate-800">
-                                {totalTVA.toFixed(2)} {currency}
-                            </span>
-                            </div>
+                                    {/* TVA */}
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-slate-500 font-medium">Total TVA</span>
+                                        <span className="font-bold text-slate-800">
+                                            {totalTVA.toFixed(2)} {currency}
+                                        </span>
+                                    </div>
 
-                            <div className="h-px bg-slate-900 my-1" />
+                                    <div className="h-px bg-slate-900 my-1" />
 
-                            {/* TTC */}
-                            <div className="flex justify-between items-center">
-                            <span className="text-sm font-bold text-slate-700">Total TTC</span>
-                            <span className="text-3xl font-black text-slate-700">
-                                {totalTTC.toFixed(2)}{" "}
-                                <span className="text-lg">{currency}</span>
-                            </span>
-                            </div>
-                        </>
-                        );
-                    })()}
+                                    {/* TTC */}
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-sm font-bold text-slate-700">Total TTC</span>
+                                        <span className="text-3xl font-black text-slate-700">
+                                            {totalTTC.toFixed(2)}{" "}
+                                            <span className="text-lg">{currency}</span>
+                                        </span>
+                                    </div>
+                                </>
+                            );
+                        })()}
                     </div>
                 </div>
             </div>

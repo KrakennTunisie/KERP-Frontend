@@ -1,14 +1,42 @@
 import { paymentMethodLabels } from "../../types/paymentMethod";
-import { OperationCategoryLabels } from "../../types/operationCategory";
-import { PaymentConditionLabels } from "../../types/paymentCondition";
 import { forwardRef } from "react";
 import { PurchaseOrder } from "../../models/purchaseOrder";
+import { formatShowLabel } from "../../lib/settingItemHelpers";
+import { BaseItem, InvoiceItem, PurchaseOrderItem } from "../../models/invoiceItem";
+import { getDiscountValue } from "../../lib/invoiceItemHelpers";
 
 type PurchaseOrderPreviewProps = {
     data: PurchaseOrder;
 };
 
 const PurchaseOrderPreview = forwardRef<HTMLDivElement, PurchaseOrderPreviewProps>(({ data }, ref) => {
+    const items = (data as PurchaseOrder).purchaseOrderItems
+    const currency = data.currency
+    const subtotalHT = items!.reduce((sum, item) => {
+        return sum + (item?.quantity ?? 0) * (item?.unityPriceEXclTax ?? 0);
+    }, 0);
+
+    const totalDiscount = items!.reduce((sum, item) => {
+        const subtotal = (item?.quantity ?? 0) * (item?.unityPriceEXclTax ?? 0);
+
+        const discount = getDiscountValue(item as PurchaseOrderItem, subtotal)
+
+        return sum + discount;
+    }, 0);
+
+    const netHT = subtotalHT - totalDiscount;
+
+    const totalTVA = items!.reduce((sum, item) => {
+        const subtotal = (item?.quantity ?? 0) * (item?.unityPriceEXclTax ?? 0);
+
+        const discount = getDiscountValue(item as  PurchaseOrderItem, subtotal)
+
+        const net = subtotal - discount;
+
+        return sum + net * ((item?.vatRate ?? 0) / 100);
+    }, 0);
+
+    const totalTTC = netHT + totalTVA;
     return (
         <div ref={ref} className="flex-1 p-6  bg-white">
             <div className="bg-white rounded-xl shadow-xl border border-slate-100 overflow-hidden max-w-[820px] mx-auto">
@@ -97,7 +125,7 @@ const PurchaseOrderPreview = forwardRef<HTMLDivElement, PurchaseOrderPreviewProp
 
                         { label: "Date de livraison", value: data.issueDate ? new Date(data.issueDate).toLocaleDateString("fr-FR") : "-" },
 
-                        { label: "Paiement", value: PaymentConditionLabels[data.paymentCondition] ?? "—" },
+                        { label: "Paiement", value: formatShowLabel(data.paymentCondition) ?? "—" },
                         { label: "Mode", value: paymentMethodLabels[data!.paymentMethod!] ?? "—" },
 
                     ].map(({ label, value }) => (
@@ -136,7 +164,7 @@ const PurchaseOrderPreview = forwardRef<HTMLDivElement, PurchaseOrderPreviewProp
                                                 {item!.description || "—"}
                                             </p>
                                             <p className="text-xs text-slate-400 mt-0.5">TVA appliquée : {item!.vatRate}%</p>
-                                            <p className="text-xs text-slate-400 mt-0.5">Catégorie : {OperationCategoryLabels[item!.operationCategory!]}</p>
+                                            <p className="text-xs text-slate-400 mt-0.5">Catégorie : {item!.operationCategory!}</p>
                                         </td>
                                         <td className="text-right text-sm text-slate-600 py-4">{item!.quantity}</td>
                                         <td className="text-right text-sm text-slate-600 py-4">{item!.unityPriceEXclTax!.toFixed(2)}</td>
@@ -173,29 +201,50 @@ const PurchaseOrderPreview = forwardRef<HTMLDivElement, PurchaseOrderPreviewProp
 
                     {/* Totals */}
                     <div className="w-64 flex flex-col gap-2">
+
+                        {/* Total HT */}
                         <div className="flex justify-between text-sm">
                             <span className="text-slate-500 font-medium">Total HT</span>
-                            <span className="font-bold text-slate-800">{data.totalExclTax?.toFixed(2)}
-                                {" "+data.currency}
+                            <span className="font-bold text-slate-800">
+                                {subtotalHT.toFixed(2)} {currency}
                             </span>
                         </div>
+
+                        {/* Remise */}
+                        <div className="flex justify-between text-sm">
+                            <span className="text-slate-500 font-medium">Remise totale</span>
+                            <span className="font-bold text-slate-800">
+                                -{totalDiscount.toFixed(2)} {currency}
+                            </span>
+                        </div>
+
+                        {/* Net HT */}
+                        <div className="flex justify-between text-sm">
+                            <span className="text-slate-500 font-medium">Net HT</span>
+                            <span className="font-bold text-slate-800">
+                                {netHT.toFixed(2)} {currency}
+                            </span>
+                        </div>
+
+                        {/* TVA */}
                         <div className="flex justify-between text-sm">
                             <span className="text-slate-500 font-medium">Total TVA</span>
                             <span className="font-bold text-slate-800">
-                                {data?.totalInclTax && data?.totalExclTax && (data?.totalInclTax - data?.totalExclTax).toFixed(2)+" "}
-                                {data.currency}
+                                {totalTVA.toFixed(2)} {currency}
                             </span>
                         </div>
+
                         <div className="h-px bg-slate-900 my-1" />
+
+                        {/* TTC */}
                         <div className="flex justify-between items-center">
                             <span className="text-sm font-bold text-slate-700">Total TTC</span>
                             <span className="text-3xl font-black text-slate-700">
-                                {data.totalInclTax?.toFixed(2)}{" "}
-                                <span className="text-lg">
-                                    {data.currency}
-                                </span>
+                                {totalTTC.toFixed(2)}{" "}
+                                <span className="text-lg">{currency}</span>
                             </span>
                         </div>
+
                     </div>
                 </div>
             </div>

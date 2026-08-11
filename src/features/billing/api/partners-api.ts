@@ -1,6 +1,6 @@
 // src/features/billing/api/partners.api.ts
 import { apiClient } from "@/shared/api/api-client";
-import { AUDITLOGS_ENDPOINTS, BILLING_ENDPOINTS, DASHBOARD_ENDPOINTS, EXCHANGE_RATE_ENDPOINTS, INVOICES_CREDIT_NOTE_ENDPOINTS, INVOICES_ENDPOINTS, MAILING_ENDPOINTS, PAYMENT_ENDPIONTS, PURCHASE_ORDER_ENDPOINTS } from "@/shared/api/endpoints";
+import { AUDITLOGS_ENDPOINTS, BILLING_ENDPOINTS, DASHBOARD_ENDPOINTS, EXCHANGE_RATE_ENDPOINTS, INVOICES_CREDIT_NOTE_ENDPOINTS, INVOICES_ENDPOINTS, MAILING_ENDPOINTS, OPERATION_CATEGORY_ENDPOINTS, PAYMENT_CONDITION_ENDPOINTS, PAYMENT_ENDPIONTS, PURCHASE_ORDER_ENDPOINTS, TVA_RATE_ENDPOINTS } from "@/shared/api/endpoints";
 import { ExchangeRateParams, GetListParams, PageResponse } from "@/shared/api/types";
 import { InvoiceCreditNoteCreate, InvoiceCreditNoteDetails, InvoiceCreditNotePageItem } from "../models/creditNote";
 import { Invoice, InvoiceCreate, InvoicePageItem, } from "../models/invoice";
@@ -16,6 +16,10 @@ import {  Payment, PaymentDetails, PaymentListItem } from "../models/payment";
 import { PartnerRevenueStats } from "../types/partnerRevenueStats";
 import { EmailLog, EmailLogDetails } from "../types/emailLog";
 import { PartnerDocumentType } from "../types/documentType";
+import { TVARate, TVARatePageItem } from "../models/TVArate";
+import { PaymentCondition, PaymentConditionPageItem } from "../models/paymentCondition";
+import { OperationCategory, OperationCategoryPageItem } from "../models/operationCategory";
+import { PaymentType } from "../types/paymentStatus";
 
 export const partnersApi = {
 
@@ -36,6 +40,14 @@ export const partnersApi = {
 
   getSupplierById: (id: string) =>
     apiClient.get<PartnerAllDetails>(BILLING_ENDPOINTS.supplierById(id)),
+
+  existsByCompanyName : (companyName:string)=> apiClient.get<boolean>(BILLING_ENDPOINTS.existByCompanyName(companyName)),
+
+  getSupplierByCompanyName : (companyName: string) => apiClient.get<PartnerSummary>(BILLING_ENDPOINTS.getSupplierByCompanyName(companyName)),
+
+  clientExistsByCompanyName : (companyName:string)=> apiClient.get<boolean>(BILLING_ENDPOINTS.clientExistByCompanyName(companyName)),
+
+  getClientByCompanyName : (companyName: string) => apiClient.get<PartnerSummary>(BILLING_ENDPOINTS.getClientByCompanyName(companyName)),
 
   createClient: (payload: FormData) =>
     apiClient.post<CreatePartner>(BILLING_ENDPOINTS.clients, payload),
@@ -192,7 +204,7 @@ export const PurchaseOrderAPI = {
     apiClient.get<PurchaseOrderDetails>(PURCHASE_ORDER_ENDPOINTS.supplierPurchaseOrderById(id)),
 
   createClientPurchaseOrder: (payload: FormData) =>
-    apiClient.post<PurchaseOrderCreate>(PURCHASE_ORDER_ENDPOINTS.purchaseOrders, payload),
+    apiClient.post<PurchaseOrderCreate>(PURCHASE_ORDER_ENDPOINTS.clientPurchaseOrders, payload),
 
   createSupplierPurchaseOrder: (payload: FormData) =>
     apiClient.post<PurchaseOrderCreate>(PURCHASE_ORDER_ENDPOINTS.supplierPurchaseOrders, payload),
@@ -231,6 +243,8 @@ export const paymentsAPI = {
     apiClient.post<Payment>(PAYMENT_ENDPIONTS.payment, data),
 
   updatePayment: (id: string, payload: FormData) => apiClient.patch<Payment>(PAYMENT_ENDPIONTS.paymentById(id), payload),
+
+  updatePaymentStatus: (id:string , status : PaymentType) => apiClient.patch<void>(PAYMENT_ENDPIONTS.updatePaymentStatus(id,status)),
 
   deletePayment: (id: string)=> 
     apiClient.delete<void>(PAYMENT_ENDPIONTS.paymentById(id)),
@@ -274,4 +288,67 @@ export const MailingAPI ={
 export const AuditLogAPI = {
   getAuditLogs: (id: string)=> apiClient.get<AuditLog[]>(AUDITLOGS_ENDPOINTS.getAuditLogsByIdClient(id)),
   getAuditLogsBySupplier: (id: string)=> apiClient.get<AuditLog[]>(AUDITLOGS_ENDPOINTS.getAuditLogsByIdSupplier(id))
+}
+
+export const OperationCategoryAPI = {
+  
+  getAllOperationCategories: () => apiClient.get<OperationCategoryPageItem[]>(OPERATION_CATEGORY_ENDPOINTS.getAllOperationCategories),
+
+  getAllActiveOperationCategories: () => apiClient.get<OperationCategoryPageItem[]>(OPERATION_CATEGORY_ENDPOINTS.getAllActiveOperationCategories),
+
+  getOperationCategory: (id: string) => apiClient.get<OperationCategory>(OPERATION_CATEGORY_ENDPOINTS.getOperationCategory(id)),
+
+  getOperationCategoryByCode: (code: string) => apiClient.get<OperationCategory>(OPERATION_CATEGORY_ENDPOINTS.getOperationCategoryByCode(code)),
+
+  getOperationCategoryByLabel: (label: string) => apiClient.get<OperationCategory>(OPERATION_CATEGORY_ENDPOINTS.getOperationCategoryByLabel(label)),
+
+  createOperationCategory: (payload: FormData) => apiClient.post<OperationCategory>(OPERATION_CATEGORY_ENDPOINTS.createOperationCategory, payload),
+
+  updateOperationCategory: (id: string, payload: FormData) => apiClient.put<OperationCategory>(OPERATION_CATEGORY_ENDPOINTS.updateOperationCategory(id), payload),
+
+  activateOperationCategory: (id: string) => apiClient.patch<void>(OPERATION_CATEGORY_ENDPOINTS.activateOperationCategory(id)),
+
+  deactivateOperationCategory: (id: string) =>apiClient.patch<void>(OPERATION_CATEGORY_ENDPOINTS.deactivateOperationCategory(id))
+}
+
+export const PaymentConditionAPI = {
+  getAllPaymentConditions: () => apiClient.get<PaymentConditionPageItem[]>(PAYMENT_CONDITION_ENDPOINTS.getAllPaymentConditions),
+
+  getAllActivePaymentConditions: () => apiClient.get<PaymentConditionPageItem[]>(PAYMENT_CONDITION_ENDPOINTS.getAllActivePaymentConditions),
+
+  getPaymentCondition: (id: string) => apiClient.get<PaymentCondition>(PAYMENT_CONDITION_ENDPOINTS.getPaymentCondition(id)),
+
+  getPaymentConditionByCode: (code: string) => apiClient.get<PaymentCondition>(PAYMENT_CONDITION_ENDPOINTS.getPaymentConditionByCode(code)),
+
+  getPaymentConditionByLabel: (label: string) => apiClient.get<PaymentCondition>(PAYMENT_CONDITION_ENDPOINTS.getPaymentConditionByLabel(label)),
+
+  createPaymentCondition: (payload: FormData) => apiClient.post<PaymentCondition>(PAYMENT_CONDITION_ENDPOINTS.createPaymentCondition, payload),
+
+  updatePaymentCondition: (id: string, payload: FormData) => apiClient.put<PaymentCondition>(PAYMENT_CONDITION_ENDPOINTS.updatePaymentCondition(id), payload),
+
+  activatePaymentCondition: (id: string) => apiClient.patch<void>(PAYMENT_CONDITION_ENDPOINTS.activatePaymentCondition(id)),
+
+  deactivatePaymentCondition: (id: string) =>apiClient.patch<void>(PAYMENT_CONDITION_ENDPOINTS.deactivatePaymentCondition(id))
+}
+
+export const TvaRateAPI = {
+  getAllTvaRates: () => apiClient.get<TVARatePageItem[]>(TVA_RATE_ENDPOINTS.getAllTvaRates),
+
+  getAllActiveTvaRates: () => apiClient.get<TVARatePageItem[]>(TVA_RATE_ENDPOINTS.getAllActiveTvaRates),
+
+  getTvaRate: (id: string) => apiClient.get<TVARate>(TVA_RATE_ENDPOINTS.getTvaRate(id)),
+
+  getTvaRateByCode: (code: string) => apiClient.get<TVARate>(TVA_RATE_ENDPOINTS.getTvaRateByCode(code)),
+
+  getTvaRateByLabel: (label: string) => apiClient.get<TVARate>(TVA_RATE_ENDPOINTS.getTvaRateByLabel(label)),
+
+  existTvaRateByLabel: (label: string) => apiClient.get<boolean>(TVA_RATE_ENDPOINTS.existTvaRateByLabel(label)),
+
+  createTvaRate: (payload: FormData) => apiClient.post<TVARate>(TVA_RATE_ENDPOINTS.createTvaRate, payload),
+
+  updateTvaRate: (id: string, payload: FormData) => apiClient.put<TVARate>(TVA_RATE_ENDPOINTS.updateTvaRate(id), payload),
+
+  activateTvaRate: (id: string) => apiClient.patch<void>(TVA_RATE_ENDPOINTS.activateTvaRate(id)),
+
+  deactivateTvaRate: (id: string) =>apiClient.patch<void>(TVA_RATE_ENDPOINTS.deactivateTvaRate(id))
 }

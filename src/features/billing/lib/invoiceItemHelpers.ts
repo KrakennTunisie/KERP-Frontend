@@ -1,9 +1,9 @@
 import { PdfLineItem } from "@/shared/pdf/types";
-import { BaseItem } from "../models/invoiceItem";
+import { BaseItem, InvoiceItem, PurchaseOrderItem } from "../models/invoiceItem";
 import { CurrencyType } from "../types/currency";
 import { discountTypeSchema } from "../types/discountType";
 
-export const getDiscountLabel = (invoiceItem: BaseItem | PdfLineItem, currency: CurrencyType): string=>{
+export const getDiscountLabel = (invoiceItem: InvoiceItem | PurchaseOrderItem| PdfLineItem, currency: CurrencyType): string=>{
     if(invoiceItem && invoiceItem.discountType && invoiceItem.discountValue){
          const discountLabel =  invoiceItem.discountType === discountTypeSchema.enum.PERCENTAGE ?
           invoiceItem.discountValue +"%"
@@ -14,7 +14,7 @@ export const getDiscountLabel = (invoiceItem: BaseItem | PdfLineItem, currency: 
     return "-";
 }
 
-export const getDiscountValue = (invoiceItem: BaseItem, subtotal: number): number=>{
+export const getDiscountValue = (invoiceItem: InvoiceItem | PurchaseOrderItem, subtotal: number): number=>{
     if(invoiceItem && invoiceItem.discountType && invoiceItem.discountValue){
          const discount =
         invoiceItem.discountType === discountTypeSchema.enum.PERCENTAGE

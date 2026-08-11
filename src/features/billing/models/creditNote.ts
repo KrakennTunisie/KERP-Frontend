@@ -1,11 +1,11 @@
 import { z } from "zod";
-import { baseInvoiceCreditNoteItemSchema, creditNoteItemSchema, invoiceItemSchema } from "./invoiceItem";
+import { baseInvoiceCreditNoteItemSchema, creditNoteItemSchema } from "./invoiceItem";
 import { CreditNoteTypeSchema } from "../types/creditNoteType";
 import { invoiceComplianceStatusSchema } from "../types/invoiceComplianceStatus";
 import { invoiceStatusSchema } from "../types/invoiceStatus";
 import { fileSchema } from "../types/pdfSchema";
 import { documentSchema } from "./document";
-import { invoiceDetailedSummarySchema, invoiceSchema, invoiceSummarySchema } from "./invoice";
+import { invoiceDetailedSummarySchema, invoiceSchema } from "./invoice";
 import { InvoiceCreditNoteEventSchema } from "./invoiceEvent";
 
 const detailsInvoiceCreditNoteItemSchema = z.object({
@@ -31,7 +31,7 @@ const detailsInvoiceCreditNoteItemSchema = z.object({
   totalExclTaxEUR: z.number(),
   totalInclTaxEUR: z.number(),
   totalExclTaxTND: z.number(),
-  totalInclTaxTND: z.number(),  
+  totalInclTaxTND: z.number(),
   totalExclTaxUSD: z.number(),
   totalInclTaxUSD: z.number(),
 })
@@ -89,8 +89,17 @@ export const invoiceCreditNoteCreateSchema = z.object({
   invoiceCreditNoteDocument: fileSchema.nullable(),
   creditNoteItems: z.array(creditNoteItemSchema).nullable(),
   issueDate: z.date(),
-});
-
+}).refine(
+  (data) => {
+    if (!data.originalInvoice?.issueDate) return true;
+    console.log("1");
+    return new Date(data.issueDate) > new Date(data.originalInvoice.issueDate);
+  },
+  {
+    message: "La date d'émission doit être postérieure ou égale à celle de la facture d'origine",
+    path: ["issueDate"],
+  }
+);
 /**
  * InvoiceCreditNotePageItem
  * idInvoiceCreditNote, invoiceCreditNoteNumber, issueDate,

@@ -1,16 +1,13 @@
 import AddressBox from "@/shared/components/ui/adresseBox";
 import DocumentItem from "@/shared/components/ui/documentItem";
-import IconButton from "@/shared/components/ui/iconButton";
 import InfoField from "@/shared/components/ui/infoField";
 import InfoGrid from "@/shared/components/ui/infoGrid";
 import SectionCard from "@/shared/components/ui/sectionCard";
 import { Separator } from "@/shared/components/ui/separator";
 
-import { UserPen } from "lucide-react";
 import { ClientPartnerDetails } from "../../models/partner";
 import { partnerTypeSchema } from "../../types/partnerType";
-import { PaymentConditionLabels } from "../../types/paymentCondition";
-import Link from "next/link";
+import { formatShowLabel } from "../../lib/settingItemHelpers";
 
 type PartnerDetailsCardProps = {
   partner: ClientPartnerDetails;
@@ -38,7 +35,7 @@ export default function PartnerDetailsCard({
         <InfoField label="Devise" value={partner.currency} />
         <InfoField
           label="Conditions de paiement"
-          value={PaymentConditionLabels[partner.paymentCondition!] || "-"}
+          value={formatShowLabel(partner.paymentCondition!) || "-"}
         />
       </InfoGrid>
 

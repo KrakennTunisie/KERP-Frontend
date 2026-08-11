@@ -1,9 +1,9 @@
-import { 
-  Users, 
-  Receipt, 
-  Wallet, 
-  CalendarCheck, 
-  LayoutDashboard, 
+import {
+  Users,
+  Receipt,
+  Wallet,
+  CalendarCheck,
+  LayoutDashboard,
   UsersRound,
   ShieldCheck,
   KeyRound
@@ -22,14 +22,14 @@ export const NAVIGATION_ITEMS = [
       {
         title: "Utilisateurs",
         icon: UsersRound,
-        href:"/admin/users"
+        href: "/admin/users"
       },
       {
         title: "Rôles",
         icon: ShieldCheck,
         href: "/admin/roles",
       },
-      
+
       {
         title: "Permissions",
         icon: KeyRound,
@@ -58,17 +58,29 @@ export const NAVIGATION_ITEMS = [
   {
     title: "Finance",
     items: [
-      { title: "Facturation", 
-        icon: Receipt, 
+      {
+        title: "Facturation",
+        icon: Receipt,
         subMenu: [
-          { title: "Tableau de board", href: "/billing/dashboard" },
-          { title: "Clients", href: "/billing/clients" },
-          { title: "Fournisseurs", href: "/billing/suppliers" },
-          { title: "Factures Clients", href: "/billing/invoices/clients" },
-          { title: "Factures Fournisseurs", href: "/billing/invoices/suppliers" },
-          { title: "Paiements Clients", href: "/billing/payments" },
-          { title: "Bons des commandes clients", href: "/billing/purchaseOrder/clients" },
-          { title: "Bons des commandes Fournisseurs", href: "/billing/purchaseOrder/suppliers" },
+          { title: "Tableau de bord", href: "/billing/dashboard" },
+          {
+            title: "Clients",
+            subMenu: [
+              { title: "Liste des clients", href: "/billing/clients" },
+              { title: "Factures Clients", href: "/billing/invoices/clients" },
+              { title: "Paiements Clients", href: "/billing/payments" },
+              { title: "Bons de commande Clients", href: "/billing/purchaseOrder/clients" },
+            ],
+          },
+          {
+            title: "Fournisseurs",
+            subMenu: [
+              { title: "Liste des fournisseurs", href: "/billing/suppliers" },
+              { title: "Factures Fournisseurs", href: "/billing/invoices/suppliers" },
+              { title: "Bons de commande Fournisseurs", href: "/billing/purchaseOrder/suppliers" },
+            ],
+          },
+          { title: "Paramètres", href: "/billing/parameters" },
         ],
       },
       {

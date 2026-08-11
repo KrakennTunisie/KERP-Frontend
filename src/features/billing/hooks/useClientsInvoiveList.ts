@@ -19,9 +19,11 @@ export function useClientInvoiceList () {
     const [loading, setLoading]= useState(false)
     const [deleteLoading, setDeleteLoading]= useState(false)
     const [updateLoading, setUpdateLoading]= useState(false)
+    const [archiveLoading, setArchiveLoading] = useState(false)
     const [invoiceId, setInvoiceId]= useState("")
     const [open, setOpen] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
+    const [archiveOpen, setArchiveOpen] = useState(false);
     const [updateOpen, setUpdateOpen] = useState(false);
     const [invoiceRef ,setInvoiceRef] = useState("");
     const [clientsInvoices, setClientsInvoices] = useState<InvoicePageItem[] | []>([])
@@ -32,7 +34,7 @@ export function useClientInvoiceList () {
     const [nextStatus, setNextStatus]=useState("")
     const router = useRouter()
     const debouncedSearchQuery = useDebounce(search, 2000);
-      const [clientInvoiceStats, setClientInvoiceStats]=useState<PartnerInvoiceStats>({
+    const [clientInvoiceStats, setClientInvoiceStats]=useState<PartnerInvoiceStats>({
       totalAmountTND: 0,
       totalAmountEUR: 0,
       totalAmountUSD: 0,
@@ -82,6 +84,22 @@ export function useClientInvoiceList () {
           appToast.error("Erreur de suppresion: ",getApiErrorMessage(error))
         } finally {
           setDeleteLoading(false);
+        }
+    }
+
+    const archiveInvoice = async()=>{
+       try {
+          setArchiveLoading(true);
+          const formData = new FormData();
+          formData.append("status",  "ARCHIVED");
+          await InvoicesAPI.updateClientInvoiceStatus(invoiceId, formData);
+          appToast.success('Facture archivée avec succés.')
+          setArchiveOpen(false)
+          await fetchClientsInvoices()
+        } catch (error) {
+          appToast.error("Erreur de suppresion: ",getApiErrorMessage(error))
+        } finally {
+          setArchiveLoading(false);
         }
     }
 
@@ -161,11 +179,15 @@ export function useClientInvoiceList () {
      setInvoiceId,
      deleteLoading,
      updateStatus,
+     archiveInvoice,
      updateLoading,
-     loading,
+     loading,fetchClientsInvoices,
      nextStatus, setNextStatus,
      selectedInvoice, setSelectedInvoice,
      clientInvoiceStats,
+     archiveLoading,
+     archiveOpen,
+     setArchiveOpen,
 
     }
 }

@@ -6,6 +6,7 @@ import { PartnerSummary } from "@/features/billing/models/partner";
 import { CreatePaymentFormValues, PaymentDetails } from "@/features/billing/models/payment";
 import { BaseItem, InvoiceItem } from "@/features/billing/models/invoiceItem";
 import { getDiscountValue } from "@/features/billing/lib/invoiceItemHelpers";
+import { discountTypeSchema } from "@/features/billing/types/discountType";
 
 
 export function mapPartnerToPdfParty(partner: PartnerSummary): PdfParty {
@@ -45,12 +46,13 @@ const defaultSeller: PdfParty = {
 export function invoiceItemToPdfLineItem(
   invoiceItem: BaseItem
 ): PdfLineItem {
+  const item = invoiceItem as InvoiceItem
   const quantity = Number(invoiceItem.quantity ?? 0);
   const unitPrice = Number(invoiceItem.unityPriceEXclTax ?? 0);
 
   const subtotal = quantity * unitPrice;
 
-  const discount =getDiscountValue(invoiceItem, subtotal)
+  const discount =getDiscountValue(item, subtotal)
 
   const netHT = Math.max(0, subtotal - discount);
 
@@ -64,11 +66,11 @@ export function invoiceItemToPdfLineItem(
     itemTaxAmount: invoiceItem.itemTaxAmount ?? 0,
     itemTotalInclTax: invoiceItem.itemTotalInclTax ?? 0,
 
-    operationCategory: invoiceItem.operationCategory,
+    operationCategory: invoiceItem.operationCategory!,
 
-    discountType: invoiceItem.discountType ,
+    discountType: item?.discountType ? item?.discountType : discountTypeSchema.enum.AMOUNT,
 
-    discountValue: invoiceItem.discountValue ?? 0,
+    discountValue: item?.discountValue ?? 0,
 
     discountTotal: discount,
     netHT: netHT,

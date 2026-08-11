@@ -6,7 +6,7 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
-import { ExchangeRateAPI, InvoicesAPI, partnersApi, PurchaseOrderAPI } from "../api/partners-api";
+import { ExchangeRateAPI, InvoicesAPI,  partnersApi,  PurchaseOrderAPI } from "../api/partners-api";
 import { Invoice, InvoiceCreate, invoiceCreateSchema } from "../models/invoice";
 import { BaseItem, defaultInvoiceItem, InvoiceItem } from "../models/invoiceItem";
 import { PartnerSummary } from "../models/partner";
@@ -30,9 +30,10 @@ import { generatePdfFile } from "@/shared/pdf/pdfGenerator";
 import { invoiceToPdfData } from "@/shared/pdf/documentAdapter";
 import { invoiceTypeSchema } from "../types/invoiceType";
 import { discountTypeSchema } from "../types/discountType";
+import { extractPaymentConditionDays } from "../lib/settingItemHelpers";
 
 export type InvoiceFormClientProps = {
-    mode: "create" | "edit" | "clone";
+  mode: "create" | "edit" | "clone";
   invoiceId?: string
 }
 
@@ -51,16 +52,16 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
   const [exchangeRate, setExchangeRate] = useState<ExchangeRate>()
   const [invoice, setInvoice] = useState<Invoice>()
   const [createdInvoice, setCreatedInvoice] = useState<Invoice>()
-  const [sendOpen, setSendOpen] = useState(false);    
+  const [sendOpen, setSendOpen] = useState(false);
 
   /** Appel de la fonction qui permet la récupération des données lorsque la facture est en mode = edit */
   const fetchClientInvoice = async () => {
     try {
       if (mode === "edit" || mode === "clone") {
-          setLoadingEdit(true);
-          const invoice = await InvoicesAPI.getClientInvoiceById(invoiceId);
-          setInvoice(invoice);
-        }
+        setLoadingEdit(true);
+        const invoice = await InvoicesAPI.getClientInvoiceById(invoiceId);
+        setInvoice(invoice);
+      }
     } catch (error) {
       appToast.error("Erreur Fetch du client:", getApiErrorMessage(error));
     }
@@ -111,11 +112,11 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
       totalExclTax: 0,
       totalInclTax: 0,
       vatRate: 0,
-      paymentCondition: PaymentConditionSchema.enum.NET_15,
+      paymentCondition: "NET_15",
       paymentMethod: paymentMethodSchema.enum.BANK_TRANSFER,
       partner: null,
       purchaseOrder: null,
-      invoiceCurrency: currencyTypeSchema.enum.TND,
+     
       appliedExchangeRate: 3,
       exchangeRateReferenceDate: new Date(),
       exchangeRateSource: exchangeRateSourceSchema.enum.EXTERNAL_API,
@@ -123,33 +124,33 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
       invoiceComplianceStatus: invoiceComplianceStatusSchema.enum.RECEIVED,
       invoiceDocument: null,
       vatAmount: 0,
-      comment:""
+      comment: ""
     },
     mode: "onChange",
   });
 
   const getError = (field: keyof InvoiceCreate) => {
-          return errors[field]?.message as string | undefined;
-      };
+    return errors[field]?.message as string | undefined;
+  };
 
   const getItemError = (
-      index: number,
-      field: keyof InvoiceItem
-    ) => {
-      return errors.invoiceItems?.[index]?.[field]?.message as
-        | string
-        | undefined;
-    };
+    index: number,
+    field: keyof InvoiceItem
+  ) => {
+    return errors.invoiceItems?.[index]?.[field]?.message as
+      | string
+      | undefined;
+  };
 
-  const { control, setValue, getValues, handleSubmit, reset, formState: { isDirty, isValid, errors } } = form;
+  const { control, setValue, getValues, handleSubmit, watch, reset, formState: { isDirty, isValid, errors } } = form;
   const { append, remove, replace } = useFieldArray({
     control,
     name: "invoiceItems",
   });
   /*** Récupération des données de la facture lorsque le mode est edit */
   useEffect(() => {
-    if ((mode === "edit" || mode==="clone") && invoice) {
-      console.log(invoice.issueDate)
+    if ((mode === "edit" || mode === "clone") && invoice) {
+      setClientSearch(invoice.partner?.companyName ?? '')
       reset({
         idInvoice: mode === "clone" ? "" : invoice.idInvoice,
         invoiceNumber:
@@ -158,8 +159,8 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
             : invoice.invoiceNumber,
         invoiceStatus:
           mode === "clone"
-          ? invoiceStatusSchema.enum.DRAFT
-          : invoice.invoiceStatus,
+            ? invoiceStatusSchema.enum.DRAFT
+            : invoice.invoiceStatus,
         invoiceType: invoiceTypeSchema.enum.SALE,
         issueDate: new Date(invoice.issueDate),
         dueDate: new Date(invoice.dueDate),
@@ -179,7 +180,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
         invoiceItems: invoice.purchaseOrder
           ? invoice.invoiceItems!.map((item: any) => ({
             idInvoiceItem: item.idInvoiceItem,
-            purchaseOrderItem : item.purchaseOrderItem,
+            purchaseOrderItem: item.purchaseOrderItem,
             invoice: item.invoice ?? null,
             description: item.description,
             unityPriceEXclTax: item.unityPriceEXclTax,
@@ -217,22 +218,22 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
         invoiceDocument: null,
         complianceQRcode: "",
         invoiceComplianceStatus: invoice.invoiceComplianceStatus,
-        comment:invoice.comment,
+        comment: invoice.comment,
       });
     }
   }, [mode, invoice, reset]);
 
-    useEffect(() => {
-      if (
-        nextNumber?.value &&
-        (mode === "create" || mode === "clone")
-      ) {
-        form.setValue("invoiceNumber", nextNumber.value, {
-          shouldValidate: true,
-          shouldDirty: false,
-        });
-      }
-    }, [nextNumber, mode]);
+  useEffect(() => {
+    if (
+      nextNumber?.value &&
+      (mode === "create" || mode === "clone")
+    ) {
+      form.setValue("invoiceNumber", nextNumber.value, {
+        shouldValidate: true,
+        shouldDirty: false,
+      });
+    }
+  }, [nextNumber, mode]);
 
   /**** Récupération de l'éxchange rate */
   const fetchExchangeRate = async (toCurrency: string) => {
@@ -286,8 +287,11 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
     }
   }, [exchangeRate, selectedCurrency, mode]);
 
+
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [TtnModalOpen, setTtnModalOpen] = useState(false);
+  const [showAddSupplierModal, setShowAddSupplierModal] = useState(false);
   const [loadingForm, setLoadingForm] = useState(false);
   const [loadingEdit, setLoadingEdit] = useState(false);
   const [loadingPurchaseOrders, setLoadingPurchaseOrders] = useState(false);
@@ -307,29 +311,13 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
   const [clients, setClients] = useState<PartnerSummary[] | []>([])
   const [loadingClients, setLoadingClients] = useState(false)
   const [showDropdown, setShowDropdown] = useState(false);
+
+
   const previousCurrencyRef = useRef<CurrencyType>("TND");
-  // const previewData = useWatch({ control });
   const previewData = getValues();
 
   // Validation des données obligatoire
   const canCreateInvoice = true
-   //(mode == "create" ? isDirty : true) && 
-    // isValid &&
-    /* !!previewData.partner &&
-    !!previewData.invoiceItems?.length &&
-    !!previewData.dueDate &&
-    !!previewData.issueDate &&
-    !!previewData.paymentCondition &&
-    !!previewData.paymentMethod &&
-    previewData.invoiceItems.every(
-      (item) =>
-        item.description?.trim() &&
-        item.operationCategory?.trim() &&
-        item.quantity! > 0 &&
-        item.unityPriceEXclTax! >= 0 &&
-        item.vatRate! >= 0
-    ); */
-
 
 
   //Filtrage de la liste des clients lors de la recherche 
@@ -369,7 +357,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
       invoice: (item as InvoiceItem).invoice ?? null,
       purchaseOrderItem: null,
       creditedQuantity: 0,
-      
+
 
     }));
 
@@ -377,64 +365,70 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
     setValue("invoiceItems", mappedItems, {
       shouldValidate: true,
       shouldDirty: true,
-        shouldTouch: true,
+      shouldTouch: true,
     });
 
 
   };
 
   /***** Synchronisation des items lorsque la facture est réliée à un bon de commande */
-  const SyncPurchaseOrderItems = (newItems: BaseItem[], isInitialSync: boolean = false) => {
-    const mappedItems: InvoiceItem[] = newItems
-      .map((item: any) => {
-        const sourcePOItem = item.purchaseOrderItem ?? item;
+const SyncPurchaseOrderItems = (newItems: BaseItem[], isInitialSync: boolean = false) => {
+  const mappedItems: InvoiceItem[] = newItems
+    .map((item: any) => {
+      const sourcePOItem = item.purchaseOrderItem ?? item;
 
-        const {
-          idInvoiceItem,
-          invoice,
-          purchaseOrderItem,
-          ...cleanPurchaseOrderItem
-        } = sourcePOItem;
+      const {
+        idInvoiceItem,
+        invoice,
+        purchaseOrderItem,
+        ...cleanPurchaseOrderItem
+      } = sourcePOItem;
+      const quantity = isInitialSync
+        ? (sourcePOItem.quantity ?? 0) - (sourcePOItem.invoicedQuantity ?? 0)
+        : (item.quantity ?? 0);
 
-        const quantity = isInitialSync
-          ? (sourcePOItem.quantity ?? 0) - (sourcePOItem.invoicedQuantity ?? 0)
-          : (item.quantity ?? 0);
+      return {
+        idInvoiceItem: item.idInvoiceItem ?? uuidv4(),
+        invoice: item.invoice ?? null,
+        description: item.description,
+        unityPriceEXclTax: item.unityPriceEXclTax,
+        vatRate: item.vatRate,
+        itemTotalExclTax: (quantity * item.unityPriceEXclTax),
+        itemTaxAmount: (quantity * item.unityPriceEXclTax) * (item.vatRate / 100),
+        itemTotalInclTax: (quantity * item.unityPriceEXclTax) * (1 + item.vatRate / 100),
+        operationCategory: item.operationCategory,
+        quantity,
+        purchaseOrderItem: {
+          ...cleanPurchaseOrderItem,
+          discountType: cleanPurchaseOrderItem.discountType ?? discountTypeSchema.enum.PERCENTAGE,
+          discountValue: cleanPurchaseOrderItem.discountValue ?? 0,
+        },
+        creditedQuantity: 0,
+        discountType: item.discountType ?? cleanPurchaseOrderItem.discountType ?? discountTypeSchema.enum.PERCENTAGE ,
+        discountValue: item.discountValue ?? cleanPurchaseOrderItem.discountValue ?? 0,
+      };
+    })
+    .filter(item => item.quantity > 0);
 
-        return {
-          idInvoiceItem: item.idInvoiceItem ?? uuidv4(),
-          invoice: item.invoice ?? null,
-          description: item.description,
-          unityPriceEXclTax: item.unityPriceEXclTax,
-          vatRate: item.vatRate,
-          itemTotalExclTax: (quantity * item.unityPriceEXclTax),
-          itemTaxAmount: (quantity * item.unityPriceEXclTax)*(item.vatRate/100),
-          itemTotalInclTax: (quantity * item.unityPriceEXclTax)*(1+item.vatRate/100),
-          operationCategory: item.operationCategory,
-          quantity,
-          purchaseOrderItem: cleanPurchaseOrderItem,
-          creditedQuantity: 0,
-          discountType:discountTypeSchema.enum.PERCENTAGE,
-          discountValue: 0,
-        };
-      })
-      .filter(item => item.quantity > 0);
+  console.log(mappedItems);
 
-    console.log(mappedItems);
+  replace(mappedItems);
 
-    replace(mappedItems);
+  setValue("invoiceItems", mappedItems, {
+    shouldValidate: true,
+    shouldDirty: true,
+  });
+};
 
-    setValue("invoiceItems", mappedItems, {
-      shouldValidate: true,
-      shouldDirty: true,
-    });
-  };
 
   // Ajout d'un card qui permet l'ajout les données d'unt item (P.U ,QT , TVA)
   const addItem = () => {
-      const partner = getValues("partner");
+    const partner = getValues("partner");
 
-    append({...defaultInvoiceItem(),
-      vatRate: Number(partner && partner.taxRate) ?? 0}, {
+    append({
+      ...defaultInvoiceItem(),
+      vatRate: Number(partner && partner.taxRate) ?? 0
+    }, {
       shouldFocus: false,
     });
   };
@@ -481,7 +475,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
     setValue("totalExclTax", totals.totalHT, { shouldValidate: true, shouldDirty: true });
     setValue("vatAmount", totals.totalTVA, { shouldValidate: true, shouldDirty: true });
     setValue("totalInclTax", totals.totalTTC, { shouldValidate: true, shouldDirty: true });
-    if (linkedToPO && selectedPO || invoice?.purchaseOrder!=null) {
+    if (linkedToPO && selectedPO || invoice?.purchaseOrder != null) {
       SyncPurchaseOrderItems(updatedItems, false);
     } else {
       syncItems(updatedItems);
@@ -519,19 +513,19 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
   // Sélection d'un client
   const selectClient = (client: PartnerSummary) => {
     setValue("partner", client, { shouldValidate: true, shouldDirty: true, });
-    setClientSearch(client.partnerName!);
-    setValue("invoiceCurrency", client.currency!, {
-    shouldValidate: true,
-    shouldDirty: true,
-  });
-  // Apply client's tax rate to all invoice items
-  const invoiceItems = getValues("invoiceItems");
-  invoiceItems && invoiceItems.forEach((_, index) => {
-    setValue(`invoiceItems.${index}.vatRate`, Number(client.taxRate), {
+    setClientSearch(client.companyName!);
+    setValue("invoiceCurrency", client.currency as CurrencyType, {
       shouldValidate: true,
       shouldDirty: true,
     });
-  });
+    // Apply client's tax rate to all invoice items
+    const invoiceItems = getValues("invoiceItems");
+    invoiceItems && invoiceItems.forEach((_, index) => {
+      setValue(`invoiceItems.${index}.vatRate`, Number(client.taxRate), {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    });
     setShowDropdown(false);
   };
 
@@ -540,39 +534,37 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
   const clearClient = () => {
     setValue("partner", null, { shouldValidate: true, shouldDirty: true, });
     setValue("invoiceCurrency", currencyTypeSchema.enum.TND, {
-    shouldValidate: true,
-    shouldDirty: true,
-  });
+      shouldValidate: true,
+      shouldDirty: true,
+    });
     setClientSearch("");
   };
 
 
-  
+
 
   // calcule de la date d'échance lors la saisie de condition de paiement 
   const calculateDueDate = (): Date => {
     const date = new Date(getValues("issueDate"));
     console.log(date)
-    switch (getValues("paymentCondition")) {
-      case PaymentConditionSchema.enum.NET_15: date.setDate(date.getDate() + 15); break;
-      case PaymentConditionSchema.enum.NET_30: date.setDate(date.getDate() + 30); break;
-      case PaymentConditionSchema.enum.NET_45: date.setDate(date.getDate() + 45); break;
-      case "IMMEDIATE": break;
-    }
+
+
+    date.setDate(date.getDate() + Number(extractPaymentConditionDays(getValues('paymentCondition'))))
+
     setValue("dueDate", date, { shouldValidate: true });
+
     return date;
   };
 
   // récupérer la liste des bons de commande disponible en cours de livraison ou bien broullion 
   const fetchPurchaseOrderSummary = async () => {
     try {
-    //  setLoading(true)
-    if(mode=="create"){
+      if (mode == "create") {
 
-      setLoadingPurchaseOrders(true)
-      const purchaseorders = await PurchaseOrderAPI.getPurchaseOrderSummary();
-      setPurchaseOrders(purchaseorders);
-    }
+        setLoadingPurchaseOrders(true)
+        const purchaseorders = await PurchaseOrderAPI.getPurchaseOrderSummary();
+        setPurchaseOrders(purchaseorders);
+      }
 
     } catch (error) {
       appToast.error("Erreur Fetch du client:", getApiErrorMessage(error));
@@ -584,14 +576,14 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
   // récupérer un bon de commande séléctionnée
   const fetchPurchaseOrder = async (idPurchaseOrder: string) => {
     try {
-      //   setLoading(true)
+
       const purchaseOrder = await PurchaseOrderAPI.getClientPurchaseOrderById(idPurchaseOrder);
       return purchaseOrder;
     } catch (error) {
-      appToast.error("Erreur Fetch du client:", getApiErrorMessage(error));
+      appToast.error("Erreur Fetch du bon de commande:", getApiErrorMessage(error));
     }
     finally {
-      //   setLoading(false)
+
     }
   };
 
@@ -607,8 +599,9 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
     form.setValue("paymentCondition", po!.paymentCondition);
     form.setValue("paymentMethod", po!.paymentMethod);
     calculateDueDate()
-    form.setValue("invoiceCurrency", po!.purchaseCurrency);
+    console.log(getValues("invoiceCurrency"))
     po?.partner && selectClient(po?.partner);
+    form.setValue("invoiceCurrency", po!.purchaseCurrency, { shouldValidate: true, shouldDirty: true,});
     const totals = calculateInvoiceTotalsFromPurchaseOrder(po!.purchaseOrderItems!);
     setValue("totalExclTax", totals.totalHT, { shouldValidate: true, shouldDirty: true });
     setValue("vatAmount", totals.totalTVA, { shouldValidate: true, shouldDirty: true });
@@ -619,6 +612,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
       issueDate: new Date(po.issueDate),
       purchaseOrderStatus: po.purchaseOrderStatus,
       currency: po.purchaseCurrency,
+      
     });
     console.log(po!.purchaseOrderItems);
     SyncPurchaseOrderItems(po!.purchaseOrderItems!, true)
@@ -635,7 +629,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
       clearClient();
       setValue("invoiceItems", [defaultInvoiceItem()], { shouldValidate: true, shouldDirty: true, });
       setValue("issueDate", new Date(), { shouldValidate: true, shouldDirty: true, });
-      setValue("invoiceCurrency", currencyTypeSchema.enum.TND, { shouldValidate: true, shouldDirty: true, });
+      setValue("invoiceCurrency", currencyTypeSchema.enum.EUR, { shouldValidate: true, shouldDirty: true, });
       setValue("paymentCondition", PaymentConditionSchema.enum.NET_15, { shouldValidate: true, shouldDirty: true, });
       setValue("paymentMethod", paymentMethodSchema.enum.BANK_TRANSFER, { shouldValidate: true, shouldDirty: true, });
       setValue("totalExclTax", 0, { shouldValidate: true, shouldDirty: true });
@@ -650,8 +644,6 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
   const onSubmit = handleSubmit(
     async () => {
       const values = getValues();
-
-      console.log(getValues("purchaseOrder"))
       const pdfFile = await generatePdfFile(invoiceToPdfData(values));
       if (pdfFile) {
         setValue("invoiceDocument", pdfFile, { shouldValidate: true, shouldDirty: true });
@@ -690,7 +682,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
       const formData = new FormData();
 
       formData.append("invoiceNumber", values.invoiceNumber);
-  
+
       formData.append("issueDate", values.issueDate.toISOString());
       formData.append("dueDate", values.dueDate.toISOString());
       if (selectedPO) {
@@ -736,7 +728,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
         setIsModalOpen(false);
         setSuccessMessage("La facture a été créée avec succès.");
         setTtnModalOpen(true);
-        setCreatedInvoice(createdInvoice as unknown as  Invoice)
+        setCreatedInvoice(createdInvoice as unknown as Invoice)
       }
     } catch (e: unknown) {
       const message = getApiErrorMessage(e);
@@ -799,7 +791,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
       if (invoice!.purchaseOrder) {
         formData.append("purchaseOrder", invoice!.purchaseOrder.idPurchaseOrder);
       }
-     
+
       if (values.invoiceItems?.length) {
         const invoiceItemsToSend = values.invoiceItems.map(({ purchaseOrderItem, ...rest }: any) => ({
           ...rest,
@@ -821,7 +813,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
         setIsModalOpen(false);
         setSuccessMessage("La facture a été mise à jour avec succès.");
         setTtnModalOpen(true);
-        setCreatedInvoice(createdInvoice as unknown as  Invoice)
+        setCreatedInvoice(createdInvoice as unknown as Invoice)
       }
     } catch (e: unknown) {
       const message = getApiErrorMessage(e);
@@ -862,6 +854,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
     setClientSearch,
     clients,
     showDropdown,
+    getClients,
     setShowDropdown,
     selectClient,
     clearClient,
@@ -909,7 +902,14 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
     invoice,
     getError,
     getItemError,
-    sendOpen, setSendOpen
+    setValue,
+    watch,
+    sendOpen, setSendOpen,
+    showAddSupplierModal, setShowAddSupplierModal,
+    /* 
+        vatRates, paymentConditions, operationCategories,
+    
+        fetchPaymentConditions, fetchCategories, fetchTvaRates */
 
   };
 

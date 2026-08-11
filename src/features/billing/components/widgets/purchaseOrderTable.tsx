@@ -24,6 +24,7 @@ type PurchaseOrderTableProps = {
   onUpdateStatus: (purchaseOrder: PurchaseOrderPageItem) => void;
   onSend?: (purchaseOrder: PurchaseOrderPageItem) => void;
   onDelete: (purchaseOrder: PurchaseOrderPageItem) => void;
+  onArchive: (purchaseOrder: PurchaseOrderPageItem) => void;
 
   getAllowedNextStatuses: (status: purchaseOrderStatus) => purchaseOrderStatus[];
 };
@@ -56,6 +57,7 @@ export function PurchaseOrderTable({
   onUpdateStatus,
   onSend,
   onDelete,
+  onArchive,
   getAllowedNextStatuses,
 }: PurchaseOrderTableProps) {
   const isSupplierPurchaseOrder = type === "SUPPLIER";
@@ -81,7 +83,7 @@ export function PurchaseOrderTable({
                 partnerColumnLabel,
                 "Date",
                 "Statut",
-                "Montant TTC EUR",
+                "Montant TTC",
                 "Actions",
               ].map((column) => (
                 <th
@@ -116,6 +118,7 @@ export function PurchaseOrderTable({
                         onView={onView}
                         onEdit={onEdit}
                         onSend={onSend}
+                        onArchive={(purchaseOrder) => onArchive(purchaseOrder)}
                         onUpdateStatus={onUpdateStatus}
                         onDelete={onDelete}
                         getAllowedNextStatuses={getAllowedNextStatuses}

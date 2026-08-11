@@ -1,4 +1,4 @@
-import { UserRole, UserStatus } from "../mocks/mock-users";
+import { UserRole, UserStatus } from "../models/user";
 
 export const ROLE_COLOR_MAP: Record<string, string> = {
   violet: "bg-violet-50 text-violet-700 border-violet-200",
@@ -9,7 +9,7 @@ export const ROLE_COLOR_MAP: Record<string, string> = {
 };
 
 export const getUserRoleLabel = (
-  role: UserRole
+  role: string
 ): string => {
   switch (role) {
     case "ADMIN":
@@ -36,7 +36,7 @@ export const getUserRoleLabel = (
 };
 
 export const getUserRoleColor = (
-  role: UserRole
+  role: string
 ): string => {
   switch (role) {
     case "ADMIN":

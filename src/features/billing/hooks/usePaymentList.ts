@@ -19,6 +19,7 @@ export function usePaymentList() {
   const [loading, setLoading] =useState(true)
 
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [openSendMail,setOpenMail]= useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<PaymentListItem | null>(null);
     const debouncedSearchQuery = useDebounce(search, 2000);
@@ -27,7 +28,7 @@ export function usePaymentList() {
     const [totalElements, setTotalElements] = useState(0);
 
 
-      const fetchClientsInvoices = async () => {
+      const fetchClientsPayment = async () => {
           try {
             setLoading(true);
             const keyword =
@@ -58,7 +59,7 @@ export function usePaymentList() {
   
       useEffect(() => {
         
-        fetchClientsInvoices();
+        fetchClientsPayment();
       }, [debouncedSearchQuery, currentPage, methodFilter]);
 
 
@@ -70,7 +71,7 @@ export function usePaymentList() {
             appToast.success('Paiement supprimé avec succès.')
             setSelectedPayment(null)
             setDeleteOpen(false)
-            await fetchClientsInvoices()
+            await fetchClientsPayment()
           } catch (error) {
             appToast.error("Erreur de suppresion: ",getApiErrorMessage(error))
           } finally {
@@ -88,14 +89,16 @@ export function usePaymentList() {
     setMethodFilter,
 
     payments,
+    fetchClientsPayment,
 
     currentPage,
     setCurrentPage,
     totalElements,
     totalPages,
-
+    
     loading,
-
+    openSendMail,
+    setOpenMail,
     deletePayment,
     deleteLoading,
     deleteOpen,

@@ -4,7 +4,6 @@ import { exchangeRateSourceSchema } from "../types/exchangeRateSource";
 import { invoiceComplianceStatusSchema } from "../types/invoiceComplianceStatus";
 import { invoiceStatusSchema, invoiceStatusSchemaWithoutAll } from "../types/invoiceStatus";
 import { invoiceTypeSchema } from "../types/invoiceType";
-import { PaymentConditionSchema } from "../types/paymentCondition";
 import { paymentMethodSchema } from "../types/paymentMethod";
 import { fileSchema } from "../types/pdfSchema";
 import { documentSchema } from "./document";
@@ -12,6 +11,8 @@ import { InvoiceEventSchema } from "./invoiceEvent";
 import { invoiceItemSchema } from "./invoiceItem";
 import { partnerSchema, partnerSummarySchema } from "./partner";
 import { basePurchaseOrderSchema, purchaseOrderSummaryDTO } from "./purchaseOrder";
+import { extractPaymentConditionDays } from "../lib/settingItemHelpers";
+import { formatDateLong } from "@/shared/utils/formatDate";
 
 const baseInvoiceSchema = z.object({
   invoiceNumber: z.string(),
@@ -21,7 +22,7 @@ const baseInvoiceSchema = z.object({
   invoiceCurrency: currencyTypeSchema,
   vatRate: z.number(),
   paymentMethod: paymentMethodSchema,
-  paymentCondition: PaymentConditionSchema,
+  paymentCondition: z.string(),
   exchangeRateReferenceDate: z.date(),
   appliedExchangeRate: z.number(),
   exchangeRateSource: exchangeRateSourceSchema,
@@ -49,24 +50,16 @@ const withDueDateValidation = <T extends z.ZodTypeAny>(schema: T) =>
     const { issueDate, dueDate, paymentCondition } = data as {
       issueDate: Date;
       dueDate: Date;
-      paymentCondition: "NET_15" | "NET_30" | "IMMEDIATE";
+      paymentCondition: string;
     };
 
     if (!issueDate || !dueDate || !paymentCondition) return;
 
     const minDueDate = new Date(issueDate);
-
-    switch (paymentCondition) {
-      case "NET_15":
-        minDueDate.setDate(minDueDate.getDate() + 15);
-        break;
-      case "NET_30":
-        minDueDate.setDate(minDueDate.getDate() + 30);
-        break;
-      case "IMMEDIATE":
-        break;
-    }
-
+   
+    minDueDate.setDate(minDueDate.getDate() + Number(extractPaymentConditionDays(paymentCondition)));
+    console.log("issueDate:", formatDateLong(issueDate))
+    console.log("dueDate:", formatDateLong(dueDate))
     if (dueDate < minDueDate) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -89,16 +82,16 @@ const invoiceObjectSchema = baseInvoiceSchema.extend({
 
 export const invoiceSchema = withDueDateValidation(
   invoiceObjectSchema.extend({
-   invoiceDocument: documentSchema.nullable(), 
-   totalExclTaxEUR: z.number(),
-   totalInclTaxEUR: z.number(),
-   totalExclTaxTND: z.number(),
-   totalInclTaxTND: z.number(),
-   totalExclTaxUSD: z.number(),
-   totalInclTaxUSD: z.number(),
-   remainingAmount: z.number(),
-   invoiceEvents: z.array(z.lazy(()=> InvoiceEventSchema)).optional(),
-   hasInvoiceCreditNotes: z.boolean().nullable(),
+    invoiceDocument: documentSchema.nullable(),
+    totalExclTaxEUR: z.number(),
+    totalInclTaxEUR: z.number(),
+    totalExclTaxTND: z.number(),
+    totalInclTaxTND: z.number(),
+    totalExclTaxUSD: z.number(),
+    totalInclTaxUSD: z.number(),
+    remainingAmount: z.number(),
+    invoiceEvents: z.array(z.lazy(() => InvoiceEventSchema)).optional(),
+    hasInvoiceCreditNotes: z.boolean().nullable(),
   })
 );
 
@@ -113,9 +106,9 @@ export const invoicePageItemSchema = invoiceObjectSchema.pick({
   invoiceCurrency: true,
   vatRate: true,
   appliedExchangeRate: true,
-  
+
 }).extend({
-  
+
   totalExclTaxEUR: z.number(),
   totalInclTaxEUR: z.number(),
   totalExclTaxTND: z.number(),
@@ -123,7 +116,7 @@ export const invoicePageItemSchema = invoiceObjectSchema.pick({
   totalExclTaxUSD: z.number(),
   totalInclTaxUSD: z.number(),
   remainingAmount: z.number(),
-  invoiceDocument: documentSchema.nullable(), 
+  invoiceDocument: documentSchema.nullable(),
   partner: z.lazy(() => partnerSummarySchema)
 });
 
@@ -135,7 +128,7 @@ export const invoicePageItemSchema2 = invoiceObjectSchema.pick({
   invoiceType: true,
   invoiceStatus: true,
   invoiceCurrency: true,
-  totalInclTax:true
+  totalInclTax: true
 });
 
 export const invoiceCreateSchema = withDueDateValidation(
@@ -157,24 +150,25 @@ export const invoiceCreateSchema = withDueDateValidation(
     totalInclTax: true,
     comment: true,
   })
-  .extend({
-    invoiceDocument: fileSchema.nullable(),
-    idInvoice: z.string(),
-    sentToTTNDate: z.date().nullable(),
-    sentToclientDate: z.date().nullable(),
-    creationDate: z.date().nullable(),
-    invoiceStatus: invoiceStatusSchema,
-    complianceQRcode: z.string(),
-    vatAmount: z.number().nullable(),
-    invoiceComplianceStatus: invoiceComplianceStatusSchema.nullable(),
-    partner: z.lazy(() => partnerSummarySchema).nullable(),
-    purchaseOrder:z.lazy(() => purchaseOrderSummaryDTO).nullable()
-  }).superRefine((data, ctx) => {
+    .extend({
+      invoiceDocument: fileSchema.nullable(),
+      idInvoice: z.string(),
+      sentToTTNDate: z.date().nullable(),
+      sentToclientDate: z.date().nullable(),
+      creationDate: z.date().nullable(),
+      invoiceStatus: invoiceStatusSchema,
+      complianceQRcode: z.string(),
+      vatAmount: z.number().nullable(),
+      invoiceComplianceStatus: invoiceComplianceStatusSchema.nullable(),
+      partner: z.lazy(() => partnerSummarySchema).nullable(),
+      purchaseOrder: z.lazy(() => purchaseOrderSummaryDTO).nullable()
+    }).superRefine((data, ctx) => {
+      const isPurchase = data.invoiceType === invoiceTypeSchema.enum.PURCHASE;
       if (!data.partner) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: ["partner"],
-          message: "Le client est obligatoire",
+          message: isPurchase ? "Le fournisseur est obligatoire" : "Le client est obligatoire",
         });
       }
     })
@@ -193,7 +187,7 @@ export const invoiceSummarySchema = z.object({
   issueDate: z.date(),
   invoiceType: invoiceTypeSchema,
   invoiceStatus: invoiceStatusSchema,
-  invoiceComplianceStatus:invoiceComplianceStatusSchema,
+  invoiceComplianceStatus: invoiceComplianceStatusSchema,
   invoiceCurrency: currencyTypeSchema,
   totalExclTaxEUR: z.number(),
   totalInclTaxEUR: z.number(),
@@ -205,8 +199,47 @@ export const invoiceSummarySchema = z.object({
 })
 
 export const invoiceDetailedSummarySchema = invoiceSummarySchema.extend({
-  partner : partnerSummarySchema
+  partner: partnerSummarySchema
 })
+
+
+/*** Schema pour un item de facture extrait ***/
+const extractedInvoiceItemSchema = z.object({
+    description: z.string(),
+    quantity: z.number(),
+    unityPriceExclTax: z.number(),
+    itemTotalInclTax: z.number(),
+    operationCategory: z.string(),
+    vatRate: z.number(),
+    itemTotalExclTax: z.number(),
+    discountValue: z.number(),
+});
+
+/*** Schema pour les données de facture extraites via IA/OCR ***/
+const extractedInvoiceSchema = z.object({
+    invoiceNumber: z.string(),
+    issueDate: z.string(), 
+    dueDate: z.string(),
+    invoiceCurrency: z.string(), 
+    vatRate: z.number(),
+    totalExclTax: z.number(),
+    totalInclTax: z.number(),
+    companyName: z.string(),
+    issuerTaxId: z.string(),
+    companyAddress: z.string(),
+    issuerEmail: z.string(),
+    issuerPhone: z.string(),
+    paymentCondition: z.string(),
+    paymentMethod: z.string(),
+    invoiceItems: z.array(extractedInvoiceItemSchema).default([]),
+    termsAndConditions: z.string().nullable(),
+    comments: z.string().nullable(),
+});
+
+
+
+/*** Types inférés ***/
+export type ExtractedInvoice = z.infer<typeof extractedInvoiceSchema>;
 
 
 export type Invoice = z.infer<typeof invoiceSchema>;

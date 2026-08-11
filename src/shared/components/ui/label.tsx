@@ -28,7 +28,7 @@ function Label({
         data-slot="label"
         className={cn(
             "group/label inline-flex w-fit items-center gap-1.5",
-            "text-[13px] font-semibold leading-none tracking-tight text-slate-700",
+            "block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1",
             "transition-colors duration-200",
             "select-none",
             "peer-focus-visible:text-blue-600",

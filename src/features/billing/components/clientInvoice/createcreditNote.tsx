@@ -1,5 +1,5 @@
 "use client"
-import { FileX, ShieldCheck} from 'lucide-react';
+import { FileX, ShieldCheck } from 'lucide-react';
 import InvoicePreview from '../widgets/invoicePreview';
 import useCreateCreditNote, { InvoiceDetailsProps } from '../../hooks/useCreateCreditNote';
 import { SectionTitle } from '../widgets/sectionTitle';
@@ -12,26 +12,33 @@ import { DocumentPreviewModal } from '@/shared/components/ui/documentPreviewModa
 import { SendToTTNModal } from '../widgets/ttnConfirmationModal';
 import { Controller } from 'react-hook-form';
 import { FieldError } from '@/shared/components/ui/fieldError';
+import { useFetchSettings } from '../../hooks/useFetchSetting';
+import { extractTvaRate, formatShowLabel } from '../../lib/settingItemHelpers';
+import { InvoiceItem } from '../../models/invoiceItem';
 
-export function CreateCreditNote({invoiceId}: InvoiceDetailsProps) {
+export function CreateCreditNote({ invoiceId }: InvoiceDetailsProps) {
     const { previewData, form, removeItem, addItem, updateItem, onSubmit, onCloseDocumentModal, createCreditNoteInvoice,
         setItemSearchMap, setShowDropdownMap, itemSearchMap, showDropdownMap, creditNoteItemMap, setCreditNoteItemMap, filteredItems, fields,
-        canCreateInvoice, invoiceRef, isModalOpen, TtnModalOpen, setTtnModalOpen, pdfUrl, loadingForm, loadingInvoice, loadingTTN, successMessage, 
-        sent, sendToTTN, router, errors, getMaxQuantity, getError } = useCreateCreditNote({invoiceId});
+        canCreateInvoice, invoiceRef, isModalOpen, TtnModalOpen, setTtnModalOpen, pdfUrl, loadingForm, loadingInvoice, loadingTTN, successMessage,
+        sent, sendToTTN, router, errors, getMaxQuantity, getError } = useCreateCreditNote({ invoiceId });
     const { register } = form
+    const {
+        vatRates,
+        fetchTvaRates
+    } = useFetchSettings()
     return (
-        <div className="flex-1 flex flex-col min-h-0 bg-white">
+        <div className="flex-1 flex flex-col min-h-0">
             {/* Header */}
             <header className="bg-white border-b border-gray-100 px-8 py-6 sticky top-0 z-10">
                 <div className="flex items-center justify-between w-full">
                     <div className="flex items-center  gap-6">
-                         <button
-                          onClick={() => router.back()}
-                          className="w-9 h-9 rounded-xl border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors">
-                          <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                              <path d="M19 12H5M12 5l-7 7 7 7" />
-                          </svg>
-                      </button>
+                        <button
+                            onClick={() => router.back()}
+                            className="w-9 h-9 rounded-xl border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                                <path d="M19 12H5M12 5l-7 7 7 7" />
+                            </svg>
+                        </button>
                         <div>
                             <div className="flex items-center gap-3">
                                 <FileX className="w-8 h-8 text-rose-600" />
@@ -61,12 +68,12 @@ export function CreateCreditNote({invoiceId}: InvoiceDetailsProps) {
                 document={pdfUrl}
                 loading={loadingForm}
                 type='Facture'
-                 />
+            />
             {/* Modal pour demander au user s'il veut envoyer la Facture au TTN */}
             <SendToTTNModal
                 open={TtnModalOpen}
-                onClose={() => {setTtnModalOpen(false); router.back()}}
-                onConfirm={() => { sendToTTN() }}
+                onClose={() => {   router.back(); setTtnModalOpen(false); }}
+                onConfirm={async () => { await sendToTTN(); router.back(); }}
                 loading={loadingTTN}
                 invoiceSent={sent}
                 invoiceRef={previewData.invoiceCreditNoteNumber}
@@ -120,38 +127,29 @@ export function CreateCreditNote({invoiceId}: InvoiceDetailsProps) {
                                             <Controller
                                                 control={form.control}
                                                 name="issueDate"
-                                                render={({ field }) => (
-                                                    <>
-                                                    <input
-                                                        type="date"
-                                                        value={field.value ? (() => {
-                                                            const d = new Date(field.value);
-                                                            const year = d.getFullYear();
-                                                            const month = String(d.getMonth() + 1).padStart(2, "0");
-                                                            const day = String(d.getDate()).padStart(2, "0");
-                                                            return `${year}-${month}-${day}`;
-                                                        })() : ""}
-                                                        onChange={(e) => {
-                                                            field.onChange(new Date(e.target.value));
-                                                        }}
-                                                        min={
-                                                            (() => {
-                                                                let poDate: Date | null = null;
-                                                                    const editPODate = form.getValues("originalInvoice");
-                                                                    if (editPODate) poDate = new Date(editPODate);
-                                                                if (poDate) {
-                                                                    const year = poDate.getFullYear();
-                                                                    const month = String(poDate.getMonth() + 1).padStart(2, "0");
-                                                                    const day = String(poDate.getDate()).padStart(2, "0");
+                                                render={({ field }) => {
+                                                    return (
+                                                        <>
+                                                            <input
+                                                                type="date"
+
+                                                                value={field.value ? (() => {
+                                                                    const d = new Date(field.value);
+                                                                    const year = d.getFullYear();
+                                                                    const month = String(d.getMonth() + 1).padStart(2, "0");
+                                                                    const day = String(d.getDate()).padStart(2, "0");
                                                                     return `${year}-${month}-${day}`;
-                                                                }
-                                                            })()
-                                                        }
-                                                        className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
-                                                    />
-                                                    <FieldError error={getError("issueDate")} />
-                                                    </>
-                                                )}
+                                                                })() : ""}
+                                                                onChange={(e) => {
+                                                                    field.onChange(new Date(e.target.value));
+                                                                }}
+
+                                                                className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
+                                                            />
+                                                            <FieldError error={getError("issueDate")} />
+                                                        </>
+                                                    );
+                                                }}
                                             />
                                         </div>
                                     </div>
@@ -216,6 +214,7 @@ export function CreateCreditNote({invoiceId}: InvoiceDetailsProps) {
                                                     <input
                                                         type="text"
                                                         readOnly
+
                                                         placeholder="Sélectionner un produit..."
                                                         value={itemSearchMap[index] || ""}
                                                         onChange={(e) => {
@@ -253,43 +252,66 @@ export function CreateCreditNote({invoiceId}: InvoiceDetailsProps) {
 
                                                     {showDropdownMap[index] && filteredItems!.length > 0 && (
                                                         <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-20 overflow-hidden">
-                                                            {filteredItems!.map((filteredItem) => (
-                                                                <button
-                                                                    key={filteredItem.idInvoiceItem}
-                                                                    type="button"
-                                                                    onMouseDown={(e) => {
-                                                                        e.preventDefault();
+                                                            {filteredItems!.map((filteredItem) => {
+                                                                const originalInvoiceItem = form.getValues("originalInvoice")?.invoiceItems.find(
+                                                                    (invItem: InvoiceItem) => invItem.idInvoiceItem === filteredItem.idInvoiceItem
+                                                                );
+                                                                const remainingQty = originalInvoiceItem ? getMaxQuantity(originalInvoiceItem) : 0;
+                                                                const isDisabled = remainingQty === 0;
 
-                                                                        setCreditNoteItemMap((prev) => ({
-                                                                            ...prev,
-                                                                            [index]: filteredItem,
-                                                                        }));
+                                                                return (
+                                                                    <button
+                                                                        key={filteredItem.idInvoiceItem}
+                                                                        type="button"
+                                                                        disabled={isDisabled}
+                                                                        onMouseDown={(e) => {
+                                                                            e.preventDefault();
 
-                                                                        setItemSearchMap((prev) => ({
-                                                                            ...prev,
-                                                                            [index]: filteredItem.description,
-                                                                        }));
-                                                                        setShowDropdownMap((prev) => ({
-                                                                            ...prev,
-                                                                            [index]: false,
-                                                                        }));
-                                                                        updateItem(field.idCreditNoteItem!, {
-                                                                            idCreditNoteItem: field.idCreditNoteItem!,
-                                                                            description: filteredItem.description,
-                                                                            quantity: filteredItem.quantity,
-                                                                            unityPriceEXclTax: filteredItem.unityPriceEXclTax,
-                                                                            vatRate: filteredItem.vatRate,
-                                                                            operationCategory: filteredItem.operationCategory,
-                                                                            originalItem:filteredItem.idInvoiceItem
-                                                                        });
-                                                                    }}
-                                                                    className="w-full text-left px-4 py-3 hover:bg-blue-50 transition border-b border-slate-50 last:border-0"
-                                                                >
-                                                                    <p className="text-sm font-bold text-slate-800">
-                                                                        {filteredItem.description}
-                                                                    </p>
-                                                                </button>
-                                                            ))}
+                                                                            if (isDisabled) return; 
+
+                                                                            const maxQty = remainingQty; 
+                                                                            setCreditNoteItemMap((prev) => ({
+                                                                                ...prev,
+                                                                                [index]: {
+                                                                                    ...filteredItem,
+                                                                                    quantity: maxQty,
+                                                                                },
+                                                                            }));
+
+                                                                            setItemSearchMap((prev) => ({
+                                                                                ...prev,
+                                                                                [index]: filteredItem.description,
+                                                                            }));
+                                                                            setShowDropdownMap((prev) => ({
+                                                                                ...prev,
+                                                                                [index]: false,
+                                                                            }));
+                                                                            updateItem(field.idCreditNoteItem!, {
+                                                                                idCreditNoteItem: field.idCreditNoteItem!,
+                                                                                description: filteredItem.description,
+                                                                                quantity: maxQty,
+                                                                                unityPriceEXclTax: filteredItem.unityPriceEXclTax,
+                                                                                vatRate: filteredItem.vatRate,
+                                                                                operationCategory: filteredItem.operationCategory,
+                                                                                originalItem: filteredItem.idInvoiceItem,
+                                                                            });
+                                                                        }}
+                                                                        className={`w-full text-left px-4 py-3 transition border-b border-slate-50 last:border-0 ${isDisabled
+                                                                                ? "opacity-50 cursor-not-allowed bg-slate-50"
+                                                                                : "hover:bg-blue-50"
+                                                                            }`}
+                                                                    >
+                                                                        <p className="text-sm font-bold text-slate-800">
+                                                                            {filteredItem.description}
+                                                                            {isDisabled && (
+                                                                                <span className="ml-2 text-xs font-normal text-red-500">
+                                                                                    (Quantité épuisée)
+                                                                                </span>
+                                                                            )}
+                                                                        </p>
+                                                                    </button>
+                                                                );
+                                                            })}
                                                         </div>
                                                     )}
                                                 </div>
@@ -308,16 +330,18 @@ export function CreateCreditNote({invoiceId}: InvoiceDetailsProps) {
                                                                 value={creditNoteItemMap[index]?.quantity ?? ""}
                                                                 onChange={(e) => {
                                                                     const val = parseFloat(e.target.value) || 0;
+                                                                    const maxAllowed = getMaxQuantity(creditNoteItemMap[index]);
+                                                                    const clampedVal = Math.min(val, maxAllowed); // empêche de dépasser le max
 
                                                                     setCreditNoteItemMap((prev) => ({
                                                                         ...prev,
                                                                         [index]: {
                                                                             ...prev[index],
-                                                                            quantity: val,
+                                                                            quantity: clampedVal,
                                                                         },
                                                                     }));
 
-                                                                    updateItem(field.idCreditNoteItem!, { quantity: val });
+                                                                    updateItem(field.idCreditNoteItem!, { quantity: clampedVal });
                                                                 }}
                                                                 className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 text-center focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
                                                             />
@@ -351,11 +375,11 @@ export function CreateCreditNote({invoiceId}: InvoiceDetailsProps) {
                                                                 TVA %
                                                             </label>
                                                             <select
-                                                                value={creditNoteItemMap[index].vatRate}
-                                                                disabled
-                                                                onChange={(e) => {
-                                                                    const val = Number(e.target.value);
+                                                                value={String(creditNoteItemMap[index]?.vatRate ?? "")}
 
+                                                                onChange={(e) => {
+                                                                    console.log(creditNoteItemMap[index]?.vatRate)
+                                                                    const val = Number(e.target.value);
                                                                     setCreditNoteItemMap((prev) => ({
                                                                         ...prev,
                                                                         [index]: {
@@ -363,21 +387,27 @@ export function CreateCreditNote({invoiceId}: InvoiceDetailsProps) {
                                                                             vatRate: val,
                                                                         },
                                                                     }));
-
                                                                     updateItem(field.idCreditNoteItem!, { vatRate: val });
                                                                 }}
                                                                 className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 text-center focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition"
                                                             >
-                                                                {tvaRateSchema.options.map((rate) => (
-                                                                    <option key={rate.value} value={rate.value}>
-                                                                        {rate.value}%
-                                                                    </option>
-                                                                ))}
+                                                                {vatRates.length === 0 ? (
+                                                                    <div className="px-3 py-2 text-sm text-slate-400">
+                                                                        Aucun taux de TVA disponible
+                                                                    </div>) : (
+                                                                    vatRates.map((rate) => (
+                                                                        <option
+                                                                            key={rate.code}
+                                                                            value={String(extractTvaRate(rate.label))}
+                                                                        >
+                                                                            {formatShowLabel(rate.label)}
+                                                                        </option>
+                                                                    )))}
                                                             </select>
                                                         </div>
-                                                            <span className="text-xs text-blue-500">
-                                                                Quantité restant à créditer : {getMaxQuantity(creditNoteItemMap[index])}
-                                                            </span>
+                                                        <span className="text-xs text-blue-500 whitespace-nowrap">
+                                                            Quantité restant à créditer : {getMaxQuantity(creditNoteItemMap[index])}
+                                                        </span>
                                                     </div>
                                                 )}
                                             </div>

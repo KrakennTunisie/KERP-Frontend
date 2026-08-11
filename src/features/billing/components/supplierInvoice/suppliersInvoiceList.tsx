@@ -9,6 +9,9 @@ import { BillingPageHeader } from "../widgets/billingHeader";
 import { BillingTable } from "../widgets/billingTable";
 import { Status, UpdateDocumentStatusModal } from "../widgets/updateStatusModal";
 import { DeleteInvoiceModal } from "../widgets/deleteInvoiceModal";
+import UploadInvoiceModal from "../widgets/uploadInvoiceModal";
+import InvoiceFormModal from "./createSupplierInvoice";
+import { ArchiveInvoiceModal } from "../widgets/archiveModal";
 
 
 export default function SuppliersInvoiceList() {
@@ -18,11 +21,13 @@ export default function SuppliersInvoiceList() {
         setInvoiceId,
         setUpdateOpen,
         updateOpen,
-        updateLoading,
-        updateStatus,invoiceRef,
+        updateLoading, archiveLoading,
+        archiveOpen,
+        setArchiveOpen,archiveInvoice,
+        updateStatus, invoiceRef, handleUpload,
         selectedInvoice, setSelectedInvoice, deleteSupplierInvoice,
         nextStatus, setNextStatus, deleteOpen, deleteLoading, setDeleteOpen,
-        loading, suppliersInvoiceStats } = useSupplierInvoiceList();
+        loading, suppliersInvoiceStats, isUploadInvoiceOpen, setIsUploadInvoiceOpen } = useSupplierInvoiceList();
     const invoiceStatuses = invoiceStatusSchema.options
         .filter(
             (status) =>
@@ -41,6 +46,8 @@ export default function SuppliersInvoiceList() {
             <BillingPageHeader
                 title="Factures Fournisseurs"
                 description="Consultation et suivi des factures d’achat"
+                createLabel="Nouvelle facture fournisseur"
+                onCreateClick={() => setIsUploadInvoiceOpen(true)}
             />
             {/* Stats */}
             <div className="flex gap-4 mb-8">
@@ -92,6 +99,14 @@ export default function SuppliersInvoiceList() {
                 onConfirm={deleteSupplierInvoice}
                 loading={deleteLoading} />
 
+            <ArchiveInvoiceModal
+                documentType="invoice"
+                open={archiveOpen}
+                onClose={() => setArchiveOpen(false)}
+                documentRef={invoiceRef}
+                onConfirm={archiveInvoice}
+                loading={archiveLoading} />
+
             {/* Search + Filters */}
             <StatusFilterBar
                 search={search}
@@ -101,9 +116,9 @@ export default function SuppliersInvoiceList() {
                 defaultStatus={invoiceStatusSchema.enum.TO_COLLECT}
                 statuses={invoiceStatuses}
                 searchPlaceholder="Référence ou client..."
-                onDownloadAll={()=>console.log("DownloadALL")}
-                onDownloadCurrentYear={()=>console.log("onDownloadCurrentYear")}
-                onDownloadFitered={()=>console.log("onDownloadFitered")}
+                onDownloadAll={() => console.log("DownloadALL")}
+                onDownloadCurrentYear={() => console.log("onDownloadCurrentYear")}
+                onDownloadFitered={() => console.log("onDownloadFitered")}
             />
 
             <UpdateDocumentStatusModal
@@ -145,22 +160,57 @@ export default function SuppliersInvoiceList() {
                     getSupplierInvoiceAllowedNextStatuses(invoice.invoiceStatus).length > 0
                 }
                 onDelete={(invoice) => {
-
+                    if (invoice.invoiceStatus == invoiceStatusSchema.enum.DRAFT || invoice.invoiceStatus == invoiceStatusSchema.enum.CANCELLED) {
                         setSelectedInvoice(invoice);
                         setInvoiceId(invoice.idInvoice);
-                        setDeleteOpen(true);                                    
-                    }}
+                        setDeleteOpen(true);
+                    }
+                }}
+                onArchive={(invoice) => {
+                    if (invoice.invoiceStatus == invoiceStatusSchema.enum.PAID || invoice.invoiceStatus == invoiceStatusSchema.enum.CANCELLED) {
+                        setSelectedInvoice(invoice);
+                        setInvoiceId(invoice.idInvoice);
+                        setArchiveOpen(true);
+                    }
+                }}
                 getNumber={(invoice) => invoice.invoiceNumber}
                 getPartnerName={(invoice) => invoice.partner?.companyName}
                 getStatus={(invoice) => invoice.invoiceStatus}
                 getAmountEUR={(invoice) => invoice.totalInclTaxEUR}
                 getAmountTND={(invoice) => invoice.totalInclTaxTND}
+                getCurrency={(invoice)=> invoice.invoiceCurrency}
                 getDate={(invoice) => invoice.dueDate ?? invoice.issueDate}
                 getStatusLabel={(status) => invoiceStatusLabels[status]}
                 getStatusColor={(status) =>
                     status !== "ALL" ? invoiceStatusColors[status] : ""
                 }
             />
+
+
+            <UpdateDocumentStatusModal
+                open={updateOpen}
+                onClose={() => setUpdateOpen(false)}
+                onConfirm={updateStatus}
+                documentNumber={selectedInvoice?.invoiceNumber}
+                currentStatus={selectedInvoice?.invoiceStatus}
+                documentType="invoice"
+                nextStatus={nextStatus as Status}
+                onNextStatusChange={setNextStatus}
+                allowedStatuses={
+                    selectedInvoice
+                        ? getSupplierInvoiceAllowedNextStatuses(selectedInvoice.invoiceStatus)
+                        : []
+                }
+                isSubmitting={updateLoading}
+            />
+
+            <UploadInvoiceModal
+                open={isUploadInvoiceOpen}
+                loading={loading}
+                onClose={() => setIsUploadInvoiceOpen(false)}
+                onUpload={handleUpload}
+            />
+
         </div>
 
     );

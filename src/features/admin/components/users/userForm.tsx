@@ -1,9 +1,6 @@
 'use client'
 
-import { ArrowLeft, Check, Save, User } from "lucide-react"
-import { useRouter } from "next/navigation"
-import { UserRole, UserStatus } from "../../mocks/mock-users"
-import { useState } from "react"
+import { ArrowLeft, User } from "lucide-react"
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import {
@@ -15,41 +12,35 @@ import {
 } from "@/shared/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select";
 import { Button } from "@/shared/components/ui/button"
+import { useCreateEditUser } from "../../hooks/useCreateEditUser"
+import { CreateUser,  USER_STATUS_OPTIONS } from "../../models/user";
+
 export type PropsForm = {
   userId?: string,
   mode: "create" |"edit"
 }
 
+export interface userProps {
+    params: {
+        idUser: string
+    }
+}
 
 export default function UserForm ({userId, mode}:PropsForm) {
-     const router = useRouter();
+ 
+const {
+        onSubmit,
+        register,
+      handleSubmit,
+      reset,
+      setValue,
+      watch,
+      errors, isSubmitting,
+      router,
+      roles
+    } = useCreateEditUser({userId, mode});
 
-  const [form, setForm] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    role: "USER" as UserRole,
-    status: "ACTIVE" as UserStatus,
-  });
-
-  const handleChange = (
-    field: keyof typeof form,
-    value: string
-  ) => {
-    setForm((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
-
-  const handleSubmit = () => {
-    if (mode === "create") {
-      console.log("Create user", form);
-    } else {
-      console.log("Update user", userId, form);
-    }
-  };
-
+    const isEditMode = mode==="edit"
   return (
     <div className="bg-gray-50">
 
@@ -89,7 +80,10 @@ export default function UserForm ({userId, mode}:PropsForm) {
 
       {/* FORM */}
       <main className="flex-1 overflow-y-auto p-8">
-        <form className="mx-auto space-y-6 pb-10">
+        <form
+            id="userForm"     
+            onSubmit={handleSubmit(onSubmit)}
+            className="mx-auto space-y-6 pb-10">
 
             {/* GENERAL */}
             <Card className="border-slate-200 bg-white shadow-sm">
@@ -110,14 +104,18 @@ export default function UserForm ({userId, mode}:PropsForm) {
 
                 <Input
                     label="Prénom"
-                    placeholder="John"
                     required
+                    placeholder="John"
+                    {...register("firstName")}
+                    error={errors.firstName?.message}
                 />
 
                 <Input
                     label="Nom"
-                    placeholder="Doe"
                     required
+                    placeholder="Doe"
+                    {...register("lastName")}
+                    error={errors.lastName?.message}
                 />
 
                 <Input
@@ -126,14 +124,17 @@ export default function UserForm ({userId, mode}:PropsForm) {
                     required
                     type="email"
                     className="md:col-span-2"
+                    {...register("email")}
+                    error={errors.email?.message}
                 />
 
                 <Input
                     label="Téléphone"
                     placeholder="+216XXXXXXXX"
-                    required
                     type="text"
                     className="md:col-span-2"
+                    {...register("phoneNumber")}
+                    error={errors.phoneNumber?.message}
                 />
 
                 </div>
@@ -146,103 +147,115 @@ export default function UserForm ({userId, mode}:PropsForm) {
             {/* ROLE & STATUS */}
 
             <Card className="border-slate-200 bg-white shadow-sm">
+                <CardHeader className="border-b border-slate-100">
+                    <CardTitle className="text-lg">
+                    Permissions
+                    </CardTitle>
 
-            <CardHeader className="border-b border-slate-100">
+                    <CardDescription>
+                    Définissez le rôle et le statut du compte.
+                    </CardDescription>
+                </CardHeader>
 
-                <CardTitle className="text-lg">
-                Permissions
-                </CardTitle>
+                <CardContent className="p-5 sm:p-6">
+                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
 
-                <CardDescription>
-                Définissez le rôle et le statut du compte.
-                </CardDescription>
-
-            </CardHeader>
-
-
-            <CardContent className="p-5 sm:p-6">
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-
-                <div className="space-y-2">
-
-                    <Label required>
-                    Rôle
-                    </Label>
-
-                    <Select>
-                    <SelectTrigger className="bg-slate-50">
-                        <SelectValue placeholder="Choisir un rôle" />
-                    </SelectTrigger>
-
-                    <SelectContent>
-
-                        <SelectItem value="MANAGER">
-                        Manager
-                        </SelectItem>
-
-                        <SelectItem value="ACCOUNTANT">
-                        Comptable
-                        </SelectItem>
-
-                        <SelectItem value="CLIENT">
-                        Client
-                        </SelectItem>
-
-                        <SelectItem value="SUPPLIER">
-                        Fournisseur
-                        </SelectItem>
-
-                        <SelectItem value="USER">
-                        Utilisateur
-                        </SelectItem>
-
-                    </SelectContent>
-
-                    </Select>
-
-                </div>
-
-
-                
-
+                    {/* ROLE */}
                     <div className="space-y-2">
+                        <Label required>
+                        Rôle
+                        </Label>
 
-                    <Label>
-                        Statut
-                    </Label>
-
-                    <Select>
-
-                        <SelectTrigger className="bg-slate-50">
-                        <SelectValue placeholder="Choisir le statut" />
-                    </SelectTrigger>
+                        <Select
+                        value={watch("roles")}
+                        onValueChange={(value) =>
+                            setValue(
+                            "roles",
+                            value as CreateUser["roles"],
+                            {
+                                shouldValidate: true,
+                            }
+                            )
+                        }
+                        disabled={isEditMode}
+                        >
+                        <SelectTrigger
+                            className={`
+                            bg-slate-50
+                            ${isEditMode ? "cursor-not-allowed opacity-60" : ""}
+                            `}
+                        >
+                            <SelectValue />
+                        </SelectTrigger>
 
                         <SelectContent>
-
-                        <SelectItem className="" value="ACTIVE">
-                            Actif
-                        </SelectItem>
-
-                        <SelectItem value="INACTIVE">
-                            Inactif
-                        </SelectItem>
-
-                        <SelectItem value="BLOCKED">
-                            Bloqué
-                        </SelectItem>
-
+                            {roles.map((role) => (
+                            <SelectItem
+                                key={role.id}
+                                value={role.name}
+                            >
+                                {role.name}
+                            </SelectItem>
+                            ))}
                         </SelectContent>
+                        </Select>
 
-                    </Select>
-
+                        {errors.roles && (
+                        <p className="text-sm text-red-500">
+                            {errors.roles.message}
+                        </p>
+                        )}
                     </div>
 
+                    {/* STATUS */}
+                    <div className="space-y-2">
+                        <Label>
+                        Statut
+                        </Label>
 
-                </div>
+                        <Select
+                        value={watch("status")}
+                        onValueChange={(value) =>
+                            setValue(
+                            "status",
+                            value as CreateUser["status"],
+                            {
+                                shouldValidate: true,
+                            }
+                            )
+                        }
+                        disabled={isEditMode}
+                        >
+                        <SelectTrigger
+                            className={`
+                            bg-slate-50
+                            ${isEditMode ? "cursor-not-allowed opacity-60" : ""}
+                            `}
+                        >
+                            <SelectValue />
+                        </SelectTrigger>
 
-            </CardContent>
+                        <SelectContent>
+                            {USER_STATUS_OPTIONS.map((status) => (
+                            <SelectItem
+                                key={status.value}
+                                value={status.value}
+                            >
+                                {status.label}
+                            </SelectItem>
+                            ))}
+                        </SelectContent>
+                        </Select>
 
+                        {errors.status && (
+                        <p className="text-sm text-red-500">
+                            {errors.status.message}
+                        </p>
+                        )}
+                    </div>
+
+                    </div>
+                </CardContent>
             </Card>
         </form>
         <Card className="sticky bottom-0 z-10 border-slate-200 bg-white/90 backdrop-blur shadow-lg">
@@ -252,17 +265,20 @@ export default function UserForm ({userId, mode}:PropsForm) {
                 <Button
                 type="button"
                 variant="outline"
+                disabled={isSubmitting}
                 onClick={() => router.back()}
                 >
                 Annuler
                 </Button>
 
-                <Button type="submit">
-
-                {mode === "create"
-                    ? "Créer l'utilisateur"
-                    : "Mettre à jour"}
-
+                <Button
+                    form="userForm"
+                    type="submit"
+                    disabled={isSubmitting}
+                >
+                    {mode === "create"
+                        ? "Créer l'utilisateur"
+                        : "Mettre à jour"}
                 </Button>
 
             </CardContent>

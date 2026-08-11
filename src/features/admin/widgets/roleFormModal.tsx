@@ -1,17 +1,20 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Role } from "../mocks/mock-roles";
-import { Permission } from "../mocks/mock-permission";
 import { Modal } from "@/shared/components/ui/modal";
 import { getCategoryLabel } from "../helpers/categoryHelper";
+import { ClientPermissions, Permission } from "../models/permission";
+import { CreateRole } from "../models/role";
+import { UseFormReturn } from "react-hook-form";
 
 export type RoleModalProps = {
-  mode: "edit" | "create";
+  loading: boolean;
+  mode: "create" | "edit";
   open: boolean;
   onClose: () => void;
-  onSave: (role: Omit<Role, "id">) => void;
-  permissions: Permission[];
+  onSave: (role: CreateRole) => Promise<void>;
+  permissions: ClientPermissions[];
+  form : UseFormReturn<CreateRole>
 };
 
 
@@ -27,52 +30,83 @@ const PERM_ICONS: Record<string, string> = {
 };
 
 export function RoleModalForm({
+  loading,
+  form,
   mode,
   open,
   onClose,
   onSave,
   permissions,
 }: RoleModalProps) {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [color, setColor] = useState("#3b82f6");
   const [activeCategory, setActiveCategory] = useState<string>("ALL");
-  const [selectedPermissions, setSelectedPermissions] = useState<Set<string>>(
-    new Set()
-  );
+
 
   const categories = useMemo(() => {
-    const cats = Array.from(new Set(permissions.map((p) => p.category)));
+    const cats = Array.from(new Set(permissions.map((p) => p.clientId)));
     return ["ALL", ...cats];
   }, [permissions]);
 
   const filteredPermissions = useMemo(() => {
     if (activeCategory === "ALL") return permissions;
-    return permissions.filter((p) => p.category === activeCategory);
+    return permissions.filter((p) => p.clientId === activeCategory);
   }, [permissions, activeCategory]);
 
-  const togglePermission = (key: string) => {
-    setSelectedPermissions((prev) => {
-      const next = new Set(prev);
-      if (next.has(key)) next.delete(key);
-      else next.add(key);
-      return next;
-    });
-  };
 
-  const handleSave = () => {
-    onSave({
-      name,
-      description,
-      color,
-      permissions: permissions.filter((p) => selectedPermissions.has(p.key)),
-    });
-    setName("");
-    setDescription("");
-    setColor("#3b82f6");
-    setSelectedPermissions(new Set());
-    setActiveCategory("ALL");
-  };
+    const {register,
+      handleSubmit,
+      setValue,
+      watch,
+      formState: { errors }
+      } = form
+
+const selectedPermissions = watch("permissions");
+
+const togglePermission = (
+  clientId: string,
+  permission: Permission
+) => {
+  const selected = watch("permissions");
+
+  const exists = selected.some(
+    (p) =>
+      p.clientId === clientId &&
+      p.name === permission.name
+  );
+
+  if (exists) {
+    setValue(
+      "permissions",
+      selected.filter(
+        (p) =>
+          !(
+            p.clientId === clientId &&
+            p.name === permission.name
+          )
+      ),
+      { shouldValidate: true }
+    );
+  } else {
+    setValue(
+      "permissions",
+      [
+        ...selected,
+        {
+          clientId,
+          name: permission.name,
+          description: permission.description,
+        },
+      ],
+      { shouldValidate: true }
+    );
+  }
+};
+
+const submit = async (data: CreateRole) => {
+  await onSave(data);
+  //reset();
+ // onClose();
+};
+
 
   return (
     <Modal
@@ -82,17 +116,25 @@ export function RoleModalForm({
       footer={
         <div className="flex justify-end gap-2">
           <button
+            disabled={loading}
             onClick={onClose}
-            className="h-[34px] px-4 cursor-pointer rounded-lg border border-blue-200 text-sm text-blue-500 hover:bg-blue-50 transition-colors"
+            className="h-[34px] px-4 cursor-pointer rounded-lg border border-blue-200 text-sm text-blue-500 
+            hover:bg-blue-50 transition-colors
+            disabled:cursor-not-allowed
+            disabled:opacity-50"
           >
             Annuler
           </button>
           <button
-            onClick={handleSave}
-            className="h-[34px] px-4 cursor-pointer rounded-lg bg-blue-500 text-white text-sm font-medium hover:bg-blue-800 transition-colors flex items-center gap-1.5"
+            disabled={loading}
+            onClick={handleSubmit(submit)}
+            className="h-[34px] px-4 cursor-pointer rounded-lg bg-blue-500 text-white text-sm font-medium 
+            hover:bg-blue-800 transition-colors flex items-center gap-1.5
+            disabled:cursor-not-allowed
+            disabled:opacity-50"
           >
             <i className="ti ti-check text-sm" aria-hidden="true" />
-            Enregistrer
+            {loading ? "Chargement...": "Enregistrer"}
           </button>
         </div>
       }
@@ -108,11 +150,16 @@ export function RoleModalForm({
             <input
               className="h-9 px-3 rounded-lg border border-gray-200 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-100  transition-all"
               placeholder="ex. Comptable"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              {...register('name')}
             />
           </div>
+          
         </div>
+        {errors.name && (
+            <p className="text-xs text-red-500 mt-1">
+                {errors.name.message}
+            </p>
+        )}
 
         {/* Description */}
         <div className="flex flex-col gap-1">
@@ -124,9 +171,13 @@ export function RoleModalForm({
             className="px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-900 placeholder:text-gray-400 resize-none leading-relaxed focus:outline-none focus:ring-2 focus:ring-gray-100  transition-all"
             placeholder="Décrivez les responsabilités de ce rôle…"
             rows={2}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            {...register('description')}
           />
+          {errors.description && (
+              <p className="text-xs text-red-500 mt-1">
+                  {errors.description.message}
+              </p>
+          )}
         </div>
 
         {/* Permissions */}
@@ -136,7 +187,7 @@ export function RoleModalForm({
               Permissions
             </label>
             <span className="text-xs text-gray-400">
-              {selectedPermissions.size} sélectionnée(s)
+              {selectedPermissions.length} sélectionnée(s)
             </span>
           </div>
 
@@ -159,51 +210,80 @@ export function RoleModalForm({
 
           {/* Liste permissions */}
           <div className="border border-gray-100 rounded-lg max-h-[200px] overflow-y-auto bg-gray-50 divide-y divide-gray-100 scrollbar-thin">
-            {filteredPermissions.map((perm) => {
-              const checked = selectedPermissions.has(perm.key);
-              const icon = PERM_ICONS[perm.key] ?? "ti-lock";
+          {filteredPermissions.map((client) => {
+            const icon = PERM_ICONS[client.clientId] ?? "ti-lock";
 
-              return (
-                <label
-                  key={perm.key}
-                  onClick={() => togglePermission(perm.key)}
-                  className="flex items-center gap-2.5 px-3 py-2.5 cursor-pointer hover:bg-white transition-colors"
-                >
-                  {/* Checkbox custom */}
-                  <span
-                    className={`w-4 h-4 rounded-[4px] flex items-center justify-center flex-shrink-0 transition-all border ${
-                      checked
-                        ? "bg-blue-600 border-transparent"
-                        : "bg-transparent border-blue-300"
-                    }`}
-                  >
-                    {checked && (
-                      <i
-                        className="ti ti-check text-white"
-                        aria-hidden="true"
-                      />
-                    )}
+            return (
+              <div key={client.clientId} className="border-b border-gray-100 last:border-0">
+                {/* Client header */}
+                <div className="sticky top-0 z-10 flex items-center justify-between bg-gray-100 px-3 py-2">
+                  <div className="flex items-center gap-2">
+                    <i className={`ti ${icon} text-blue-500`} />
+                    <span className="text-xs font-semibold uppercase tracking-wide text-gray-700">
+                      {getCategoryLabel(client.clientId)}
+                    </span>
+                  </div>
+
+                  <span className="text-[11px] text-gray-400">
+                    {client.permissions.length} permission
+                    {client.permissions.length > 1 ? "s" : ""}
                   </span>
+                </div>
 
-                  {/* Icône permission */}
-                  <i
-                    className={`ti ${icon} text-blue-400`}
-                    style={{ fontSize: 15 }}
-                    aria-hidden="true"
-                  />
+                {/* Permissions */}
+              {client.permissions && client.permissions.map((permission) => {
+                  const key = `${client.clientId}:${permission.name}`;
 
-                  {/* Label */}
-                  <span className="text-sm text-gray-800 flex-1">
-                    {perm.label}
-                  </span>
+                        const checked = selectedPermissions.some(
+                            (p) =>
+                              p.clientId === client.clientId &&
+                              p.name === permission.name
+                        );
+                  return (
+                    <label
+                      key={key}
+                      onClick={() => togglePermission(client.clientId, permission)}
+                      className="flex items-center gap-2.5 px-3 py-2.5 cursor-pointer hover:bg-white transition-colors"
+                    >
+                      {/* Checkbox */}
+                      <span
+                        className={`w-4 h-4 rounded-[4px] flex items-center justify-center flex-shrink-0 transition-all border ${
+                          checked
+                            ? "bg-blue-600 border-transparent"
+                            : "bg-transparent border-blue-300"
+                        }`}
+                      >
+                        {checked && (
+                          <i
+                            className="ti ti-check text-white text-xs"
+                            aria-hidden="true"
+                          />
+                        )}
+                      </span>
 
-                  {/* Badge catégorie */}
-                  <span className="text-[11px] px-2 py-0.5 rounded-full border border-gray-200 bg-white text-gray-400">
-                    {getCategoryLabel(perm.category)}
-                  </span>
-                </label>
-              );
-            })}
+                      {/* Permission */}
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-800">
+                          {permission.name}
+                        </p>
+
+                        {permission.description && (
+                          <p className="text-xs text-gray-500">
+                            {permission.description}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Client badge */}
+                      <span className="text-[11px] px-2 py-0.5 rounded-full border border-gray-200 bg-white text-gray-400">
+                        {getCategoryLabel(client.clientId)}
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+            );
+          })}
 
             {filteredPermissions.length === 0 && (
               <p className="text-sm text-gray-400 text-center py-6">
@@ -211,7 +291,12 @@ export function RoleModalForm({
               </p>
             )}
           </div>
-        </div>
+          {errors.permissions && (
+              <p className="text-xs text-red-500 mt-1">
+                  {errors.permissions.message}
+              </p>
+          )}        
+          </div>
       </div>
     </Modal>
   );

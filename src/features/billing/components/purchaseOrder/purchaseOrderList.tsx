@@ -1,34 +1,59 @@
 'use client';
 
 import { usePurchaseOrderList } from "../../hooks/usePurchaseOrderList";
+import { invoiceStatusSchema } from "../../types/invoiceStatus";
 import { getClientPurchaseOrderAllowedNextStatuses, purchaseOrderStatusLabels, purchaseOrderStatusSchema } from "../../types/purchaseOrderStatus";
+import { ArchiveInvoiceModal } from "../widgets/archiveModal";
 import { StatusFilterBar } from "../widgets/billingFilterBar";
 import { BillingPageHeader } from "../widgets/billingHeader";
 import { DeleteInvoiceModal } from "../widgets/deleteInvoiceModal";
 import { PurchaseOrderTable } from "../widgets/purchaseOrderTable";
 import { SendDocumentModal } from "../widgets/sendInvoiceModal";
 import { Status, UpdateDocumentStatusModal } from "../widgets/updateStatusModal";
+import UploadInvoiceModal from "../widgets/uploadInvoiceModal";
 import PurchaseOrderModal, { PurchaseOrderModalContent } from "./purchaseOrderDetails";
 
 export default function PurchaseOrderList() {
 
-    const { router, search, setSearch, deleteOpen, setDeleteOpen, purchaseOrders, totalElements, totalPages, deletePurchaseOrder, setIdPurchaseOrder, idPurchaseOrder,updateLoading,setNextStatus,setUpdateLoading,nextStatus
-        , filtre, setFiltre, invoiceRef, setInvoiceRef, open, setOpen,updateOpen,setUpdateOpen,selectedPurchaseOrder,setSelectedPurchaseOrder,updateStatus,     setCurrentPage,
-    currentPage, openSendMail, setOpenSendMail,
-    loading } = usePurchaseOrderList();
+    const { router, search, setSearch, deleteOpen, setDeleteOpen, purchaseOrders, totalElements, totalPages, deletePurchaseOrder, setIdPurchaseOrder, idPurchaseOrder, updateLoading, setNextStatus, setUpdateLoading, nextStatus
+        , filtre, setFiltre, invoiceRef, setInvoiceRef, open, setOpen, updateOpen, setUpdateOpen, selectedPurchaseOrder, setSelectedPurchaseOrder, updateStatus, setCurrentPage,
+        currentPage, openSendMail, setOpenSendMail, setIsUploadInvoiceOpen, handleUpload, isUploadInvoiceOpen, loadingInvoice, setLodingInvoice, archiveOpen, setArchiveOpen,
+        loadingArchive, setLoadingArchive,archivePurchaseOrder,
+        loading, } = usePurchaseOrderList();
 
-            const purchaseOrderStatus = purchaseOrderStatusSchema.options
-            .map((status) => ({
-                value: status,
-                label: purchaseOrderStatusLabels[status],
-            }));
+    const purchaseOrderStatus = purchaseOrderStatusSchema.options
+        .map((status) => ({
+            value: status,
+            label: purchaseOrderStatusLabels[status],
+        }));
     return (
         <div className="min-h-screen bg-gray-50 p-8 font-sans">
             {/* Header */}
             <BillingPageHeader
-            title="Commande Clients"
-            description="Gestion des Bons de commande"
-           
+                title="Commande Clients"
+                description="Gestion des Bons de commande"
+                onCreateClick={() => {
+                    setIsUploadInvoiceOpen(true)
+                }}
+                createLabel="Nouvelle Commande"
+
+            />
+            <ArchiveInvoiceModal
+                documentType="purchase-order"
+                open={archiveOpen}
+                onClose={() => setArchiveOpen(false)}
+                documentRef={invoiceRef}
+                onConfirm={async()=> {await archivePurchaseOrder()}}
+                loading={loadingArchive} />
+
+
+            <UploadInvoiceModal
+                open={isUploadInvoiceOpen}
+                loading={loadingInvoice}
+                onClose={() => {
+                    setIsUploadInvoiceOpen(false)
+                }}
+                onUpload={handleUpload}
             />
 
             <DeleteInvoiceModal
@@ -74,20 +99,20 @@ export default function PurchaseOrderList() {
             />
 
             {/* Table card */}
-                {/* Search + Filters */}
+            {/* Search + Filters */}
 
-                <StatusFilterBar
-                    search={search}
-                    onSearchChange={setSearch}
-                    selectedStatus={filtre}
-                    onStatusChange={setFiltre}
-                    defaultStatus={purchaseOrderStatusSchema.enum.ALL}
-                    statuses={purchaseOrderStatus}
-                    searchPlaceholder="Référence ou client..."
-                    onDownloadAll={()=>console.log("DownloadALL")}
-                    onDownloadCurrentYear={()=>console.log("onDownloadCurrentYear")}
-                    onDownloadFitered={()=>console.log("onDownloadFitered")}
-                />
+            <StatusFilterBar
+                search={search}
+                onSearchChange={setSearch}
+                selectedStatus={filtre}
+                onStatusChange={setFiltre}
+                defaultStatus={purchaseOrderStatusSchema.enum.ALL}
+                statuses={purchaseOrderStatus}
+                searchPlaceholder="Référence ou client..."
+                onDownloadAll={() => console.log("DownloadALL")}
+                onDownloadCurrentYear={() => console.log("onDownloadCurrentYear")}
+                onDownloadFitered={() => console.log("onDownloadFitered")}
+            />
             {/* Table */}
             <PurchaseOrderTable
                 type="CLIENT"
@@ -119,6 +144,15 @@ export default function PurchaseOrderList() {
                     setDeleteOpen(true);
                     setInvoiceRef(purchaseOrder.purchaseOrderNumber);
                     setIdPurchaseOrder(purchaseOrder.idPurchaseOrder);
+                }}
+                onArchive={(purchaseOrder) => {
+                      console.log("1")
+                    if (purchaseOrder.purchaseOrderStatus == purchaseOrderStatusSchema.enum.FULLY_INVOICED || purchaseOrder.purchaseOrderStatus == purchaseOrderStatusSchema.enum.CANCELLED ) {
+                        console.log("1")
+                        setSelectedPurchaseOrder(purchaseOrder);
+                        setIdPurchaseOrder(purchaseOrder.idPurchaseOrder);
+                        setArchiveOpen(true);
+                    }
                 }}
             />
         </div>

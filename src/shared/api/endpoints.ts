@@ -1,8 +1,12 @@
 import { PartnerDocumentType } from "@/features/billing/types/documentType";
 import { buildQueryString } from "./query-string-builder";
 import {  ExchangeRateParams, GetListParams } from "./types";
+import { withPrefix } from "../utils/prefixHelper";
 
-export const BILLING_ENDPOINTS = {
+const BILLING_PREFIX = '/billing'
+import { PaymentType } from "@/features/billing/types/paymentStatus";
+
+export const BILLING_ENDPOINTS = withPrefix(BILLING_PREFIX,{
   clients: "/partners/clients",
   suppliers: "/partners/suppliers",
   getClients: (query? : GetListParams)=> `/partners/clients${buildQueryString(query)}`,
@@ -18,6 +22,10 @@ export const BILLING_ENDPOINTS = {
   supplierInvoiceById: (id: string) => `/invoices/suppliers/${id}`,
   getClientsInvoices: (idClient:string) => `/invoices/last/client-invoices/${idClient}`,
   getSuppliersInvoices: (idSupplier:string) => `/invoices/last/supplier-invoices/${idSupplier}`,
+  existByCompanyName: (companyName:string)=> `/partners/suppliers/existByCompanyName/${companyName}`,
+  getSupplierByCompanyName :(companyName:string) => `/partners/suppliers/companyName/${companyName}`,
+  clientExistByCompanyName: (companyName:string)=> `/partners/clients/existByCompanyName/${companyName}`,
+  getClientByCompanyName :(companyName:string) => `/partners/clients/companyName/${companyName}`,
 
 
   updatestatus: (id: string, statusClient: boolean) => `/partners/clients/updateStatus/${id}?statusClient=${statusClient}`,
@@ -33,9 +41,9 @@ export const BILLING_ENDPOINTS = {
   uploadClientDocument: (idPartner: string, partnerDocumentType:PartnerDocumentType)=>`/partners/clients/documents/upload/${idPartner}?partnerDocumentType=${partnerDocumentType}`,
 
   uploadDocument: "/documents/upload",
-};
+});
 
-export const INVOICES_ENDPOINTS={
+export const INVOICES_ENDPOINTS=withPrefix(BILLING_PREFIX,{
   clientsInvoices: "/invoices/client-invoices",
   suppliersInvoices: "/invoices/supplier-invoices",
   nextNumber: "/invoices/next-number",
@@ -64,9 +72,9 @@ export const INVOICES_ENDPOINTS={
   clientInvoicesByIdPartner: (id: string, query? : GetListParams) => `/invoices/last/client-invoices/${id}${buildQueryString(query)}`,
 
   supplierInvoicesByIdPartner: (id: string, query? : GetListParams) => `/invoices/last/supplier-invoices/${id}${buildQueryString(query)}`,
-}
+})
 
-export const INVOICES_CREDIT_NOTE_ENDPOINTS={
+export const INVOICES_CREDIT_NOTE_ENDPOINTS = withPrefix(BILLING_PREFIX,{
   invoiceCreditNotes: "/credit-note-invoices/",
   nextNumber: "/credit-note-invoices/next-number",
 
@@ -76,17 +84,21 @@ export const INVOICES_CREDIT_NOTE_ENDPOINTS={
   updateStatusInvoiceCreditNote: (id: string)=> `/credit-note-invoices/${id}/status`,
 
   getInvoiceCreditNoteByIdPartner: (idPartner?: string, partnerType?:string, query? : GetListParams) => `/credit-note-invoices/getPartnerCreditNote/${idPartner}${buildQueryString(query)}&partnerType=${partnerType}`,
-}
+})
 
-export const PURCHASE_ORDER_ENDPOINTS = {
+export const PURCHASE_ORDER_ENDPOINTS = withPrefix(BILLING_PREFIX,{
   purchaseOrders: "/purchase-orders/",
   nextNumber: "/purchase-orders/next-number",
   summary:"/purchase-orders/summary",
-  updateSupplierPurchaseOrder : "/purchase-orders/supplier",
+ 
   getPurchaseOrders: (query? : GetListParams)=> `/purchase-orders/${buildQueryString(query)}`,
   purchaseOrderById: (id?: string) => `/purchase-orders/${id}`, 
   updateStatusPurchaseOrder: (id: string)=> `/purchase-orders/${id}/status`,
+  
 
+  clientPurchaseOrders: "/purchase-orders/client",
+  
+  updateSupplierPurchaseOrder : "/purchase-orders/supplier",
   supplierPurchaseOrders: "/purchase-orders/supplier",
   supplierSummary:"/purchase-orders/supplier/summary",
   getSupplierPurchaseOrders: (query? : GetListParams)=> `/purchase-orders/supplier${buildQueryString(query)}`,
@@ -96,33 +108,34 @@ export const PURCHASE_ORDER_ENDPOINTS = {
   getPurchaseOrderByIdPartner:(id: string,  partnerType:string, query? : GetListParams) => `/purchase-orders/partner/${id}${buildQueryString(query)}&partnerType=${partnerType}`,
 
  
-}
+})
 
-export const EXCHANGE_RATE_ENDPOINTS = {
+export const EXCHANGE_RATE_ENDPOINTS = withPrefix(BILLING_PREFIX,{
   exchangeRate: "/exchange-rate/content",
   getExchangeRate: (query? : ExchangeRateParams)=> `/exchange-rate/content${buildQueryString(query)}`,
 
-}
+})
 
-export const PAYMENT_ENDPIONTS={
+export const PAYMENT_ENDPIONTS= withPrefix(BILLING_PREFIX,{
   payment:"/payments/",
   nextNumber: "/payments/next-number",
   getPayments: (query?: GetListParams)=>`/payments${buildQueryString(query)}`,
   getPaymentsByIdInvoice: (id: string, query?: GetListParams)=>`/payments/invoice/${id}${buildQueryString(query)}`,
   getPaymentsByIdParner: (id: string, query?: GetListParams)=>`/payments/partner/${id}${buildQueryString(query)}`,
-  paymentById: (id: string)=>`/payments/${id}`
-}
+  paymentById: (id: string)=>`/payments/${id}`,
+ updatePaymentStatus: (id: string, paymentStatus: PaymentType) =>`/payments/updateStatus/${id}?paymentStatus=${paymentStatus}`,
+})
 
-export const DASHBOARD_ENDPOINTS={
+export const DASHBOARD_ENDPOINTS= withPrefix(BILLING_PREFIX,{
   dashboard : '/dashboard',
   statsClientsInvoices: '/dashboard/clients-invoices',
   statsSuppliersInvoices: '/dashboard/suppliers-invoices',
   getClientRevenue: (idPartner: string, period: string) => `/dashboard/client-revenue/${idPartner}?period=${period}`,
   getSupplierRevune: (idPartner: string, period : string) => `/dashboard/supplier-despenses/${idPartner}?period=${period}`,
   getAllClientReveune: '/dashboard/all-client-revenue',
-}
+})
 
-export const MAILING_ENDPOINTS={
+export const MAILING_ENDPOINTS= withPrefix(BILLING_PREFIX,{
   mailing:'/mailing',
   sendSimpleEmail:`/mailing/send-email`,
   getEmailById: (id: string )=>`/mailing/mail/${id}`,
@@ -132,8 +145,87 @@ export const MAILING_ENDPOINTS={
   sendEmailPurchaseOrder:(id: string )=>`/mailing/purchase-order/${id}/send-email`,
   sendEmailPayment: (id: string )=>`/mailing/payment/${id}/send-email`,
 
-}
-export const  AUDITLOGS_ENDPOINTS = {
+})
+
+export const  AUDITLOGS_ENDPOINTS = withPrefix(BILLING_PREFIX,{
  getAuditLogsByIdClient: (id: string) => `/logs/logs-clients/${id}`, 
  getAuditLogsByIdSupplier: (id: string) => `/logs/logs-suppliers/${id}`, 
-}  
+})  
+
+export const OPERATION_CATEGORY_ENDPOINTS = withPrefix(BILLING_PREFIX,{
+  getAllOperationCategories: "/operation-categories",
+
+  getAllActiveOperationCategories: "/operation-categories/active",
+
+  getOperationCategory: (id: string) => `/operation-categories/${id}`,
+
+  getOperationCategoryByCode: (code: string) =>
+    `/operation-categories/code/${code}`,
+
+  getOperationCategoryByLabel: (label: string) =>
+    `/operation-categories/label/${label}`,
+
+  createOperationCategory:  "/operation-categories",
+
+  updateOperationCategory: (id: string) =>
+    `/operation-categories/${id}`,
+
+  activateOperationCategory: (id: string) =>
+    `/operation-categories/${id}/activate`,
+
+  deactivateOperationCategory: (id: string) =>
+    `/operation-categories/${id}/deactivate`
+})
+
+export const PAYMENT_CONDITION_ENDPOINTS = withPrefix(BILLING_PREFIX,{
+  getAllPaymentConditions: "/payment-conditions",
+
+  getAllActivePaymentConditions: "/payment-conditions/active",
+
+  getPaymentCondition: (id: string) => `/payment-conditions/${id}`,
+
+  getPaymentConditionByCode: (code: string) =>
+    `/payment-conditions/code/${code}`,
+
+  getPaymentConditionByLabel: (label: string) =>
+    `/payment-conditions/label/${label}`,
+
+  createPaymentCondition: "/payment-conditions",
+
+  updatePaymentCondition: (id: string) =>
+    `/payment-conditions/${id}`,
+
+  activatePaymentCondition: (id: string) =>
+    `/payment-conditions/${id}/activate`,
+
+  deactivatePaymentCondition: (id: string) =>
+    `/payment-conditions/${id}/deactivate`
+})
+
+export const TVA_RATE_ENDPOINTS = withPrefix(BILLING_PREFIX,{
+  getAllTvaRates: "/tva-rates",
+
+  getAllActiveTvaRates: "/tva-rates/active",
+
+  getTvaRate: (id: string) => `/tva-rates/${id}`,
+
+  getTvaRateByCode: (code: string) =>
+    `/tva-rates/code/${code}`,
+
+  getTvaRateByLabel: (label: string) =>
+  `/tva-rates/label?label=${encodeURIComponent(label)}`,
+
+  existTvaRateByLabel: (label: string) =>
+  `/tva-rates/existByLabel?label=${encodeURIComponent(label)}`,
+
+  createTvaRate: "/tva-rates",
+
+  updateTvaRate: (id: string) =>
+    `/tva-rates/${id}`,
+
+  activateTvaRate: (id: string) =>
+    `/tva-rates/${id}/activate`,
+
+  deactivateTvaRate: (id: string) =>
+    `/tva-rates/${id}/deactivate`
+})

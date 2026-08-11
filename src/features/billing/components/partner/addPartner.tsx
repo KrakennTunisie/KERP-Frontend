@@ -74,10 +74,13 @@ export default function AddPartnerPage({ type, mode, partnerId }: pageProps) {
 
             <main className="flex-1 overflow-y-auto p-8">
                 <form
-                    onSubmit={handleSubmit(onSubmit, (errors) => {
-                        console.log("Validation échouée:", errors);
-                    })}
-                    className="mx-auto  space-y-6 pb-10"
+                    onSubmit={handleSubmit(
+                        (data) => onSubmit(data, true),
+                        (errors) => {
+                            console.log("Validation échouée:", errors);
+                        }
+                    )}
+                    className="mx-auto space-y-6 pb-10"
                     id="form-partner"
                 >
 

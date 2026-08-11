@@ -1,0 +1,61 @@
+"use client";
+
+import { FolderTree } from "lucide-react";
+import { cardProps, SettingCard } from "./settingCard";
+import { SettingTypeSchema } from "../../types/settingType";
+import { useEffect, useState } from "react";
+import { OperationCategoryPageItem } from "../../models/operationCategory";
+import { OperationCategoryAPI } from "../../api/partners-api";
+import { appToast } from "@/shared/lib/toast";
+import { getApiErrorMessage } from "@/shared/api/handle-api-error";
+
+
+
+
+export function OperationCategoryCard({ onShow, onToggleActive, onAction, onFetchReady}: cardProps) {
+
+    const [operationCategories, setOperationCategories]=useState<OperationCategoryPageItem[]|[]>([])
+    const [fetchLoading, setFetchLoading]=useState(false)
+    const [open, setOpen]=useState(false)
+
+
+    const fetchCategories = async ()=>{
+        try {
+            setFetchLoading(true)
+            const response = await OperationCategoryAPI.getAllOperationCategories()
+            setOperationCategories(response)
+        } catch (error) {
+            appToast.error("erreur de fetch", getApiErrorMessage(error))
+        }finally{
+            setFetchLoading(false)
+        }
+    }
+    useEffect(()=>{
+        if(open)
+        fetchCategories();
+    },[open])
+
+    useEffect(()=>{
+        if(open)
+        onFetchReady(fetchCategories);
+    },[open])
+
+
+  return (
+    <SettingCard
+      title="Catégories d'opérations"
+      type={SettingTypeSchema.enum.OPERATION_CATEGORY}
+      description="Classification des opérations de facturation."
+      icon={<FolderTree className="h-5 w-5 text-blue-600" />}
+      items={operationCategories}
+      actionLabel="+ Ajouter catégorie services"
+      loading={fetchLoading}
+      onAction={onAction}
+      onShow={onShow}
+      onRefresh={fetchCategories}
+      onToggleActive={onToggleActive}
+      open={open}
+      setOpen={setOpen}
+    />
+  );
+}

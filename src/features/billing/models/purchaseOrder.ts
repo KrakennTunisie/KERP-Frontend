@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { currencyTypeSchema } from "../types/currency";
 import { exchangeRateSourceSchema } from "../types/exchangeRateSource";
-import { PaymentConditionSchema } from "../types/paymentCondition";
 import { paymentMethodSchema } from "../types/paymentMethod";
 import { fileSchema } from "../types/pdfSchema";
 import { purchaseOrderStatusWithoutAllSchema } from "../types/purchaseOrderStatus";
@@ -20,7 +19,7 @@ const purchaseOrderBaseFields = {
     currency: currencyTypeSchema,
     vatAmount: z.number(),
     paymentMethod: paymentMethodSchema,
-    paymentCondition: PaymentConditionSchema,
+    paymentCondition: z.string(),
     exchangeRateReferenceDate: z.date(),
     appliedExchangeRate: z.number(),
     exchangeRateSource: exchangeRateSourceSchema,
@@ -40,14 +39,32 @@ export const basePurchaseOrderSchema = z.object({
                 `${item.description?.trim()}-${item.operationCategory}-${item.vatRate}`);
             return new Set(keys).size === keys.length;
         }, { message: "Les lignes du bon commande doivent être uniques" }),
-});
+}).superRefine((data, ctx) => {
+      const isPurchase = data.purchaseOrderType === purchaseOrderTypeSchema.enum.PURCHASE;
+      if (!data.partner) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["partner"],
+          message: isPurchase ? "Le fournisseur est obligatoire" : "Le client est obligatoire",
+        });
+      }
+    });
 
 export const purchaseOrderCreateDTO = z.object({
     ...purchaseOrderBaseFields,
-    partner: z.string(),
-    purchaseOrderItems: z.array(purchaseOrderItemSchema),
+    partner: z.lazy(() => partnerSummarySchema).nullable(),
+    purchaseOrderItems: z.array(purchaseOrderItemSchema).nullable(),
     purchaseOrderDocument: fileSchema.nullable(),
-});
+}).superRefine((data, ctx) => {
+      const isPurchase = data.purchaseOrderType === purchaseOrderTypeSchema.enum.PURCHASE;
+      if (!data.partner) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["partner"],
+          message: isPurchase ? "Le fournisseur est obligatoire" : "Le client est obligatoire",
+        });
+      }
+    });
 
 export const purchaseOrderUpdateDTO = z.object({
     idPurchaseOrder: z.string(),
@@ -111,7 +128,7 @@ export const purchaseOrderDetailsSchema = z.object({
     totalExclTaxUSD: z.number(),
     totalInclTaxUSD: z.number(),
     paymentMethod: paymentMethodSchema,
-    paymentCondition: PaymentConditionSchema,
+    paymentCondition: z.string(),
     exchangeRateReferenceDate: z.date(),
     appliedExchangeRate: z.number(),
     exchangeRateSource: exchangeRateSourceSchema,
@@ -135,6 +152,40 @@ export const CategoryAmountSchema = z.object({
   category: z.string(),
   montant: z.number(),
 });
+
+
+/*** Schema pour un item de facture extrait ***/
+const extractedPurchaseOrderItemSchema = z.object({
+    description: z.string(),
+    quantity: z.number(),
+    unityPriceExclTax: z.number(),
+    itemTotalInclTax: z.number(),
+    operationCategory: z.string(),
+    vatRate: z.number(),
+    itemTotalExclTax: z.number(),
+    discountValue: z.number(),
+});
+
+/*** Schema pour les données de facture extraites via IA/OCR ***/
+const extractedPurchaseOrderSchema = z.object({
+    purchaseOrderNumber: z.string(),
+    issueDate: z.string(), 
+    deliveryDate: z.string(),
+    purchaseCurrency: z.string(), 
+    vatRate: z.number(),
+    totalExclTax: z.number(),
+    totalInclTax: z.number(),
+    companyName: z.string(),
+    issuerTaxId: z.string(),
+    companyAddress: z.string(),
+    issuerEmail: z.string(),
+    issuerPhone: z.string(),
+    paymentCondition: z.string(),
+    paymentMethod: z.string(),
+    purchaseOrderItems: z.array(extractedPurchaseOrderItemSchema).default([]),
+});
+
+export type ExtractedPurchaseOrder = z.infer<typeof extractedPurchaseOrderSchema>;
 
 export type CategoryAmount = z.infer<typeof CategoryAmountSchema>;
 

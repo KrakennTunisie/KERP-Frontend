@@ -21,6 +21,7 @@ import { useDebounce } from "@/shared/hooks/useDebounce";
 import { nextNumber } from "../types/nextNumber";
 import { generatePdfFile } from "@/shared/pdf/pdfGenerator";
 import { paymentToPdfData } from "@/shared/pdf/documentAdapter";
+import { paymentStatusTypeSchema } from "../types/paymentStatus";
 
 type UseCreatePaymentProps = {
   mode?: "create" | "update" | "clone";
@@ -81,6 +82,7 @@ export default function useCreatePayment({
       date: new Date().toISOString().slice(0, 10),
       amount: 0,
       method: "BANK_TRANSFER",
+      paymentStatus : paymentStatusTypeSchema.enum.NOT_SENT,
       invoiceNumber: "",
       currency: "EUR",
       paymentDocument: null,
@@ -200,6 +202,7 @@ const fetchPaymentDetails = async () => {
       date: new Date().toISOString().slice(0, 10),
       amount: payment.amount ?? 0,
       method: payment.method ?? "BANK_TRANSFER",
+      paymentStatus: payment.paymentStatus,
       invoiceNumber:
         payment.invoice?.invoiceNumber  ?? "",
       currency:
@@ -286,6 +289,7 @@ const fetchPaymentDetails = async () => {
     formData.append("amount", String(data.amount));
     formData.append("currency", data.currency);
     formData.append("method", data.method);
+    formData.append("paymentStatus", data.paymentStatus);
     formData.append("comment", data.comment)
     
     if( data.paymentDocument)
