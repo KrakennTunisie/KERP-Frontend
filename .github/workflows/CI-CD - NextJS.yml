@@ -135,8 +135,15 @@ jobs:
       - name: Check Billing Service
         run: |
           STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-            http://${{ secrets.SERVER_HOST }}:8081/actuator/health)
+            http://${{ secrets.SERVER_HOST }}:8081/api/billing/actuator/health)
           [ "$STATUS" = "200" ] || (echo "Billing KO ($STATUS)" && exit 1)
+
+      - name: Check IAM Service
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            http://${{ secrets.SERVER_HOST }}:8085/api/iam/actuator/health)
+          [ "$STATUS" = "200" ] || (echo "Billing KO ($STATUS)" && exit 1)
+
 
       - name: Check Frontend via Nginx
         run: |
