@@ -194,7 +194,7 @@ export default function useSupplierInvoiceList() {
     const formData = new FormData();
     formData.append('data', file); // 'data' is the binary property name n8n expects
 
-    const res = await fetch('http://localhost:5678/webhook/b770d73d-b268-4c5b-a25d-7bc47fe8516e', {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_N8N_INVOICE_SUPPLIER_WEBHOOK_URL}`, {
       method: 'POST',
       body: formData,
     });

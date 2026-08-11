@@ -63,7 +63,7 @@ export default function LoginPage() {
           password:""
         })
         // Authentication succeeded
-        router.replace("/dashboard");
+        router.replace("/billing/dashboard");
 
       } catch (error) {
         console.error(

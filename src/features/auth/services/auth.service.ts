@@ -12,10 +12,9 @@ interface KeycloakTokenResponse {
 
 class AuthService {
   private readonly keycloakUrl =
-    process.env.KEYCLOAK_URL!;
+    process.env.KEYCLOAK_URL!; 
 
-  private readonly realm =
-    process.env.KEYCLOAK_REALM!;
+  private readonly realm = process.env.KEYCLOAK_REALM;
 
   private readonly clientId =
     process.env.KEYCLOAK_CLIENT_ID!;
@@ -34,14 +33,6 @@ class AuthService {
       password: credentials.password,
       scope: "openid",
     });
-
-    if (this.clientSecret) {
-      body.append(
-        "client_secret",
-        this.clientSecret
-      );
-    }
-
     const response = await fetch(
       `${this.keycloakUrl}/realms/${this.realm}/protocol/openid-connect/token`,
       {
@@ -56,8 +47,6 @@ class AuthService {
     );
 
     if (!response.ok) {
-      console.log(response)
-
       throw new Error("Invalid credentials");
     }
 

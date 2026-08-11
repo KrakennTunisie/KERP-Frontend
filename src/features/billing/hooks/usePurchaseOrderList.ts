@@ -149,7 +149,7 @@ export function usePurchaseOrderList() {
     const formData = new FormData();
     formData.append('data', file);
 
-    const res = await fetch('http://localhost:5678/webhook/60171212-e903-450d-9027-25f7c7ef4754', {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_N8N_PURCHASE_ORDER_WEBHOOK_URL}`, {
       method: 'POST',
       body: formData,
     });

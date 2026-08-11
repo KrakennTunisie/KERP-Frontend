@@ -66,7 +66,7 @@ export function invoiceItemToPdfLineItem(
     itemTaxAmount: invoiceItem.itemTaxAmount ?? 0,
     itemTotalInclTax: invoiceItem.itemTotalInclTax ?? 0,
 
-    operationCategory: invoiceItem.operationCategory,
+    operationCategory: invoiceItem.operationCategory!,
 
     discountType: item?.discountType ? item?.discountType : discountTypeSchema.enum.AMOUNT,
 
