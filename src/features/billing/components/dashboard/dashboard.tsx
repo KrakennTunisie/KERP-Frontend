@@ -222,7 +222,7 @@ export function BillingDashboard() {
       setSilidingStatusPanel("loading");
 
       const res = await fetch(
-        "http://localhost:5678/webhook/81492a9c-8e6f-4066-98a5-f566c34ae778",
+        `${process.env.N8N_RESUME_STATICS}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
