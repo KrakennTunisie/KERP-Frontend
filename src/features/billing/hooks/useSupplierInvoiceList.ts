@@ -194,7 +194,7 @@ export default function useSupplierInvoiceList() {
     const formData = new FormData();
     formData.append('data', file); // 'data' is the binary property name n8n expects
 
-    const res = await fetch(`${process.env.N8N_INVOICE_OCR}`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_N8N_INVOICE_OCR}`, {
       method: 'POST',
       body: formData,
     });

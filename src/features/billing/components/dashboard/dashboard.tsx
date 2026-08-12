@@ -222,7 +222,7 @@ export function BillingDashboard() {
       setSilidingStatusPanel("loading");
 
       const res = await fetch(
-        `${process.env.N8N_RESUME_STATICS}`,
+        `${process.env.NEXT_PUBLIC_N8N_RESUME_STATICS}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
