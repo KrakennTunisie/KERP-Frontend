@@ -149,7 +149,7 @@ export function usePurchaseOrderList() {
     const formData = new FormData();
     formData.append('data', file);
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_N8N_PURCHASE_ORDER_WEBHOOK_URL}`, {
+    const res = await fetch(`${process.env.N8N_PURCHASE_ORDER_OCR}`, {
       method: 'POST',
       body: formData,
     });
