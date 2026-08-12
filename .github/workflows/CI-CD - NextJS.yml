@@ -85,9 +85,9 @@ jobs:
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.image.outputs.name }}:latest
           build-args: |
-             NEXT_PUBLIC_N8N_INVOICE_OCR=${{ vars.NEXT_PUBLIC_N8N_INVOICE_OCR }}
-             NEXT_PUBLIC_N8N_PURCHASE_ORDER_OCR=${{ vars.NEXT_PUBLIC_N8N_PURCHASE_ORDER_OCR }}
-             NEXT_PUBLIC_N8N_RESUME_STATICS=${{ vars.NEXT_PUBLIC_N8N_RESUME_STATICS }}
+             NEXT_PUBLIC_N8N_INVOICE_OCR=${{ secrets.NEXT_PUBLIC_N8N_INVOICE_OCR }}
+             NEXT_PUBLIC_N8N_PURCHASE_ORDER_OCR=${{ secrets.NEXT_PUBLIC_N8N_PURCHASE_ORDER_OCR }}
+             NEXT_PUBLIC_N8N_RESUME_STATICS=${{ secrets.NEXT_PUBLIC_N8N_RESUME_STATICS }}
 
       - name: Cleanup
         run: docker system prune -f
