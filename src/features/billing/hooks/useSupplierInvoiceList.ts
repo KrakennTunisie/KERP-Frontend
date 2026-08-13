@@ -191,21 +191,20 @@ export default function useSupplierInvoiceList() {
   };
 
   async function extractInvoice(file: File) {
-    const formData = new FormData();
-    formData.append('data', file); // 'data' is the binary property name n8n expects
+  const formData = new FormData();
+  formData.append("data", file);
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_N8N_INVOICE_OCR}`, {
-      method: 'POST',
-      body: formData,
-    });
+  const res = await fetch("/api/n8n/invoice-ocr", {
+    method: "POST",
+    body: formData,
+  });
 
-    if (!res.ok) {
-      throw new Error(`Extraction request failed with status ${res.status}`);
-    }
-
-    return res.json();
+  if (!res.ok) {
+    throw new Error(`Extraction request failed with status ${res.status}`);
   }
 
+  return res.json();
+}
 
   return {
     router,

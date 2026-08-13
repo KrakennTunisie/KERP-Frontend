@@ -221,14 +221,16 @@ export function BillingDashboard() {
     try {
       setSilidingStatusPanel("loading");
 
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_N8N_RESUME_STATICS}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(stats),
-        }
-      );
+      const res = await fetch("/api/n8n/resume-statics", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(stats),
+      });
+
+      if (!res.ok) {
+        throw new Error(`Extraction request failed with status ${res.status}`);
+      }
+
 
       if (!res.ok) throw new Error("Échec de l'appel n8n");
       const data = await res.json();
@@ -277,7 +279,7 @@ export function BillingDashboard() {
       <SlidingPanel
         open={openSlidingPanel}
         onClose={() => setOpenSilidingPanel(false)}
-        onOpen={()=> setOpenSilidingPanel(true)}
+        onOpen={() => setOpenSilidingPanel(true)}
         status={silidingPanelStatus!}
         data={summary!}
         onRetry={() => {

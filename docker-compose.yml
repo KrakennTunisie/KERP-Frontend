@@ -1,10 +1,6 @@
 services:
   kerp-frontend:
     build: .
-    args:
-      NEXT_PUBLIC_N8N_INVOICE_OCR: ${NEXT_PUBLIC_N8N_INVOICE_OCR}
-      NEXT_PUBLIC_N8N_PURCHASE_ORDER_OCR: ${NEXT_PUBLIC_N8N_PURCHASE_ORDER_OCR}
-      NEXT_PUBLIC_N8N_RESUME_STATICS: ${NEXT_PUBLIC_N8N_RESUME_STATICS}
     container_name: kerp-frontend
     restart: unless-stopped
     env_file:
