@@ -146,20 +146,20 @@ export function usePurchaseOrderList() {
 };
 
   async function extractInvoice(file: File) {
-    const formData = new FormData();
-    formData.append('data', file);
+  const formData = new FormData();
+  formData.append("data", file);
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_N8N_PURCHASE_ORDER_OCR}`, {
-      method: 'POST',
-      body: formData,
-    });
+  const res = await fetch("/api/n8n/purchaseOrder-ocr", {
+    method: "POST",
+    body: formData,
+  });
 
-    if (!res.ok) {
-      throw new Error(`Extraction request failed with status ${res.status}`);
-    }
-
-    return res.json();
+  if (!res.ok) {
+    throw new Error(`Extraction request failed with status ${res.status}`);
   }
+
+  return res.json();
+}
 
 
   const router = useRouter()
