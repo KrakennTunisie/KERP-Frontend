@@ -20,13 +20,14 @@ import { PurchaseOrderDetails, PurchaseOrderSummary } from "../models/purchaseOr
 import { AddPartnerFormData, PartnerSummary } from "../models/partner";
 import { useDebounce } from "@/shared/hooks/useDebounce";
 import { calculateInvoiceTotals, calculateInvoiceTotalsFromPurchaseOrder, calculUnityPrice, recalculate } from "../lib/invoiceCalculation";
-import { useInvoiceStore } from "./useSupplierInvoiceList";
+
 import { discountTypeOptions, discountTypeSchema } from "../types/discountType";
 
 import { normalizeVatRatePercentage } from "../lib/normalizeTVA";
 import { formatOperationCategoryLabel } from "../lib/normalizeOperationCategory";
 import { normalizePaymentConditionToDbFormat } from "../lib/normalizePaymentCondition";
 import { resolvePaymentMethod } from "../lib/normalizePaymentMethod";
+import { useInvoiceStore } from "../lib/globalStateFile";
 export type InvoiceFormClientProps = {
     mode: "create" | "edit" | "clone";
     invoiceId?: string
@@ -70,7 +71,7 @@ export default function useCreateSupplierInvoice() {
     /*** Affichage le nombre suivant du facture => Série des nombre */
     const fetchNextNumber = async () => {
         try {
-            console.log("debug2")
+           
             const response = await InvoicesAPI.getNextInvoiceNumber();
             setNextNumber(response);
         }
@@ -89,7 +90,7 @@ export default function useCreateSupplierInvoice() {
         const stored = localStorage.getItem('extractedInvoiceData');
         if (stored) {
             setExtractedData(JSON.parse(stored));
-            localStorage.removeItem('extractedInvoiceData');
+           
         }
     }, []);
 
@@ -289,12 +290,10 @@ export default function useCreateSupplierInvoice() {
     const checkSupplierExists = useCallback(async (companyName: string) => {
         if (!companyName) return;
         try {
-            console.log("debug1")
             const exists = await partnersApi.existsByCompanyName(companyName);
             setSupplierExist(exists);
 
             if (exists) {
-                console.log("exisiting supplier");
                 try {
                     const getExistedSupplier = await partnersApi.getSupplierByCompanyName(companyName);
                     selectSupplier(getExistedSupplier);
@@ -628,6 +627,7 @@ export default function useCreateSupplierInvoice() {
 
             if (createdInvoice) {
                 appToast.success("Facture créée avec succès");
+                localStorage.removeItem('extractedInvoiceData');
                 setIsModalOpen(false);
                 setSuccessMessage("La facture a été créée avec succès.");
                 setTtnModalOpen(true);

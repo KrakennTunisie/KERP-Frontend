@@ -49,6 +49,8 @@ export const useAuthStore =
           });
 
         if (!response.ok) {
+          const errorBody = await response.text();
+         console.error("Keycloak error:", response.status, errorBody);
           throw new Error(
             "Authentication failed"
           );

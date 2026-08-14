@@ -45,9 +45,9 @@ export default function UnauthorizedPage() {
 
           {/* Description */}
           <p className="mx-auto mb-8 max-w-sm text-center text-sm leading-relaxed text-muted-foreground">
-            Vous n'avez pas les autorisations nécessaires pour accéder à
-            cette page. Si vous pensez qu'il s'agit d'une erreur, contactez
-            votre administrateur système.
+            {"Vous n'avez pas les autorisations nécessaires pour accéder à"}
+            {"cette page. Si vous pensez qu'il s'agit d'une erreur, contactez"}
+            {"votre administrateur système."}
           </p>
 
           {/* Actions */}
@@ -62,26 +62,11 @@ export default function UnauthorizedPage() {
             </Button>
 
             <Button asChild className="flex-1">
-              <Link href="/dashboard">
+              <Link href="/dashboard/billing">
                 <LayoutDashboard className="mr-2 h-4 w-4" />
                 Tableau de bord
               </Link>
             </Button>
-          </div>
-
-          {/* Contact link */}
-          <div className="mt-6 flex items-center justify-center gap-1.5 border-t border-border/60 pt-6 text-xs text-muted-foreground">
-            <Mail className="h-3.5 w-3.5" />
-            <span>
-            <a             
-                href="mailto:admin@kouka.tn"
-                className="font-medium text-foreground underline-offset-4 hover:underline"
-              >
-             Besoin d'accès ?{" "}
-
-                Contacter l'administrateur
-              </a>
-            </span>
           </div>
         </div>
       </div>

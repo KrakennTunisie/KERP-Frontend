@@ -14,6 +14,7 @@ import { Controller } from 'react-hook-form';
 import { FieldError } from '@/shared/components/ui/fieldError';
 import { useFetchSettings } from '../../hooks/useFetchSetting';
 import { extractTvaRate, formatShowLabel } from '../../lib/settingItemHelpers';
+import { InvoiceItem } from '../../models/invoiceItem';
 
 export function CreateCreditNote({ invoiceId }: InvoiceDetailsProps) {
     const { previewData, form, removeItem, addItem, updateItem, onSubmit, onCloseDocumentModal, createCreditNoteInvoice,
@@ -71,7 +72,7 @@ export function CreateCreditNote({ invoiceId }: InvoiceDetailsProps) {
             {/* Modal pour demander au user s'il veut envoyer la Facture au TTN */}
             <SendToTTNModal
                 open={TtnModalOpen}
-                onClose={() => { setTtnModalOpen(false); }}
+                onClose={() => {   router.back(); setTtnModalOpen(false); }}
                 onConfirm={async () => { await sendToTTN(); router.back(); }}
                 loading={loadingTTN}
                 invoiceSent={sent}
@@ -213,6 +214,7 @@ export function CreateCreditNote({ invoiceId }: InvoiceDetailsProps) {
                                                     <input
                                                         type="text"
                                                         readOnly
+
                                                         placeholder="Sélectionner un produit..."
                                                         value={itemSearchMap[index] || ""}
                                                         onChange={(e) => {
@@ -250,50 +252,66 @@ export function CreateCreditNote({ invoiceId }: InvoiceDetailsProps) {
 
                                                     {showDropdownMap[index] && filteredItems!.length > 0 && (
                                                         <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-20 overflow-hidden">
-                                                            {filteredItems!.map((filteredItem) => (
-                                                                <button
-                                                                    key={filteredItem.idInvoiceItem}
-                                                                    type="button"
-                                                                    onMouseDown={(e) => {
-                                                                        e.preventDefault();
+                                                            {filteredItems!.map((filteredItem) => {
+                                                                const originalInvoiceItem = form.getValues("originalInvoice")?.invoiceItems.find(
+                                                                    (invItem: InvoiceItem) => invItem.idInvoiceItem === filteredItem.idInvoiceItem
+                                                                );
+                                                                const remainingQty = originalInvoiceItem ? getMaxQuantity(originalInvoiceItem) : 0;
+                                                                const isDisabled = remainingQty === 0;
 
-                                                                        const maxQty = getMaxQuantity(filteredItem);
+                                                                return (
+                                                                    <button
+                                                                        key={filteredItem.idInvoiceItem}
+                                                                        type="button"
+                                                                        disabled={isDisabled}
+                                                                        onMouseDown={(e) => {
+                                                                            e.preventDefault();
 
-                                                                        setCreditNoteItemMap((prev) => ({
-                                                                            ...prev,
-                                                                            [index]: {
-                                                                                ...filteredItem,
-                                                                                quantity: maxQty, 
-                                                                            },
-                                                                        }));
+                                                                            if (isDisabled) return; 
 
+                                                                            const maxQty = remainingQty; 
+                                                                            setCreditNoteItemMap((prev) => ({
+                                                                                ...prev,
+                                                                                [index]: {
+                                                                                    ...filteredItem,
+                                                                                    quantity: maxQty,
+                                                                                },
+                                                                            }));
 
-
-                                                                        setItemSearchMap((prev) => ({
-                                                                            ...prev,
-                                                                            [index]: filteredItem.description,
-                                                                        }));
-                                                                        setShowDropdownMap((prev) => ({
-                                                                            ...prev,
-                                                                            [index]: false,
-                                                                        }));
-                                                                        updateItem(field.idCreditNoteItem!, {
-                                                                            idCreditNoteItem: field.idCreditNoteItem!,
-                                                                            description: filteredItem.description,
-                                                                            quantity: maxQty,
-                                                                            unityPriceEXclTax: filteredItem.unityPriceEXclTax,
-                                                                            vatRate: filteredItem.vatRate,
-                                                                            operationCategory: filteredItem.operationCategory,
-                                                                            originalItem: filteredItem.idInvoiceItem
-                                                                        });
-                                                                    }}
-                                                                    className="w-full text-left px-4 py-3 hover:bg-blue-50 transition border-b border-slate-50 last:border-0"
-                                                                >
-                                                                    <p className="text-sm font-bold text-slate-800">
-                                                                        {filteredItem.description}
-                                                                    </p>
-                                                                </button>
-                                                            ))}
+                                                                            setItemSearchMap((prev) => ({
+                                                                                ...prev,
+                                                                                [index]: filteredItem.description,
+                                                                            }));
+                                                                            setShowDropdownMap((prev) => ({
+                                                                                ...prev,
+                                                                                [index]: false,
+                                                                            }));
+                                                                            updateItem(field.idCreditNoteItem!, {
+                                                                                idCreditNoteItem: field.idCreditNoteItem!,
+                                                                                description: filteredItem.description,
+                                                                                quantity: maxQty,
+                                                                                unityPriceEXclTax: filteredItem.unityPriceEXclTax,
+                                                                                vatRate: filteredItem.vatRate,
+                                                                                operationCategory: filteredItem.operationCategory,
+                                                                                originalItem: filteredItem.idInvoiceItem,
+                                                                            });
+                                                                        }}
+                                                                        className={`w-full text-left px-4 py-3 transition border-b border-slate-50 last:border-0 ${isDisabled
+                                                                                ? "opacity-50 cursor-not-allowed bg-slate-50"
+                                                                                : "hover:bg-blue-50"
+                                                                            }`}
+                                                                    >
+                                                                        <p className="text-sm font-bold text-slate-800">
+                                                                            {filteredItem.description}
+                                                                            {isDisabled && (
+                                                                                <span className="ml-2 text-xs font-normal text-red-500">
+                                                                                    (Quantité épuisée)
+                                                                                </span>
+                                                                            )}
+                                                                        </p>
+                                                                    </button>
+                                                                );
+                                                            })}
                                                         </div>
                                                     )}
                                                 </div>

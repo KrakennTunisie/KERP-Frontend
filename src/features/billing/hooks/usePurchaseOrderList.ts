@@ -7,25 +7,13 @@ import { getApiErrorMessage } from "@/shared/api/handle-api-error";
 import { appToast } from "@/shared/lib/toast";
 import { PurchaseOrderPageItem, purchaseOrderPageItemSchema } from "../models/purchaseOrder";
 import { create } from "zustand";
+import { useInvoiceStore } from "../lib/globalStateFile";
 export type PropsClient = {
   params: {
     invoiceId: string
   }
 }
-type Store = {
-  file: File | null;
-  fileUrl: string | null;
 
-  setFile: (file: File | null) => void;
-  setFileUrl: (url: string | null) => void;
-};
-export const usePurchaseOrderStore = create<Store>((set) => ({
-  file: null,
-  fileUrl: null,
-
-  setFile: (file) => set({ file }),
-  setFileUrl: (url) => set({ fileUrl: url }),
-}));
 export function usePurchaseOrderList() {
   const [search, setSearch] = useState("");
   const [filtre, setFiltre] = useState<purchaseOrderStatus>("ALL");
@@ -132,8 +120,8 @@ export function usePurchaseOrderList() {
           }
       }
 
-  const setFile = usePurchaseOrderStore(state => state.setFile);
-  const setFileUrl = usePurchaseOrderStore(state => state.setFileUrl);
+  const setFile = useInvoiceStore(state => state.setFile);
+  const setFileUrl = useInvoiceStore(state => state.setFileUrl);
 
  const handleUpload = async (file: File) => {
     setLodingInvoice(true);
@@ -158,20 +146,20 @@ export function usePurchaseOrderList() {
 };
 
   async function extractInvoice(file: File) {
-    const formData = new FormData();
-    formData.append('data', file);
+  const formData = new FormData();
+  formData.append("data", file);
 
-    const res = await fetch('http://localhost:5678/webhook/60171212-e903-450d-9027-25f7c7ef4754', {
-      method: 'POST',
-      body: formData,
-    });
+  const res = await fetch("/api/n8n/purchaseOrder-ocr", {
+    method: "POST",
+    body: formData,
+  });
 
-    if (!res.ok) {
-      throw new Error(`Extraction request failed with status ${res.status}`);
-    }
-
-    return res.json();
+  if (!res.ok) {
+    throw new Error(`Extraction request failed with status ${res.status}`);
   }
+
+  return res.json();
+}
 
 
   const router = useRouter()

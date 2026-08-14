@@ -93,7 +93,7 @@ export function InvoiceCreditNotesTab({
             Refresh
           </button>
 
-          {type === "CLIENT" && (
+          {type === "CLIENT" &&  (
             <Link
               href={`/billing/invoices/clients/${invoiceId}/credit-note/create`}
               className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold text-white transition 
