@@ -219,7 +219,7 @@ export default function CreateClientPurchaseOrder() {
 
                                                             <div>
                                                                 <p className="text-sm text-amber-900">
-                                                                    Aucun client correspondant à <strong>{supplierSearch}</strong>.
+                                                                    {"Aucun client correspondant à"} <strong>{supplierSearch}</strong>.
                                                                 </p>
 
                                                                 <button

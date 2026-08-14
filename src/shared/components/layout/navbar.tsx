@@ -12,6 +12,7 @@ import { Avatar, AvatarFallback } from '@/shared/components/ui/avatar';
 import { Badge } from '@/shared/components/ui/badge';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
+import { NotificationBell } from '../widgets/notificationBell';
 
 export function Navbar() {
   const notificationCount = 3;
@@ -53,7 +54,7 @@ export function Navbar() {
       {/* Right Side Actions */}
       <div className="flex items-center gap-4">
         {/* Notifications Bell */}
-        <button className="relative p-3 hover:bg-gray-50 rounded-[16px] transition-all duration-200 group">
+{/*         <button className="relative p-3 hover:bg-gray-50 rounded-[16px] transition-all duration-200 group">
           <Bell className="w-5 h-5 text-gray-500 group-hover:text-gray-900" />
           {notificationCount > 0 && (
             <Badge 
@@ -62,7 +63,8 @@ export function Navbar() {
               {notificationCount}
             </Badge>
           )}
-        </button>
+        </button> */}
+        <NotificationBell/>
 
         {/* Profile Dropdown */}
         <DropdownMenu>

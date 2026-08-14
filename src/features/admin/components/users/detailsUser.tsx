@@ -24,6 +24,7 @@ import { getUserStatusColor, getUserStatusLabel } from "../../helpers/userHelper
 import { ChangeUserRoleModal } from "./updateUserRole";
 import { UserStatusModal } from "./userStatusModal";
 import { SendEmailModal } from "@/shared/components/widgets/sendEmailModal";
+import { getActiveDuration } from "@/shared/utils/durationGap";
 
 /* ================= SKELETON ================= */
 
@@ -53,10 +54,7 @@ export default  function UserDetailsPage({params}:userProps) {
 
   const { 
       user, 
-      heatmap,
-      logs,
       totalActions,
-      activeDays,
       loading,
       router,
     
@@ -77,7 +75,7 @@ export default  function UserDetailsPage({params}:userProps) {
    }
 
     const isActive = user.status === UserStatusSchema.enum.ACTIVE;
-
+    const activeDays = getActiveDuration(user.createdAt)
 
     const actions: ActionMenuItem[] = [
             {
@@ -212,13 +210,13 @@ export default  function UserDetailsPage({params}:userProps) {
             </div>
           </div>
 
-          <ActivityHeatmap data={heatmap} />
+          <ActivityHeatmap userId={idUser} />
           <PermissionsMatrix permissions={user.roles[0].permissions} />
         </div>
 
         {/* RIGHT */}
         <div className="lg:col-span-8">
-          <AuditLogs logs={logs} />
+          <AuditLogs userId={idUser} />
         </div>
 
       </div>

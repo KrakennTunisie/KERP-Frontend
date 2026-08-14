@@ -1,74 +1,32 @@
-import {
-NextRequest,
-NextResponse,
-} from "next/server";
+// src/app/api/auth/logout/route.ts
 
-import {
-authService,
-} from "@/features/auth/services/auth.service";
+import { NextResponse } from "next/server";
+import { authService } from "@/features/auth/services/auth.service";
+import { getAuthCookies, clearAuthCookies } from "@/shared/utils/cookies";
 
-export async function POST(
-  request: NextRequest
-  ) {
-    try {
-
-    const refreshToken =
-      request.cookies.get(
-        "refresh_token"
-      )?.value;
+export async function POST() {
+  try {
+    const { refreshToken } = await getAuthCookies();
 
     if (refreshToken) {
-
       try {
-
-        await authService.logout(
-          refreshToken
-        );
-
+        await authService.logout(refreshToken);
       } catch (error) {
-
-        // Keycloak logout failure should
-        // not prevent local cookie cleanup.
-        console.error(
-          "Keycloak logout failed:",
-          error
-        );
+        // Keycloak logout failure should not prevent local cookie cleanup.
+        console.error("Keycloak logout failed:", error);
       }
     }
 
-    const response =
-      NextResponse.json({
-        success: true,
-      });
+    await clearAuthCookies();
 
-    // Delete access token
-    response.cookies.delete(
-      "access_token"
-    );
+    return NextResponse.json({ success: true });
 
-    // Delete refresh token
-    response.cookies.delete(
-      "refresh_token"
-    );
-
-    return response;
-
-    } catch (error) {
-
-    console.error(
-      "Logout error:",
-      error
-    );
+  } catch (error) {
+    console.error("Logout error:", error);
 
     return NextResponse.json(
-      {
-        message:
-          "Logout failed",
-      },
-      {
-        status: 500,
-      }
+      { message: "Logout failed" },
+      { status: 500 }
     );
-
   }
 }
