@@ -86,7 +86,7 @@ export default function PaymentsList() {
         loading={loading}
         onPageChange={setCurrentPage}
         onView={(payment) => {
-          router.push(`/billing/payments/${payment.idPayment}`);
+          router.replace(`/billing/payments/${payment.idPayment}`);
         }}
         onEdit={(payment) => {
           router.push(`/billing/payments/update/${payment.idPayment}`);

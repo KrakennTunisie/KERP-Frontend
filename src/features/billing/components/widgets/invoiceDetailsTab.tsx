@@ -274,7 +274,7 @@ export function InvoiceDetailsTab({
   {/* RIGHT */}
   <aside className="flex flex-col gap-3">
     <InvoiceComplianceCard invoice={invoice} />
-    <InvoiceAuditCard invoice={invoice} />
+    <InvoiceAuditCard resourceId={invoice?.idInvoice ?? ""} resourceType="Invoice" />
     <InvoiceDocumentsCard
       invoice={invoice}
       setPreviewDocument={setPreviewDocument}

@@ -33,6 +33,7 @@ import { InvoiceDocumentsCard } from "../widgets/invoiceDocumentCard";
 import { DocumentPreviewModal } from "@/shared/components/ui/documentPreviewModal";
 import { partnerTypeSchema } from "../../types/partnerType";
 import { paymentStatusTypeSchema } from "../../types/paymentStatus";
+import { InvoiceAuditCard } from "../widgets/invoiceAuditCard";
 
 type Payment = {
   id: string;
@@ -407,35 +408,8 @@ export default function PaymentDetailsPage() {
                 </p>
               </div>
             </Card>
-
-            {/* Résumé rapide */}
-            <Card>
-              <div className="mb-5">
-                <SectionLabel>Résumé</SectionLabel>
-              </div>
-
-              <div className="space-y-3">
-                <SummaryRow
-                  label="Paiement"
-                  value={payment?.reference}
-                />
-
-                <SummaryRow
-                  label="Facture"
-                  value={relatedInvoice?.invoiceNumber ?? payment?.invoice.invoiceNumber}
-                />
-
-                <SummaryRow
-                  label="Méthode"
-                  value={paymentMethodLabel}
-                />
-
-                <SummaryRow
-                  label="Date"
-                  value={payment?.paymentDate ? formatDateLong(payment.paymentDate) : "—"}
-                />
-              </div>
-            </Card>
+                <InvoiceAuditCard resourceId={paymentId ?? ""} resourceType="Payment" />
+          
             <InvoiceDocumentsCard
               invoice={payment}
               setPreviewDocument={setPreviewDocument}

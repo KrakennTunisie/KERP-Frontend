@@ -1,5 +1,3 @@
-import { AuditLog, mockAuditLogs } from "@/features/billing/models/AuditLogs";
-import { HeatmapItem, mockHeatmap } from "../widgets/activityHeatMap";
 import { appToast } from "@/shared/lib/toast";
 import { usersAPI } from "../services/api";
 import { getApiErrorMessage } from "@/shared/api/handle-api-error";
@@ -19,12 +17,9 @@ export default function useUserDetails({idUser}:useUserDetailsProps){
     const [sendOpen, setSendOpen]=useState(false)
     
     const router = useRouter()
-    const logs:  AuditLog[]  = mockAuditLogs;
-    const heatmap: HeatmapItem[] = mockHeatmap;
 
     
-    const totalActions = heatmap.reduce((s, d) => s + d.count, 0);
-    const activeDays = heatmap.filter((d) => d.count > 0).length;
+    const totalActions = 0;
 
     const getUserById = async ()=>{
           if(!idUser){
@@ -49,10 +44,7 @@ export default function useUserDetails({idUser}:useUserDetailsProps){
 
     return{
         user, 
-        logs,
         totalActions,
-        activeDays,
-        heatmap,
         loading,
         router,
         updateStatusOpen, setUpdateStatusOpen,

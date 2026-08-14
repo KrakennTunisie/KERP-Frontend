@@ -150,7 +150,7 @@ export function useCreateInvoice({ mode, invoiceId }: InvoiceFormClientProps) {
   /*** Récupération des données de la facture lorsque le mode est edit */
   useEffect(() => {
     if ((mode === "edit" || mode === "clone") && invoice) {
-      setClientSearch(invoice.partner?.companyName!)
+      setClientSearch(invoice.partner?.companyName ?? "")
       reset({
         idInvoice: mode === "clone" ? "" : invoice.idInvoice,
         invoiceNumber:

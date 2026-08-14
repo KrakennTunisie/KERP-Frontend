@@ -1,6 +1,7 @@
 // src/app/api/auth/login/route.ts
 
 import { authService } from "@/features/auth/services/auth.service";
+import { setAuthCookies } from "@/shared/utils/cookies";
 import { NextRequest, NextResponse } from "next/server";
 
 
@@ -27,47 +28,13 @@ export async function POST(
       );
     }
 
-    const tokens =
-      await authService.login({
-        email,
-        password,
-      });
+    const tokens = await authService.login({ email, password });
 
-    const user =
-      await authService.getUserFromToken(
-        tokens.access_token
-      );
+    const user = await authService.getUserFromToken(tokens.access_token);
 
-    const response =
-      NextResponse.json({
-        user,
-      });
+    await setAuthCookies(tokens);
 
-    response.cookies.set(
-      "access_token",
-      tokens.access_token,
-      {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
-        maxAge: tokens.expires_in,
-      }
-    );
-
-    response.cookies.set(
-      "refresh_token",
-      tokens.refresh_token,
-      {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
-        maxAge: tokens.refresh_expires_in,
-      }
-    );
-
-    return response;
+    return NextResponse.json({ user });
 
   } catch (error) {
 

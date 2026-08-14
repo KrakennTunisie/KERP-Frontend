@@ -19,6 +19,20 @@ export type GetExtendedListParams = {
   page?: number;
 };
 
+export type GetAuditLogsParams = {
+  resourceType?: string;
+  resourceId?: string;
+  keyword?: string;
+  status?: string;
+  date?: string;
+  page?: number;
+  size?: number;
+};
+
+export type GetAuditActivityParams = {
+  userId: string;
+};
+
 
 export type ExchangeRateParams = {
   fromCurrency: string,
@@ -29,3 +43,20 @@ export const defaultExchangeRateParams: ExchangeRateParams = {
   fromCurrency: "TND",
   toCurrency: "EUR",
 };
+
+// types/notification.ts
+export type NotificationStatus = 'UNREAD' | 'READ';
+
+export interface NotificationDto {
+  id: string;
+  eventId: string;
+  eventType: string;
+  channel: string;
+  userId: string;
+  title: string;
+  message: string;
+  metadata: Record<string, unknown>;
+  status: NotificationStatus;
+  occurredAt: string;
+  createdAt: string;
+}

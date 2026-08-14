@@ -1,4 +1,9 @@
-import { useMemo } from "react";
+import { getApiErrorMessage } from "@/shared/api/handle-api-error";
+import { GetAuditActivityParams } from "@/shared/api/types";
+import { appToast } from "@/shared/lib/toast";
+import { HeatmapItem } from "@/shared/services/AuditLog";
+import { auditLogService } from "@/shared/services/auditLogsService";
+import { useEffect, useMemo, useState } from "react";
 
 export const mockHeatmap = [
   { date: "2026-05-25", count: 0 },
@@ -33,61 +38,154 @@ export const mockHeatmap = [
   { date: "2026-06-23", count: 5 },
 ];
 
-export type HeatmapItem = { date: string; count: number };
 
 /* ================= HEATMAP ================= */
 
-export default function ActivityHeatmap({ data }: { data: HeatmapItem[] }) {
-  const max = useMemo(() => Math.max(...data.map((d) => d.count), 1), [data]);
+export default function ActivityHeatmap({ userId }: { userId: string }) {
+  const [heatMapItems, setHeatMapItems] = useState<HeatmapItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    const fetchLogsActivity = async () => {
+      try {
+        setLoading(true);
+
+        const params: GetAuditActivityParams = {
+          userId,
+        };
+
+        const response = await auditLogService.getAuditActivity(params);
+
+        setHeatMapItems(response);
+      } catch (err) {
+        appToast.error(
+          "Erreur de récupération de l'activité",
+          getApiErrorMessage(err)
+        );
+        setHeatMapItems([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (userId) {
+      fetchLogsActivity();
+    } else {
+      setHeatMapItems([]);
+      setLoading(false);
+    }
+  }, [userId]);
+
+  // Nombre maximum d'actions sur une journée
+  const max = useMemo(
+    () => Math.max(...heatMapItems.map((item) => item.count), 1),
+    [heatMapItems]
+  );
+
+  // Couleur selon le nombre d'actions
   const getColor = (count: number) => {
-    const i = count / max;
-    if (count === 0) return "bg-slate-100 dark:bg-slate-800";
-    if (i < 0.25) return "bg-blue-100";
-    if (i < 0.5) return "bg-blue-200";
-    if (i < 0.75) return "bg-blue-400";
+    if (count === 0) {
+      return "bg-slate-100 dark:bg-slate-800";
+    }
+
+    const ratio = count / max;
+
+    if (ratio < 0.25) return "bg-blue-100";
+    if (ratio < 0.5) return "bg-blue-200";
+    if (ratio < 0.75) return "bg-blue-400";
+
     return "bg-blue-600";
   };
 
-  const totalActions = data.reduce((s, d) => s + d.count, 0);
+  // Total des actions sur les 30 jours
+  const totalActions = useMemo(
+    () => heatMapItems.reduce((sum, item) => sum + item.count, 0),
+    [heatMapItems]
+  );
 
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-4">
-      <div className="flex items-center justify-between mb-3">
+      {/* HEADER */}
+      <div className="mb-3 flex items-center justify-between">
         <div>
           <p className="text-[13px] font-medium text-slate-900">
             Activité utilisateur
           </p>
-          <p className="text-[11px] text-slate-400 mt-0.5">
-            {totalActions} actions sur 30 jours
+
+          <p className="mt-0.5 text-[11px] text-slate-400">
+            {loading
+              ? "Chargement..."
+              : `${totalActions} action${
+                  totalActions > 1 ? "s" : ""
+                } sur 30 jours`}
           </p>
         </div>
 
+        {/* LEGEND */}
         <div className="flex items-center gap-1.5">
-          <span className="text-[10px] text-slate-400">Faible</span>
-          {["bg-slate-100", "bg-blue-100", "bg-blue-200", "bg-blue-400", "bg-blue-600"].map(
-            (c, i) => (
-              <div key={i} className={`h-2.5 w-2.5 rounded-sm ${c}`} />
-            )
-          )}
-          <span className="text-[10px] text-slate-400">Fort</span>
+          <span className="text-[10px] text-slate-400">
+            Faible
+          </span>
+
+          {[
+            "bg-slate-100",
+            "bg-blue-100",
+            "bg-blue-200",
+            "bg-blue-400",
+            "bg-blue-600",
+          ].map((color, index) => (
+            <div
+              key={index}
+              className={`h-2.5 w-2.5 rounded-sm ${color}`}
+            />
+          ))}
+
+          <span className="text-[10px] text-slate-400">
+            Fort
+          </span>
         </div>
       </div>
 
-      <div className="grid grid-cols-10 gap-[3px]">
-        {data.map((d) => (
-          <div
-            key={d.date}
-            title={`${d.date} · ${d.count} actions`}
-            className={`h-[22px] rounded-[4px] cursor-pointer transition-transform hover:scale-110 ${getColor(d.count)}`}
-          />
-        ))}
-      </div>
+      {/* HEATMAP */}
+      {loading ? (
+        <div className="grid grid-cols-10 gap-[3px]">
+          {Array.from({ length: 30 }).map((_, index) => (
+            <div
+              key={index}
+              className="h-[22px] animate-pulse rounded-[4px] bg-slate-100"
+            />
+          ))}
+        </div>
+      ) : heatMapItems.length === 0 ? (
+        <div className="flex h-[72px] items-center justify-center text-[11px] text-slate-400">
+          Aucune activité enregistrée
+        </div>
+      ) : (
+        <div className="grid grid-cols-10 gap-[3px]">
+          {heatMapItems.map((item) => (
+            <div
+              key={item.date}
+              title={`${item.date} · ${item.count} action${
+                item.count > 1 ? "s" : ""
+              }`}
+              className={`h-[22px] cursor-pointer rounded-[4px] transition-transform hover:scale-110 ${getColor(
+                item.count
+              )}`}
+            />
+          ))}
+        </div>
+      )}
 
-      <div className="mt-2 flex justify-between text-[10px] text-slate-400">
-        <span>{data[0]?.date}</span>
-        <span>{data[data.length - 1]?.date}</span>
-      </div>
+      {/* DATES */}
+      {!loading && heatMapItems.length > 0 && (
+        <div className="mt-2 flex justify-between text-[10px] text-slate-400">
+          <span>{heatMapItems[0]?.date}</span>
+          <span>
+            {heatMapItems[heatMapItems.length - 1]?.date}
+          </span>
+        </div>
+      )}
     </div>
   );
 }
+

@@ -320,7 +320,7 @@ export default function CreateSupplierInvoice() {
 
                               <div>
                                 <p className="text-sm text-amber-900">
-                                  Aucun fournisseur correspondant à <strong>"{supplierSearch}"</strong>.
+                                  {"Aucun fournisseur correspondant à"} <strong>{supplierSearch}</strong>.
                                 </p>
 
                                 <button

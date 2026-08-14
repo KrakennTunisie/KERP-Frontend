@@ -1,39 +1,32 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { ReactNode, useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
-import PageLoader from "@/shared/components/ui/pageLoader";
+import { getRequiredRoles } from "@/shared/lib/navigation/route-permissions";
 
-export default function RoleGuard({
-  children,
-  allowedRoles,
-}: {
-  children: React.ReactNode;
-  allowedRoles: string[];
-}) {
+interface RoleGuardProps {
+  children: ReactNode;
+  fallback?: ReactNode; // if omitted, redirects to /unauthorized
+}
+
+export function RoleGuard({ children, fallback }: RoleGuardProps) {
+  const pathname = usePathname();
   const router = useRouter();
+  const userRoles = useAuthStore((s) => s.user?.roles)  ?? [];
 
-  const user = useAuthStore((state) => state.user);
-  const loading = useAuthStore((state) => state.isLoading);
-
-  const hasRole = !!user && allowedRoles.includes(user.roles[0]);
+  const requiredRoles = getRequiredRoles(pathname);
+  const hasAccess =
+    requiredRoles.length === 0 || requiredRoles.some((r) => userRoles.includes(r));
 
   useEffect(() => {
-    if (loading) return;
-
-    if (!user || !hasRole) {
-      router.replace("/not-authorized");
+    if (!hasAccess && !fallback) {
+      router.replace("/unauthorized");
     }
-  }, [loading, user, hasRole, router]);
+  }, [hasAccess, fallback, router]);
 
-  if (loading) {
-    return <PageLoader />;
-  }
-
-  if (!user || !hasRole) {
-    // Prevent rendering while the redirect happens
-    return <PageLoader />;
+  if (!hasAccess) {
+    return fallback ? <>{fallback}</> : null;
   }
 
   return <>{children}</>;
