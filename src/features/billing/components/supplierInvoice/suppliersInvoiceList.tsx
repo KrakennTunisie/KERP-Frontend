@@ -205,6 +205,7 @@ export default function SuppliersInvoiceList() {
             />
 
             <UploadInvoiceModal
+            type="facture"
                 open={isUploadInvoiceOpen}
                 loading={loading}
                 onClose={() => setIsUploadInvoiceOpen(false)}
