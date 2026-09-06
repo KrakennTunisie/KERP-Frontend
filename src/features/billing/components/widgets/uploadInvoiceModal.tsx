@@ -7,6 +7,7 @@ import { Modal } from "@/shared/components/ui/modal";
 
 type UploadInvoiceModalProps = {
   open: boolean;
+  type : string
   loading: boolean;
   onClose: () => void;
   onUpload: (file: File) => Promise<void>;
@@ -15,6 +16,7 @@ type UploadInvoiceModalProps = {
 export default function UploadInvoiceModal({
   open,
   loading,
+  type,
   onClose,
   onUpload,
 }: UploadInvoiceModalProps) {
@@ -55,7 +57,7 @@ export default function UploadInvoiceModal({
       open={open}
       onClose={handleClose}
       loading={loading}
-      title="Nouvelle facture fournisseur"
+      title={ type=="facture"?  "Nouvelle facture fournisseur" : "Nouveau bon de commande client"}
       footer={
         <>
           <button

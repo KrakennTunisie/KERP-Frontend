@@ -165,15 +165,25 @@ export function BillingDashboard() {
   ).sort((a, b) => b.montant - a.montant)
     .slice(0, 3);
 
-  // Mock chart data
-  const chartData = [
-    { month: 'Jan 2025', revenus: 12500, depenses: 8200 },
-    { month: 'Fév 2025', revenus: 8750, depenses: 6100 },
-    { month: 'Mar 2025', revenus: 15200, depenses: 9800 },
-    { month: 'Avr 2025', revenus: 9800, depenses: 7400 },
-    { month: 'Mai 2025', revenus: 11200, depenses: 8600 },
-    { month: 'Juin 2025', revenus: 500, depenses: 20 },
-  ];
+ 
+  // chartData par les vraies données calculées à partir de l'API
+  const chartData = months.map((month) => {
+    const revenus = clientInvoices
+      .filter((inv) => inv.month === month.value)
+      .reduce((sum, inv) => sum + inv.amountEUR, 0);
+
+    const depenses = supplierInvoices
+      .filter((inv) => inv.month === month.value)
+      .reduce((sum, inv) => sum + inv.amountEUR, 0);
+
+    return {
+      month: month.label,
+      revenus: Number(revenus.toFixed(2)),
+      depenses: Number(depenses.toFixed(2)),
+    };
+  });
+
+
 
   const [selectedPeriod, setSelectedPeriod] = useState(6);
 
