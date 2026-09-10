@@ -42,7 +42,7 @@ export const NAVIGATION_ITEMS: NavGroup[] = [
   },
   {
     title: "Finance",
-    roles: ["comptable", "Admin"],
+    roles: ["Comptable", "Admin"],
     items: [
       {
         title: "Facturation",
