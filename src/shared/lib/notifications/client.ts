@@ -11,7 +11,7 @@ export function connectNotificationSocket(
 ): Client {
   client = new Client({
     webSocketFactory: () =>
-      new SockJS(`${process.env.NEXT_PUBLIC_NOTIFICATION_WS_URL}`),
+      new SockJS('/api/notification-service/ws'),
 
     connectHeaders: {
       Authorization: `Bearer ${token}`,

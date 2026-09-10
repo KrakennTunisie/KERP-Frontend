@@ -48,6 +48,7 @@ export default function PurchaseOrderList() {
 
 
             <UploadInvoiceModal
+                type="bon de commande"
                 open={isUploadInvoiceOpen}
                 loading={loadingInvoice}
                 onClose={() => {
