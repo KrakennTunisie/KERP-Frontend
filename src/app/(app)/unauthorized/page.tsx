@@ -62,7 +62,7 @@ export default function UnauthorizedPage() {
             </Button>
 
             <Button asChild className="flex-1">
-              <Link href="/dashboard/billing">
+              <Link href="/billing/dashboard">
                 <LayoutDashboard className="mr-2 h-4 w-4" />
                 Tableau de bord
               </Link>

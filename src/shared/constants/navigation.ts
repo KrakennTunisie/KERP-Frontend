@@ -33,7 +33,7 @@ export const NAVIGATION_ITEMS: NavGroup[] = [
   },
   {
     title: "Gestion utilisateurs",
-    roles: ["Expert", "Admin"],
+    roles: ["Admin"],
     items: [
       { title: "Utilisateurs", icon: UsersRound, href: "/admin/users" },
       { title: "Rôles", icon: ShieldCheck, href: "/admin/roles" },
@@ -42,7 +42,7 @@ export const NAVIGATION_ITEMS: NavGroup[] = [
   },
   {
     title: "Finance",
-    roles: ["Expert", "Admin"],
+    roles: ["Comptable", "Admin"],
     items: [
       {
         title: "Facturation",
@@ -66,7 +66,7 @@ export const NAVIGATION_ITEMS: NavGroup[] = [
               { title: "Bons de commande Fournisseurs", href: "/billing/purchaseOrder/suppliers" },
             ],
           },
-          { title: "Paramètres", href: "/billing/parameters", roles: ["Expert","Admin"] }, // override: stricter than Finance
+          { title: "Paramètres", href: "/billing/parameters", roles: ["Admin"] }, // override: stricter than Finance
         ],
       },
       {
@@ -82,7 +82,7 @@ export const NAVIGATION_ITEMS: NavGroup[] = [
   },
     {
     title: "Ressources Humaines",
-    roles: ["Expert", "Admin"],
+    roles: ["Admin"],
     items: [
       {
         title: "Employés",

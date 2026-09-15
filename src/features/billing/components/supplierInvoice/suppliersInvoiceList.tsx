@@ -10,7 +10,6 @@ import { BillingTable } from "../widgets/billingTable";
 import { Status, UpdateDocumentStatusModal } from "../widgets/updateStatusModal";
 import { DeleteInvoiceModal } from "../widgets/deleteInvoiceModal";
 import UploadInvoiceModal from "../widgets/uploadInvoiceModal";
-import InvoiceFormModal from "./createSupplierInvoice";
 import { ArchiveInvoiceModal } from "../widgets/archiveModal";
 
 

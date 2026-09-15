@@ -9,13 +9,11 @@ import {
   DropdownMenuTrigger,
 } from '@/shared/components/ui/dropdown';
 import { Avatar, AvatarFallback } from '@/shared/components/ui/avatar';
-import { Badge } from '@/shared/components/ui/badge';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import { NotificationBell } from '../widgets/notificationBell';
 
 export function Navbar() {
-  const notificationCount = 3;
   const router = useRouter()
 
   const {user, logout}=useAuthStore()
@@ -81,7 +79,7 @@ export function Navbar() {
                   {user?.firstName +" "+ user?.lastName}
                 </p>
                 <p className="text-xs text-gray-500 font-semibold leading-tight">
-                  Dir. Financier
+                  {user?.roles ? user.roles[0]: ""}
                 </p>
               </div>
             </button>

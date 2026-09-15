@@ -5,6 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronDown } from "lucide-react";
 import { NAVIGATION_ITEMS } from "@/shared/constants/navigation";
+import { useAuthStore } from "@/store/authStore";
+import { filterNavigationByRole } from "@/shared/lib/navigation/filterNavigation";
 
 type NavItem = {
   title: string;
@@ -16,7 +18,19 @@ type NavItem = {
 export function Sidebar() {
   const pathname = usePathname();
   const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({});
+  const roles = useAuthStore((s) => s.user?.roles);
+  const {user} = useAuthStore()
 
+    const initials =
+    [user?.firstName, user?.lastName]
+      .filter(Boolean)
+      .map((name) => name![0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2) ||
+    user?.username
+      .slice(0, 2)
+      .toUpperCase();
   const isActive = (href?: string) => {
     if (!href) return false;
     if (href === "/") return pathname === "/";
@@ -36,6 +50,10 @@ export function Sidebar() {
     }));
   };
 
+  const navigationItems = useMemo(
+    () => filterNavigationByRole(NAVIGATION_ITEMS, roles ?? []),
+    [roles]
+  );
   // Garde les menus ouverts si la route active leur appartient (même après refresh)
   const computedExpandedMenus = useMemo(() => {
     const next = { ...expandedMenus };
@@ -53,7 +71,7 @@ export function Sidebar() {
       });
     };
 
-    NAVIGATION_ITEMS.forEach((section) => walk(section.items as NavItem[]));
+    navigationItems.forEach((section) => walk(section.items as NavItem[]));
 
     return next;
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -116,7 +134,7 @@ export function Sidebar() {
     <aside className="w-72 bg-white border-r border-gray-100 flex flex-col p-3 overflow-y-auto">
       <nav className="flex-1">
         <div className="space-y-6">
-          {NAVIGATION_ITEMS.map((section) => (
+          {navigationItems.map((section) => (
             <div key={section.title}>
               <div className="px-2 mb-2">
                 <h2 className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">
@@ -135,11 +153,11 @@ export function Sidebar() {
       <div className="pt-5 border-t border-gray-100">
         <div className="p-3 bg-gray-50 rounded-xl flex items-center gap-3 border border-gray-100 hover:bg-white transition">
           <div className="w-9 h-9 bg-gray-900 rounded-lg flex items-center justify-center text-white text-xs font-bold">
-            JD
+            {initials}
           </div>
           <div className="flex-1 overflow-hidden">
-            <p className="text-xs font-semibold text-gray-900 truncate">Jean Dupont</p>
-            <p className="text-[10px] text-gray-500 uppercase truncate">Dir. Financier</p>
+            <p className="text-xs font-semibold text-gray-900 truncate">{user?.firstName+" "+user?.lastName}</p>
+            <p className="text-[10px] text-gray-500 uppercase truncate">{roles ? roles[0]: ""}</p>
           </div>
         </div>
       </div>

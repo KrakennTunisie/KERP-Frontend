@@ -48,10 +48,6 @@ export function BillingDashboard() {
   const summaryTriggeredRef = useRef(false);
   const [clientsLoaded, setClientsLoaded] = useState(false);
   const [suppliersLoaded, setSuppliersLoaded] = useState(false);
-  useEffect(() => {
-
-    setOpenSilidingPanel(true)
-  }, [])
 
   const currentNumericMonth = new Date().getMonth(); // 0-based
 
