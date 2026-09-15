@@ -10,9 +10,49 @@ type RequestOptions = {
   body?: RequestBody;
   headers?: HeadersInit;
   signal?: AbortSignal;
+  skipAuthRefresh?: boolean; // pour éviter une boucle infinie sur /auth/refresh lui-même
 };
 
-const API_BASE_URL ="/api";
+const API_BASE_URL = "/api";
+
+// --- Gestion du refresh token ---
+let isRefreshing = false;
+let refreshWaiters: Array<(ok: boolean) => void> = [];
+
+function getCookie(name: string): string | null {
+  const match = document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`));
+  return match ? decodeURIComponent(match[2]) : null;
+}
+
+async function refreshAccessToken(): Promise<boolean> {
+  if (isRefreshing) {
+    return new Promise((resolve) => refreshWaiters.push(resolve));
+  }
+
+  isRefreshing = true;
+
+  try {
+    const refreshTokenValue = getCookie("refresh_token");
+
+    const response = await fetch(`/api/auth/refresh`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refreshToken: refreshTokenValue }),
+      credentials: "include",
+    });
+
+    const ok = response.ok;
+    refreshWaiters.forEach((resolve) => resolve(ok));
+    refreshWaiters = [];
+    return ok;
+  } catch {
+    refreshWaiters.forEach((resolve) => resolve(false));
+    refreshWaiters = [];
+    return false;
+  } finally {
+    isRefreshing = false;
+  }
+}
 
 async function parseResponse(response: Response) {
   const contentType = response.headers.get("content-type");
@@ -46,11 +86,10 @@ export async function apiRequest<T>(
   endpoint: string,
   options: RequestOptions = {}
 ): Promise<T> {
-  const { method , body, headers, signal } = options;
+  const { method, body, headers, signal, skipAuthRefresh } = options;
 
   const multipart = isFormData(body);
   const finalHeaders = normalizeHeaders(headers);
-
 
   if (multipart) {
     delete finalHeaders["Content-Type"];
@@ -74,6 +113,19 @@ export async function apiRequest<T>(
     credentials: "include",
     cache: "no-store",
   });
+
+  // --- Token expiré : on tente un refresh puis on rejoue la requête une seule fois ---
+  if (response.status === 401 && !skipAuthRefresh) {
+    const refreshed = await refreshAccessToken();
+
+    if (refreshed) {
+      return apiRequest<T>(endpoint, { ...options, skipAuthRefresh: true });
+    }
+
+    // Le refresh a échoué : on déconnecte l'utilisateur, à adapter selon ton app
+    // ex: window.location.href = "/login";
+    throw new ApiError("Session expirée", 401, null);
+  }
 
   const data = await parseResponse(response);
 
